@@ -114,48 +114,50 @@
 @media (max-width: 479px) {
   .projects-grid {
     grid-template-columns: 1fr;
-    gap: var(--space-md);
+    gap: 12px;
   }
 
   .project-card {
-    padding: var(--space-lg);
+    padding: 16px;
   }
 
   .project-icon-wrapper {
-    width: 48px;
-    height: 48px;
-    margin-bottom: var(--space-md);
+    width: 44px;
+    height: 44px;
+    margin-bottom: 12px;
+    border-radius: 12px;
   }
 
   .project-icon-wrapper svg {
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
   }
 
   .project-card-title {
-    font-size: 18px;
+    font-size: 17px;
     margin-bottom: 6px;
   }
 
   .project-card-desc {
-    font-size: 14px;
-    margin-bottom: var(--space-md);
+    font-size: 13px;
+    margin-bottom: 12px;
+    line-height: 1.5;
   }
 
   .project-tags {
-    gap: 6px;
+    gap: 5px;
   }
 
   .project-tag {
-    padding: 5px 10px;
-    font-size: 11px;
+    padding: 4px 8px;
+    font-size: 10px;
   }
 
   .featured-badge {
-    top: var(--space-sm);
-    right: var(--space-sm);
-    padding: 5px 10px;
-    font-size: 10px;
+    top: 10px;
+    right: 10px;
+    padding: 4px 8px;
+    font-size: 9px;
   }
 }
 
@@ -163,29 +165,30 @@
 @media (min-width: 480px) and (max-width: 767px) {
   .projects-grid {
     grid-template-columns: 1fr;
-    gap: var(--space-md);
+    gap: 14px;
   }
 
   .project-card {
-    padding: var(--space-lg);
+    padding: 18px;
   }
 
   .project-icon-wrapper {
-    width: 52px;
-    height: 52px;
-    margin-bottom: var(--space-md);
+    width: 48px;
+    height: 48px;
+    margin-bottom: 14px;
   }
 
   .project-card-title {
-    font-size: 20px;
+    font-size: 18px;
   }
 
   .project-card-desc {
     font-size: 14px;
+    margin-bottom: 14px;
   }
 
   .project-tag {
-    padding: 5px 11px;
+    padding: 5px 10px;
     font-size: 11px;
   }
 }

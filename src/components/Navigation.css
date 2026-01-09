@@ -153,7 +153,7 @@
 /* Small Mobile */
 @media (max-width: 479px) {
   .nav-container {
-    padding: var(--space-sm) var(--space-md);
+    padding: 8px 12px;
   }
 
   .nav-inner {
@@ -161,7 +161,7 @@
   }
 
   .nav-glass {
-    padding: 10px 16px;
+    padding: 8px 14px;
   }
 
   .nav-links {
@@ -172,23 +172,30 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 10px;
   }
 
   .logo {
-    font-size: 16px;
+    font-size: 15px;
   }
 
   .mobile-nav {
-    top: 60px;
-    left: var(--space-sm);
-    right: var(--space-sm);
+    top: 52px;
+    left: 12px;
+    right: 12px;
+    padding: 6px;
+  }
+
+  .mobile-nav .nav-link {
+    padding: 12px 14px;
+    font-size: 14px;
   }
 }
 
 /* Mobile Portrait */
 @media (min-width: 480px) and (max-width: 767px) {
   .nav-container {
-    padding: var(--space-sm) var(--space-lg);
+    padding: 8px 16px;
   }
 
   .nav-inner {
@@ -196,7 +203,7 @@
   }
 
   .nav-glass {
-    padding: 10px 20px;
+    padding: 8px 16px;
   }
 
   .nav-links {
@@ -210,7 +217,9 @@
   }
 
   .mobile-nav {
-    top: 64px;
+    top: 56px;
+    left: 16px;
+    right: 16px;
   }
 }
 

@@ -1823,62 +1823,88 @@
 
 /* Small Mobile (320px - 479px) */
 @media (max-width: 479px) {
+  .project-header {
+    margin-bottom: 24px;
+  }
+
   .back-btn {
-    padding: 10px 16px;
+    padding: 8px 14px;
     font-size: 13px;
-    margin-bottom: var(--space-xl);
+    margin-bottom: 16px;
   }
 
   .header-content {
     flex-direction: column;
-    gap: var(--space-md);
+    gap: 12px;
   }
 
   .project-icon-large {
-    width: 56px;
-    height: 56px;
-    min-width: 56px;
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    border-radius: 12px;
   }
 
   .project-icon-large svg {
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
   }
 
   .project-context {
-    font-size: 12px;
-    padding: 5px 12px;
+    font-size: 11px;
+    padding: 4px 10px;
+    margin-bottom: 8px;
+  }
+
+  .project-header h1 {
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+
+  .project-tagline {
+    font-size: 14px;
+    margin-bottom: 12px;
   }
 
   .project-tags {
-    gap: 6px;
+    gap: 5px;
+    margin-bottom: 16px;
   }
 
   .tag {
-    padding: 5px 10px;
-    font-size: 11px;
+    padding: 4px 8px;
+    font-size: 10px;
   }
 
   .header-ctas {
     flex-direction: column;
-    gap: var(--space-sm);
+    gap: 8px;
   }
 
   .cta-primary,
   .cta-secondary {
     width: 100%;
     justify-content: center;
-    padding: 12px 20px;
-    font-size: 14px;
+    padding: 11px 18px;
+    font-size: 13px;
+  }
+
+  .project-section {
+    margin-bottom: 32px;
+  }
+
+  .section-header {
+    margin-bottom: 16px;
+    gap: 8px;
   }
 
   .section-header h2 {
-    font-size: 24px;
+    font-size: 20px;
   }
 
   .section-header svg {
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
   }
 
   .demo-container,
@@ -1890,7 +1916,16 @@
   .future-card,
   .requirements-card,
   .contact-cta {
-    padding: var(--space-lg);
+    padding: 16px;
+  }
+
+  .problem-card,
+  .users-card,
+  .solution-card,
+  .results-card,
+  .cases-card,
+  .challenge-card {
+    padding: 16px;
   }
 
   .problem-grid,
@@ -1900,7 +1935,7 @@
   .cases-grid,
   .challenges-list {
     grid-template-columns: 1fr;
-    gap: var(--space-md);
+    gap: 12px;
   }
 
   .companies-card {
@@ -1911,15 +1946,22 @@
   .metrics-grid,
   .tech-stack-grid {
     grid-template-columns: 1fr;
-    gap: var(--space-sm);
+    gap: 8px;
   }
 
   .cases-gallery {
     grid-template-columns: 1fr;
+    gap: 8px;
   }
 
   .pipeline-steps {
     flex-direction: column;
+    gap: 8px;
+  }
+
+  .pipeline-step {
+    padding: 16px;
+    min-width: auto;
   }
 
   .pipeline-arrow {
@@ -1928,26 +1970,55 @@
 
   .links-grid {
     grid-template-columns: 1fr;
-    gap: var(--space-md);
+    gap: 10px;
+  }
+
+  .link-card {
+    padding: 16px;
   }
 
   .stage-stats {
     flex-direction: column;
-    gap: var(--space-md);
+    gap: 12px;
   }
 
   .stat-value {
-    font-size: 24px;
+    font-size: 22px;
   }
 
   .slideshow-nav {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
   }
 
   .slideshow-nav svg {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
+  }
+
+  .metric-card {
+    padding: 14px;
+  }
+
+  .metric-value {
+    font-size: 22px;
+  }
+
+  .tech-card {
+    padding: 12px;
+  }
+
+  .contact-cta {
+    padding: 20px;
+  }
+
+  .contact-cta h3 {
+    font-size: 20px;
+  }
+
+  .contact-cta p {
+    font-size: 14px;
+    margin-bottom: 16px;
   }
 }
 
