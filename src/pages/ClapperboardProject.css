@@ -1,7 +1,8 @@
+/* Project Page - Apple-inspired corporate design */
 .project-page {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0;
 }
 
 /* Back Button */
@@ -12,14 +13,14 @@
   padding: 12px 20px;
   background: var(--glass);
   border: 1px solid var(--glass-border);
-  border-radius: 10px;
+  border-radius: var(--radius-full);
   color: var(--text-secondary);
-  font-family: 'Rubik', sans-serif;
+  font-family: inherit;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  margin-bottom: 40px;
-  transition: all 0.2s ease;
+  margin-bottom: var(--space-2xl);
+  transition: all var(--transition-fast);
 }
 
 .back-btn:hover {
@@ -34,29 +35,29 @@
 
 /* Project Header */
 .project-header {
-  margin-bottom: 60px;
+  margin-bottom: var(--space-3xl);
 }
 
 .header-content {
   display: flex;
-  gap: 32px;
+  gap: var(--space-xl);
   align-items: flex-start;
 }
 
 .project-icon-large {
-  width: 80px;
-  height: 80px;
-  min-width: 80px;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-  border-radius: 20px;
+  width: 72px;
+  height: 72px;
+  min-width: 72px;
+  background: var(--primary);
+  border-radius: var(--radius-xl);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .project-icon-large svg {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   color: white;
 }
 
@@ -69,12 +70,12 @@
   align-items: center;
   gap: 8px;
   padding: 6px 14px;
-  background: rgba(255, 107, 53, 0.15);
-  border-radius: 100px;
+  background: rgba(255, 107, 53, 0.1);
+  border-radius: var(--radius-full);
   font-size: 13px;
   font-weight: 500;
-  color: var(--accent);
-  margin-bottom: 16px;
+  color: var(--primary);
+  margin-bottom: var(--space-md);
 }
 
 .project-context svg {
@@ -83,18 +84,18 @@
 }
 
 .project-header h1 {
-  font-size: 42px;
-  font-weight: 800;
-  letter-spacing: -1px;
-  margin-bottom: 16px;
+  font-size: clamp(28px, 5vw, 42px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin-bottom: var(--space-md);
   line-height: 1.1;
 }
 
 .project-tagline {
-  font-size: 18px;
+  font-size: clamp(15px, 2vw, 18px);
   color: var(--text-secondary);
   line-height: 1.6;
-  margin-bottom: 24px;
+  margin-bottom: var(--space-lg);
   max-width: 700px;
 }
 
@@ -1816,98 +1817,318 @@
   margin: 0 auto;
 }
 
-/* Responsive */
-@media (max-width: 1024px) {
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+/* Small Mobile (320px - 479px) */
+@media (max-width: 479px) {
+  .back-btn {
+    padding: 10px 16px;
+    font-size: 13px;
+    margin-bottom: var(--space-xl);
+  }
+
   .header-content {
     flex-direction: column;
+    gap: var(--space-md);
   }
-  
-  .problem-grid {
+
+  .project-icon-large {
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
+  }
+
+  .project-icon-large svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .project-context {
+    font-size: 12px;
+    padding: 5px 12px;
+  }
+
+  .project-tags {
+    gap: 6px;
+  }
+
+  .tag {
+    padding: 5px 10px;
+    font-size: 11px;
+  }
+
+  .header-ctas {
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .cta-primary,
+  .cta-secondary {
+    width: 100%;
+    justify-content: center;
+    padding: 12px 20px;
+    font-size: 14px;
+  }
+
+  .section-header h2 {
+    font-size: 24px;
+  }
+
+  .section-header svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .demo-container,
+  .pipeline-diagram,
+  .build-stage,
+  .test-summary,
+  .slideshow-container,
+  .failure-analysis,
+  .future-card,
+  .requirements-card,
+  .contact-cta {
+    padding: var(--space-lg);
+  }
+
+  .problem-grid,
+  .users-content,
+  .solution-details,
+  .results-details,
+  .cases-grid,
+  .challenges-list {
     grid-template-columns: 1fr;
+    gap: var(--space-md);
   }
-  
-  .users-content {
-    grid-template-columns: 1fr;
-  }
-  
+
   .companies-card {
     grid-column: span 1;
   }
-  
-  .solution-details {
-    grid-template-columns: 1fr;
-  }
-  
-  .training-config {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .metrics-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-  
-  .results-details {
-    grid-template-columns: 1fr;
-  }
-  
-  .cases-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .challenges-list {
-    grid-template-columns: 1fr;
-  }
-  
+
+  .training-config,
+  .metrics-grid,
   .tech-stack-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: 1fr;
+    gap: var(--space-sm);
   }
-  
+
+  .cases-gallery {
+    grid-template-columns: 1fr;
+  }
+
+  .pipeline-steps {
+    flex-direction: column;
+  }
+
+  .pipeline-arrow {
+    transform: rotate(90deg);
+  }
+
   .links-grid {
     grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+
+  .stage-stats {
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  .stat-value {
+    font-size: 24px;
+  }
+
+  .slideshow-nav {
+    width: 40px;
+    height: 40px;
+  }
+
+  .slideshow-nav svg {
+    width: 18px;
+    height: 18px;
   }
 }
 
-@media (max-width: 768px) {
-  .project-header h1 {
-    font-size: 32px;
+/* Mobile Portrait (480px - 767px) */
+@media (min-width: 480px) and (max-width: 767px) {
+  .header-content {
+    flex-direction: column;
+    gap: var(--space-md);
   }
-  
+
+  .project-icon-large {
+    width: 64px;
+    height: 64px;
+    min-width: 64px;
+  }
+
   .header-ctas {
     flex-direction: column;
+    gap: var(--space-sm);
   }
-  
+
   .cta-primary,
   .cta-secondary {
     width: 100%;
     justify-content: center;
   }
-  
-  .pipeline-steps {
-    flex-direction: column;
-  }
-  
-  .pipeline-arrow {
-    transform: rotate(90deg);
-  }
-  
-  .stage-stats {
-    flex-direction: column;
-    gap: 16px;
-  }
-  
-  .training-config {
+
+  .problem-grid,
+  .users-content,
+  .solution-details,
+  .results-details,
+  .cases-grid,
+  .challenges-list {
     grid-template-columns: 1fr;
   }
-  
+
+  .companies-card {
+    grid-column: span 1;
+  }
+
+  .training-config,
   .metrics-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
+  .tech-stack-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .pipeline-steps {
+    flex-direction: column;
+  }
+
+  .pipeline-arrow {
+    transform: rotate(90deg);
+  }
+
+  .links-grid {
+    grid-template-columns: 1fr;
+  }
+
   .cases-gallery {
     grid-template-columns: repeat(2, 1fr);
   }
-  
-  .tech-stack-grid {
+}
+
+/* Tablet Portrait (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .header-content {
+    gap: var(--space-lg);
+  }
+
+  .problem-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .users-content {
+    grid-template-columns: 1fr;
+  }
+
+  .companies-card {
+    grid-column: span 1;
+  }
+
+  .solution-details {
+    grid-template-columns: 1fr;
+  }
+
+  .training-config {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .metrics-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .results-details {
+    grid-template-columns: 1fr;
+  }
+
+  .cases-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .challenges-list {
+    grid-template-columns: 1fr;
+  }
+
+  .tech-stack-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .links-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Tablet Landscape / Small Desktop (1024px+) */
+@media (min-width: 1024px) {
+  .problem-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .users-content {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .companies-card {
+    grid-column: span 2;
+  }
+
+  .solution-details {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .training-config {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .metrics-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+
+  .results-details {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .cases-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .challenges-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .tech-stack-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+
+  .links-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .cta-primary:hover,
+  .cta-secondary:hover {
+    transform: none;
+  }
+
+  .company-card:hover {
+    transform: none;
+  }
+
+  .slideshow-nav:hover {
+    background: var(--glass);
+    border-color: var(--glass-border);
+  }
+
+  .link-card:hover .external-icon {
+    opacity: 0;
   }
 }
