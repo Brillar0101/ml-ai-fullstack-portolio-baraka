@@ -1,0 +1,56 @@
+{
+  "game_info": {
+    "description": "Indiana Pacers vs Oklahoma City Thunder 2024-25",
+    "team_0": "Indiana Pacers",
+    "team_0_color": "yellow",
+    "team_1": "Oklahoma City Thunder", 
+    "team_1_color": "white"
+  },
+  "rosters": {
+    "Indiana Pacers": {
+      "0": "Haliburton",
+      "00": "Mathurin",
+      "1": "Toppin",
+      "2": "Nembhard",
+      "4": "Peter",
+      "5": "Walker",
+      "7": "Jones",
+      "9": "McConnell",
+      "12": "Furphy",
+      "13": "Bradley",
+      "22": "I. Jackson",
+      "23": "Nesmith",
+      "24": "Mathews",
+      "25": "Robinson-Earl",
+      "26": "Sheppard",
+      "29": "Q. Jackson",
+      "32": "Huff",
+      "43": "Siakam",
+      "55": "Thompson"
+    },
+    "Oklahoma City Thunder": {
+      "2": "SGA",
+      "3": "Youngblood",
+      "5": "Dort",
+      "6": "J. Williams",
+      "7": "Holmgren",
+      "8": "Jalen Williams",
+      "9": "Caruso",
+      "11": "Joe",
+      "12": "Sorber",
+      "13": "Dieng",
+      "15": "Carlson",
+      "21": "Wiggins",
+      "22": "Wallace",
+      "23": "Barnhizer",
+      "25": "Mitchell",
+      "34": "K. Williams",
+      "44": "Topic",
+      "55": "Hartenstein"
+    }
+  },
+  "team_assignments": {
+    "0": "Indiana Pacers",
+    "1": "Oklahoma City Thunder"
+  }
+}

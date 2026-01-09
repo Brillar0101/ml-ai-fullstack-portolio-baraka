@@ -1,0 +1,92 @@
+.project-detail {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  color: var(--text-secondary);
+  font-family: 'Rubik', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 40px;
+  transition: all 0.2s ease;
+}
+
+.back-button:hover {
+  background: var(--glass-hover);
+  color: var(--text);
+}
+
+.back-button svg {
+  width: 18px;
+  height: 18px;
+}
+
+.project-detail-header {
+  margin-bottom: 48px;
+}
+
+.project-detail-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 32px;
+}
+
+.project-detail-icon svg {
+  width: 40px;
+  height: 40px;
+  color: white;
+}
+
+.project-detail-title {
+  font-size: 48px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  margin-bottom: 16px;
+}
+
+.project-detail-desc {
+  font-size: 20px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 32px;
+}
+
+.project-detail-content {
+  padding: 48px;
+}
+
+.content-placeholder {
+  text-align: center;
+  padding: 80px 40px;
+  color: var(--text-muted);
+}
+
+.content-placeholder svg {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.content-placeholder p {
+  font-size: 16px;
+}
+
+@media (max-width: 768px) {
+  .project-detail-title {
+    font-size: 32px;
+  }
+}

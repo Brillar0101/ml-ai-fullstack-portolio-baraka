@@ -1,0 +1,938 @@
+/* SwishVision Project Page Styles */
+/* Inherits from ClapperboardProject.css base styles */
+
+.swishvision-project .project-icon-large {
+  background: linear-gradient(135deg, #FF6B35 0%, #FF8A5C 100%);
+}
+
+/* Status Badge for In Development */
+.badge.status-badge {
+  background: rgba(255, 193, 7, 0.15);
+  border-color: rgba(255, 193, 7, 0.3);
+  color: #FFC107;
+}
+
+.badge.status-badge svg {
+  color: #FFC107;
+}
+
+/* Video Output Mockup */
+.video-output-mockup {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.video-frame {
+  width: 100%;
+  max-width: 900px;
+  background: #1a1a2e;
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.4),
+    inset 0 0 0 2px rgba(255, 255, 255, 0.1);
+}
+
+.video-screen {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: #0d0d1a;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+}
+
+.video-screen img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.video-screen:hover img {
+  transform: scale(1.02);
+}
+
+.video-overlay {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  gap: 8px;
+}
+
+.overlay-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(255, 107, 53, 0.9);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.overlay-badge svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Market Context Card */
+.market-context {
+  padding: 32px;
+  margin-top: 24px;
+}
+
+.market-context h3 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: var(--text);
+}
+
+.market-context h3 svg {
+  width: 22px;
+  height: 22px;
+  color: #FF6B35;
+}
+
+.competitors-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.competitor-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.competitor-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.competitor-price {
+  font-size: 20px;
+  font-weight: 800;
+  color: #FF6B35;
+}
+
+.competitor-note {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.target-market {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: rgba(255, 107, 53, 0.1);
+  border: 1px solid rgba(255, 107, 53, 0.2);
+  border-radius: 12px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin: 0;
+}
+
+.target-market svg {
+  width: 20px;
+  height: 20px;
+  color: #FF6B35;
+  flex-shrink: 0;
+}
+
+/* ML Models Cards */
+.models-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.model-card {
+  padding: 24px;
+  transition: all 0.3s ease;
+}
+
+.model-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 107, 53, 0.3);
+}
+
+.model-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.model-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #FF6B35;
+  font-family: 'Fira Code', monospace;
+}
+
+.model-accuracy {
+  padding: 4px 10px;
+  background: rgba(0, 212, 170, 0.15);
+  border: 1px solid rgba(0, 212, 170, 0.3);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #00D4AA;
+}
+
+.model-purpose {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+
+.model-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Processing Info Card */
+.processing-info {
+  padding: 32px;
+  margin-top: 24px;
+}
+
+.processing-info h3 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 24px;
+}
+
+.processing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.processing-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+}
+
+.processing-item svg {
+  width: 32px;
+  height: 32px;
+  color: #FF6B35;
+  flex-shrink: 0;
+}
+
+.processing-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.processing-label {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.processing-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* Project Context Card */
+.context-content {
+  max-width: 800px;
+}
+
+.context-card {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  padding: 32px;
+}
+
+.context-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: center;
+}
+
+.context-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.context-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.context-value.status-dev {
+  color: #FFC107;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1024px) {
+  .competitors-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .processing-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .context-card {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .video-frame {
+    padding: 8px;
+  }
+
+  .models-content {
+    grid-template-columns: 1fr;
+  }
+
+  .context-card {
+    grid-template-columns: 1fr;
+  }
+
+  .overlay-badge {
+    display: none;
+  }
+}
+
+/* ==========================================
+   STATUS INTRO SECTION
+   ========================================== */
+
+.status-intro {
+  padding: 32px;
+}
+
+.status-intro-content h3 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #FFC107;
+  margin-bottom: 16px;
+}
+
+.status-intro-content p {
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.status-intro-content strong {
+  color: #FF6B35;
+}
+
+.status-goals {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.goal-item {
+  display: flex;
+  gap: 16px;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  align-items: center;
+}
+
+.goal-phase {
+  font-size: 12px;
+  font-weight: 700;
+  color: #FF6B35;
+  background: rgba(255, 107, 53, 0.15);
+  padding: 6px 12px;
+  border-radius: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-width: 130px;
+  text-align: center;
+}
+
+.goal-text {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* ==========================================
+   PROGRESS TIMELINE - ML PIPELINE STYLE
+   ========================================== */
+
+.progress-timeline {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  margin-bottom: 32px;
+  padding: 16px 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #FF6B35 #1a1f2e;
+}
+
+.progress-timeline::-webkit-scrollbar {
+  height: 6px;
+}
+
+.progress-timeline::-webkit-scrollbar-track {
+  background: #1a1f2e;
+  border-radius: 3px;
+}
+
+.progress-timeline::-webkit-scrollbar-thumb {
+  background: #FF6B35;
+  border-radius: 3px;
+}
+
+.progress-stage-btn {
+  display: flex;
+  flex-direction: column;
+  min-width: 160px;
+  max-width: 160px;
+  padding: 16px;
+  padding-bottom: 12px;
+  background: linear-gradient(135deg, rgba(26, 31, 46, 0.95) 0%, rgba(20, 24, 36, 0.95) 100%);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  position: relative;
+  font-family: 'Rubik', sans-serif;
+}
+
+/* Click indicator at bottom */
+.progress-stage-btn::after {
+  content: 'Click to view';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 6px;
+  font-size: 9px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.03);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0 0 10px 10px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.progress-stage-btn:hover::after {
+  color: #FF6B35;
+  background: rgba(255, 107, 53, 0.1);
+}
+
+.progress-stage-btn:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 107, 53, 0.5);
+}
+
+.progress-stage-btn.active {
+  border-color: #FF6B35;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 107, 53, 0.3);
+}
+
+.progress-stage-btn.active::after {
+  content: 'Viewing';
+  color: #FF6B35;
+  background: rgba(255, 107, 53, 0.15);
+}
+
+.progress-stage-btn.status-completed {
+  border-color: #00D4AA;
+}
+
+.progress-stage-btn.status-in-progress {
+  border-color: #FFC107;
+}
+
+.stage-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.stage-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.progress-stage-btn.status-completed .stage-label {
+  color: #00D4AA;
+}
+
+.progress-stage-btn.status-in-progress .stage-label {
+  color: #FFC107;
+}
+
+.stage-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+}
+
+.stage-icon.completed {
+  background: #00D4AA;
+}
+
+.stage-icon.in-progress {
+  background: #FFC107;
+}
+
+.stage-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.stage-status-label {
+  font-size: 11px;
+  font-weight: 500;
+  padding-top: 8px;
+  padding-bottom: 16px; /* Space for "Click to view" indicator */
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.progress-stage-btn.status-completed .stage-status-label {
+  color: #00D4AA;
+}
+
+.progress-stage-btn.status-in-progress .stage-status-label {
+  color: #FFC107;
+}
+
+.progress-stage-btn.status-pending .stage-status-label {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* Connector arrow between stages */
+.progress-connector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.3);
+  flex-shrink: 0;
+}
+
+.progress-connector svg {
+  width: 20px;
+  height: 20px;
+}
+
+.progress-connector.completed {
+  color: #00D4AA;
+}
+
+/* ==========================================
+   PROGRESS STAGE CONTENT
+   ========================================== */
+
+.progress-stage-content {
+  padding: 32px;
+}
+
+.stage-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.stage-header h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+}
+
+.stage-status-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.stage-status-badge.status-completed {
+  background: rgba(0, 212, 170, 0.15);
+  border: 1px solid rgba(0, 212, 170, 0.3);
+  color: #00D4AA;
+}
+
+.stage-status-badge.status-in-progress {
+  background: rgba(255, 193, 7, 0.15);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  color: #FFC107;
+}
+
+.stage-status-badge svg {
+  width: 16px;
+  height: 16px;
+}
+
+.stage-description {
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+/* ==========================================
+   STAGE MEDIA CONTAINER
+   ========================================== */
+
+.stage-media-container {
+  margin-bottom: 24px;
+}
+
+.media-preview {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto 16px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #0d0d1a;
+  cursor: pointer;
+}
+
+.media-preview img {
+  width: 100%;
+  height: auto;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.media-preview:hover img {
+  transform: scale(1.02);
+}
+
+.video-thumbnail {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: #0d0d1a;
+}
+
+.video-thumbnail video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.play-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.5);
+  color: #ffffff;
+  transition: background 0.3s ease;
+}
+
+.play-overlay svg {
+  color: #FF6B35;
+}
+
+.play-overlay span {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.video-thumbnail:hover .play-overlay {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* YouTube Embed */
+.youtube-embed {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  background: #0d0d1a;
+}
+
+.youtube-embed iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 12px;
+}
+
+/* ==========================================
+   STAGE RESULTS
+   ========================================== */
+
+.stage-results {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.result-item {
+  display: flex;
+  gap: 16px;
+  padding: 20px;
+  border-radius: 12px;
+  align-items: flex-start;
+}
+
+.result-item.success {
+  background: rgba(0, 212, 170, 0.08);
+  border: 1px solid rgba(0, 212, 170, 0.2);
+}
+
+.result-item.success svg {
+  color: #00D4AA;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.result-item.issue {
+  background: rgba(255, 193, 7, 0.08);
+  border: 1px solid rgba(255, 193, 7, 0.2);
+}
+
+.result-item.issue svg {
+  color: #FFC107;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.result-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.result-item.success .result-label {
+  color: #00D4AA;
+}
+
+.result-item.issue .result-label {
+  color: #FFC107;
+}
+
+.result-item p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ==========================================
+   FEATURE STATUS ICONS
+   ========================================== */
+
+.feature-done {
+  color: #00D4AA !important;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.feature-progress {
+  color: #FFC107 !important;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.feature-pending {
+  color: rgba(255, 255, 255, 0.3) !important;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* ==========================================
+   RESPONSIVE FOR NEW SECTIONS
+   ========================================== */
+
+@media (max-width: 1024px) {
+  .stage-results {
+    grid-template-columns: 1fr;
+  }
+
+  .progress-timeline {
+    flex-wrap: nowrap;
+  }
+}
+
+@media (max-width: 768px) {
+  .goal-item {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .stage-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .progress-stage-btn {
+    min-width: 140px;
+    max-width: 140px;
+    padding: 12px;
+  }
+
+  .stage-icon {
+    width: 30px;
+    height: 30px;
+  }
+
+  .stage-icon svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .stage-name {
+    font-size: 12px;
+  }
+
+  .stage-status-label {
+    font-size: 10px;
+  }
+}
+
+/* ==========================================
+   LIGHTBOX MODAL
+   ========================================== */
+
+.lightbox-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 40px;
+  cursor: pointer;
+}
+
+.lightbox-content {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  cursor: default;
+}
+
+.lightbox-content img,
+.lightbox-content video {
+  max-width: 100%;
+  max-height: 80vh;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.lightbox-close {
+  position: absolute;
+  top: -50px;
+  right: 0;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.lightbox-close:hover {
+  background: #FF6B35;
+  border-color: #FF6B35;
+}
+
+.lightbox-close svg {
+  width: 24px;
+  height: 24px;
+}
+
+.lightbox-caption {
+  text-align: center;
+  margin-top: 16px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+}
