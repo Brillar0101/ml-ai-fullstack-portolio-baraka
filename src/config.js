@@ -11,7 +11,14 @@ export const CONFIG = {
   location: "Blacksburg, VA",
   github: "github.com/Brillar0101",
   linkedin: "linkedin.com/in/barakaeli",
-  
+
+  // EmailJS Configuration
+  emailjs: {
+    serviceId: "service_51n3oya",
+    templateId: "template_ckrtvvp",
+    publicKey: "eEWjLIqXAn2IdqCjL"
+  },
+
   colors: {
     primary: "#0078D4",
     primaryLight: "#2B88D8",
