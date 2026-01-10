@@ -192,12 +192,11 @@ body {
 }
 
 .page-subtitle {
-  font-size: clamp(16px, 2vw, 18px);
+  font-size: clamp(14px, 2vw, 18px);
   color: var(--text-secondary);
   max-width: 100%;
   margin: 0 auto;
   line-height: 1.6;
-  white-space: nowrap;
 }
 
 /* Liquid Glass Buttons - iOS 26 style */

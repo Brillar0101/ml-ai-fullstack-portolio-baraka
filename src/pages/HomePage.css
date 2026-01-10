@@ -235,62 +235,93 @@
 @media (max-width: 479px) {
   .hero-wrapper {
     height: 100vh;
+    height: 100dvh;
     max-height: 100vh;
+    max-height: 100dvh;
   }
 
   .hero-section {
     height: 100%;
-    padding: 70px 0 20px;
+    padding: 60px 16px 20px;
   }
 
   .hero-content {
     max-width: 100%;
+    padding: 0;
   }
 
   .hero-badge {
-    font-size: 11px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
+    font-size: 10px;
+    padding: 5px 10px;
+    margin-bottom: 10px;
+    gap: 5px;
+  }
+
+  .hero-badge svg {
+    width: 12px;
+    height: 12px;
   }
 
   .hero-title {
-    font-size: 32px;
-    margin-bottom: 12px;
+    font-size: 28px;
+    margin-bottom: 10px;
+    line-height: 1.1;
   }
 
   .hero-subtitle {
-    font-size: 14px;
-    margin-bottom: 8px;
+    font-size: 13px;
+    margin-bottom: 6px;
+    line-height: 1.5;
+    padding: 0 8px;
   }
 
   .hero-location {
-    margin-bottom: 14px;
-    font-size: 13px;
+    margin-bottom: 12px;
+    font-size: 12px;
+    gap: 5px;
+  }
+
+  .hero-location svg {
+    width: 14px;
+    height: 14px;
   }
 
   .skills-inline {
-    gap: 6px;
-    margin-bottom: 16px;
+    gap: 5px;
+    margin-bottom: 14px;
+    padding: 0 4px;
   }
 
   .skill-tag {
-    padding: 5px 10px;
-    font-size: 11px;
+    padding: 4px 8px;
+    font-size: 10px;
+    gap: 4px;
+  }
+
+  .skill-tag svg {
+    width: 12px;
+    height: 12px;
   }
 
   .hero-buttons {
     flex-direction: column;
     gap: 8px;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
+    padding: 0 16px;
   }
 
   .social-links {
-    gap: 10px;
+    gap: 8px;
   }
 
   .social-link {
-    width: 42px;
-    height: 42px;
+    width: 40px;
+    height: 40px;
+  }
+
+  .social-link svg {
+    width: 18px;
+    height: 18px;
   }
 }
 

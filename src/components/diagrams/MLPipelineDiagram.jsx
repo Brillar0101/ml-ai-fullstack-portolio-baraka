@@ -34,7 +34,7 @@ const MLPipelineDiagram = () => {
       id: 'detection',
       label: 'STAGE 1',
       name: 'YOLO Detection',
-      color: '#FF6B35',
+      color: '#0A84FF',
       icon: Scan,
       details: ['Player Detection', 'Referee Detection', 'Per-Frame Analysis'],
       output: 'Bounding Boxes',
@@ -155,7 +155,7 @@ const MLPipelineDiagram = () => {
       <div className="ml-models-summary">
         <div className="ml-summary-title">Models Used</div>
         <div className="ml-summary-items">
-          <div className="ml-summary-item" style={{ '--item-color': '#FF6B35' }}>
+          <div className="ml-summary-item" style={{ '--item-color': '#0A84FF' }}>
             <span className="ml-summary-name">YOLO</span>
             <span className="ml-summary-task">Detection</span>
           </div>

@@ -334,6 +334,310 @@
   }
 }
 
+/* Small Mobile (320px - 479px) */
+@media (max-width: 479px) {
+  .video-frame {
+    padding: 6px;
+    border-radius: 12px;
+  }
+
+  .video-screen {
+    border-radius: 6px;
+  }
+
+  .market-context {
+    padding: 16px;
+    margin-top: 16px;
+  }
+
+  .market-context h3 {
+    font-size: 16px;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .market-context h3 svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .competitors-grid {
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .competitor-card {
+    padding: 14px;
+    border-radius: 10px;
+  }
+
+  .competitor-name {
+    font-size: 13px;
+  }
+
+  .competitor-price {
+    font-size: 16px;
+  }
+
+  .competitor-note {
+    font-size: 10px;
+  }
+
+  .target-market {
+    padding: 12px 14px;
+    gap: 10px;
+    font-size: 12px;
+    border-radius: 10px;
+  }
+
+  .target-market svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .models-content {
+    gap: 12px;
+  }
+
+  .model-card {
+    padding: 16px;
+  }
+
+  .model-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .model-name {
+    font-size: 14px;
+  }
+
+  .model-accuracy {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+
+  .model-purpose {
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
+
+  .model-desc {
+    font-size: 11px;
+  }
+
+  .processing-info {
+    padding: 16px;
+    margin-top: 16px;
+  }
+
+  .processing-info h3 {
+    font-size: 16px;
+    margin-bottom: 16px;
+  }
+
+  .processing-grid {
+    gap: 12px;
+  }
+
+  .processing-item {
+    gap: 12px;
+    padding: 14px;
+    border-radius: 10px;
+  }
+
+  .processing-item svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .processing-label {
+    font-size: 10px;
+  }
+
+  .processing-value {
+    font-size: 14px;
+  }
+
+  .context-card {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .context-label {
+    font-size: 10px;
+  }
+
+  .context-value {
+    font-size: 13px;
+  }
+
+  .status-intro {
+    padding: 16px;
+  }
+
+  .status-intro-content h3 {
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+
+  .status-intro-content p {
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+
+  .status-goals {
+    gap: 10px;
+  }
+
+  .goal-item {
+    padding: 12px 14px;
+    gap: 10px;
+    border-radius: 10px;
+  }
+
+  .goal-phase {
+    font-size: 10px;
+    padding: 4px 8px;
+    min-width: auto;
+  }
+
+  .goal-text {
+    font-size: 12px;
+  }
+
+  .progress-timeline {
+    gap: 6px;
+    padding: 10px 0;
+    margin-bottom: 20px;
+  }
+
+  .progress-stage-btn {
+    min-width: 110px;
+    max-width: 110px;
+    padding: 10px;
+    border-radius: 10px;
+  }
+
+  .progress-stage-btn::after {
+    font-size: 7px;
+    padding: 4px;
+  }
+
+  .stage-label-row {
+    margin-bottom: 8px;
+  }
+
+  .stage-label {
+    font-size: 8px;
+  }
+
+  .stage-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+  }
+
+  .stage-icon svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .stage-name {
+    font-size: 11px;
+    margin-bottom: 6px;
+  }
+
+  .stage-status-label {
+    font-size: 9px;
+    padding-top: 6px;
+    padding-bottom: 12px;
+  }
+
+  .progress-connector svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .progress-stage-content {
+    padding: 16px;
+  }
+
+  .stage-header h3 {
+    font-size: 16px;
+  }
+
+  .stage-status-badge {
+    padding: 4px 10px;
+    font-size: 11px;
+    gap: 6px;
+  }
+
+  .stage-status-badge svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .stage-description {
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+
+  .stage-media-container {
+    margin-bottom: 16px;
+  }
+
+  .media-preview {
+    border-radius: 10px;
+    margin-bottom: 12px;
+  }
+
+  .stage-results {
+    gap: 10px;
+  }
+
+  .result-item {
+    padding: 14px;
+    gap: 12px;
+    border-radius: 10px;
+  }
+
+  .result-item svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .result-label {
+    font-size: 10px;
+    margin-bottom: 4px;
+  }
+
+  .result-item p {
+    font-size: 12px;
+  }
+
+  .lightbox-overlay {
+    padding: 20px;
+  }
+
+  .lightbox-close {
+    top: -40px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .lightbox-close svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .lightbox-caption {
+    font-size: 12px;
+    margin-top: 12px;
+  }
+}
+
 /* ==========================================
    STATUS INTRO SECTION
    ========================================== */

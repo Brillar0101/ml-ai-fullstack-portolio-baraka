@@ -1006,41 +1006,316 @@
   }
 }
 
-/* Responsive - Small Mobile */
-@media (max-width: 480px) {
+/* Small Mobile (320px - 479px) */
+@media (max-width: 479px) {
   .laptop-screen {
-    height: 200px;
+    height: 180px;
   }
 
   .phone-frame {
-    width: 200px;
-    height: 420px;
+    width: 180px;
+    height: 380px;
+    border-radius: 28px;
+    padding: 8px;
+  }
+
+  .phone-frame::before {
+    width: 60px;
+    height: 18px;
+    top: 14px;
+  }
+
+  .phone-screen {
+    border-radius: 24px;
+  }
+
+  .app-preview {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .device-toggle {
+    padding: 4px;
+    border-radius: 10px;
   }
 
   .toggle-btn {
-    padding: 10px 16px;
-    font-size: 13px;
+    padding: 8px 14px;
+    font-size: 12px;
+    gap: 6px;
+  }
+
+  .toggle-btn svg {
+    width: 14px;
+    height: 14px;
   }
 
   .slideshow-controls {
-    gap: 8px;
+    gap: 6px;
   }
 
   .control-btn {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+  }
+
+  .control-btn svg {
+    width: 18px;
+    height: 18px;
   }
 
   .control-btn.play-btn {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .control-btn.play-btn svg {
+    width: 18px;
+    height: 18px;
   }
 
   .slide-counter {
-    font-size: 12px;
+    font-size: 11px;
   }
 
   .slide-caption {
+    font-size: 13px;
+  }
+
+  .project-badges {
+    gap: 6px;
+  }
+
+  .badge {
+    padding: 5px 10px;
+    font-size: 11px;
+  }
+
+  .badge svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .future-work {
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .future-work h3 {
+    font-size: 16px;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .future-work h3 svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .future-list {
+    gap: 8px;
+  }
+
+  .future-list li {
+    padding: 12px;
+    font-size: 12px;
+    border-radius: 10px;
+    gap: 10px;
+  }
+
+  .future-list li svg {
+    width: 14px;
+    height: 14px;
+    min-width: 14px;
+  }
+
+  .architecture-diagram {
+    padding: 16px;
+  }
+
+  .architecture-diagram h3 {
+    font-size: 18px;
+    margin-bottom: 20px;
+  }
+
+  .tier-label {
+    font-size: 10px;
+    margin-bottom: 8px;
+  }
+
+  .tier-item {
+    padding: 12px 16px;
+    border-radius: 10px;
+    min-width: 100%;
+  }
+
+  .tier-item svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .tier-item span {
+    font-size: 12px;
+  }
+
+  .tier-item small {
+    font-size: 10px;
+  }
+
+  .features-card,
+  .api-summary,
+  .db-schema,
+  .tech-card {
+    padding: 16px;
+  }
+
+  .features-card h3,
+  .api-summary h3,
+  .db-schema h3,
+  .tech-card h3 {
+    font-size: 16px;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .feature-item h4 {
+    font-size: 12px;
+  }
+
+  .feature-item p {
+    font-size: 11px;
+  }
+
+  .feature-item svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .api-category {
+    padding: 12px;
+    border-radius: 10px;
+  }
+
+  .api-name {
+    font-size: 12px;
+  }
+
+  .api-count {
+    font-size: 18px;
+  }
+
+  .api-desc {
+    font-size: 10px;
+  }
+
+  .table-tag {
+    padding: 6px 10px;
+    font-size: 11px;
+    border-radius: 6px;
+  }
+
+  .tech-item {
+    padding: 10px 12px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    border-radius: 6px;
+  }
+
+  .tech-name {
+    font-size: 12px;
+  }
+
+  .tech-desc {
+    font-size: 10px;
+    text-align: left;
+  }
+
+  .link-card {
+    padding: 16px;
+  }
+
+  .link-card svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .link-title {
     font-size: 14px;
+  }
+
+  .link-url {
+    font-size: 11px;
+  }
+
+  .diagram-container {
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  .diagram-header {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+  }
+
+  .diagram-header svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .diagram-header h3 {
+    font-size: 16px;
+  }
+
+  .diagram-header span {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+
+  .diagram-placeholder {
+    padding: 24px 16px;
+    min-height: 200px;
+    border-radius: 10px;
+  }
+
+  .diagram-placeholder-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+  }
+
+  .diagram-placeholder-icon svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .diagram-placeholder h4 {
+    font-size: 14px;
+  }
+
+  .diagram-placeholder p {
+    font-size: 12px;
+  }
+
+  .diagram-placeholder .placeholder-tag {
+    padding: 4px 8px;
+    font-size: 10px;
+  }
+
+  .diagram-legend {
+    gap: 10px;
+    margin-top: 14px;
+    padding-top: 14px;
+  }
+
+  .legend-item {
+    font-size: 10px;
+    gap: 6px;
+  }
+
+  .legend-color {
+    width: 10px;
+    height: 10px;
   }
 }

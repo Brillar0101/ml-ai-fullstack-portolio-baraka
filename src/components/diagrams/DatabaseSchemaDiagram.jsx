@@ -172,7 +172,7 @@ const DatabaseSchemaDiagram = () => {
 
   const getTypeColor = (type) => {
     switch (type) {
-      case 'primary': return '#FF6B35';
+      case 'primary': return '#0A84FF';
       case 'reference': return '#00D4AA';
       case 'junction': return '#6366F1';
       case 'analytics': return '#8B5CF6';
@@ -266,7 +266,7 @@ const DatabaseSchemaDiagram = () => {
         <div className="db-legend-title">Legend</div>
         <div className="db-legend-items">
           <div className="db-legend-item">
-            <div className="db-legend-color" style={{ background: '#FF6B35' }}></div>
+            <div className="db-legend-color" style={{ background: '#0A84FF' }}></div>
             <span>Primary Entity (User-centric)</span>
           </div>
           <div className="db-legend-item">

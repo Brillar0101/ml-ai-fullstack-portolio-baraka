@@ -25,7 +25,7 @@ const SystemArchitectureDiagram = () => {
       id: 'client',
       label: 'LAYER 1',
       name: 'Client',
-      color: '#FF6B35',
+      color: '#0A84FF',
       components: [
         {
           id: 'mobile',
@@ -218,7 +218,7 @@ const SystemArchitectureDiagram = () => {
         <div className="arch-flow-title">Request Flow</div>
         <div className="arch-flow-diagram">
           <div className="arch-flow-step">
-            <div className="arch-flow-node" style={{ '--node-color': '#FF6B35' }}>
+            <div className="arch-flow-node" style={{ '--node-color': '#0A84FF' }}>
               <Smartphone size={14} style={{ marginRight: 6, verticalAlign: 'middle' }} />
               Client
             </div>

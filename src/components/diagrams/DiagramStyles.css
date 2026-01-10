@@ -863,3 +863,418 @@
     padding: 8px 12px;
   }
 }
+
+/* Small Mobile (320px - 479px) */
+@media (max-width: 479px) {
+  /* Database Diagram Mobile */
+  .db-diagram-container {
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  .db-diagram-title h3 {
+    font-size: 16px;
+  }
+
+  .db-diagram-subtitle {
+    font-size: 11px;
+  }
+
+  .db-diagram-grid {
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .db-diagram-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .db-table-card {
+    border-radius: 10px;
+  }
+
+  .db-table-header {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .db-table-name {
+    font-size: 11px;
+  }
+
+  .db-badge {
+    padding: 2px 4px;
+    font-size: 8px;
+  }
+
+  .db-table-columns {
+    padding: 6px 10px 10px;
+  }
+
+  .db-column {
+    font-size: 10px;
+    gap: 6px;
+    padding: 4px 0;
+  }
+
+  .db-column-type {
+    font-size: 9px;
+  }
+
+  .db-diagram-legend {
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+  }
+
+  .db-legend-title {
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+
+  .db-legend-items {
+    gap: 8px 12px;
+  }
+
+  .db-legend-item {
+    font-size: 10px;
+    gap: 6px;
+  }
+
+  .db-legend-color {
+    width: 12px;
+    height: 12px;
+  }
+
+  .db-relationships-info {
+    padding: 12px;
+    border-radius: 10px;
+  }
+
+  .db-rel-title {
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+
+  .db-rel-item {
+    font-size: 10px;
+    gap: 6px;
+  }
+
+  .db-rel-from,
+  .db-rel-to {
+    font-size: 9px;
+  }
+
+  .db-rel-type {
+    font-size: 8px;
+    padding: 2px 4px;
+  }
+
+  /* System Architecture Mobile */
+  .arch-diagram-container {
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  .arch-diagram-title h3 {
+    font-size: 16px;
+  }
+
+  .arch-diagram-subtitle {
+    font-size: 11px;
+  }
+
+  .arch-tiers-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .arch-tier {
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  .arch-tier-header {
+    padding-bottom: 10px;
+    margin-bottom: 12px;
+  }
+
+  .arch-tier-label {
+    font-size: 9px;
+  }
+
+  .arch-tier-name {
+    font-size: 12px;
+  }
+
+  .arch-component {
+    border-radius: 10px;
+    margin-bottom: 10px;
+  }
+
+  .arch-component-header {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .arch-component-name {
+    font-size: 11px;
+  }
+
+  .arch-component-body {
+    padding: 10px;
+  }
+
+  .arch-component-tech {
+    font-size: 10px;
+    margin-bottom: 6px;
+  }
+
+  .arch-feature {
+    font-size: 9px;
+  }
+
+  .arch-component-stat {
+    font-size: 9px;
+    margin-top: 8px;
+    padding-top: 8px;
+  }
+
+  .arch-mini-component {
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+  }
+
+  .arch-mini-header {
+    font-size: 10px;
+    margin-bottom: 6px;
+  }
+
+  .arch-mini-item {
+    font-size: 9px;
+  }
+
+  .arch-external-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .arch-external-card {
+    border-radius: 8px;
+  }
+
+  .arch-external-header {
+    padding: 8px;
+    font-size: 10px;
+  }
+
+  .arch-external-body {
+    padding: 8px;
+  }
+
+  .arch-external-item {
+    font-size: 9px;
+  }
+
+  .arch-flow-container {
+    padding: 12px;
+    border-radius: 10px;
+  }
+
+  .arch-flow-title {
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+
+  .arch-flow-diagram {
+    gap: 8px;
+  }
+
+  .arch-flow-node {
+    padding: 6px 10px;
+    font-size: 10px;
+    border-radius: 6px;
+  }
+
+  .arch-flow-label {
+    font-size: 8px;
+  }
+
+  /* ML Pipeline Mobile */
+  .ml-pipeline-container {
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  .ml-pipeline-header {
+    margin-bottom: 16px;
+  }
+
+  .ml-pipeline-title {
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+
+  .ml-pipeline-title h3 {
+    font-size: 16px;
+  }
+
+  .ml-pipeline-title svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .ml-pipeline-subtitle {
+    font-size: 10px;
+  }
+
+  .ml-pipeline-flow {
+    gap: 6px;
+    padding: 12px 0;
+    margin-bottom: 16px;
+  }
+
+  .ml-stage-card {
+    min-width: 120px;
+    max-width: 120px;
+    padding: 10px;
+    border-radius: 10px;
+  }
+
+  .ml-stage-header {
+    margin-bottom: 8px;
+  }
+
+  .ml-stage-label {
+    font-size: 8px;
+  }
+
+  .ml-stage-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+  }
+
+  .ml-stage-icon svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .ml-stage-name {
+    font-size: 11px;
+    margin-bottom: 8px;
+  }
+
+  .ml-stage-details {
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+
+  .ml-stage-detail {
+    font-size: 9px;
+    gap: 5px;
+  }
+
+  .ml-detail-dot {
+    width: 4px;
+    height: 4px;
+  }
+
+  .ml-stage-output {
+    gap: 4px;
+    padding-top: 8px;
+    font-size: 9px;
+  }
+
+  .ml-stage-output svg {
+    width: 10px;
+    height: 10px;
+  }
+
+  .ml-flow-connector svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .ml-models-summary {
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+  }
+
+  .ml-summary-title {
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+
+  .ml-summary-items {
+    gap: 8px;
+  }
+
+  .ml-summary-item {
+    padding: 8px 10px;
+    border-radius: 8px;
+    min-width: 70px;
+  }
+
+  .ml-summary-name {
+    font-size: 10px;
+  }
+
+  .ml-summary-task {
+    font-size: 8px;
+  }
+
+  .ml-performance-bar {
+    padding: 12px;
+    border-radius: 10px;
+    gap: 8px;
+    flex-direction: column;
+  }
+
+  .ml-perf-item {
+    padding: 8px 12px;
+    border-radius: 6px;
+    gap: 8px;
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .ml-perf-item svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .ml-perf-item span:first-of-type {
+    font-size: 12px;
+  }
+
+  .ml-perf-label {
+    font-size: 9px;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .db-table-card:hover,
+  .db-table-card.hovered {
+    transform: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  .arch-component:hover {
+    transform: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  .ml-stage-card:hover,
+  .ml-stage-card.hovered {
+    transform: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+}
