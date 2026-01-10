@@ -38,7 +38,7 @@ export default function App() {
   return (
     <div className="app-container">
       <Navigation currentPage={currentPage} setCurrentPage={setCurrentPage} />
-      <main className="main-content">
+      <main className={`main-content ${currentPage === 'home' ? 'no-scroll' : ''}`}>
         {renderPage()}
       </main>
     </div>

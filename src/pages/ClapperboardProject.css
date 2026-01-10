@@ -1,8 +1,8 @@
 /* Project Page - Apple-inspired corporate design */
 .project-page {
-  max-width: 1100px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 0;
+  padding: 0 var(--space-xl);
 }
 
 /* Back Button */
@@ -42,6 +42,7 @@
   display: flex;
   gap: var(--space-xl);
   align-items: flex-start;
+  width: 100%;
 }
 
 .project-icon-large {
@@ -63,6 +64,8 @@
 
 .header-text {
   flex: 1;
+  min-width: 0;
+  width: 100%;
 }
 
 .project-context {
@@ -70,7 +73,7 @@
   align-items: center;
   gap: 8px;
   padding: 6px 14px;
-  background: rgba(255, 107, 53, 0.1);
+  background: rgba(10, 132, 255, 0.1);
   border-radius: var(--radius-full);
   font-size: 13px;
   font-weight: 500;
@@ -96,7 +99,7 @@
   color: var(--text-secondary);
   line-height: 1.6;
   margin-bottom: var(--space-lg);
-  max-width: 700px;
+  max-width: 100%;
 }
 
 .project-tags {
@@ -131,18 +134,18 @@
   border: none;
   border-radius: 10px;
   color: white;
-  font-family: 'Rubik', sans-serif;
+  font-family: inherit;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   text-decoration: none;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 20px rgba(255, 107, 53, 0.3);
+  box-shadow: 0 4px 20px rgba(10, 132, 255, 0.3);
 }
 
 .cta-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(255, 107, 53, 0.4);
+  box-shadow: 0 8px 30px rgba(10, 132, 255, 0.4);
 }
 
 .cta-primary svg {
@@ -159,7 +162,7 @@
   border: 1px solid var(--glass-border);
   border-radius: 10px;
   color: var(--text);
-  font-family: 'Rubik', sans-serif;
+  font-family: inherit;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
@@ -244,7 +247,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, rgba(255, 107, 53, 0.2) 0%, rgba(255, 138, 92, 0.1) 100%);
+  background: linear-gradient(135deg, rgba(10, 132, 255, 0.2) 0%, rgba(64, 169, 255, 0.1) 100%);
 }
 
 .play-overlay {
@@ -265,7 +268,7 @@
 
 .video-link:hover .play-overlay {
   transform: translate(-50%, -50%) scale(1.1);
-  box-shadow: 0 0 40px rgba(255, 107, 53, 0.5);
+  box-shadow: 0 0 40px rgba(10, 132, 255, 0.5);
 }
 
 .play-overlay svg {
@@ -400,13 +403,13 @@
 .company-categories {
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 20px;
 }
 
 .company-category {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
 }
 
 .category-label {
@@ -419,7 +422,7 @@
 
 .company-logos {
   display: flex;
-  gap: 16px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
@@ -427,24 +430,26 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 20px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--glass-border);
+  padding: 10px 16px;
+  background: transparent;
+  backdrop-filter: blur(100px) saturate(150%);
+  -webkit-backdrop-filter: blur(100px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   transition: all 0.3s ease;
 }
 
 .company-card:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: transparent;
+  border-color: rgba(10, 132, 255, 0.25);
   transform: translateY(-2px);
 }
 
 .company-logo-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.05);
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -518,8 +523,10 @@
   align-items: center;
   gap: 12px;
   padding: 24px;
-  background: var(--glass);
-  border: 1px solid var(--glass-border);
+  background: transparent;
+  backdrop-filter: blur(100px) saturate(150%);
+  -webkit-backdrop-filter: blur(100px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   min-width: 140px;
   position: relative;
@@ -697,8 +704,10 @@
   justify-content: center;
   gap: 12px;
   padding: 60px;
-  background: var(--glass);
-  border: 2px dashed var(--glass-border);
+  background: transparent;
+  backdrop-filter: blur(100px) saturate(150%);
+  -webkit-backdrop-filter: blur(100px) saturate(150%);
+  border: 2px dashed rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   color: var(--text-muted);
   margin-top: 24px;
@@ -718,8 +727,10 @@
   margin-top: 24px;
   border-radius: 12px;
   overflow: hidden;
-  background: var(--glass);
-  border: 1px solid var(--glass-border);
+  background: transparent;
+  backdrop-filter: blur(100px) saturate(150%);
+  -webkit-backdrop-filter: blur(100px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .project-image img {
@@ -731,8 +742,10 @@
 .case-image {
   border-radius: 8px;
   overflow: hidden;
-  background: var(--glass);
-  border: 1px solid var(--glass-border);
+  background: transparent;
+  backdrop-filter: blur(100px) saturate(150%);
+  -webkit-backdrop-filter: blur(100px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .case-image img {
@@ -757,7 +770,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(255, 107, 53, 0.7);
+  background: rgba(10, 132, 255, 0.7);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -810,8 +823,10 @@
   position: absolute;
   top: -50px;
   right: 0;
-  background: var(--glass);
-  border: 1px solid var(--glass-border);
+  background: transparent;
+  backdrop-filter: blur(100px) saturate(150%);
+  -webkit-backdrop-filter: blur(100px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 50%;
   width: 44px;
   height: 44px;
@@ -866,10 +881,12 @@
   gap: 8px;
   margin-top: 20px;
   padding: 12px 20px;
-  background: var(--glass);
-  border: 1px solid var(--glass-border);
+  background: transparent;
+  backdrop-filter: blur(100px) saturate(150%);
+  -webkit-backdrop-filter: blur(100px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
-  color: var(--accent);
+  color: var(--primary);
   text-decoration: none;
   font-size: 14px;
   font-weight: 500;
@@ -877,7 +894,8 @@
 }
 
 .roboflow-link:hover {
-  background: var(--glass-hover);
+  background: transparent;
+  border-color: rgba(10, 132, 255, 0.25);
 }
 
 .roboflow-link svg {
@@ -897,7 +915,10 @@
   flex-direction: column;
   gap: 4px;
   padding: 16px;
-  background: var(--glass);
+  background: transparent;
+  backdrop-filter: blur(100px) saturate(150%);
+  -webkit-backdrop-filter: blur(100px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 10px;
 }
 
@@ -995,9 +1016,11 @@
 .test-stat {
   text-align: center;
   padding: 24px;
-  background: var(--glass);
+  background: transparent;
+  backdrop-filter: blur(100px) saturate(150%);
+  -webkit-backdrop-filter: blur(100px) saturate(150%);
   border-radius: 12px;
-  border: 1px solid var(--glass-border);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .test-stat.positive .test-stat-value {
@@ -1035,10 +1058,12 @@
 .rate-bar-container {
   flex: 1;
   height: 24px;
-  background: var(--glass);
+  background: transparent;
+  backdrop-filter: blur(100px) saturate(150%);
+  -webkit-backdrop-filter: blur(100px) saturate(150%);
   border-radius: 12px;
   overflow: hidden;
-  border: 1px solid var(--glass-border);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .rate-bar-fill {
@@ -1082,8 +1107,10 @@
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: var(--glass);
-  border: 1px solid var(--glass-border);
+  background: transparent;
+  backdrop-filter: blur(100px) saturate(150%);
+  -webkit-backdrop-filter: blur(100px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: var(--text);
   cursor: pointer;
   display: flex;
@@ -1142,8 +1169,10 @@
   width: 48px;
   height: 48px;
   border-radius: 12px;
-  background: var(--glass);
-  border: 1px solid var(--glass-border);
+  background: transparent;
+  backdrop-filter: blur(100px) saturate(150%);
+  -webkit-backdrop-filter: blur(100px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: var(--text-secondary);
   cursor: pointer;
   display: flex;
@@ -1153,7 +1182,8 @@
 }
 
 .control-btn:hover {
-  background: var(--glass-hover);
+  background: transparent;
+  border-color: rgba(10, 132, 255, 0.25);
   color: var(--text);
 }
 
@@ -1225,8 +1255,10 @@
   width: 48px;
   min-width: 48px;
   border-radius: 12px;
-  background: var(--glass);
-  border: 1px solid var(--glass-border);
+  background: transparent;
+  backdrop-filter: blur(100px) saturate(150%);
+  -webkit-backdrop-filter: blur(100px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: var(--text);
   cursor: pointer;
   display: flex;
@@ -1250,7 +1282,10 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 32px;
-  background: var(--glass);
+  background: transparent;
+  backdrop-filter: blur(100px) saturate(150%);
+  -webkit-backdrop-filter: blur(100px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   overflow: hidden;
 }
@@ -1566,8 +1601,10 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: var(--glass);
-  border: 2px dashed var(--glass-border);
+  background: transparent;
+  backdrop-filter: blur(100px) saturate(150%);
+  -webkit-backdrop-filter: blur(100px) saturate(150%);
+  border: 2px dashed rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   color: var(--text-muted);
   font-size: 11px;
@@ -2195,8 +2232,8 @@
   }
 
   .slideshow-nav:hover {
-    background: var(--glass);
-    border-color: var(--glass-border);
+    background: transparent;
+    border-color: rgba(255, 255, 255, 0.1);
   }
 
   .link-card:hover .external-icon {

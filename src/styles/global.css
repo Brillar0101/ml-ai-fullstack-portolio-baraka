@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+/* Import Inter as SF Pro alternative (SF Pro is not available as web font) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 * {
   margin: 0;
@@ -7,23 +8,30 @@
 }
 
 :root {
-  /* Corporate Black/Orange/White Theme - Apple-inspired */
-  --primary: #FF6B35;
-  --primary-light: #FF8A5C;
-  --primary-dark: #E55A2B;
-  --accent: #FF6B35;
+  /* Professional Blue & White Theme - Apple-inspired */
+  --primary: #0A84FF;
+  --primary-light: #40A9FF;
+  --primary-dark: #0066CC;
+  --accent: #0A84FF;
 
-  /* Refined dark palette */
+  /* Secondary colors */
+  --secondary: #5AC8FA;
+  --secondary-glow: rgba(10, 132, 255, 0.4);
+
+  /* Clean dark palette with subtle blue undertones */
   --dark: #000000;
-  --dark-secondary: #0a0a0a;
-  --dark-tertiary: #141414;
-  --dark-elevated: #1a1a1a;
+  --dark-secondary: #0A0A0F;
+  --dark-tertiary: #111118;
+  --dark-elevated: #18181F;
 
-  /* Glass effects - more subtle for corporate look */
-  --glass: rgba(255, 255, 255, 0.03);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-hover: rgba(255, 255, 255, 0.06);
-  --glass-strong: rgba(255, 255, 255, 0.1);
+  /* Liquid Glass effects - Pure transparent blur */
+  --glass: transparent;
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-hover: transparent;
+  --glass-strong: transparent;
+  --glass-blue: transparent;
+  --glass-inner-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  --glass-glow: 0 0 40px rgba(10, 132, 255, 0.1);
 
   /* Typography */
   --text: #FFFFFF;
@@ -62,21 +70,43 @@ html {
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: var(--dark);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   color: var(--text);
   min-height: 100vh;
   overflow-x: hidden;
   line-height: 1.5;
+  /* Professional dark animated gradient background */
+  background: linear-gradient(
+    135deg,
+    #000000 0%,
+    #0A0A0F 20%,
+    #0D1117 40%,
+    #111118 60%,
+    #0A0A0F 80%,
+    #000000 100%
+  );
+  background-size: 400% 400%;
+  animation: gradientShift 25s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .app-container {
   min-height: 100vh;
-  background: var(--dark);
   position: relative;
 }
 
-/* Subtle gradient overlay - more refined */
+/* Subtle gradient overlay with blue accent */
 .app-container::before {
   content: '';
   position: fixed;
@@ -85,26 +115,42 @@ body {
   right: 0;
   bottom: 0;
   background:
-    radial-gradient(ellipse at 50% 0%, rgba(255, 107, 53, 0.04) 0%, transparent 60%);
+    radial-gradient(ellipse at 15% 15%, rgba(10, 132, 255, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 85%, rgba(90, 200, 250, 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(10, 132, 255, 0.04) 0%, transparent 60%);
   pointer-events: none;
   z-index: 0;
 }
 
-/* Glass Card Effect - More refined */
+/* Liquid Glass Card Effect - Pure transparent with high blur */
 .glass-card {
-  background: var(--glass);
-  backdrop-filter: blur(40px);
-  -webkit-backdrop-filter: blur(40px);
-  border: 1px solid var(--glass-border);
+  position: relative;
+  background: transparent;
+  backdrop-filter: blur(100px) saturate(150%);
+  -webkit-backdrop-filter: blur(100px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-xl);
   transition: all var(--transition-smooth);
+  overflow: hidden;
+}
+
+.glass-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: var(--glass-inner-shadow);
+  pointer-events: none;
+  z-index: 1;
 }
 
 .glass-card:hover {
-  background: var(--glass-hover);
-  border-color: rgba(255, 107, 53, 0.2);
+  background: transparent;
+  border-color: rgba(10, 132, 255, 0.25);
   transform: translateY(-2px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.3),
+    0 0 60px rgba(10, 132, 255, 0.08);
 }
 
 /* Main Content */
@@ -116,10 +162,19 @@ body {
   z-index: 1;
 }
 
+/* No scroll for landing page */
+.main-content.no-scroll {
+  padding-top: 0;
+  padding-bottom: 0;
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
+}
+
 .container {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 0 var(--space-2xl);
+  padding: 0 var(--space-xl);
 }
 
 /* Page Header - Corporate style */
@@ -139,19 +194,21 @@ body {
 .page-subtitle {
   font-size: clamp(16px, 2vw, 18px);
   color: var(--text-secondary);
-  max-width: 560px;
+  max-width: 100%;
   margin: 0 auto;
   line-height: 1.6;
+  white-space: nowrap;
 }
 
-/* Buttons - Apple-inspired */
+/* Liquid Glass Buttons - iOS 26 style */
 .btn-primary {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-sm);
   padding: 14px 28px;
-  background: var(--primary);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
   border: none;
   border-radius: var(--radius-full);
   color: white;
@@ -161,11 +218,22 @@ body {
   cursor: pointer;
   transition: all var(--transition-base);
   text-decoration: none;
+  overflow: hidden;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.4), inset 0 0 2px rgba(255, 255, 255, 0.2);
+  pointer-events: none;
 }
 
 .btn-primary:hover {
-  background: var(--primary-light);
+  background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
   transform: scale(1.02);
+  box-shadow: 0 8px 32px rgba(10, 132, 255, 0.5);
 }
 
 .btn-primary:active {
@@ -182,14 +250,18 @@ body {
   transform: translateX(2px);
 }
 
+/* Liquid Glass Secondary Button */
 .btn-secondary {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-sm);
   padding: 14px 28px;
-  background: transparent;
-  border: 1.5px solid var(--glass-border);
+  background: var(--glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-full);
   color: var(--text);
   font-family: inherit;
@@ -198,11 +270,22 @@ body {
   cursor: pointer;
   transition: all var(--transition-base);
   text-decoration: none;
+  overflow: hidden;
+}
+
+.btn-secondary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: var(--glass-inner-shadow);
+  pointer-events: none;
 }
 
 .btn-secondary:hover {
-  background: var(--glass);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: var(--glass-hover);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 }
 
 .btn-secondary svg {
@@ -305,15 +388,16 @@ body {
 /* Tablet Landscape / Small Desktop (1024px - 1279px) */
 @media (min-width: 1024px) and (max-width: 1279px) {
   .container {
-    max-width: 960px;
+    max-width: 100%;
+    padding: 0 var(--space-xl);
   }
 }
 
 /* Desktop (1280px+) */
 @media (min-width: 1280px) {
   .container {
-    max-width: 1200px;
-    padding: 0 var(--space-2xl);
+    max-width: 1400px;
+    padding: 0 var(--space-xl);
   }
 
   .main-content {
@@ -324,7 +408,15 @@ body {
 /* Large Desktop (1440px+) */
 @media (min-width: 1440px) {
   .container {
-    max-width: 1280px;
+    max-width: 1600px;
+    padding: 0 var(--space-2xl);
+  }
+}
+
+/* Extra Large Desktop (1920px+) */
+@media (min-width: 1920px) {
+  .container {
+    max-width: 1800px;
   }
 }
 
@@ -332,18 +424,18 @@ body {
 @media (hover: none) and (pointer: coarse) {
   .glass-card:hover {
     transform: none;
-    background: var(--glass);
-    border-color: var(--glass-border);
+    background: transparent;
+    border-color: rgba(255, 255, 255, 0.1);
   }
 
   .btn-primary:hover {
     transform: none;
-    background: var(--primary);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
   }
 
   .btn-secondary:hover {
     background: transparent;
-    border-color: var(--glass-border);
+    border-color: rgba(255, 255, 255, 0.1);
   }
 }
 
@@ -355,5 +447,10 @@ body {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  body {
+    animation: none;
+    background-size: 100% 100%;
   }
 }

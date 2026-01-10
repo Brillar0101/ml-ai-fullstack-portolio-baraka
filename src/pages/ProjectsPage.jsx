@@ -28,22 +28,24 @@ const ProjectsPage = ({ setCurrentPage, setSelectedProject }) => {
       
       <div className="projects-grid">
         {PROJECTS.map((project) => (
-          <div 
+          <div
             key={project.id}
             className="glass-card project-card"
             onClick={() => handleProjectClick(project)}
           >
             {project.featured && <span className="featured-badge">Featured</span>}
-            <div 
-              className="project-icon-wrapper"
-              style={{ background: project.gradient }}
-            >
-              <project.icon />
+            <div className="project-card-header">
+              <div
+                className="project-icon-wrapper"
+                style={{ background: project.gradient }}
+              >
+                <project.icon />
+              </div>
+              <h3 className="project-card-title">
+                {project.title}
+                <ArrowRight />
+              </h3>
             </div>
-            <h3 className="project-card-title">
-              {project.title}
-              <ArrowRight />
-            </h3>
             <p className="project-card-desc">{project.shortDesc}</p>
             <div className="project-tags">
               {project.tags.map((tag, index) => (

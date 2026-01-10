@@ -17,15 +17,26 @@
 }
 
 .nav-glass {
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-  border: 1px solid var(--glass-border);
+  position: relative;
+  background: transparent;
+  backdrop-filter: blur(100px) saturate(150%);
+  -webkit-backdrop-filter: blur(100px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-full);
   padding: 8px 8px 8px 24px;
   display: flex;
   align-items: center;
   gap: var(--space-lg);
+  overflow: hidden;
+}
+
+.nav-glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: var(--glass-inner-shadow);
+  pointer-events: none;
 }
 
 .logo {
@@ -81,19 +92,31 @@
 /* Mobile menu button */
 .mobile-menu-btn {
   display: none;
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-  border: 1px solid var(--glass-border);
+  position: relative;
+  background: transparent;
+  backdrop-filter: blur(100px) saturate(150%);
+  -webkit-backdrop-filter: blur(100px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-md);
   padding: 12px;
   color: var(--text);
   cursor: pointer;
   transition: all var(--transition-fast);
+  overflow: hidden;
+}
+
+.mobile-menu-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: var(--glass-inner-shadow);
+  pointer-events: none;
 }
 
 .mobile-menu-btn:hover {
-  background: var(--glass-hover);
+  background: transparent;
+  border-color: rgba(10, 132, 255, 0.25);
 }
 
 .mobile-menu-btn svg {
@@ -109,10 +132,10 @@
   top: 72px;
   left: var(--space-md);
   right: var(--space-md);
-  background: rgba(0, 0, 0, 0.95);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-  border: 1px solid var(--glass-border);
+  background: transparent;
+  backdrop-filter: blur(100px) saturate(150%);
+  -webkit-backdrop-filter: blur(100px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-lg);
   padding: var(--space-sm);
   z-index: 999;

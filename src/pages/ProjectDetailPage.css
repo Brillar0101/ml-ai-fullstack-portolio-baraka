@@ -1,6 +1,6 @@
 /* Project Detail Page - Apple-inspired corporate design */
 .project-detail {
-  max-width: 900px;
+  max-width: 1100px;
   margin: 0 auto;
 }
 
@@ -135,6 +135,48 @@
 /* Tablet Portrait */
 @media (min-width: 768px) and (max-width: 1023px) {
   .project-detail {
-    max-width: 720px;
+    max-width: 100%;
+  }
+}
+
+/* Large Desktop (1440px+) */
+@media (min-width: 1440px) {
+  .project-detail {
+    max-width: 1300px;
+  }
+
+  .project-detail-icon {
+    width: 80px;
+    height: 80px;
+  }
+
+  .project-detail-icon svg {
+    width: 40px;
+    height: 40px;
+  }
+
+  .project-detail-content {
+    padding: var(--space-3xl);
+  }
+}
+
+/* Extra Large Desktop (1920px+) */
+@media (min-width: 1920px) {
+  .project-detail {
+    max-width: 1500px;
+  }
+
+  .project-detail-icon {
+    width: 88px;
+    height: 88px;
+  }
+
+  .project-detail-icon svg {
+    width: 44px;
+    height: 44px;
+  }
+
+  .project-detail-content {
+    padding: 64px;
   }
 }

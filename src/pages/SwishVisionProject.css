@@ -2,7 +2,7 @@
 /* Inherits from ClapperboardProject.css base styles */
 
 .swishvision-project .project-icon-large {
-  background: linear-gradient(135deg, #FF6B35 0%, #FF8A5C 100%);
+  background: linear-gradient(135deg, #0A84FF 0%, #40A9FF 100%);
 }
 
 /* Status Badge for In Development */
@@ -68,7 +68,7 @@
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  background: rgba(255, 107, 53, 0.9);
+  background: rgba(10, 132, 255, 0.9);
   border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
@@ -99,7 +99,7 @@
 .market-context h3 svg {
   width: 22px;
   height: 22px;
-  color: #FF6B35;
+  color: #0A84FF;
 }
 
 .competitors-grid {
@@ -114,8 +114,8 @@
   flex-direction: column;
   gap: 4px;
   padding: 20px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   text-align: center;
 }
@@ -129,7 +129,7 @@
 .competitor-price {
   font-size: 20px;
   font-weight: 800;
-  color: #FF6B35;
+  color: #0A84FF;
 }
 
 .competitor-note {
@@ -142,8 +142,8 @@
   align-items: center;
   gap: 12px;
   padding: 16px 20px;
-  background: rgba(255, 107, 53, 0.1);
-  border: 1px solid rgba(255, 107, 53, 0.2);
+  background: rgba(10, 132, 255, 0.1);
+  border: 1px solid rgba(10, 132, 255, 0.2);
   border-radius: 12px;
   color: var(--text-secondary);
   font-size: 14px;
@@ -153,7 +153,7 @@
 .target-market svg {
   width: 20px;
   height: 20px;
-  color: #FF6B35;
+  color: #0A84FF;
   flex-shrink: 0;
 }
 
@@ -171,7 +171,7 @@
 
 .model-card:hover {
   transform: translateY(-4px);
-  border-color: rgba(255, 107, 53, 0.3);
+  border-color: rgba(10, 132, 255, 0.3);
 }
 
 .model-header {
@@ -184,7 +184,7 @@
 .model-name {
   font-size: 18px;
   font-weight: 700;
-  color: #FF6B35;
+  color: #0A84FF;
   font-family: 'Fira Code', monospace;
 }
 
@@ -235,15 +235,15 @@
   align-items: center;
   gap: 16px;
   padding: 20px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
 }
 
 .processing-item svg {
   width: 32px;
   height: 32px;
-  color: #FF6B35;
+  color: #0A84FF;
   flex-shrink: 0;
 }
 
@@ -357,7 +357,7 @@
 }
 
 .status-intro-content strong {
-  color: #FF6B35;
+  color: #0A84FF;
 }
 
 .status-goals {
@@ -370,8 +370,8 @@
   display: flex;
   gap: 16px;
   padding: 16px 20px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   align-items: center;
 }
@@ -379,8 +379,8 @@
 .goal-phase {
   font-size: 12px;
   font-weight: 700;
-  color: #FF6B35;
-  background: rgba(255, 107, 53, 0.15);
+  color: #0A84FF;
+  background: rgba(10, 132, 255, 0.15);
   padding: 6px 12px;
   border-radius: 6px;
   white-space: nowrap;
@@ -407,7 +407,7 @@
   padding: 16px 0;
   overflow-x: auto;
   scrollbar-width: thin;
-  scrollbar-color: #FF6B35 #1a1f2e;
+  scrollbar-color: #0A84FF #1a1f2e;
 }
 
 .progress-timeline::-webkit-scrollbar {
@@ -420,7 +420,7 @@
 }
 
 .progress-timeline::-webkit-scrollbar-thumb {
-  background: #FF6B35;
+  background: #0A84FF;
   border-radius: 3px;
 }
 
@@ -455,33 +455,33 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: rgba(255, 255, 255, 0.4);
-  background: rgba(255, 255, 255, 0.03);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: transparent;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 0 0 10px 10px;
   text-align: center;
   transition: all 0.3s ease;
 }
 
 .progress-stage-btn:hover::after {
-  color: #FF6B35;
-  background: rgba(255, 107, 53, 0.1);
+  color: #0A84FF;
+  background: rgba(10, 132, 255, 0.1);
 }
 
 .progress-stage-btn:hover {
   transform: translateY(-6px);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
-  border-color: rgba(255, 107, 53, 0.5);
+  border-color: rgba(10, 132, 255, 0.5);
 }
 
 .progress-stage-btn.active {
-  border-color: #FF6B35;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 107, 53, 0.3);
+  border-color: #0A84FF;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 0 20px rgba(10, 132, 255, 0.3);
 }
 
 .progress-stage-btn.active::after {
   content: 'Viewing';
-  color: #FF6B35;
-  background: rgba(255, 107, 53, 0.15);
+  color: #0A84FF;
+  background: rgba(10, 132, 255, 0.15);
 }
 
 .progress-stage-btn.status-completed {
@@ -695,7 +695,7 @@
 }
 
 .play-overlay svg {
-  color: #FF6B35;
+  color: #0A84FF;
 }
 
 .play-overlay span {
@@ -921,8 +921,8 @@
 }
 
 .lightbox-close:hover {
-  background: #FF6B35;
-  border-color: #FF6B35;
+  background: #0A84FF;
+  border-color: #0A84FF;
 }
 
 .lightbox-close svg {
