@@ -1,47 +1,45 @@
 import React, { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { Home, FolderOpen, Mail, Menu, X } from 'lucide-react';
 import { CONFIG } from '../config';
 import './Navigation.css';
 
-const Navigation = ({ currentPage, setCurrentPage }) => {
+const Navigation = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  
+  const location = useLocation();
+
   const navItems = [
-    { id: 'home', label: 'Home', icon: Home },
-    { id: 'projects', label: 'Projects', icon: FolderOpen },
-    { id: 'contact', label: 'Contact', icon: Mail }
+    { path: '/', label: 'Home', icon: Home },
+    { path: '/projects', label: 'Projects', icon: FolderOpen },
+    { path: '/contact', label: 'Contact', icon: Mail }
   ];
-  
-  const handleNavClick = (pageId) => {
-    setCurrentPage(pageId);
-    setMobileMenuOpen(false);
+
+  const isActive = (path) => {
+    if (path === '/') return location.pathname === '/';
+    return location.pathname.startsWith(path);
   };
-  
+
   return (
     <nav className="nav-container">
       <div className="nav-inner">
         <div className="nav-glass">
-          <div 
-            className="logo" 
-            onClick={() => setCurrentPage('home')} 
-            style={{ cursor: 'pointer' }}
-          >
+          <Link to="/" className="logo">
             {CONFIG.name}
-          </div>
+          </Link>
           <div className="nav-links">
             {navItems.map(item => (
-              <button
-                key={item.id}
-                className={`nav-link ${currentPage === item.id ? 'active' : ''}`}
-                onClick={() => handleNavClick(item.id)}
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`nav-link ${isActive(item.path) ? 'active' : ''}`}
               >
                 <item.icon />
                 {item.label}
-              </button>
+              </Link>
             ))}
           </div>
         </div>
-        <button 
+        <button
           className="mobile-menu-btn"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         >
@@ -50,14 +48,15 @@ const Navigation = ({ currentPage, setCurrentPage }) => {
       </div>
       <div className={`mobile-nav ${mobileMenuOpen ? 'open' : ''}`}>
         {navItems.map(item => (
-          <button
-            key={item.id}
-            className={`nav-link ${currentPage === item.id ? 'active' : ''}`}
-            onClick={() => handleNavClick(item.id)}
+          <Link
+            key={item.path}
+            to={item.path}
+            className={`nav-link ${isActive(item.path) ? 'active' : ''}`}
+            onClick={() => setMobileMenuOpen(false)}
           >
             <item.icon />
             {item.label}
-          </button>
+          </Link>
         ))}
       </div>
     </nav>

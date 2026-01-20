@@ -1,4 +1,4 @@
-/* Navigation - Apple-inspired corporate design */
+/* Navigation - Professional corporate design */
 .nav-container {
   position: fixed;
   top: 0;
@@ -18,110 +18,96 @@
 
 .nav-glass {
   position: relative;
-  background: transparent;
-  backdrop-filter: blur(100px) saturate(150%);
-  -webkit-backdrop-filter: blur(100px) saturate(150%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-full);
-  padding: 8px 8px 8px 24px;
+  background: rgba(9, 9, 11, 0.8);
+  backdrop-filter: blur(20px) saturate(120%);
+  -webkit-backdrop-filter: blur(20px) saturate(120%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 6px 6px 6px 20px;
   display: flex;
   align-items: center;
-  gap: var(--space-lg);
+  gap: var(--space-md);
   overflow: hidden;
 }
 
-.nav-glass::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  box-shadow: var(--glass-inner-shadow);
-  pointer-events: none;
-}
-
 .logo {
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--text);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
   white-space: nowrap;
-  transition: opacity var(--transition-fast);
+  transition: color var(--transition-fast);
+  text-decoration: none;
 }
 
 .logo:hover {
-  opacity: 0.7;
+  color: var(--text-secondary);
+}
+
+/* Remove link styling from nav links */
+a.nav-link {
+  text-decoration: none;
 }
 
 .nav-links {
   display: flex;
-  gap: 4px;
+  gap: 2px;
 }
 
 .nav-link {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 10px 18px;
+  padding: 8px 14px;
   background: transparent;
   border: none;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   font-family: inherit;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-sm);
   transition: all var(--transition-fast);
   white-space: nowrap;
 }
 
 .nav-link:hover {
   color: var(--text);
-  background: var(--glass-hover);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .nav-link.active {
-  color: var(--text);
+  color: white;
   background: var(--primary);
 }
 
 .nav-link svg {
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
 }
 
 /* Mobile menu button */
 .mobile-menu-btn {
   display: none;
   position: relative;
-  background: transparent;
-  backdrop-filter: blur(100px) saturate(150%);
-  -webkit-backdrop-filter: blur(100px) saturate(150%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-md);
-  padding: 12px;
+  background: rgba(9, 9, 11, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 10px;
   color: var(--text);
   cursor: pointer;
   transition: all var(--transition-fast);
-  overflow: hidden;
-}
-
-.mobile-menu-btn::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  box-shadow: var(--glass-inner-shadow);
-  pointer-events: none;
 }
 
 .mobile-menu-btn:hover {
-  background: transparent;
-  border-color: rgba(10, 132, 255, 0.25);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .mobile-menu-btn svg {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   display: block;
 }
 
@@ -129,23 +115,23 @@
 .mobile-nav {
   display: none;
   position: fixed;
-  top: 72px;
+  top: 64px;
   left: var(--space-md);
   right: var(--space-md);
-  background: transparent;
-  backdrop-filter: blur(100px) saturate(150%);
-  -webkit-backdrop-filter: blur(100px) saturate(150%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-lg);
-  padding: var(--space-sm);
+  background: rgba(9, 9, 11, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 6px;
   z-index: 999;
 }
 
 .mobile-nav.open {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  animation: slideDown 0.2s ease;
+  gap: 2px;
+  animation: slideDown 0.2s ease-out;
 }
 
 @keyframes slideDown {
@@ -160,9 +146,9 @@
 }
 
 .mobile-nav .nav-link {
-  padding: 14px 18px;
+  padding: 12px 16px;
   justify-content: flex-start;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
 }
 
 .mobile-nav .nav-link.active {

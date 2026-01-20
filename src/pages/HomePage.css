@@ -2,6 +2,7 @@
 .hero-wrapper {
   position: relative;
   height: 100vh;
+  height: 100dvh;
   max-height: 100vh;
   display: flex;
   align-items: center;
@@ -9,7 +10,7 @@
   overflow: hidden;
 }
 
-/* Video Background - optional, works with or without video */
+/* Video Background - optimized for YouTube embeds and local videos */
 .video-background {
   position: absolute;
   top: 0;
@@ -17,12 +18,27 @@
   width: 100%;
   height: 100%;
   z-index: 0;
+  overflow: hidden;
 }
 
 .background-video {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
+}
+
+/* YouTube embed support - scales to cover viewport */
+.video-background iframe {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100vw;
+  height: 56.25vw; /* 16:9 aspect ratio */
+  min-height: 100vh;
+  min-width: 177.78vh; /* 16:9 aspect ratio */
+  transform: translate(-50%, -50%);
+  pointer-events: none;
 }
 
 .video-overlay {
@@ -32,11 +48,12 @@
   width: 100%;
   height: 100%;
   background: linear-gradient(
-    135deg,
-    rgba(0, 0, 0, 0.6) 0%,
-    rgba(0, 0, 0, 0.4) 50%,
-    rgba(0, 0, 0, 0.6) 100%
+    180deg,
+    rgba(9, 9, 11, 0.75) 0%,
+    rgba(9, 9, 11, 0.5) 40%,
+    rgba(9, 9, 11, 0.7) 100%
   );
+  z-index: 1;
 }
 
 /* Hero Section - Centered within viewport */
@@ -46,41 +63,29 @@
   justify-content: center;
   height: 100%;
   position: relative;
-  z-index: 1;
+  z-index: 2;
   padding: 80px 0 40px;
 }
 
 .hero-content {
-  max-width: 800px;
+  max-width: 680px;
   text-align: center;
 }
 
-/* Liquid Glass Badge */
+/* Badge - Professional and subtle */
 .hero-badge {
-  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 20px;
-  background: transparent;
-  backdrop-filter: blur(100px) saturate(150%);
-  -webkit-backdrop-filter: blur(100px) saturate(150%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 8px 16px;
+  background: rgba(37, 99, 235, 0.12);
+  border: 1px solid rgba(37, 99, 235, 0.2);
   border-radius: var(--radius-full);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
-  color: var(--primary);
-  margin-bottom: var(--space-lg);
-  overflow: hidden;
-}
-
-.hero-badge::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  box-shadow: var(--glass-inner-shadow);
-  pointer-events: none;
+  color: var(--primary-light);
+  margin-bottom: var(--space-xl);
+  letter-spacing: 0.02em;
 }
 
 .hero-badge svg {
@@ -89,85 +94,72 @@
 }
 
 .hero-title {
-  font-size: clamp(40px, 6vw, 80px);
-  font-weight: 700;
-  line-height: 1.05;
+  font-size: clamp(36px, 5vw, 56px);
+  font-weight: 600;
+  line-height: 1.1;
   letter-spacing: -0.03em;
   margin-bottom: var(--space-lg);
+  color: var(--text);
 }
 
 .hero-subtitle {
-  font-size: clamp(16px, 2vw, 20px);
+  font-size: clamp(15px, 1.6vw, 17px);
   font-weight: 400;
   color: var(--text-secondary);
   margin-bottom: var(--space-md);
-  max-width: 650px;
+  max-width: 520px;
   margin-left: auto;
   margin-right: auto;
-  line-height: 1.6;
+  line-height: 1.7;
 }
 
 .hero-location {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   color: var(--text-muted);
-  font-size: 14px;
+  font-size: 13px;
   margin-bottom: var(--space-xl);
 }
 
 .hero-location svg {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   color: var(--primary);
 }
 
-/* Liquid Glass Skill Tags */
+/* Skill Tags - Clean and minimal */
 .skills-inline {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
   margin-bottom: var(--space-xl);
 }
 
 .skill-tag {
-  position: relative;
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 14px;
-  background: transparent;
-  backdrop-filter: blur(100px) saturate(150%);
-  -webkit-backdrop-filter: blur(100px) saturate(150%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-full);
-  font-size: 13px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
   font-weight: 500;
   color: var(--text-secondary);
   transition: all var(--transition-fast);
-  overflow: hidden;
-}
-
-.skill-tag::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  box-shadow: var(--glass-inner-shadow);
-  pointer-events: none;
 }
 
 .skill-tag:hover {
-  background: var(--glass-hover);
+  background: rgba(255, 255, 255, 0.08);
   color: var(--text);
-  border-color: rgba(10, 132, 255, 0.5);
-  box-shadow: 0 4px 20px rgba(10, 132, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 .skill-tag svg {
-  width: 14px;
-  height: 14px;
+  width: 13px;
+  height: 13px;
   color: var(--primary);
 }
 
@@ -175,56 +167,40 @@
 .hero-buttons {
   display: flex;
   justify-content: center;
-  gap: var(--space-md);
+  gap: var(--space-sm);
   margin-bottom: var(--space-xl);
 }
 
-/* Liquid Glass Social Links */
+/* Social Links - Minimal and professional */
 .social-links {
   display: flex;
   justify-content: center;
-  gap: 12px;
+  gap: 8px;
 }
 
 .social-link {
-  position: relative;
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
-  backdrop-filter: blur(100px) saturate(150%);
-  -webkit-backdrop-filter: blur(100px) saturate(150%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-md);
-  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
   transition: all var(--transition-fast);
   text-decoration: none;
-  overflow: hidden;
-}
-
-.social-link::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  box-shadow: var(--glass-inner-shadow);
-  pointer-events: none;
 }
 
 .social-link:hover {
   background: var(--primary);
   border-color: var(--primary);
   color: white;
-  box-shadow: 0 8px 24px rgba(10, 132, 255, 0.4);
 }
 
 .social-link svg {
-  width: 20px;
-  height: 20px;
-  position: relative;
-  z-index: 1;
+  width: 18px;
+  height: 18px;
 }
 
 /* ============================================
@@ -236,25 +212,21 @@
   .hero-wrapper {
     height: 100vh;
     height: 100dvh;
-    max-height: 100vh;
-    max-height: 100dvh;
   }
 
   .hero-section {
     height: 100%;
-    padding: 60px 16px 20px;
+    padding: 60px 16px 24px;
   }
 
   .hero-content {
     max-width: 100%;
-    padding: 0;
   }
 
   .hero-badge {
-    font-size: 10px;
-    padding: 5px 10px;
-    margin-bottom: 10px;
-    gap: 5px;
+    font-size: 11px;
+    padding: 6px 12px;
+    margin-bottom: var(--space-lg);
   }
 
   .hero-badge svg {
@@ -264,38 +236,28 @@
 
   .hero-title {
     font-size: 28px;
-    margin-bottom: 10px;
-    line-height: 1.1;
+    margin-bottom: var(--space-md);
   }
 
   .hero-subtitle {
-    font-size: 13px;
-    margin-bottom: 6px;
-    line-height: 1.5;
+    font-size: 14px;
+    margin-bottom: var(--space-sm);
     padding: 0 8px;
   }
 
   .hero-location {
-    margin-bottom: 12px;
+    margin-bottom: var(--space-lg);
     font-size: 12px;
-    gap: 5px;
-  }
-
-  .hero-location svg {
-    width: 14px;
-    height: 14px;
   }
 
   .skills-inline {
-    gap: 5px;
-    margin-bottom: 14px;
-    padding: 0 4px;
+    gap: 6px;
+    margin-bottom: var(--space-lg);
   }
 
   .skill-tag {
-    padding: 4px 8px;
-    font-size: 10px;
-    gap: 4px;
+    padding: 5px 10px;
+    font-size: 11px;
   }
 
   .skill-tag svg {
@@ -306,7 +268,7 @@
   .hero-buttons {
     flex-direction: column;
     gap: 8px;
-    margin-bottom: 14px;
+    margin-bottom: var(--space-lg);
     padding: 0 16px;
   }
 
@@ -315,161 +277,121 @@
   }
 
   .social-link {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
   }
 
   .social-link svg {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
   }
 }
 
 /* Mobile Portrait (480px - 767px) */
 @media (min-width: 480px) and (max-width: 767px) {
-  .hero-wrapper {
-    height: 100vh;
-    max-height: 100vh;
-  }
-
   .hero-section {
-    height: 100%;
-    padding: 80px 0 30px;
+    padding: 80px 20px 30px;
   }
 
   .hero-content {
     max-width: 100%;
   }
 
-  .hero-badge {
-    font-size: 12px;
-    margin-bottom: 14px;
-  }
-
   .hero-title {
-    font-size: 40px;
-    margin-bottom: 14px;
+    font-size: 36px;
   }
 
   .hero-subtitle {
     font-size: 15px;
-    margin-bottom: 10px;
-  }
-
-  .hero-location {
-    margin-bottom: 16px;
-  }
-
-  .skills-inline {
-    margin-bottom: 18px;
   }
 
   .hero-buttons {
     flex-direction: column;
     align-items: center;
     gap: 10px;
-    margin-bottom: 18px;
   }
 }
 
 /* Tablet Portrait (768px - 1023px) */
 @media (min-width: 768px) and (max-width: 1023px) {
   .hero-section {
-    height: 100%;
-    padding: 100px 0 40px;
+    padding: 100px 32px 40px;
   }
 
   .hero-content {
-    max-width: 700px;
+    max-width: 600px;
   }
 
   .hero-title {
-    font-size: 52px;
+    font-size: 44px;
   }
 }
 
 /* Tablet Landscape / Small Desktop (1024px - 1279px) */
 @media (min-width: 1024px) and (max-width: 1279px) {
   .hero-content {
-    max-width: 750px;
+    max-width: 640px;
   }
 
   .hero-title {
-    font-size: 60px;
+    font-size: 48px;
   }
 }
 
 /* Desktop (1280px+) */
 @media (min-width: 1280px) {
   .hero-content {
-    max-width: 850px;
+    max-width: 700px;
   }
 
   .hero-title {
-    font-size: 72px;
+    font-size: 54px;
   }
 }
 
 /* Large Desktop (1440px+) */
 @media (min-width: 1440px) {
   .hero-content {
-    max-width: 900px;
+    max-width: 720px;
   }
 
   .hero-title {
-    font-size: 80px;
+    font-size: 58px;
   }
 
   .hero-subtitle {
-    font-size: 20px;
-    max-width: 700px;
+    font-size: 18px;
+    max-width: 560px;
   }
 }
 
 /* Extra Large Desktop (1920px+) */
 @media (min-width: 1920px) {
   .hero-content {
-    max-width: 1000px;
+    max-width: 800px;
   }
 
   .hero-title {
-    font-size: 88px;
+    font-size: 64px;
   }
 
   .hero-subtitle {
-    font-size: 22px;
-    max-width: 750px;
-  }
-
-  .hero-badge {
-    font-size: 15px;
-    padding: 12px 24px;
-  }
-
-  .skill-tag {
-    padding: 10px 18px;
-    font-size: 15px;
-  }
-
-  .social-link {
-    width: 56px;
-    height: 56px;
+    font-size: 19px;
+    max-width: 600px;
   }
 }
 
 /* Touch device optimizations */
 @media (hover: none) and (pointer: coarse) {
   .skill-tag:hover {
-    background: transparent;
+    background: rgba(255, 255, 255, 0.04);
     color: var(--text-secondary);
-    border-color: rgba(255, 255, 255, 0.1);
-    box-shadow: none;
+    border-color: var(--glass-border);
   }
 
   .social-link:hover {
-    background: transparent;
-    border-color: rgba(255, 255, 255, 0.1);
-    color: var(--text-secondary);
-    box-shadow: none;
+    background: rgba(255, 255, 255, 0.04);
+    border-color: var(--glass-border);
+    color: var(--text-muted);
   }
 }

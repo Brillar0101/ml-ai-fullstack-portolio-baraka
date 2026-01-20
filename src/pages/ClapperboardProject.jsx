@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import {
   ChevronLeft,
   ChevronRight,
@@ -45,7 +46,7 @@ import {
 } from 'lucide-react';
 import './ClapperboardProject.css';
 
-const ClapperboardProject = ({ setCurrentPage }) => {
+const ClapperboardProject = () => {
   const [activeSection, setActiveSection] = useState('demo');
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxImage, setLightboxImage] = useState({ src: '', alt: '' });
@@ -175,10 +176,10 @@ const ClapperboardProject = ({ setCurrentPage }) => {
   return (
     <div className="project-page">
       {/* Navigation */}
-      <button className="back-btn" onClick={() => setCurrentPage('projects')}>
+      <Link to="/projects" className="back-btn">
         <ChevronLeft />
         Back to Projects
-      </button>
+      </Link>
 
       {/* Section 0: Project Header */}
       <header className="project-header">
@@ -1009,10 +1010,10 @@ if result['has_clapperboard']:
         <div className="glass-card contact-cta">
           <h3>Interested in this project?</h3>
           <p>I'm open to discussing collaborations, opportunities, or technical details.</p>
-          <button className="cta-primary" onClick={() => setCurrentPage('contact')}>
+          <Link to="/contact" className="cta-primary">
             <Mail />
             Get in Touch
-          </button>
+          </Link>
         </div>
       </section>
 

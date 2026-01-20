@@ -6,5 +6,11 @@ export default defineConfig({
   server: {
     port: 3000,
     open: true
+  },
+  // Support client-side routing - redirect all paths to index.html
+  build: {
+    rollupOptions: {
+      input: './index.html'
+    }
   }
 });

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import {
   ChevronLeft,
   ChevronRight,
@@ -45,7 +46,7 @@ import './ClapperboardProject.css'; // Base project page styles
 import './SwishVisionProject.css';
 import MLPipelineDiagram from '../components/diagrams/MLPipelineDiagram';
 
-const SwishVisionProject = ({ setCurrentPage }) => {
+const SwishVisionProject = () => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxImage, setLightboxImage] = useState({ src: '', alt: '' });
   const [lightboxIsVideo, setLightboxIsVideo] = useState(false);
@@ -229,10 +230,10 @@ const SwishVisionProject = ({ setCurrentPage }) => {
       )}
 
       {/* Back Button */}
-      <button className="back-button" onClick={() => setCurrentPage('projects')}>
+      <Link to="/projects" className="back-button">
         <ChevronLeft />
         <span>Back to Projects</span>
-      </button>
+      </Link>
 
       {/* Section 0: Header */}
       <header className="project-header">
@@ -675,43 +676,40 @@ const SwishVisionProject = ({ setCurrentPage }) => {
         </div>
         <div className="tech-content">
           <div className="glass-card tech-card">
-            <h3>
+            <div className="tech-card-icon">
               <Brain />
-              ML Pipeline
-            </h3>
+            </div>
+            <h3>ML Pipeline</h3>
             <div className="tech-list">
               {techStack.mlPipeline.map((tech, index) => (
                 <div key={index} className="tech-item">
                   <span className="tech-name">{tech.name}</span>
-                  <span className="tech-desc">{tech.desc}</span>
                 </div>
               ))}
             </div>
           </div>
           <div className="glass-card tech-card">
-            <h3>
+            <div className="tech-card-icon">
               <Server />
-              Backend
-            </h3>
+            </div>
+            <h3>Backend</h3>
             <div className="tech-list">
               {techStack.backend.map((tech, index) => (
                 <div key={index} className="tech-item">
                   <span className="tech-name">{tech.name}</span>
-                  <span className="tech-desc">{tech.desc}</span>
                 </div>
               ))}
             </div>
           </div>
           <div className="glass-card tech-card">
-            <h3>
+            <div className="tech-card-icon">
               <Monitor />
-              Frontend
-            </h3>
+            </div>
+            <h3>Frontend</h3>
             <div className="tech-list">
               {techStack.frontend.map((tech, index) => (
                 <div key={index} className="tech-item">
                   <span className="tech-name">{tech.name}</span>
-                  <span className="tech-desc">{tech.desc}</span>
                 </div>
               ))}
             </div>
@@ -765,10 +763,10 @@ const SwishVisionProject = ({ setCurrentPage }) => {
           <div className="glass-card contact-cta">
             <h3>Interested in this project?</h3>
             <p>I'd love to discuss the ML pipeline, computer vision challenges, or potential collaborations.</p>
-            <button className="cta-primary" onClick={() => setCurrentPage('contact')}>
+            <Link to="/contact" className="cta-primary">
               <Mail />
               Get in Touch
-            </button>
+            </Link>
           </div>
         </div>
       </section>

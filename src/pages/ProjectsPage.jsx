@@ -1,22 +1,10 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { PROJECTS } from '../data/projects';
 import './ProjectsPage.css';
 
-const ProjectsPage = ({ setCurrentPage, setSelectedProject }) => {
-  const handleProjectClick = (project) => {
-    if (project.route === 'clapperboard-project') {
-      setCurrentPage('clapperboard-project');
-    } else if (project.route === 'psiv-rentals-project') {
-      setCurrentPage('psiv-rentals-project');
-    } else if (project.route === 'swishvision-project') {
-      setCurrentPage('swishvision-project');
-    } else {
-      setSelectedProject(project.id);
-      setCurrentPage('project-detail');
-    }
-  };
-  
+const ProjectsPage = () => {
   return (
     <div className="container">
       <header className="page-header">
@@ -25,13 +13,13 @@ const ProjectsPage = ({ setCurrentPage, setSelectedProject }) => {
           A collection of my work in machine learning, computer vision, and full-stack development
         </p>
       </header>
-      
+
       <div className="projects-grid">
         {PROJECTS.map((project) => (
-          <div
+          <Link
             key={project.id}
+            to={project.route}
             className="glass-card project-card"
-            onClick={() => handleProjectClick(project)}
           >
             {project.featured && <span className="featured-badge">Featured</span>}
             <div className="project-card-header">
@@ -52,7 +40,7 @@ const ProjectsPage = ({ setCurrentPage, setSelectedProject }) => {
                 <span key={index} className="project-tag">{tag}</span>
               ))}
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>

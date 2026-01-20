@@ -97,7 +97,7 @@
 .db-table-name {
   font-size: 13px;
   font-weight: 700;
-  font-family: 'Rubik', monospace;
+  font-family: 'Fira Code', monospace;
   flex: 1;
   white-space: nowrap;
   overflow: hidden;
@@ -170,13 +170,13 @@
 
 .db-column-name {
   flex: 1;
-  font-family: monospace;
+  font-family: 'Fira Code', monospace;
   color: rgba(255, 255, 255, 0.8);
 }
 
 .db-column-type {
   color: rgba(255, 255, 255, 0.4);
-  font-family: monospace;
+  font-family: 'Fira Code', monospace;
   font-size: 10px;
 }
 
@@ -257,7 +257,7 @@
 
 .db-rel-from {
   color: #0A84FF;
-  font-family: monospace;
+  font-family: 'Fira Code', monospace;
   font-weight: 600;
 }
 
@@ -267,7 +267,7 @@
 
 .db-rel-to {
   color: rgba(255, 255, 255, 0.6);
-  font-family: monospace;
+  font-family: 'Fira Code', monospace;
 }
 
 .db-rel-type {

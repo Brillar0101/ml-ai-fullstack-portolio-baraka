@@ -6,7 +6,8 @@
 }
 
 /* Back Button */
-.back-btn {
+.back-btn,
+a.back-btn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -21,6 +22,7 @@
   cursor: pointer;
   margin-bottom: var(--space-2xl);
   transition: all var(--transition-fast);
+  text-decoration: none;
 }
 
 .back-btn:hover {
@@ -960,7 +962,7 @@
 .code-snippet pre {
   padding: 20px;
   margin: 0;
-  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-family: 'Fira Code', monospace;
   font-size: 14px;
   line-height: 1.6;
   color: var(--text-secondary);
@@ -982,7 +984,7 @@
   padding: 16px;
   background: rgba(0, 0, 0, 0.2);
   border-radius: 8px;
-  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-family: 'Fira Code', monospace;
   font-size: 13px;
   color: var(--text-secondary);
   margin: 0;
@@ -1781,7 +1783,7 @@
   padding: 8px 16px;
   background: rgba(0, 0, 0, 0.3);
   border-radius: 6px;
-  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-family: 'Fira Code', monospace;
   font-size: 13px;
   color: var(--text-secondary);
 }

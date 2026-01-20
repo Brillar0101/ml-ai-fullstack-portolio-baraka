@@ -506,62 +506,117 @@
   color: var(--accent);
 }
 
-/* Tech Stack */
+/* Tech Stack - Compact Inline Design */
 .tech-content {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .tech-card {
-  padding: 28px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tech-card-header {
+  display: none;
+}
+
+.tech-card-label {
+  display: none;
+}
+
+.tech-card-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary);
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.tech-card-icon svg {
+  width: 16px;
+  height: 16px;
+  color: white;
 }
 
 .tech-card h3 {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 18px;
-  font-weight: 700;
-  margin-bottom: 20px;
-}
-
-.tech-card h3 svg {
-  width: 20px;
-  height: 20px;
-  color: var(--primary);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+  min-width: 90px;
 }
 
 .tech-list {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  align-items: center;
+  gap: 0;
+  flex: 1;
 }
 
 .tech-item {
-  display: flex;
-  justify-content: space-between;
+  display: inline-flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  background: var(--glass);
-  border-radius: 8px;
-  border: 1px solid var(--glass-border);
+  padding: 0;
+  background: none;
+  border: none;
+}
+
+.tech-item::before {
+  display: none;
+}
+
+.tech-item::after {
+  content: '•';
+  color: var(--text-dim);
+  margin: 0 8px;
+  font-size: 8px;
+}
+
+.tech-item:last-child::after {
+  display: none;
 }
 
 .tech-name {
   font-size: 13px;
-  font-weight: 600;
-  flex-shrink: 0;
-  white-space: nowrap;
+  font-weight: 400;
+  color: var(--text-secondary);
 }
 
 .tech-desc {
-  font-size: 11px;
-  color: var(--text-muted);
-  text-align: right;
-  flex-shrink: 1;
-  min-width: 0;
+  display: none;
+}
+
+/* Responsive tech stack */
+@media (max-width: 767px) {
+  .tech-card {
+    padding: 10px 14px;
+    flex-wrap: wrap;
+  }
+
+  .tech-card h3 {
+    font-size: 13px;
+    min-width: 80px;
+  }
+
+  .tech-list {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .tech-item::after {
+    margin: 0 6px;
+  }
+
+  .tech-name {
+    font-size: 12px;
+  }
 }
 
 /* Links */

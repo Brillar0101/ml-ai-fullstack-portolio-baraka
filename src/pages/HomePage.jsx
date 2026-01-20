@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Brain, ArrowRight, Mail, Code2, Cpu, Camera, Globe, Database, Github, Linkedin, MapPin, Play } from 'lucide-react';
 import { CONFIG } from '../config';
 import './HomePage.css';
@@ -12,7 +13,7 @@ const SKILLS = [
   { name: "Node.js", icon: Database }
 ];
 
-const HomePage = ({ setCurrentPage }) => {
+const HomePage = () => {
   return (
     <div className="hero-wrapper">
       {/* Video Background Placeholder - Replace src with your video */}
@@ -60,14 +61,14 @@ const HomePage = ({ setCurrentPage }) => {
             </div>
 
             <div className="hero-buttons">
-              <button className="btn-primary" onClick={() => setCurrentPage('projects')}>
+              <Link to="/projects" className="btn-primary">
                 View Projects
                 <ArrowRight />
-              </button>
-              <button className="btn-secondary" onClick={() => setCurrentPage('contact')}>
+              </Link>
+              <Link to="/contact" className="btn-secondary">
                 <Mail />
                 Get in Touch
-              </button>
+              </Link>
             </div>
 
             <div className="social-links">

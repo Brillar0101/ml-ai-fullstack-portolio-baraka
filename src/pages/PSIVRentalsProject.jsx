@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import {
   ChevronLeft,
   ChevronRight,
@@ -52,7 +53,7 @@ import './PSIVRentalsProject.css';
 import DatabaseSchemaDiagram from '../components/diagrams/DatabaseSchemaDiagram';
 import SystemArchitectureDiagram from '../components/diagrams/SystemArchitectureDiagram';
 
-const PSIVRentalsProject = ({ setCurrentPage }) => {
+const PSIVRentalsProject = () => {
   const [activeSection, setActiveSection] = useState('demo');
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxImage, setLightboxImage] = useState({ src: '', alt: '' });
@@ -207,10 +208,10 @@ const PSIVRentalsProject = ({ setCurrentPage }) => {
       )}
 
       {/* Back Button */}
-      <button className="back-button" onClick={() => setCurrentPage('projects')}>
+      <Link to="/projects" className="back-button">
         <ChevronLeft />
         <span>Back to Projects</span>
-      </button>
+      </Link>
 
       {/* Section 0: Header */}
       <header className="project-header">
@@ -614,43 +615,40 @@ const PSIVRentalsProject = ({ setCurrentPage }) => {
         </div>
         <div className="tech-content">
           <div className="glass-card tech-card">
-            <h3>
+            <div className="tech-card-icon">
               <Smartphone />
-              Mobile App
-            </h3>
+            </div>
+            <h3>Mobile App</h3>
             <div className="tech-list">
               {techStack.mobile.map((tech, index) => (
                 <div key={index} className="tech-item">
                   <span className="tech-name">{tech.name}</span>
-                  <span className="tech-desc">{tech.desc}</span>
                 </div>
               ))}
             </div>
           </div>
           <div className="glass-card tech-card">
-            <h3>
+            <div className="tech-card-icon">
               <Server />
-              Backend
-            </h3>
+            </div>
+            <h3>Backend</h3>
             <div className="tech-list">
               {techStack.backend.map((tech, index) => (
                 <div key={index} className="tech-item">
                   <span className="tech-name">{tech.name}</span>
-                  <span className="tech-desc">{tech.desc}</span>
                 </div>
               ))}
             </div>
           </div>
           <div className="glass-card tech-card">
-            <h3>
+            <div className="tech-card-icon">
               <Monitor />
-              Admin Dashboard
-            </h3>
+            </div>
+            <h3>Admin Dashboard</h3>
             <div className="tech-list">
               {techStack.admin.map((tech, index) => (
                 <div key={index} className="tech-item">
                   <span className="tech-name">{tech.name}</span>
-                  <span className="tech-desc">{tech.desc}</span>
                 </div>
               ))}
             </div>
@@ -686,10 +684,10 @@ const PSIVRentalsProject = ({ setCurrentPage }) => {
           <div className="glass-card contact-cta">
             <h3>Interested in this project?</h3>
             <p>I'd love to discuss the technical implementation or potential collaborations.</p>
-            <button className="cta-primary" onClick={() => setCurrentPage('contact')}>
+            <Link to="/contact" className="cta-primary">
               <Mail />
               Get in Touch
-            </button>
+            </Link>
           </div>
         </div>
       </section>

@@ -4,7 +4,8 @@
   margin: 0 auto;
 }
 
-.back-button {
+.back-button,
+a.back-button {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -19,6 +20,7 @@
   cursor: pointer;
   margin-bottom: var(--space-2xl);
   transition: all var(--transition-fast);
+  text-decoration: none;
 }
 
 .back-button:hover {

@@ -1,8 +1,15 @@
-/* Projects Grid - Apple-inspired corporate design with Liquid Glass */
+/* Projects Grid - Professional corporate design */
 .projects-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-  gap: var(--space-xl);
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--space-lg);
+}
+
+/* Remove link styling from project cards */
+a.project-card {
+  text-decoration: none;
+  color: inherit;
+  display: block;
 }
 
 .project-card {
@@ -10,16 +17,15 @@
   padding: var(--space-lg);
   cursor: pointer;
   overflow: hidden;
-  /* Liquid Glass Effect - Pure transparent with high blur */
-  background: transparent;
-  backdrop-filter: blur(100px) saturate(150%);
-  -webkit-backdrop-filter: blur(100px) saturate(150%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-xl);
+  background: var(--glass);
+  backdrop-filter: blur(40px) saturate(120%);
+  -webkit-backdrop-filter: blur(40px) saturate(120%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
   transition: all var(--transition-smooth);
 }
 
-/* Liquid Glass inner highlight */
+/* Subtle inner highlight */
 .project-card::before {
   content: '';
   position: absolute;
@@ -30,31 +36,11 @@
   z-index: 1;
 }
 
-/* Top accent line on hover */
-.project-card::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, var(--primary), var(--primary-light));
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform var(--transition-smooth);
-}
-
 .project-card:hover {
-  background: transparent;
-  border-color: rgba(10, 132, 255, 0.25);
-  transform: translateY(-4px);
-  box-shadow:
-    0 20px 40px rgba(0, 0, 0, 0.3),
-    0 0 60px rgba(10, 132, 255, 0.08);
-}
-
-.project-card:hover::after {
-  transform: scaleX(1);
+  background: var(--glass-hover);
+  border-color: rgba(255, 255, 255, 0.12);
+  transform: translateY(-2px);
+  box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.4);
 }
 
 .project-card-header {
@@ -68,13 +54,12 @@
 .project-icon-wrapper {
   width: 36px;
   height: 36px;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   background: var(--primary);
-  margin-top: 2px;
 }
 
 .project-icon-wrapper svg {
@@ -84,23 +69,24 @@
 }
 
 .project-card-title {
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 600;
   margin: 0;
   display: flex;
   align-items: center;
   gap: var(--space-sm);
   letter-spacing: -0.02em;
-  line-height: 1.3;
+  line-height: 1.35;
   flex: 1;
+  color: var(--text);
 }
 
 .project-card-title svg {
-  width: 18px;
-  height: 18px;
-  color: var(--primary);
+  width: 16px;
+  height: 16px;
+  color: var(--text-muted);
   opacity: 0;
-  transform: translateX(-8px);
+  transform: translateX(-4px);
   transition: all var(--transition-fast);
 }
 
@@ -110,39 +96,36 @@
 }
 
 .project-card-desc {
-  font-size: 15px;
+  font-size: 14px;
   color: var(--text-secondary);
   line-height: 1.6;
-  margin-bottom: var(--space-lg);
+  margin-bottom: var(--space-md);
 }
 
 .project-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
 }
 
 .project-tag {
-  position: relative;
-  padding: 6px 12px;
-  background: rgba(10, 132, 255, 0.12);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(10, 132, 255, 0.2);
-  border-radius: var(--radius-full);
-  font-size: 12px;
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  font-size: 11px;
   font-weight: 500;
-  color: var(--primary-light);
+  color: var(--text-muted);
 }
 
 .featured-badge {
   position: absolute;
   top: var(--space-md);
   right: var(--space-md);
-  padding: 6px 12px;
+  padding: 4px 10px;
   background: var(--primary);
-  border-radius: var(--radius-full);
-  font-size: 11px;
+  border-radius: var(--radius-sm);
+  font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;

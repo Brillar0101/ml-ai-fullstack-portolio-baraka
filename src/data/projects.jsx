@@ -20,7 +20,7 @@ export const PROJECTS = [
     tags: ["PyTorch", "YOLO", "SAM2", "FastAPI", "Next.js"],
     gradient: "linear-gradient(135deg, #0A84FF 0%, #40A9FF 100%)",
     featured: true,
-    route: "swishvision-project"
+    route: "/projects/swishvision"
   },
   {
     id: "clapperboard-detector",
@@ -30,7 +30,7 @@ export const PROJECTS = [
     tags: ["YOLOv8", "Object Detection", "Roboflow", "OpenCV"],
     gradient: "linear-gradient(135deg, #0A84FF 0%, #40A9FF 100%)",
     featured: false,
-    route: "clapperboard-project"
+    route: "/projects/clapperboard"
   },
   {
     id: "psiv-rentals",
@@ -40,7 +40,7 @@ export const PROJECTS = [
     tags: ["React Native", "Node.js", "PostgreSQL", "Stripe"],
     gradient: "linear-gradient(135deg, #0A84FF 0%, #40A9FF 100%)",
     featured: false,
-    route: "psiv-rentals-project"
+    route: "/projects/psiv-rentals"
   }
 ];
 
