@@ -675,7 +675,7 @@ const SwishVisionProject = () => {
           <h2>Tech Stack</h2>
         </div>
         <div className="tech-content">
-          <div className="glass-card tech-card">
+          <div className="tech-card">
             <div className="tech-card-icon">
               <Brain />
             </div>
@@ -688,7 +688,7 @@ const SwishVisionProject = () => {
               ))}
             </div>
           </div>
-          <div className="glass-card tech-card">
+          <div className="tech-card">
             <div className="tech-card-icon">
               <Server />
             </div>
@@ -701,7 +701,7 @@ const SwishVisionProject = () => {
               ))}
             </div>
           </div>
-          <div className="glass-card tech-card">
+          <div className="tech-card">
             <div className="tech-card-icon">
               <Monitor />
             </div>

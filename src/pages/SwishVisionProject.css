@@ -1240,3 +1240,116 @@
   color: rgba(255, 255, 255, 0.7);
   font-size: 14px;
 }
+
+/* ==========================================
+   TECH STACK - Compact Inline Layout
+   ========================================== */
+
+.tech-content {
+  display: block !important;
+}
+
+.tech-content .tech-card {
+  padding: 10px 0 !important;
+  display: block !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  border-bottom: 1px solid var(--glass-border) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+  text-align: left !important;
+}
+
+.tech-content .tech-card:last-child {
+  border-bottom: none !important;
+}
+
+.tech-content .tech-card::before {
+  display: none !important;
+  content: none !important;
+}
+
+.tech-content .tech-card:hover {
+  background: transparent !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.tech-content .tech-card-icon {
+  display: inline-flex !important;
+  vertical-align: middle !important;
+  width: 20px !important;
+  height: 20px !important;
+  min-width: 20px !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: var(--primary) !important;
+  border-radius: 4px !important;
+  margin-right: 8px !important;
+}
+
+.tech-content .tech-card-icon svg {
+  width: 10px !important;
+  height: 10px !important;
+  color: white !important;
+}
+
+.tech-content .tech-card h3 {
+  display: inline !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: var(--text) !important;
+  margin: 0 !important;
+  margin-right: 12px !important;
+  vertical-align: middle !important;
+}
+
+.tech-content .tech-list {
+  display: inline !important;
+  vertical-align: middle !important;
+}
+
+.tech-content .tech-item {
+  display: inline !important;
+}
+
+.tech-content .tech-item::before {
+  display: none !important;
+}
+
+.tech-content .tech-item::after {
+  content: ' • ' !important;
+  color: var(--text-dim) !important;
+}
+
+.tech-content .tech-item:last-child::after {
+  content: '' !important;
+}
+
+.tech-content .tech-name {
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  color: var(--text-muted) !important;
+}
+
+.tech-content .tech-desc {
+  display: none !important;
+}
+
+/* Responsive tech stack */
+@media (max-width: 767px) {
+  .tech-content .tech-card {
+    padding: 8px 0 !important;
+  }
+
+  .tech-content .tech-card h3 {
+    font-size: 12px !important;
+    margin-right: 8px !important;
+  }
+
+  .tech-content .tech-name {
+    font-size: 11px !important;
+  }
+}

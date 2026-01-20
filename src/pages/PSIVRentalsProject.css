@@ -506,18 +506,41 @@
   color: var(--accent);
 }
 
-/* Tech Stack - Compact Inline Design */
+/* Tech Stack - Single Line Per Category */
 .tech-content {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0;
+  align-items: stretch;
 }
 
 .tech-card {
-  padding: 12px 16px;
+  padding: 8px 0;
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: flex-start;
+  gap: 10px;
+  background: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  border-bottom: 1px solid var(--glass-border) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.tech-card:last-child {
+  border-bottom: none !important;
+}
+
+.tech-card::before {
+  display: none !important;
+}
+
+.tech-card:hover {
+  background: none !important;
+  transform: none !important;
+  box-shadow: none !important;
+  border-color: var(--glass-border) !important;
 }
 
 .tech-card-header {
@@ -529,35 +552,37 @@
 }
 
 .tech-card-icon {
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--primary);
-  border-radius: 6px;
+  border-radius: 5px;
   flex-shrink: 0;
 }
 
 .tech-card-icon svg {
-  width: 16px;
-  height: 16px;
+  width: 12px;
+  height: 12px;
   color: white;
 }
 
 .tech-card h3 {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text);
   margin: 0;
-  min-width: 90px;
+  white-space: nowrap;
+  min-width: 100px;
 }
 
 .tech-list {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 0;
-  flex: 1;
+  flex-wrap: wrap;
 }
 
 .tech-item {
@@ -576,7 +601,7 @@
   content: '•';
   color: var(--text-dim);
   margin: 0 8px;
-  font-size: 8px;
+  font-size: 6px;
 }
 
 .tech-item:last-child::after {
@@ -586,7 +611,7 @@
 .tech-name {
   font-size: 13px;
   font-weight: 400;
-  color: var(--text-secondary);
+  color: var(--text-muted);
 }
 
 .tech-desc {
@@ -596,18 +621,18 @@
 /* Responsive tech stack */
 @media (max-width: 767px) {
   .tech-card {
-    padding: 10px 14px;
+    padding: 8px 0;
     flex-wrap: wrap;
+    gap: 8px;
   }
 
   .tech-card h3 {
-    font-size: 13px;
-    min-width: 80px;
+    font-size: 12px;
   }
 
   .tech-list {
     flex-wrap: wrap;
-    gap: 4px;
+    gap: 2px;
   }
 
   .tech-item::after {
@@ -615,7 +640,7 @@
   }
 
   .tech-name {
-    font-size: 12px;
+    font-size: 11px;
   }
 }
 
