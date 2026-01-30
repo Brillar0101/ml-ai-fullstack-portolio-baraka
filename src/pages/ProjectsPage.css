@@ -17,7 +17,7 @@ a.project-card {
   padding: var(--space-lg);
   cursor: pointer;
   overflow: hidden;
-  background: var(--glass);
+  background: rgba(20, 20, 22, 0.8);
   backdrop-filter: blur(40px) saturate(120%);
   -webkit-backdrop-filter: blur(40px) saturate(120%);
   border: 1px solid var(--glass-border);
@@ -38,9 +38,7 @@ a.project-card {
 
 .project-card:hover {
   background: var(--glass-hover);
-  border-color: rgba(255, 255, 255, 0.12);
-  transform: translateY(-2px);
-  box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.4);
+  border-color: rgba(37, 99, 235, 0.2);
 }
 
 .project-card-header {
@@ -78,21 +76,13 @@ a.project-card {
   letter-spacing: -0.02em;
   line-height: 1.35;
   flex: 1;
-  color: var(--text);
+  color: #FFFFFF;
 }
 
 .project-card-title svg {
   width: 16px;
   height: 16px;
   color: var(--text-muted);
-  opacity: 0;
-  transform: translateX(-4px);
-  transition: all var(--transition-fast);
-}
-
-.project-card:hover .project-card-title svg {
-  opacity: 1;
-  transform: translateX(0);
 }
 
 .project-card-desc {
@@ -110,12 +100,12 @@ a.project-card {
 
 .project-tag {
   padding: 4px 10px;
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-sm);
   font-size: 11px;
   font-weight: 500;
-  color: var(--text-muted);
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .featured-badge {
@@ -332,27 +322,7 @@ a.project-card {
 /* Touch device optimizations */
 @media (hover: none) and (pointer: coarse) {
   .project-card:hover {
-    transform: none;
-    background: transparent;
-    border-color: rgba(255, 255, 255, 0.1);
-    box-shadow: none;
-  }
-
-  .project-card:hover::after {
-    transform: scaleX(0);
-  }
-
-  .project-card:hover .project-card-title svg {
-    opacity: 0;
-    transform: translateX(-8px);
-  }
-
-  .project-card:active {
-    background: transparent;
-    border-color: rgba(10, 132, 255, 0.3);
-  }
-
-  .project-card:active::after {
-    transform: scaleX(1);
+    background: var(--glass);
+    border-color: var(--glass-border);
   }
 }

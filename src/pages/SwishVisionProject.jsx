@@ -282,6 +282,22 @@ const SwishVisionProject = () => {
         </div>
       </header>
 
+      {/* Hero Demo Video - Autoplay YouTube Embed */}
+      <section className="hero-demo-section">
+        <div className="hero-video-container">
+          <iframe
+            className="hero-demo-video"
+            src="https://www.youtube.com/embed/oqUrfFeTF88?autoplay=1&mute=1&loop=1&playlist=oqUrfFeTF88&controls=0&showinfo=0&rel=0&modestbranding=1&vq=hd1080&hd=1"
+            title="SwishVision Demo - Tactical View"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          ></iframe>
+          <div className="hero-video-overlay">
+            <span className="demo-label">Live Demo Preview</span>
+          </div>
+        </div>
+      </section>
+
       {/* Section 1: Project Status - Honest Introduction */}
       <section className="project-section">
         <div className="section-header">
