@@ -90,7 +90,7 @@ const SwishVisionProject = () => {
       statusLabel: 'Working',
       description: 'Added SAM2 (Segment Anything Model 2) to make detection continuous across frames. This successfully maintained tracking throughout the video.',
       result: 'Continuous player tracking achieved across video frames',
-      issue: 'Players not detected in the first frame remain undetected throughout - still working on a solution',
+      issue: 'Players not detected in the first frame remain undetected throughout. Still working on a solution.',
       media: [
         { src: '/assets/images_sv/playerdetection_tracked/playertracking_frame_01.jpg', alt: 'Player Tracking Frame 1', type: 'image' },
         { src: '/assets/images_sv/playerdetection_tracked/playertracking_frame_02.jpg', alt: 'Player Tracking Frame 2', type: 'image' },
@@ -103,7 +103,7 @@ const SwishVisionProject = () => {
       title: 'Stage 3: Tactical View (Homography)',
       status: 'completed',
       statusLabel: 'Working',
-      description: 'Implemented tactical 2D court view using homography transformation. Players are color-coded by team - red for one team, green for the other, and yellow for referees.',
+      description: 'Implemented tactical 2D court view using homography transformation. Players are color-coded by team: red for one team, green for the other, and yellow for referees.',
       result: 'Real-time 2D minimap showing player positions on court',
       issue: null,
       media: [
@@ -288,7 +288,7 @@ const SwishVisionProject = () => {
           <iframe
             className="hero-demo-video"
             src="https://www.youtube.com/embed/oqUrfFeTF88?autoplay=1&mute=1&loop=1&playlist=oqUrfFeTF88&controls=0&showinfo=0&rel=0&modestbranding=1&vq=hd1080&hd=1"
-            title="SwishVision Demo - Tactical View"
+            title="SwishVision Demo, Tactical View"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
           ></iframe>
@@ -314,15 +314,15 @@ const SwishVisionProject = () => {
             <div className="status-goals">
               <div className="goal-item">
                 <div className="goal-phase">Phase 1 (Current)</div>
-                <div className="goal-text">Build all basic analytics - player tracking, team classification, jersey detection, tactical view</div>
+                <div className="goal-text">Build all basic analytics: player tracking, team classification, jersey detection, tactical view</div>
               </div>
               <div className="goal-item">
                 <div className="goal-phase">Phase 2 (Next)</div>
-                <div className="goal-text">Analyze plays - possession tracking, shot detection, play-by-play breakdown</div>
+                <div className="goal-text">Analyze plays: possession tracking, shot detection, play-by-play breakdown</div>
               </div>
               <div className="goal-item">
                 <div className="goal-phase">Phase 3 (Future)</div>
-                <div className="goal-text">Advanced features - player heatmaps, speed tracking, real-time processing</div>
+                <div className="goal-text">Advanced features: player heatmaps, speed tracking, real-time processing</div>
               </div>
             </div>
           </div>

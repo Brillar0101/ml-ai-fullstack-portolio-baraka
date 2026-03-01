@@ -65,7 +65,7 @@ export default function App() {
   // Update document title based on route
   useEffect(() => {
     const pageTitle = pageTitles[location.pathname] || 'Home';
-    document.title = `${pageTitle} | ${CONFIG.name} - Computer Engineer`;
+    document.title = `${pageTitle} | ${CONFIG.name}, Computer Engineer`;
   }, [location.pathname]);
 
   const isHomePage = location.pathname === '/';

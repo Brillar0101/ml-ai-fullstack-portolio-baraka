@@ -64,12 +64,12 @@ const ClapperboardProject = () => {
   // Generate slideshow images
   const negativeImages = Array.from({ length: 22 }, (_, i) => ({
     src: `/assets/images/clapperboard/result_slideshow/result_neg_${String(i).padStart(4, '0')}.jpg`,
-    alt: `True Negative ${i + 1} of 22 - Correctly ignored (no clapperboard)`
+    alt: `True Negative ${i + 1} of 22, correctly ignored (no clapperboard)`
   }));
 
   const positiveImages = Array.from({ length: 111 }, (_, i) => ({
     src: `/assets/images/clapperboard/result_slideshow/result_pos_${String(i).padStart(4, '0')}.jpg`,
-    alt: `True Positive ${i + 1} of 111 - Clapperboard detected`
+    alt: `True Positive ${i + 1} of 111, clapperboard detected`
   }));
 
   const slideshowImages = [...negativeImages, ...positiveImages];
@@ -87,7 +87,7 @@ const ClapperboardProject = () => {
     },
     {
       src: '/assets/images/clapperboard/result_slideshow/result_neg_0016.jpg',
-      alt: 'False positive - iPad detected as clapperboard',
+      alt: 'False positive, iPad detected as clapperboard',
       description: 'The model incorrectly detected an iPad/tablet as a clapperboard with 87.3% confidence.'
     },
     {
