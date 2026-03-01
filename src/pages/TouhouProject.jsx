@@ -331,7 +331,7 @@ const TouhouProject = () => {
   const [lightboxSrc, setLightboxSrc] = useState('');
   const [lightboxAlt, setLightboxAlt] = useState('');
 
-  const videoId = null;
+  const videoId = 'Qiki2CVyrGQ';
 
   const openLightbox = (src, alt) => {
     setLightboxSrc(src);
