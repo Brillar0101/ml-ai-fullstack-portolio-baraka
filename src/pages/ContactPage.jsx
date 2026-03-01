@@ -49,14 +49,7 @@ const ContactPage = () => {
   };
 
   return (
-    <div className="container">
-      <header className="page-header">
-        <h1 className="page-title">Get in Touch</h1>
-        <p className="page-subtitle">
-          I'm always open to discussing new projects, opportunities, or collaborations
-        </p>
-      </header>
-
+    <div className="contact-page">
       <div className="contact-grid">
         <div className="glass-card contact-info">
           <h3>Contact Information</h3>

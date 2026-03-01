@@ -26,9 +26,9 @@
   width: 100%;
   border-radius: var(--radius-xl);
   overflow: hidden;
-  background: #0a0a0b;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  background: var(--bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-lg);
 }
 
 .hero-demo-video {
@@ -53,12 +53,11 @@
   gap: 6px;
   padding: 8px 14px;
   background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid var(--border);
   border-radius: var(--radius-full);
   font-size: 12px;
   font-weight: 600;
-  color: #FFFFFF;
+  color: white;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -103,7 +102,7 @@
 .video-frame {
   width: 100%;
   max-width: 900px;
-  background: #1e1e1e;
+  background: var(--surface);
   border-radius: 16px;
   padding: 12px;
   box-shadow: var(--shadow-lg);
@@ -112,7 +111,7 @@
 .video-screen {
   width: 100%;
   aspect-ratio: 16/9;
-  background: #0d0d0d;
+  background: var(--bg);
   border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
@@ -147,7 +146,7 @@
   border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
-  color: #ffffff;
+  color: white;
 }
 
 .overlay-badge svg {
@@ -189,7 +188,7 @@
   flex-direction: column;
   gap: 4px;
   padding: 20px;
-  background: rgba(20, 20, 22, 0.8);
+  background: var(--glass);
   border: 1px solid var(--glass-border);
   border-radius: 12px;
   text-align: center;
@@ -311,7 +310,7 @@
   align-items: center;
   gap: 16px;
   padding: 20px;
-  background: rgba(20, 20, 22, 0.8);
+  background: var(--glass);
   border: 1px solid var(--glass-border);
   border-radius: 12px;
   box-shadow: var(--shadow-sm);
@@ -752,7 +751,7 @@
   gap: 16px;
   padding: 16px 20px;
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border);
   border-radius: 12px;
   align-items: center;
 }
@@ -788,7 +787,7 @@
   padding: 16px 0;
   overflow-x: auto;
   scrollbar-width: thin;
-  scrollbar-color: var(--primary) #e0e0e0;
+  scrollbar-color: var(--primary) var(--bg-tertiary);
 }
 
 .progress-timeline::-webkit-scrollbar {
@@ -796,7 +795,7 @@
 }
 
 .progress-timeline::-webkit-scrollbar-track {
-  background: #e0e0e0;
+  background: var(--bg-tertiary);
   border-radius: 3px;
 }
 
@@ -812,7 +811,7 @@
   max-width: 160px;
   padding: 16px;
   padding-bottom: 12px;
-  background: rgba(20, 20, 22, 0.9);
+  background: var(--glass);
   border: 2px solid var(--glass-border);
   border-radius: 12px;
   cursor: pointer;
@@ -1031,7 +1030,7 @@
   margin: 0 auto 16px;
   border-radius: 12px;
   overflow: hidden;
-  background: #0d0d1a;
+  background: var(--surface);
   cursor: pointer;
 }
 
@@ -1050,7 +1049,7 @@
   position: relative;
   width: 100%;
   aspect-ratio: 16/9;
-  background: #0d0d1a;
+  background: var(--surface);
 }
 
 .video-thumbnail video {
@@ -1093,7 +1092,7 @@
   position: relative;
   width: 100%;
   padding-bottom: 56.25%; /* 16:9 aspect ratio */
-  background: #0d0d1a;
+  background: var(--surface);
 }
 
 .youtube-embed iframe {
@@ -1193,7 +1192,7 @@
 }
 
 .feature-pending {
-  color: rgba(255, 255, 255, 0.3) !important;
+  color: var(--text-dim) !important;
   width: 20px;
   height: 20px;
   flex-shrink: 0;
@@ -1260,7 +1259,6 @@
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.95);
-  backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1281,15 +1279,15 @@
   max-width: 100%;
   max-height: 80vh;
   border-radius: 12px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--shadow-lg);
 }
 
 .lightbox-close {
   position: absolute;
   top: -50px;
   right: 0;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
   border-radius: 50%;
   width: 44px;
   height: 44px;
@@ -1297,7 +1295,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #ffffff;
+  color: var(--text);
   transition: all 0.2s ease;
 }
 
@@ -1314,7 +1312,7 @@
 .lightbox-caption {
   text-align: center;
   margin-top: 16px;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--text-secondary);
   font-size: 14px;
 }
 
@@ -1333,8 +1331,6 @@
   border: none !important;
   border-radius: 0 !important;
   border-bottom: 1px solid var(--glass-border) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
   box-shadow: none !important;
   text-align: left !important;
 }
@@ -1397,7 +1393,7 @@
 }
 
 .tech-content .tech-item::after {
-  content: ' • ' !important;
+  content: ' \2022 ' !important;
   color: var(--text-dim) !important;
 }
 

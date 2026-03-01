@@ -3,25 +3,36 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
-    <meta name="description" content="Baraka - ML/AI Engineer specializing in Computer Vision, PyTorch, and Full-Stack Development. View my portfolio of machine learning projects." />
-    <meta name="keywords" content="ML Engineer, AI Engineer, Machine Learning, Computer Vision, PyTorch, Python, React, Portfolio" />
+    <meta name="description" content="Baraka - Computer Engineer specializing in ML/AI, Embedded Systems, and Hardware Design. Virginia Tech." />
+    <meta name="keywords" content="Computer Engineer, ML Engineer, AI, Embedded Systems, Hardware Design, Python, PyTorch, React, Portfolio" />
     <meta name="author" content="Baraka" />
-    <meta name="theme-color" content="#FF6B35" />
+    <meta name="theme-color" content="#0068FF" />
 
     <!-- Open Graph / Social Media -->
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Baraka | ML/AI Engineer" />
-    <meta property="og:description" content="ML/AI Engineer specializing in Computer Vision, PyTorch, and Full-Stack Development." />
+    <meta property="og:title" content="Baraka | Computer Engineer" />
+    <meta property="og:description" content="Computer Engineer specializing in ML/AI, Embedded Systems, and Hardware Design." />
 
     <!-- Mobile Web App -->
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
-    <title>Baraka | ML/AI Engineer</title>
+    <title>Baraka | Computer Engineer</title>
+
+    <!-- Anti-flash: set theme before React loads -->
+    <script>
+      (function() {
+        var theme = localStorage.getItem('theme');
+        if (!theme) theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+      })();
+    </script>
+
+    <!-- DM Sans - closest free match to Micron Basis -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,300;1,9..40,400&display=swap" rel="stylesheet">
   </head>
   <body>
     <div id="root"></div>

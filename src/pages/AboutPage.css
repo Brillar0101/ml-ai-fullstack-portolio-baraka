@@ -1,0 +1,146 @@
+/* About Page */
+@import './ClapperboardProject.css';
+
+.about-page {
+  padding-bottom: var(--space-4xl);
+}
+
+.about-section {
+  margin-bottom: var(--space-3xl);
+}
+
+/* Bio Grid */
+.about-bio-grid {
+  display: flex;
+  gap: var(--space-2xl);
+  align-items: flex-start;
+}
+
+.about-photo-placeholder {
+  width: 180px;
+  height: 180px;
+  min-width: 180px;
+  border-radius: var(--radius-xl);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+}
+
+.about-bio-text h2 {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+  color: var(--text);
+}
+
+.about-role {
+  font-size: 16px;
+  color: var(--primary);
+  font-weight: 500;
+  margin-bottom: var(--space-md);
+}
+
+.about-bio-text p {
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: var(--space-sm);
+}
+
+/* Education Card */
+.about-education-card {
+  max-width: 480px;
+}
+
+.about-education-card h3 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: var(--text);
+}
+
+.about-degree {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--primary);
+  margin-bottom: 4px;
+}
+
+.about-grad {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.about-education-card > p:last-child {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+/* Skill Tags */
+.about-skill-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* Resume Embed */
+.about-resume-embed {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.resume-viewer {
+  width: 100%;
+  height: 800px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-secondary);
+}
+
+.resume-download-btn {
+  align-self: flex-start;
+}
+
+/* Connect Links */
+.about-connect-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .about-bio-grid {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--space-lg);
+  }
+
+  .about-photo-placeholder {
+    width: 140px;
+    height: 140px;
+    min-width: 140px;
+  }
+
+  .resume-viewer {
+    height: 500px;
+  }
+}
+
+@media (max-width: 479px) {
+  .about-bio-text h2 {
+    font-size: 24px;
+  }
+
+  .about-connect-links {
+    flex-direction: column;
+  }
+}

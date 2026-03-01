@@ -1,4 +1,4 @@
-import { Camera, Layers } from 'lucide-react';
+import { Camera, Layers, Cpu, Crosshair } from 'lucide-react';
 
 // Custom Basketball Icon
 const Basketball = () => (
@@ -11,6 +11,13 @@ const Basketball = () => (
   </svg>
 );
 
+export const CATEGORIES = [
+  { id: 'all', label: 'All Projects' },
+  { id: 'ml-ai', label: 'ML / AI' },
+  { id: 'embedded', label: 'Embedded Systems' },
+  { id: 'hardware', label: 'Hardware Design' }
+];
+
 export const PROJECTS = [
   {
     id: "swishvision",
@@ -18,7 +25,7 @@ export const PROJECTS = [
     shortDesc: "AI-powered basketball analytics platform using YOLO, SAM2, and SmolVLM2 for player tracking and game analysis",
     icon: Basketball,
     tags: ["PyTorch", "YOLO", "SAM2", "FastAPI", "Next.js"],
-    gradient: "linear-gradient(135deg, #0A84FF 0%, #40A9FF 100%)",
+    category: "ml-ai",
     featured: true,
     route: "/projects/swishvision"
   },
@@ -28,7 +35,7 @@ export const PROJECTS = [
     shortDesc: "YOLOv8n detection system achieving 96.4% mAP@0.5 at 48 FPS for video production workflows",
     icon: Camera,
     tags: ["YOLOv8", "Object Detection", "Roboflow", "OpenCV"],
-    gradient: "linear-gradient(135deg, #0A84FF 0%, #40A9FF 100%)",
+    category: "ml-ai",
     featured: false,
     route: "/projects/clapperboard"
   },
@@ -38,17 +45,29 @@ export const PROJECTS = [
     shortDesc: "Full-stack equipment rental platform with React Native mobile app, Node.js backend, and admin dashboard",
     icon: Layers,
     tags: ["React Native", "Node.js", "PostgreSQL", "Stripe"],
-    gradient: "linear-gradient(135deg, #0A84FF 0%, #40A9FF 100%)",
+    category: "ml-ai",
     featured: false,
     route: "/projects/psiv-rentals"
+  },
+  {
+    id: "pixel-monarch",
+    title: "Pixel Monarch",
+    shortDesc: "Kingdom management game on MSP432 LaunchPad with LCD graphics, UART communication, and hardware abstraction layer",
+    icon: Cpu,
+    tags: ["MSP432", "C", "UART", "SPI", "LCD", "Embedded"],
+    category: "embedded",
+    featured: true,
+    visible: false,
+    route: "/projects/pixel-monarch"
+  },
+  {
+    id: "touhou",
+    title: "Touhou",
+    shortDesc: "Bullet-hell shooter on MSP432 with 6 enemy firing patterns, joystick control, power-ups, and custom sprite rendering on 128x128 LCD",
+    icon: Crosshair,
+    tags: ["MSP432", "C", "ADC14", "SPI", "LCD", "Timer32"],
+    category: "embedded",
+    featured: true,
+    route: "/projects/touhou"
   }
-];
-
-export const SKILLS = [
-  { name: "Python", icon: "Code2" },
-  { name: "TensorFlow", icon: "Brain" },
-  { name: "PyTorch", icon: "Cpu" },
-  { name: "Computer Vision", icon: "Camera" },
-  { name: "React", icon: "Globe" },
-  { name: "Node.js", icon: "Database" }
 ];

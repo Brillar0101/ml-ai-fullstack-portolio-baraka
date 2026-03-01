@@ -1,0 +1,200 @@
+/* Touhou Project — shared project + diagram styles */
+@import './ClapperboardProject.css';
+@import '../components/diagrams/DiagramStyles.css';
+
+/* Video Hero Section */
+.touhou-video-hero {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: 500px;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  margin-bottom: var(--space-2xl);
+  border: 1px solid var(--border);
+  background: #000;
+}
+
+.touhou-video-hero iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.touhou-video-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.touhou-video-placeholder svg {
+  width: 48px;
+  height: 48px;
+  color: var(--primary);
+}
+
+/* Screenshot Gallery */
+.screenshot-gallery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: var(--space-lg);
+}
+
+.screenshot-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.screenshot-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  border-color: var(--primary);
+}
+
+.screenshot-card img {
+  width: 100%;
+  aspect-ratio: 128 / 128;
+  object-fit: cover;
+  display: block;
+  background: #000;
+}
+
+.screenshot-caption {
+  padding: 12px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* Bullet pattern colors */
+.bullet-pattern-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: var(--space-md);
+}
+
+.bullet-pattern-card {
+  padding: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--pattern-color, var(--primary));
+  transition: all 0.2s ease;
+}
+
+.bullet-pattern-card:hover {
+  border-color: var(--pattern-color, var(--primary));
+}
+
+.bullet-pattern-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.bullet-pattern-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.bullet-pattern-color {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+/* Lightbox */
+.touhou-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  cursor: pointer;
+}
+
+.touhou-lightbox img {
+  max-width: 90vw;
+  max-height: 85vh;
+  object-fit: contain;
+  border-radius: var(--radius-md);
+  cursor: default;
+}
+
+.touhou-lightbox-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.touhou-lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .screenshot-gallery {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .bullet-pattern-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .touhou-video-hero {
+    max-height: 300px;
+  }
+}
+
+@media (max-width: 479px) {
+  .screenshot-gallery {
+    grid-template-columns: 1fr;
+  }
+
+  .bullet-pattern-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .touhou-video-hero {
+    max-height: 220px;
+    border-radius: var(--radius-md);
+  }
+
+  .screenshot-caption {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+}

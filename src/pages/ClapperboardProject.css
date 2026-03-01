@@ -95,7 +95,7 @@ a.back-btn {
   letter-spacing: -0.03em;
   margin-bottom: var(--space-md);
   line-height: 1.1;
-  color: #FFFFFF;
+  color: var(--text);
 }
 
 .project-tagline {
@@ -174,8 +174,8 @@ a.back-btn {
 }
 
 .cta-secondary:hover {
-  background: rgba(0, 0, 0, 0.04);
-  border-color: rgba(0, 0, 0, 0.15);
+  background: var(--glass-hover);
+  border-color: var(--border);
 }
 
 .cta-secondary svg {
@@ -205,7 +205,7 @@ a.back-btn {
   font-size: 32px;
   font-weight: 700;
   letter-spacing: -0.5px;
-  color: #FFFFFF;
+  color: var(--text);
 }
 
 /* Demo Section */
@@ -219,7 +219,7 @@ a.back-btn {
   padding-bottom: 56.25%; /* 16:9 aspect ratio */
   border-radius: 12px;
   overflow: hidden;
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--bg-secondary);
   margin-bottom: 20px;
 }
 
@@ -233,7 +233,7 @@ a.back-btn {
 }
 
 .video-placeholder {
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--bg-secondary);
   border-radius: 12px;
   overflow: hidden;
   margin-bottom: 20px;
@@ -347,7 +347,7 @@ a.back-btn {
   font-size: 20px;
   font-weight: 700;
   margin-bottom: 12px;
-  color: #FFFFFF;
+  color: var(--text);
 }
 
 .problem-card p {
@@ -375,7 +375,7 @@ a.back-btn {
   font-size: 20px;
   font-weight: 700;
   margin-bottom: 20px;
-  color: #FFFFFF;
+  color: var(--text);
 }
 
 .users-list {
@@ -436,17 +436,15 @@ a.back-btn {
   align-items: center;
   gap: 12px;
   padding: 10px 16px;
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: var(--glass);
   border: 1px solid var(--glass-border);
   border-radius: 12px;
   transition: all 0.3s ease;
 }
 
 .company-card:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(37, 99, 235, 0.3);
+  background: var(--glass-hover);
+  border-color: var(--primary);
 }
 
 .company-logo-icon {
@@ -527,9 +525,7 @@ a.back-btn {
   align-items: center;
   gap: 12px;
   padding: 24px;
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: var(--glass);
   border: 1px solid var(--glass-border);
   border-radius: 16px;
   min-width: 140px;
@@ -570,7 +566,7 @@ a.back-btn {
 .step-label {
   font-size: 15px;
   font-weight: 600;
-  color: #FFFFFF;
+  color: var(--text);
 }
 
 .step-desc {
@@ -709,8 +705,8 @@ a.back-btn {
   justify-content: center;
   gap: 12px;
   padding: 60px;
-  background: rgba(0, 0, 0, 0.02);
-  border: 2px dashed rgba(0, 0, 0, 0.1);
+  background: var(--bg-secondary);
+  border: 2px dashed var(--border);
   border-radius: 12px;
   color: var(--text-muted);
   margin-top: 24px;
@@ -730,7 +726,7 @@ a.back-btn {
   margin-top: 24px;
   border-radius: 12px;
   overflow: hidden;
-  background: rgba(20, 20, 22, 0.8);
+  background: var(--surface);
   border: 1px solid var(--glass-border);
   box-shadow: var(--shadow-md);
 }
@@ -744,7 +740,7 @@ a.back-btn {
 .case-image {
   border-radius: 8px;
   overflow: hidden;
-  background: rgba(20, 20, 22, 0.8);
+  background: var(--surface);
   border: 1px solid var(--glass-border);
   box-shadow: var(--shadow-sm);
 }
@@ -780,7 +776,6 @@ a.back-btn {
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.9);
-  backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -807,9 +802,7 @@ a.back-btn {
   position: absolute;
   top: -50px;
   right: 0;
-  background: rgba(30, 30, 35, 0.9);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: var(--surface);
   border: 1px solid var(--glass-border);
   border-radius: 50%;
   width: 44px;
@@ -818,7 +811,7 @@ a.back-btn {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #FFFFFF;
+  color: var(--text);
   transition: all 0.2s ease;
 }
 
@@ -865,9 +858,7 @@ a.back-btn {
   gap: 8px;
   margin-top: 20px;
   padding: 12px 20px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: var(--glass);
   border: 1px solid var(--glass-border);
   border-radius: 8px;
   color: var(--primary-light);
@@ -878,8 +869,8 @@ a.back-btn {
 }
 
 .roboflow-link:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(37, 99, 235, 0.3);
+  background: var(--glass-hover);
+  border-color: var(--primary);
 }
 
 .roboflow-link svg {
@@ -899,9 +890,7 @@ a.back-btn {
   flex-direction: column;
   gap: 4px;
   padding: 16px;
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: var(--glass);
   border: 1px solid var(--glass-border);
   border-radius: 10px;
 }
@@ -916,11 +905,11 @@ a.back-btn {
 .config-value {
   font-size: 15px;
   font-weight: 600;
-  color: #FFFFFF;
+  color: var(--text);
 }
 
 .code-snippet {
-  background: #1e1e1e;
+  background: var(--bg-tertiary);
   border-radius: 12px;
   overflow: hidden;
   margin-bottom: 24px;
@@ -932,10 +921,10 @@ a.back-btn {
   align-items: center;
   gap: 8px;
   padding: 12px 20px;
-  background: #2d2d2d;
+  background: var(--bg-secondary);
   font-size: 13px;
   font-weight: 500;
-  color: #e0e0e0;
+  color: var(--text-secondary);
 }
 
 .code-header svg {
@@ -949,7 +938,7 @@ a.back-btn {
   font-family: 'Fira Code', monospace;
   font-size: 14px;
   line-height: 1.6;
-  color: #e0e0e0;
+  color: var(--text-secondary);
   overflow-x: auto;
 }
 
@@ -966,11 +955,11 @@ a.back-btn {
 
 .output-format pre {
   padding: 16px;
-  background: #1e1e1e;
+  background: var(--bg-tertiary);
   border-radius: 8px;
   font-family: 'Fira Code', monospace;
   font-size: 13px;
-  color: #e0e0e0;
+  color: var(--text-secondary);
   margin: 0;
 }
 
@@ -1002,9 +991,7 @@ a.back-btn {
 .test-stat {
   text-align: center;
   padding: 24px;
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: var(--glass);
   border-radius: 12px;
   border: 1px solid var(--glass-border);
 }
@@ -1044,7 +1031,7 @@ a.back-btn {
 .rate-bar-container {
   flex: 1;
   height: 24px;
-  background: rgba(0, 0, 0, 0.05);
+  background: var(--bg-secondary);
   border-radius: 12px;
   overflow: hidden;
   border: 1px solid var(--glass-border);
@@ -1091,9 +1078,7 @@ a.back-btn {
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: var(--glass);
   border: 1px solid var(--glass-border);
   color: var(--text);
   cursor: pointer;
@@ -1119,7 +1104,7 @@ a.back-btn {
   position: relative;
   border-radius: 12px;
   overflow: hidden;
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--bg-secondary);
   cursor: pointer;
 }
 
@@ -1136,7 +1121,7 @@ a.back-btn {
   bottom: 16px;
   right: 16px;
   padding: 8px 16px;
-  background: rgba(0, 0, 0, 0.7);
+  background: var(--bg-tertiary);
   border-radius: 20px;
   font-size: 14px;
   font-weight: 600;
@@ -1153,9 +1138,7 @@ a.back-btn {
   width: 48px;
   height: 48px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: var(--glass);
   border: 1px solid var(--glass-border);
   color: var(--text-secondary);
   cursor: pointer;
@@ -1166,8 +1149,8 @@ a.back-btn {
 }
 
 .control-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(37, 99, 235, 0.3);
+  background: var(--glass-hover);
+  border-color: var(--primary);
   color: var(--text);
 }
 
@@ -1239,9 +1222,7 @@ a.back-btn {
   width: 48px;
   min-width: 48px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: var(--glass);
   border: 1px solid var(--glass-border);
   color: var(--text);
   cursor: pointer;
@@ -1266,9 +1247,7 @@ a.back-btn {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 32px;
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: var(--glass);
   border: 1px solid var(--glass-border);
   border-radius: 16px;
   overflow: hidden;
@@ -1580,8 +1559,8 @@ a.back-btn {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: rgba(0, 0, 0, 0.02);
-  border: 2px dashed rgba(0, 0, 0, 0.1);
+  background: var(--bg-secondary);
+  border: 2px dashed var(--border);
   border-radius: 8px;
   color: var(--text-muted);
   font-size: 11px;
@@ -1756,11 +1735,11 @@ a.back-btn {
 
 .requirements-list code {
   padding: 8px 16px;
-  background: #1e1e1e;
+  background: var(--bg-tertiary);
   border-radius: 6px;
   font-family: 'Fira Code', monospace;
   font-size: 13px;
-  color: #e0e0e0;
+  color: var(--text-secondary);
 }
 
 /* Links Section */
@@ -2209,7 +2188,7 @@ a.back-btn {
   }
 
   .slideshow-nav:hover {
-    background: rgba(30, 30, 35, 0.9);
+    background: var(--surface);
     border-color: var(--glass-border);
   }
 
@@ -2238,7 +2217,7 @@ a.back-btn {
 .subsection-title {
   font-size: 16px;
   font-weight: 600;
-  color: #FFFFFF;
+  color: var(--text);
   margin-top: var(--space-lg);
   margin-bottom: var(--space-md);
 }
@@ -2269,7 +2248,7 @@ a.back-btn {
   font-size: 14px;
   line-height: 1.5;
   padding: 8px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--border-light);
 }
 
 .bullet-list.compact li {
@@ -2279,7 +2258,7 @@ a.back-btn {
 }
 
 .bullet-list li strong {
-  color: #FFFFFF;
+  color: var(--text);
   font-weight: 600;
 }
 
@@ -2322,16 +2301,16 @@ a.back-btn {
 
 /* Info Card - Standard content card */
 .info-card {
-  background: rgba(20, 20, 22, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   padding: 24px;
   transition: all var(--transition-fast);
 }
 
 .info-card:hover {
-  border-color: rgba(255, 255, 255, 0.15);
-  background: rgba(25, 25, 28, 0.9);
+  border-color: var(--border);
+  background: var(--glass-hover);
 }
 
 .info-card.highlight {
@@ -2359,7 +2338,7 @@ a.back-btn {
 .info-card h3 {
   font-size: 16px;
   font-weight: 600;
-  color: #FFFFFF;
+  color: var(--text);
   margin-bottom: 8px;
 }
 
@@ -2372,8 +2351,8 @@ a.back-btn {
 
 /* Metric Card - For key stats */
 .metric-card {
-  background: rgba(20, 20, 22, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   padding: 20px;
   text-align: center;
@@ -2399,7 +2378,7 @@ a.back-btn {
 .metric-card .metric-value {
   font-size: 24px;
   font-weight: 700;
-  color: #FFFFFF;
+  color: var(--text);
   margin-bottom: 4px;
 }
 
@@ -2412,8 +2391,8 @@ a.back-btn {
 
 /* Stat Card - For results */
 .stat-card {
-  background: rgba(20, 20, 22, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   padding: 20px;
   text-align: center;
@@ -2422,7 +2401,7 @@ a.back-btn {
 .stat-card .stat-value {
   font-size: 28px;
   font-weight: 700;
-  color: #FFFFFF;
+  color: var(--text);
   margin-bottom: 4px;
 }
 
@@ -2450,8 +2429,8 @@ a.back-btn {
 
 /* Future Card - Compact improvement items */
 .future-card {
-  background: rgba(20, 20, 22, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   padding: 16px;
   display: flex;
@@ -2515,8 +2494,8 @@ a.back-btn {
 /* Media Card - Compact for images, videos, code */
 .media-card {
   position: relative;
-  background: rgba(20, 20, 22, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   overflow: hidden;
   margin-bottom: var(--space-lg);
@@ -2533,7 +2512,7 @@ a.back-btn {
   padding: 16px 20px 8px;
   font-size: 16px;
   font-weight: 600;
-  color: #FFFFFF;
+  color: var(--text);
   margin: 0;
 }
 
@@ -2546,7 +2525,7 @@ a.back-btn {
 
 /* Media Card Code Styling */
 .media-card.code-card {
-  background: #1a1a1a;
+  background: var(--bg-tertiary);
 }
 
 .media-card.code-card .code-header {
@@ -2554,10 +2533,10 @@ a.back-btn {
   align-items: center;
   gap: 8px;
   padding: 10px 16px;
-  background: #252525;
+  background: var(--bg-secondary);
   font-size: 12px;
   font-weight: 500;
-  color: #b0b0b0;
+  color: var(--text-muted);
 }
 
 .media-card.code-card .code-header svg {
@@ -2571,7 +2550,7 @@ a.back-btn {
   font-family: 'Fira Code', 'Consolas', monospace;
   font-size: 13px;
   line-height: 1.5;
-  color: #e0e0e0;
+  color: var(--text-secondary);
   overflow-x: auto;
 }
 
@@ -2615,8 +2594,8 @@ a.back-btn {
 
 .requirements-inline code {
   padding: 6px 12px;
-  background: #1a1a1a;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--glass-border);
   border-radius: 6px;
   font-family: 'Fira Code', 'Consolas', monospace;
   font-size: 12px;
@@ -2636,7 +2615,7 @@ a.back-btn {
   align-items: center;
   gap: 8px;
   padding: 10px 16px;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--glass);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   color: var(--primary-light);
@@ -2669,7 +2648,7 @@ a.back-btn {
 .contact-section h3 {
   font-size: 20px;
   font-weight: 600;
-  color: #FFFFFF;
+  color: var(--text);
   margin-bottom: 8px;
 }
 

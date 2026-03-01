@@ -1,36 +1,20 @@
 // ============================================
-// CONFIGURATION - Easy to modify
+// CONFIGURATION
 // ============================================
 
 export const CONFIG = {
   name: "Baraka",
-  title: "ML/AI Engineer",
-  tagline: "Computer Science Senior at Virginia Tech",
+  title: "Computer Engineer",
+  tagline: "Virginia Tech '27",
   email: "barakaeli@vt.edu",
   phone: "+1 (540) 998-2037",
   location: "Blacksburg, VA",
   github: "github.com/Brillar0101",
   linkedin: "linkedin.com/in/barakaeli",
 
-  // EmailJS Configuration
   emailjs: {
-    serviceId: "service_51n3oya",
-    templateId: "template_ckrtvvp",
-    publicKey: "eEWjLIqXAn2IdqCjL"
-  },
-
-  colors: {
-    primary: "#0078D4",
-    primaryLight: "#2B88D8",
-    primaryDark: "#005A9E",
-    accent: "#00A4EF",
-    dark: "#0A1628",
-    darkSecondary: "#162038",
-    glass: "rgba(255, 255, 255, 0.08)",
-    glassBorder: "rgba(255, 255, 255, 0.12)",
-    glassHover: "rgba(255, 255, 255, 0.15)",
-    text: "#FFFFFF",
-    textSecondary: "rgba(255, 255, 255, 0.7)",
-    textMuted: "rgba(255, 255, 255, 0.5)"
+    serviceId: import.meta.env.VITE_EMAILJS_SERVICE_ID || "service_51n3oya",
+    templateId: import.meta.env.VITE_EMAILJS_TEMPLATE_ID || "template_ckrtvvp",
+    publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY || "eEWjLIqXAn2IdqCjL"
   }
 };

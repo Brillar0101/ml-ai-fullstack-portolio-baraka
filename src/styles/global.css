@@ -1,6 +1,11 @@
-/* Import Inter as SF Pro alternative (SF Pro is not available as web font) */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&display=swap');
+/* ============================================
+   DESIGN SYSTEM — Micron/Crucial Inspired
+   Font: DM Sans (Google Fonts)
+   Colors: Black, White, Blue (#0068FF)
+   ============================================ */
+
+/* Code font for code blocks */
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap');
 
 * {
   margin: 0;
@@ -8,53 +13,30 @@
   box-sizing: border-box;
 }
 
+/* ---- Light Theme (Default) ---- */
 :root {
-  /* Professional Blue Theme - Keep blue accent */
-  --primary: #2563EB;
-  --primary-light: #3B82F6;
-  --primary-dark: #1D4ED8;
-  --accent: #2563EB;
+  --primary: #0068FF;
+  --primary-light: #3388FF;
+  --primary-dark: #0050CC;
 
-  /* Secondary colors */
-  --secondary: #60A5FA;
-  --secondary-glow: rgba(37, 99, 235, 0.3);
+  --bg: #FFFFFF;
+  --bg-secondary: #F2F2F2;
+  --bg-tertiary: #E6E6E6;
+  --surface: #FFFFFF;
 
-  /* Dark Theme Palette */
-  --bg: #0A0A0B;
-  --bg-secondary: #111113;
-  --bg-tertiary: #18181B;
-  --bg-elevated: #1C1C1F;
-  --surface: #141416;
+  --text: #000000;
+  --text-secondary: #4D4D4D;
+  --text-muted: #8C8C8C;
+  --text-dim: #BFBFBF;
 
-  /* Legacy dark variable names */
-  --dark: #0A0A0B;
-  --dark-secondary: #111113;
-  --dark-tertiary: #18181B;
-  --dark-elevated: #1C1C1F;
+  --border: #E6E6E6;
+  --border-light: #F2F2F2;
 
-  /* Glass effects - dark theme */
-  --glass: rgba(20, 20, 22, 0.8);
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --glass-hover: rgba(30, 30, 35, 0.9);
-  --glass-strong: rgba(25, 25, 28, 0.95);
-  --glass-blue: rgba(37, 99, 235, 0.15);
-  --glass-inner-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
-  --glass-glow: 0 0 60px rgba(37, 99, 235, 0.2);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.1);
 
-  /* Shadows for dark theme */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.5);
-  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.3);
-  --shadow-card-hover: 0 8px 24px rgba(0, 0, 0, 0.4);
-
-  /* Typography - light text for dark backgrounds */
-  --text: #FAFAFA;
-  --text-secondary: rgba(250, 250, 250, 0.7);
-  --text-muted: rgba(250, 250, 250, 0.5);
-  --text-dim: rgba(250, 250, 250, 0.35);
-
-  /* Spacing system - 8px base */
+  /* Spacing — 8px base */
   --space-xs: 4px;
   --space-sm: 8px;
   --space-md: 16px;
@@ -64,128 +46,156 @@
   --space-3xl: 64px;
   --space-4xl: 96px;
 
-  /* Border radius - professional, rounded */
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-  --radius-xl: 18px;
-  --radius-2xl: 22px;
+  /* Border radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
   --radius-full: 9999px;
 
-  /* Transitions - smooth and subtle */
+  /* Transitions */
   --transition-fast: 0.15s ease-out;
   --transition-base: 0.2s ease-out;
   --transition-smooth: 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+
+  /* Legacy compat — project pages still reference these */
+  --glass: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-hover: rgba(245, 245, 245, 0.95);
+  --radius-2xl: 22px;
 }
+
+/* ---- Dark Theme ---- */
+[data-theme="dark"] {
+  --bg: #000000;
+  --bg-secondary: #111113;
+  --bg-tertiary: #1C1C1F;
+  --surface: #111113;
+
+  --text: #FFFFFF;
+  --text-secondary: #BFBFBF;
+  --text-muted: #8C8C8C;
+  --text-dim: #4D4D4D;
+
+  --border: #262626;
+  --border-light: #1C1C1F;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.6);
+
+  --glass: rgba(17, 17, 19, 0.8);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-hover: rgba(28, 28, 31, 0.95);
+}
+
+/* ============================================
+   BASE
+   ============================================ */
 
 html {
   font-size: 16px;
+  zoom: 1.15;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: 'DM Sans', Arial, sans-serif;
   color: var(--text);
+  background: var(--bg);
   min-height: 100vh;
   overflow-x: hidden;
   line-height: 1.6;
-  letter-spacing: -0.01em;
-  /* Dark theme background */
-  background: var(--bg);
-  background-image:
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(37, 99, 235, 0.15) 0%, transparent 50%),
-    linear-gradient(180deg, var(--bg) 0%, var(--bg-secondary) 100%);
-  background-attachment: fixed;
+  letter-spacing: 0;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
+
+a {
+  color: var(--primary);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+::selection {
+  background: var(--primary);
+  color: #FFFFFF;
+}
+
+/* ============================================
+   LAYOUT
+   ============================================ */
 
 .app-container {
   min-height: 100vh;
   position: relative;
 }
 
-/* Glass Card Effect - Light theme with shadows */
-.glass-card {
-  position: relative;
-  background: var(--glass);
-  backdrop-filter: blur(20px) saturate(100%);
-  -webkit-backdrop-filter: blur(20px) saturate(100%);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-xl);
-  transition: all var(--transition-smooth);
-  overflow: hidden;
-  box-shadow: var(--shadow-card);
-}
-
-.glass-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  box-shadow: var(--glass-inner-shadow);
-  pointer-events: none;
-  z-index: 1;
-}
-
-.glass-card:hover {
-  background: var(--glass-hover);
-  border-color: rgba(255, 255, 255, 0.15);
-}
-
-/* Main Content */
 .main-content {
-  padding-top: 100px;
+  padding-top: 80px;
   padding-bottom: var(--space-3xl);
   min-height: 100vh;
-  position: relative;
-  z-index: 1;
 }
 
-/* No scroll for landing page */
 .main-content.no-scroll {
   padding-top: 0;
   padding-bottom: 0;
-  height: 100vh;
-  max-height: 100vh;
+  /* Divide by zoom factor (1.15) so it fits the actual screen */
+  height: calc(100vh / 1.15);
+  max-height: calc(100vh / 1.15);
   overflow: hidden;
 }
 
+.main-content.admin-page {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
 .container {
-  max-width: 1400px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 0 var(--space-xl);
 }
 
-/* Page Header - Corporate style */
+/* ============================================
+   TYPOGRAPHY
+   ============================================ */
+
+/* Page header */
 .page-header {
-  text-align: center;
   margin-bottom: var(--space-3xl);
 }
 
 .page-title {
   font-size: clamp(32px, 5vw, 48px);
   font-weight: 700;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.01em;
+  line-height: 1.05;
   margin-bottom: var(--space-md);
-  line-height: 1.1;
   color: var(--text);
-}
-
-/* Key headings - no underline */
-.page-title-underlined {
-  position: relative;
-  display: inline-block;
 }
 
 .page-subtitle {
   font-size: clamp(14px, 2vw, 18px);
   color: var(--text-secondary);
-  max-width: 100%;
-  margin: 0 auto;
+  max-width: 600px;
   line-height: 1.6;
 }
 
-/* NVIDIA-Style Section Category Labels */
+/* Eyebrow label — Micron style */
+.eyebrow {
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--primary);
+  margin-bottom: 12px;
+}
+
+/* Section category (legacy compat) */
 .section-category {
   display: inline-block;
   font-size: 12px;
@@ -196,31 +206,32 @@ body {
   margin-bottom: 12px;
 }
 
+/* ============================================
+   BUTTONS
+   ============================================ */
 
-/* Primary Button - Professional and refined */
 .btn-primary {
-  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-sm);
-  padding: 12px 24px;
+  padding: 12px 28px;
   background: var(--primary);
-  border: none;
+  border: 1px solid var(--primary);
   border-radius: var(--radius-md);
-  color: white;
+  color: #FFFFFF;
   font-family: inherit;
   font-size: 14px;
   font-weight: 500;
-  letter-spacing: 0;
   cursor: pointer;
   transition: all var(--transition-base);
   text-decoration: none;
-  overflow: hidden;
 }
 
 .btn-primary:hover {
   background: var(--primary-light);
+  border-color: var(--primary-light);
+  text-decoration: none;
 }
 
 .btn-primary svg {
@@ -228,33 +239,27 @@ body {
   height: 16px;
 }
 
-/* Secondary Button - Dark theme style */
 .btn-secondary {
-  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-sm);
-  padding: 12px 24px;
+  padding: 12px 28px;
   background: transparent;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid var(--border);
   border-radius: var(--radius-md);
   color: var(--text);
   font-family: inherit;
   font-size: 14px;
   font-weight: 500;
-  letter-spacing: 0;
   cursor: pointer;
   transition: all var(--transition-base);
   text-decoration: none;
-  overflow: hidden;
 }
 
 .btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.25);
+  border-color: var(--text-muted);
+  text-decoration: none;
 }
 
 .btn-secondary svg {
@@ -262,19 +267,29 @@ body {
   height: 16px;
 }
 
-/* Gradient Text */
-.gradient-text {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+/* ============================================
+   GLASS CARD (legacy compat for project pages)
+   ============================================ */
+
+.glass-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-smooth);
+}
+
+.glass-card::before {
+  display: none;
+}
+
+.glass-card:hover {
+  border-color: var(--text-dim);
 }
 
 /* ============================================
-   RESPONSIVE - Mobile First Approach
+   RESPONSIVE
    ============================================ */
 
-/* Small Mobile (320px - 479px) */
 @media (max-width: 479px) {
   :root {
     --space-lg: 16px;
@@ -284,43 +299,24 @@ body {
   }
 
   .container {
-    padding: 0 12px;
+    padding: 0 16px;
   }
 
   .main-content {
     padding-top: 64px;
-    padding-bottom: var(--space-lg);
-  }
-
-  .page-header {
-    margin-bottom: var(--space-lg);
   }
 
   .page-title {
     font-size: 28px;
   }
 
-  .page-subtitle {
-    font-size: 14px;
-  }
-
   .btn-primary,
   .btn-secondary {
-    padding: 11px 20px;
-    font-size: 14px;
     width: 100%;
-  }
-
-  .glass-card {
-    border-radius: var(--radius-md);
-  }
-
-  .glass-card:hover {
-    transform: none;
+    padding: 12px 20px;
   }
 }
 
-/* Mobile Portrait (480px - 767px) */
 @media (min-width: 480px) and (max-width: 767px) {
   :root {
     --space-xl: 24px;
@@ -329,82 +325,46 @@ body {
   }
 
   .container {
-    padding: 0 16px;
+    padding: 0 20px;
   }
 
   .main-content {
     padding-top: 70px;
-    padding-bottom: var(--space-xl);
-  }
-
-  .btn-primary,
-  .btn-secondary {
-    width: 100%;
   }
 }
 
-/* Tablet Portrait (768px - 1023px) */
 @media (min-width: 768px) and (max-width: 1023px) {
-  .container {
-    padding: 0 var(--space-xl);
-  }
-
   .main-content {
-    padding-top: 90px;
+    padding-top: 80px;
   }
 }
 
-/* Tablet Landscape / Small Desktop (1024px - 1279px) */
-@media (min-width: 1024px) and (max-width: 1279px) {
-  .container {
-    max-width: 100%;
-    padding: 0 var(--space-xl);
-  }
-}
-
-/* Desktop (1280px+) */
 @media (min-width: 1280px) {
   .container {
-    max-width: 1400px;
-    padding: 0 var(--space-xl);
+    max-width: 1200px;
   }
 
   .main-content {
-    padding-top: 120px;
+    padding-top: 100px;
   }
 }
 
-/* Large Desktop (1440px+) */
 @media (min-width: 1440px) {
   .container {
-    max-width: 1600px;
+    max-width: 1400px;
     padding: 0 var(--space-2xl);
-  }
-}
-
-/* Extra Large Desktop (1920px+) */
-@media (min-width: 1920px) {
-  .container {
-    max-width: 1800px;
   }
 }
 
 /* Touch device optimizations */
 @media (hover: none) and (pointer: coarse) {
-  .glass-card:hover {
-    transform: none;
-    background: var(--glass);
-    border-color: var(--glass-border);
-  }
-
   .btn-primary:hover {
-    transform: none;
     background: var(--primary);
   }
 
   .btn-secondary:hover {
     background: transparent;
-    border-color: rgba(0, 0, 0, 0.12);
+    border-color: var(--border);
   }
 }
 
@@ -416,10 +376,5 @@ body {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
-  }
-
-  body {
-    animation: none;
-    background-size: 100% 100%;
   }
 }

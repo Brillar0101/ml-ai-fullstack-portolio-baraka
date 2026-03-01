@@ -1,407 +1,221 @@
-/* Hero Wrapper - Full viewport landing page (no scroll) */
+/* Hero — Full viewport, Micron-style full-bleed video background */
+
 .hero-wrapper {
   position: relative;
-  height: 100vh;
-  height: 100dvh;
-  max-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
+  height: 100%;
   overflow: hidden;
-  background: var(--bg);
 }
 
-/* Video Background - optimized for YouTube embeds and local videos */
-.video-background {
+/* Background YouTube video — cover viewport like object-fit: cover */
+.hero-video-bg {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   z-index: 0;
+  pointer-events: none;
   overflow: hidden;
 }
 
-.background-video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-}
-
-/* YouTube embed support - scales to cover viewport */
-.video-background iframe {
+.hero-video-bg iframe {
   position: absolute;
   top: 50%;
   left: 50%;
   width: 100vw;
-  height: 56.25vw; /* 16:9 aspect ratio */
-  min-height: 100vh;
-  min-width: 177.78vh; /* 16:9 aspect ratio */
+  height: 56.25vw; /* 16:9 */
+  min-height: calc(100vh / 1.15);
+  min-width: calc(177.78vh / 1.15);
   transform: translate(-50%, -50%);
+  border: 0;
   pointer-events: none;
 }
 
-/* Video overlay - Dark theme with gradient */
-.video-overlay {
+/* Dark overlay on top of video */
+.hero-overlay {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    180deg,
-    rgba(10, 10, 11, 0.85) 0%,
-    rgba(10, 10, 11, 0.7) 40%,
-    rgba(10, 10, 11, 0.9) 100%
-  );
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
   z-index: 1;
 }
 
-/* Hero Section - Centered within viewport */
-.hero-section {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
+[data-theme="light"] .hero-overlay {
+  background: rgba(255, 255, 255, 0.75);
+}
+
+/* Hero content — sits above video + overlay */
+.hero-content {
   position: relative;
   z-index: 2;
-  padding: 80px 0 40px;
+  max-width: 800px;
+  text-align: left;
+  padding: 0 var(--space-2xl);
 }
 
-.hero-content {
-  max-width: 900px;
-  text-align: center;
-  padding: 0 var(--space-xl);
-}
-
-/* Badge - Professional blue accent */
-.hero-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background: rgba(37, 99, 235, 0.2);
-  border: 1px solid rgba(37, 99, 235, 0.4);
-  border-radius: var(--radius-full);
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--primary-light);
-  margin-bottom: var(--space-xl);
-  letter-spacing: 0.02em;
-}
-
-.hero-badge svg {
-  width: 14px;
-  height: 14px;
-}
-
-.hero-title {
-  font-size: clamp(36px, 6vw, 72px);
+/* Name */
+.hero-name {
+  font-size: clamp(56px, 10vw, 96px);
   font-weight: 700;
-  line-height: 1.1;
   letter-spacing: -0.03em;
-  margin-bottom: var(--space-lg);
-  color: #FFFFFF;
+  line-height: 1.05;
+  color: #ffffff;
+  margin-bottom: var(--space-md);
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
-.hero-subtitle {
-  font-size: clamp(15px, 1.6vw, 18px);
+[data-theme="light"] .hero-name {
+  color: var(--text);
+}
+
+.hero-name.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Role */
+.hero-role {
+  font-size: clamp(20px, 3vw, 32px);
+  font-weight: 500;
+  color: var(--primary);
+  margin-bottom: var(--space-lg);
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.hero-role.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Tagline */
+.hero-tagline {
+  font-size: clamp(16px, 2vw, 20px);
   font-weight: 400;
   color: rgba(255, 255, 255, 0.8);
-  margin-bottom: var(--space-md);
-  max-width: 700px;
-  margin-left: auto;
-  margin-right: auto;
-  line-height: 1.7;
+  line-height: 1.6;
+  margin-bottom: var(--space-2xl);
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
 }
 
-.hero-location {
-  display: inline-flex;
+[data-theme="light"] .hero-tagline {
+  color: var(--text-secondary);
+}
+
+.hero-tagline.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* CTAs */
+.hero-ctas {
+  display: flex;
+  gap: var(--space-md);
+  margin-bottom: var(--space-2xl);
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.hero-ctas.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Override button styles for hero (ensure visibility on video) */
+.hero-ctas .btn-secondary {
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.hero-ctas .btn-secondary:hover {
+  border-color: #ffffff;
+  color: #ffffff;
+}
+
+[data-theme="light"] .hero-ctas .btn-secondary {
+  color: var(--text);
+  border-color: var(--border);
+}
+
+[data-theme="light"] .hero-ctas .btn-secondary:hover {
+  border-color: var(--text);
+  color: var(--text);
+}
+
+/* Social links */
+.hero-social {
+  display: flex;
+  gap: var(--space-lg);
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.hero-social.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.hero-social a {
+  display: flex;
   align-items: center;
-  gap: 6px;
-  color: var(--text-muted);
-  font-size: 13px;
-  margin-bottom: var(--space-xl);
-}
-
-.hero-location svg {
-  width: 14px;
-  height: 14px;
-  color: var(--primary);
-}
-
-/* Skill Tags - Dark theme styling */
-.skills-inline {
-  display: flex;
-  flex-wrap: wrap;
   justify-content: center;
-  gap: 8px;
-  margin-bottom: var(--space-xl);
-}
-
-.skill-tag {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-sm);
-  font-size: 12px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.8);
-  transition: all var(--transition-fast);
-}
-
-.skill-tag:hover {
-  border-color: var(--primary);
-  color: var(--primary-light);
-}
-
-.skill-tag svg {
-  width: 13px;
-  height: 13px;
-  color: var(--primary);
-}
-
-/* CTA Buttons */
-.hero-buttons {
-  display: flex;
-  justify-content: center;
-  gap: var(--space-sm);
-  margin-bottom: var(--space-xl);
-}
-
-/* Social Links - Dark theme styling */
-.social-links {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-}
-
-.social-link {
   width: 40px;
   height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-sm);
-  color: rgba(255, 255, 255, 0.6);
-  transition: all var(--transition-fast);
-  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-md);
+  color: rgba(255, 255, 255, 0.7);
+  transition: color 0.2s ease, border-color 0.2s ease;
 }
 
-.social-link:hover {
-  border-color: var(--primary);
-  color: var(--primary-light);
-  background: rgba(37, 99, 235, 0.1);
+[data-theme="light"] .hero-social a {
+  border-color: var(--border);
+  color: var(--text-muted);
 }
 
-.social-link svg {
-  width: 18px;
-  height: 18px;
+.hero-social a:hover {
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.6);
 }
 
-/* ============================================
-   RESPONSIVE
-   ============================================ */
+[data-theme="light"] .hero-social a:hover {
+  color: var(--text);
+  border-color: var(--text-muted);
+}
 
-/* Small Mobile (320px - 479px) */
+/* ---- Responsive ---- */
+
 @media (max-width: 479px) {
-  .hero-wrapper {
-    height: 100vh;
-    height: 100dvh;
-  }
-
-  .hero-section {
-    height: 100%;
-    padding: 60px 16px 24px;
-  }
-
   .hero-content {
-    max-width: 100%;
+    text-align: center;
+    padding: 0 var(--space-lg);
   }
 
-  .hero-badge {
-    font-size: 11px;
-    padding: 6px 12px;
-    margin-bottom: var(--space-lg);
-  }
-
-  .hero-badge svg {
-    width: 12px;
-    height: 12px;
-  }
-
-  .hero-title {
-    font-size: 28px;
-    margin-bottom: var(--space-md);
-  }
-
-  .hero-subtitle {
-    font-size: 14px;
-    margin-bottom: var(--space-sm);
-    padding: 0 8px;
-  }
-
-  .hero-location {
-    margin-bottom: var(--space-lg);
-    font-size: 12px;
-  }
-
-  .skills-inline {
-    gap: 6px;
-    margin-bottom: var(--space-lg);
-  }
-
-  .skill-tag {
-    padding: 5px 10px;
-    font-size: 11px;
-  }
-
-  .skill-tag svg {
-    width: 12px;
-    height: 12px;
-  }
-
-  .hero-buttons {
+  .hero-ctas {
     flex-direction: column;
-    gap: 8px;
-    margin-bottom: var(--space-lg);
-    padding: 0 16px;
   }
 
-  .social-links {
-    gap: 8px;
-  }
-
-  .social-link {
-    width: 36px;
-    height: 36px;
-  }
-
-  .social-link svg {
-    width: 16px;
-    height: 16px;
+  .hero-social {
+    justify-content: center;
   }
 }
 
-/* Mobile Portrait (480px - 767px) */
 @media (min-width: 480px) and (max-width: 767px) {
-  .hero-section {
-    padding: 80px 20px 30px;
-  }
-
   .hero-content {
-    max-width: 100%;
+    text-align: center;
+    padding: 0 var(--space-xl);
   }
 
-  .hero-title {
-    font-size: 36px;
+  .hero-ctas {
+    justify-content: center;
   }
 
-  .hero-subtitle {
-    font-size: 15px;
-  }
-
-  .hero-buttons {
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-  }
-}
-
-/* Tablet Portrait (768px - 1023px) */
-@media (min-width: 768px) and (max-width: 1023px) {
-  .hero-section {
-    padding: 100px 32px 40px;
-  }
-
-  .hero-content {
-    max-width: 600px;
-  }
-
-  .hero-title {
-    font-size: 44px;
-  }
-}
-
-/* Tablet Landscape / Small Desktop (1024px - 1279px) */
-@media (min-width: 1024px) and (max-width: 1279px) {
-  .hero-content {
-    max-width: 800px;
-  }
-
-  .hero-title {
-    font-size: 56px;
-  }
-
-  .hero-subtitle {
-    max-width: 650px;
-  }
-}
-
-/* Desktop (1280px+) */
-@media (min-width: 1280px) {
-  .hero-content {
-    max-width: 950px;
-  }
-
-  .hero-title {
-    font-size: 64px;
-  }
-
-  .hero-subtitle {
-    max-width: 750px;
-  }
-}
-
-/* Large Desktop (1440px+) */
-@media (min-width: 1440px) {
-  .hero-content {
-    max-width: 1100px;
-  }
-
-  .hero-title {
-    font-size: 72px;
-  }
-
-  .hero-subtitle {
-    font-size: 19px;
-    max-width: 800px;
-  }
-}
-
-/* Extra Large Desktop (1920px+) */
-@media (min-width: 1920px) {
-  .hero-content {
-    max-width: 1300px;
-  }
-
-  .hero-title {
-    font-size: 80px;
-  }
-
-  .hero-subtitle {
-    font-size: 20px;
-    max-width: 900px;
-  }
-}
-
-/* Touch device optimizations */
-@media (hover: none) and (pointer: coarse) {
-  .skill-tag:hover {
-    background: rgba(255, 255, 255, 0.05);
-    color: rgba(255, 255, 255, 0.8);
-    border-color: var(--glass-border);
-  }
-
-  .social-link:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: var(--glass-border);
-    color: rgba(255, 255, 255, 0.6);
+  .hero-social {
+    justify-content: center;
   }
 }
