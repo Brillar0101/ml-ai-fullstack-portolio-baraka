@@ -2,45 +2,96 @@
 @import './ClapperboardProject.css';
 @import '../components/diagrams/DiagramStyles.css';
 
-/* Video Hero Section */
-.touhou-video-hero {
+/* Landing Hero with Background Video */
+.touhou-hero-wrapper {
   position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  max-height: 500px;
-  border-radius: var(--radius-xl);
-  overflow: hidden;
-  margin-bottom: var(--space-2xl);
-  border: 1px solid var(--border);
-  background: #000;
-}
-
-.touhou-video-hero iframe {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  border: none;
-}
-
-.touhou-video-placeholder {
-  position: absolute;
-  inset: 0;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  background: var(--bg-secondary);
-  color: var(--text-muted);
-  font-size: 14px;
+  min-height: 100vh;
+  overflow: hidden;
 }
 
-.touhou-video-placeholder svg {
-  width: 48px;
-  height: 48px;
-  color: var(--primary);
+.touhou-hero-video-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.touhou-hero-video-bg iframe {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100vw;
+  height: 56.25vw;
+  min-height: calc(100vh / 1.15);
+  min-width: calc(177.78vh / 1.15);
+  transform: translate(-50%, -50%);
+  border: 0;
+  pointer-events: none;
+}
+
+.touhou-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 1;
+}
+
+.touhou-hero-back {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  z-index: 2;
+}
+
+.touhou-hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 800px;
+  text-align: left;
+  padding: 0 var(--space-2xl);
+}
+
+.touhou-hero-content h1 {
+  font-size: 64px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-bottom: 16px;
+  color: #fff;
+}
+
+.touhou-hero-content .project-tagline {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 17px;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.touhou-hero-content .project-context {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.touhou-hero-content .project-context span {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.touhou-hero-content .tag {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.touhou-hero-content .cta-secondary {
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #fff;
+}
+
+.touhou-hero-content .cta-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
 }
 
 /* Screenshot Gallery */
@@ -174,8 +225,8 @@
     gap: 10px;
   }
 
-  .touhou-video-hero {
-    max-height: 300px;
+  .touhou-hero-content h1 {
+    font-size: 48px;
   }
 }
 
@@ -188,9 +239,13 @@
     grid-template-columns: 1fr;
   }
 
-  .touhou-video-hero {
-    max-height: 220px;
-    border-radius: var(--radius-md);
+  .touhou-hero-content h1 {
+    font-size: 36px;
+  }
+
+  .touhou-hero-back {
+    top: 16px;
+    left: 16px;
   }
 
   .screenshot-caption {

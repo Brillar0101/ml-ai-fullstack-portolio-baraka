@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ChevronLeft,
@@ -298,8 +298,8 @@ const screenshots = [
     caption: 'Player ship (bottom) faces the enemy (top) with health counters tracking damage'
   },
   {
-    src: '/assets/images/touhou/bullet-patterns.png',
-    alt: 'Enemy bullet-hell patterns',
+    src: '/assets/images/touhou/bullet-pattern.png',
+    alt: 'Enemy bullet-hell pattern',
     caption: 'Bullet-hell in action as the enemy fires colored projectile patterns toward the player'
   },
   {
@@ -308,9 +308,9 @@ const screenshots = [
     caption: 'Evolved combat with health bars, survival timer, multi-pattern bullets, and power-up system'
   },
   {
-    src: '/assets/images/touhou/game-over.png',
-    alt: 'Game over screen with score',
-    caption: 'Game over screen showing final score from survival time and remaining health'
+    src: '/assets/images/touhou/instructions.jpg',
+    alt: 'Instructions screen',
+    caption: 'Instructions screen explaining controls and gameplay mechanics'
   }
 ];
 
@@ -326,12 +326,70 @@ const bulletPatterns = [
   { name: 'Random Drop', desc: 'Random vertical positions', color: '#22C55E' }
 ];
 
+const TOUHOU_VIDEO_ID = 'Qiki2CVyrGQ';
+
 const TouhouProject = () => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxSrc, setLightboxSrc] = useState('');
   const [lightboxAlt, setLightboxAlt] = useState('');
+  const playerRef = useRef(null);
+  const containerRef = useRef(null);
 
-  const videoId = 'Qiki2CVyrGQ';
+  const onPlayerReady = useCallback((event) => {
+    event.target.mute();
+    event.target.playVideo();
+  }, []);
+
+  const onPlayerStateChange = useCallback((event) => {
+    if (event.data === 0) {
+      event.target.seekTo(0);
+      event.target.playVideo();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!window.YT) {
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      document.head.appendChild(tag);
+    }
+
+    function createPlayer() {
+      if (!containerRef.current) return;
+      playerRef.current = new window.YT.Player(containerRef.current, {
+        videoId: TOUHOU_VIDEO_ID,
+        playerVars: {
+          autoplay: 1,
+          mute: 1,
+          controls: 0,
+          showinfo: 0,
+          rel: 0,
+          modestbranding: 1,
+          playsinline: 1,
+          disablekb: 1,
+          fs: 0,
+          iv_load_policy: 3,
+          vq: 'hd1080',
+        },
+        events: {
+          onReady: onPlayerReady,
+          onStateChange: onPlayerStateChange,
+        },
+      });
+    }
+
+    if (window.YT && window.YT.Player) {
+      createPlayer();
+    } else {
+      window.onYouTubeIframeAPIReady = createPlayer;
+    }
+
+    return () => {
+      if (playerRef.current && playerRef.current.destroy) {
+        playerRef.current.destroy();
+      }
+    };
+  }, [onPlayerReady, onPlayerStateChange]);
 
   const openLightbox = (src, alt) => {
     setLightboxSrc(src);
@@ -350,68 +408,49 @@ const TouhouProject = () => {
   }, [lightboxOpen]);
 
   return (
-    <div className="project-page">
-      {/* Navigation */}
-      <Link to="/projects" className="back-btn">
-        <ChevronLeft />
-        Back to Projects
-      </Link>
+    <>
+      {/* Landing Hero with Background Video */}
+      <div className="touhou-hero-wrapper">
+        <div className="touhou-hero-video-bg">
+          <div ref={containerRef} />
+        </div>
+        <div className="touhou-hero-overlay" />
 
-      {/* Project Header */}
-      <header className="project-header">
-        <div className="header-content">
-          <div className="project-icon-large">
-            <Crosshair />
+        <Link to="/projects" className="back-btn touhou-hero-back">
+          <ChevronLeft />
+          Back to Projects
+        </Link>
+
+        <div className="touhou-hero-content">
+          <div className="project-context">
+            <Cpu />
+            <span>Embedded Systems</span>
           </div>
-          <div className="header-text">
-            <div className="project-context">
-              <Cpu />
-              <span>Embedded Systems</span>
-            </div>
-            <h1>Touhou</h1>
-            <p className="project-tagline">
-              A bullet-hell shooter on the MSP432 LaunchPad featuring 6 enemy firing patterns,
-              joystick-controlled movement, power-up system, and custom sprite rendering on a 128x128 LCD,
-              all running bare-metal with no operating system.
-            </p>
-            <div className="project-tags">
-              <span className="tag">MSP432</span>
-              <span className="tag">C</span>
-              <span className="tag">ADC14</span>
-              <span className="tag">SPI</span>
-              <span className="tag">LCD</span>
-              <span className="tag">Timer32</span>
-              <span className="tag">Bare-Metal</span>
-            </div>
-            <div className="header-ctas">
-              <a href="https://github.com/Brillar0101" target="_blank" rel="noopener noreferrer" className="cta-secondary">
-                <Github />
-                GitHub
-              </a>
-            </div>
+          <h1>Touhou</h1>
+          <p className="project-tagline">
+            A bullet-hell shooter on the MSP432 LaunchPad featuring 6 enemy firing patterns,
+            joystick-controlled movement, power-up system, and custom sprite rendering on a 128x128 LCD,
+            all running bare-metal with no operating system.
+          </p>
+          <div className="project-tags">
+            <span className="tag">MSP432</span>
+            <span className="tag">C</span>
+            <span className="tag">ADC14</span>
+            <span className="tag">SPI</span>
+            <span className="tag">LCD</span>
+            <span className="tag">Timer32</span>
+            <span className="tag">Bare-Metal</span>
+          </div>
+          <div className="header-ctas">
+            <a href="https://github.com/Brillar0101" target="_blank" rel="noopener noreferrer" className="cta-secondary">
+              <Github />
+              GitHub
+            </a>
           </div>
         </div>
-      </header>
+      </div>
 
-      {/* Video Hero */}
-      <section className="project-section">
-        <div className="touhou-video-hero">
-          {videoId ? (
-            <iframe
-              src={`https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0`}
-              title="Touhou Gameplay Demo"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
-          ) : (
-            <div className="touhou-video-placeholder">
-              <Play />
-              <span>Gameplay video coming soon</span>
-            </div>
-          )}
-        </div>
-      </section>
-
+      <div className="project-page">
       {/* The Challenge */}
       <section className="project-section">
         <div className="section-header">
@@ -735,6 +774,7 @@ const TouhouProject = () => {
         </div>
       )}
     </div>
+    </>
   );
 };
 
