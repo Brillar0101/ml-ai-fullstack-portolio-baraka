@@ -283,27 +283,27 @@ const FSMPipelineDiagram = () => {
    ============================================ */
 const screenshots = [
   {
-    src: '/assets/images/touhou/startup.png',
+    src: '/assets/images/touhou/startup.jpg',
     alt: 'Title screen startup animation',
     caption: 'Title screen with 3-second auto-advance to the main menu'
   },
   {
-    src: '/assets/images/touhou/menu.png',
+    src: '/assets/images/touhou/menu.jpg',
     alt: 'Main menu screen',
     caption: 'Main menu with S1/S2 navigation and joystick selection'
   },
   {
-    src: '/assets/images/touhou/gameplay-basic.png',
+    src: '/assets/images/touhou/gameplay-basic.jpg',
     alt: 'Player and enemy ships with health displays',
     caption: 'Player ship (bottom) faces the enemy (top) with health counters tracking damage'
   },
   {
-    src: '/assets/images/touhou/bullet-pattern.png',
+    src: '/assets/images/touhou/bullet-pattern.jpg',
     alt: 'Enemy bullet-hell pattern',
     caption: 'Bullet-hell in action as the enemy fires colored projectile patterns toward the player'
   },
   {
-    src: '/assets/images/touhou/gameplay-advanced.png',
+    src: '/assets/images/touhou/gameplay-advanced.jpg',
     alt: 'Full gameplay with health bars, timer, and multi-colored bullets',
     caption: 'Evolved combat with health bars, survival timer, multi-pattern bullets, and power-up system'
   },
@@ -326,7 +326,7 @@ const bulletPatterns = [
   { name: 'Random Drop', desc: 'Random vertical positions', color: '#22C55E' }
 ];
 
-const TOUHOU_VIDEO_ID = 'Qiki2CVyrGQ';
+const TOUHOU_VIDEO_ID = 'wSuiJyFIlaU';
 
 const TouhouProject = () => {
   const [lightboxOpen, setLightboxOpen] = useState(false);

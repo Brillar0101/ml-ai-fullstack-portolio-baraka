@@ -596,6 +596,7 @@
 /* Pipeline Flow - Horizontal Scroll on smaller screens */
 .ml-pipeline-flow {
   display: flex;
+  justify-content: center;
   gap: 8px;
   overflow-x: auto;
   padding: 16px 0;

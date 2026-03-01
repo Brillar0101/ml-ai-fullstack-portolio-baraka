@@ -17,26 +17,64 @@ import {
 import { CONFIG } from '../config';
 import './AboutPage.css';
 
+const devicon = (slug, variant = 'original') =>
+  `https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/${slug}/${slug}-${variant}.svg`;
+
 const skillCategories = [
   {
     title: 'ML / AI',
     icon: Brain,
-    skills: ['PyTorch', 'TensorFlow', 'YOLOv8', 'SAM2', 'OpenCV', 'Scikit-learn', 'Hugging Face', 'ONNX']
+    skills: [
+      { name: 'PyTorch', logo: devicon('pytorch') },
+      { name: 'TensorFlow', logo: devicon('tensorflow') },
+      { name: 'YOLOv8', logo: null },
+      { name: 'SAM2', logo: null },
+      { name: 'OpenCV', logo: devicon('opencv') },
+      { name: 'Scikit-learn', logo: devicon('scikitlearn') },
+      { name: 'Hugging Face', logo: null },
+      { name: 'ONNX', logo: null },
+    ]
   },
   {
     title: 'Web Development',
     icon: Globe,
-    skills: ['React', 'Next.js', 'Node.js', 'FastAPI', 'PostgreSQL', 'Supabase', 'Tailwind CSS']
+    skills: [
+      { name: 'React', logo: devicon('react') },
+      { name: 'Next.js', logo: devicon('nextjs'), invert: true },
+      { name: 'Node.js', logo: devicon('nodejs') },
+      { name: 'FastAPI', logo: devicon('fastapi') },
+      { name: 'PostgreSQL', logo: devicon('postgresql') },
+      { name: 'Supabase', logo: devicon('supabase') },
+      { name: 'Tailwind CSS', logo: devicon('tailwindcss') },
+    ]
   },
   {
     title: 'Embedded Systems',
     icon: Cpu,
-    skills: ['MSP432', 'C', 'UART', 'SPI', 'ADC14', 'Timer32', 'Bare-Metal', 'ARM Cortex-M']
+    skills: [
+      { name: 'MSP432', logo: null },
+      { name: 'C', logo: devicon('c') },
+      { name: 'UART', logo: null },
+      { name: 'SPI', logo: null },
+      { name: 'ADC14', logo: null },
+      { name: 'Timer32', logo: null },
+      { name: 'Bare-Metal', logo: null },
+      { name: 'ARM Cortex-M', logo: null },
+    ]
   },
   {
     title: 'Tools & Platforms',
     icon: Wrench,
-    skills: ['Git', 'Docker', 'Linux', 'Vercel', 'AWS', 'Roboflow', 'Jupyter', 'VS Code']
+    skills: [
+      { name: 'Git', logo: devicon('git') },
+      { name: 'Docker', logo: devicon('docker') },
+      { name: 'Linux', logo: devicon('linux') },
+      { name: 'Vercel', logo: null },
+      { name: 'AWS', logo: devicon('amazonwebservices', 'plain-wordmark'), invert: true },
+      { name: 'Roboflow', logo: null },
+      { name: 'Jupyter', logo: devicon('jupyter') },
+      { name: 'VS Code', logo: devicon('vscode') },
+    ]
   }
 ];
 
@@ -107,17 +145,31 @@ const AboutPage = () => {
           <Wrench />
           <h2>Skills & Technologies</h2>
         </div>
-        <div className="cards-grid two-col">
+        <div className="skill-marquee-container">
           {skillCategories.map((cat) => (
-            <div key={cat.title} className="info-card">
-              <div className="card-icon">
-                <cat.icon />
-              </div>
-              <h3>{cat.title}</h3>
-              <div className="about-skill-tags">
-                {cat.skills.map((skill) => (
-                  <span key={skill} className="tag">{skill}</span>
-                ))}
+            <div key={cat.title} className="skill-marquee-row">
+              <h3 className="skill-marquee-title">
+                <cat.icon size={18} />
+                {cat.title}
+              </h3>
+              <div className="skill-marquee">
+                <div className="skill-marquee-track">
+                  {cat.skills.map((skill, i) => (
+                    <div key={i} className="skill-marquee-item">
+                      {skill.logo ? (
+                        <img
+                          src={skill.logo}
+                          alt=""
+                          className={`skill-logo${skill.invert ? ' skill-logo-invert' : ''}`}
+                          onError={(e) => { e.target.style.display = 'none'; }}
+                        />
+                      ) : (
+                        <span className="skill-logo-text">{skill.name.charAt(0)}</span>
+                      )}
+                      <span className="skill-name">{skill.name}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           ))}

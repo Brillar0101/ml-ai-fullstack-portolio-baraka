@@ -81,13 +81,78 @@
   color: var(--text-muted);
 }
 
-/* Skill Tags */
-.about-skill-tags {
+/* Skill Marquee */
+.skill-marquee-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.skill-marquee-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.skill-marquee-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+}
+
+.skill-marquee-title svg {
+  color: var(--primary);
+}
+
+.skill-marquee-track {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
+  gap: 16px;
 }
+
+.skill-marquee-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-width: 80px;
+  padding: 12px 16px;
+}
+
+.skill-logo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.skill-logo-invert {
+  filter: brightness(0) invert(1);
+}
+
+.skill-logo-text {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.skill-name {
+  font-size: 13px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
 
 /* Resume Embed */
 .about-resume-embed {
