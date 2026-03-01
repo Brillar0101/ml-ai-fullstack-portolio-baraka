@@ -279,7 +279,7 @@ const FSMPipelineDiagram = () => {
 };
 
 /* ============================================
-   Screenshots — selected images with captions
+   Screenshots -selected images with captions
    ============================================ */
 const screenshots = [
   {

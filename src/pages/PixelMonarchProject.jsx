@@ -495,7 +495,7 @@ const PixelMonarchProject = () => {
             <span>Button Debounce FSM (Button.c)</span>
           </div>
           <pre>
-{`// 4-state debounce — filters switch bounce in 5ms
+{`// 4-state debounce, filters switch bounce in 5ms
 switch (button_p->debounceState) {
     case StableR:  // Stable Released
         if (rawState == PRESSED)

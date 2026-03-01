@@ -31,7 +31,7 @@
   border-bottom-color: var(--primary);
 }
 
-/* Project List — Clean rows, no cards */
+/* Project List -Clean rows, no cards */
 .project-list {
   display: flex;
   flex-direction: column;

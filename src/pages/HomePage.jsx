@@ -81,7 +81,7 @@ const HomePage = () => {
 
   return (
     <div className="hero-wrapper">
-      {/* Background YouTube video — seamless loop via API */}
+      {/* Background YouTube video */}
       <div className="hero-video-bg">
         <div ref={containerRef} />
       </div>

@@ -1,5 +1,5 @@
 /* ============================================
-   DESIGN SYSTEM — Micron/Crucial Inspired
+   DESIGN SYSTEM -Micron/Crucial Inspired
    Font: DM Sans (Google Fonts)
    Colors: Black, White, Blue (#0068FF)
    ============================================ */
@@ -36,7 +36,7 @@
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.1);
 
-  /* Spacing — 8px base */
+  /* Spacing -8px base */
   --space-xs: 4px;
   --space-sm: 8px;
   --space-md: 16px;
@@ -58,7 +58,7 @@
   --transition-base: 0.2s ease-out;
   --transition-smooth: 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
 
-  /* Legacy compat — project pages still reference these */
+  /* Legacy compat -project pages still reference these */
   --glass: rgba(255, 255, 255, 0.8);
   --glass-border: rgba(0, 0, 0, 0.08);
   --glass-hover: rgba(245, 245, 245, 0.95);
@@ -185,7 +185,7 @@ a:hover {
   line-height: 1.6;
 }
 
-/* Eyebrow label — Micron style */
+/* Eyebrow label -Micron style */
 .eyebrow {
   font-size: 14px;
   font-weight: 500;

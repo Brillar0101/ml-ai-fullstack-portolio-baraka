@@ -1,4 +1,4 @@
-/* Hero — Full viewport, Micron-style full-bleed video background */
+/* Hero -Full viewport, Micron-style full-bleed video background */
 
 .hero-wrapper {
   position: relative;
@@ -9,7 +9,7 @@
   overflow: hidden;
 }
 
-/* Background YouTube video — cover viewport like object-fit: cover */
+/* Background YouTube video -cover viewport like object-fit: cover */
 .hero-video-bg {
   position: absolute;
   inset: 0;
@@ -43,7 +43,7 @@
   background: rgba(255, 255, 255, 0.75);
 }
 
-/* Hero content — sits above video + overlay */
+/* Hero content -sits above video + overlay */
 .hero-content {
   position: relative;
   z-index: 2;
