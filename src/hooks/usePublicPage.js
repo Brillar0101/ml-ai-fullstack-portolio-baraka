@@ -7,36 +7,28 @@ import { supabase } from '../lib/supabase';
  * Only switches to builder content after it successfully loads.
  */
 export function usePublicPage(slug) {
-  // Start with loading=false so pages render immediately
   const [content, setContent] = useState(null);
-  const [loading] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
 
     async function load() {
-      // Try Supabase (non-blocking, with timeout)
+      // Try Supabase
       if (supabase) {
         try {
-          const controller = new AbortController();
-          const timeout = setTimeout(() => controller.abort(), 2000);
-
-          const { data } = await supabase
+          const { data, error } = await supabase
             .from('page_content')
             .select('craft_state')
             .eq('page_slug', slug)
             .eq('is_published', true)
-            .single()
-            .abortSignal(controller.signal);
+            .single();
 
-          clearTimeout(timeout);
-
-          if (!cancelled && data?.craft_state) {
+          if (!error && !cancelled && data?.craft_state) {
             setContent(data.craft_state);
             return;
           }
         } catch {
-          // Supabase failed — that's fine, use hardcoded content
+          // Supabase failed, fall through
         }
       }
 
@@ -58,5 +50,6 @@ export function usePublicPage(slug) {
     return () => { cancelled = true; };
   }, [slug]);
 
-  return { content, loading };
+  // Never block rendering — loading is always false
+  return { content, loading: false };
 }
