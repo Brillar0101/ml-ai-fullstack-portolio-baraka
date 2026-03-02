@@ -1,13 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { useProjects } from '../hooks/useProjects';
+import { usePublicPage } from '../hooks/usePublicPage';
 import { CATEGORIES } from '../data/projects';
 import './ProjectsPage.css';
+
+const PageRenderer = lazy(() => import('../builder/components/PageRenderer').then(m => ({ default: m.PageRenderer })));
 
 const ProjectsPage = () => {
   const [activeCategory, setActiveCategory] = useState('all');
   const { projects, loading } = useProjects(activeCategory);
+  const { content: builderContent, loading: builderLoading } = usePublicPage('/projects');
+
+  if (builderLoading) return <div style={{ minHeight: '60vh' }} />;
+  if (builderContent) return (
+    <Suspense fallback={<div style={{ minHeight: '60vh' }} />}>
+      <PageRenderer craftState={builderContent} />
+    </Suspense>
+  );
 
   return (
     <div className="container">

@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { LayoutDashboard, FolderKanban, BarChart3, Image, LogOut } from 'lucide-react';
+import { LayoutDashboard, FolderKanban, BarChart3, Image, PenTool, Settings, LogOut } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import './AdminLayout.css';
 
@@ -9,6 +9,8 @@ const navItems = [
   { to: '/admin/projects', icon: FolderKanban, label: 'Projects' },
   { to: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
   { to: '/admin/media', icon: Image, label: 'Media' },
+  { to: '/admin/page-builder', icon: PenTool, label: 'Page Builder' },
+  { to: '/admin/settings', icon: Settings, label: 'Settings' },
 ];
 
 export default function AdminLayout() {

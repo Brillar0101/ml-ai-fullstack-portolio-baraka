@@ -26,6 +26,8 @@ const AdminOverview = lazy(() => import('./pages/admin/AdminOverview'));
 const AdminProjects = lazy(() => import('./pages/admin/AdminProjects'));
 const AdminAnalytics = lazy(() => import('./pages/admin/AdminAnalytics'));
 const AdminMedia = lazy(() => import('./pages/admin/AdminMedia'));
+const AdminPageBuilder = lazy(() => import('./pages/admin/AdminPageBuilder'));
+const AdminSettings = lazy(() => import('./pages/admin/AdminSettings'));
 
 // Page titles for each route
 const pageTitles = {
@@ -116,6 +118,8 @@ export default function App() {
               <Route path="projects" element={<AdminProjects />} />
               <Route path="analytics" element={<AdminAnalytics />} />
               <Route path="media" element={<AdminMedia />} />
+              <Route path="page-builder" element={<AdminPageBuilder />} />
+              <Route path="settings" element={<AdminSettings />} />
             </Route>
           </Routes>
         </Suspense>

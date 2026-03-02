@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
+import { usePublicPage } from '../hooks/usePublicPage';
 import {
-  User,
   GraduationCap,
   Target,
   Download,
@@ -78,7 +78,26 @@ const skillCategories = [
   }
 ];
 
+const PageRenderer = lazy(() => import('../builder/components/PageRenderer').then(m => ({ default: m.PageRenderer })));
+
+const getPhotoCrop = () => {
+  try {
+    const saved = localStorage.getItem('profile_photo_crop');
+    return saved ? JSON.parse(saved) : null;
+  } catch { return null; }
+};
+
 const AboutPage = () => {
+  const { content, loading } = usePublicPage('/about');
+  const photoCrop = getPhotoCrop();
+
+  if (loading) return <div style={{ minHeight: '60vh' }} />;
+  if (content) return (
+    <Suspense fallback={<div style={{ minHeight: '60vh' }} />}>
+      <PageRenderer craftState={content} />
+    </Suspense>
+  );
+
   return (
     <div className="about-page container">
       <header className="page-header">
@@ -89,8 +108,16 @@ const AboutPage = () => {
       {/* Bio */}
       <section className="about-section">
         <div className="about-bio-grid">
-          <div className="about-photo-placeholder">
-            <User size={64} />
+          <div className="about-photo">
+            <img
+              src="/assets/images/profile.jpg"
+              alt="Barakaeli Lawuo"
+              className="about-photo-img"
+              style={photoCrop ? {
+                transform: `scale(${photoCrop.zoom})`,
+                transformOrigin: `${50 - photoCrop.position.x}% ${50 - photoCrop.position.y}%`,
+              } : undefined}
+            />
           </div>
           <div className="about-bio-text">
             <h2>Barakaeli Lawuo</h2>

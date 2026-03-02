@@ -1,10 +1,21 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, lazy, Suspense } from 'react';
 import emailjs from '@emailjs/browser';
 import { AtSign, Phone, MapPin, Github, Linkedin, Send, CheckCircle, AlertCircle, Loader } from 'lucide-react';
+import { usePublicPage } from '../hooks/usePublicPage';
 import { CONFIG } from '../config';
 import './ContactPage.css';
 
+const PageRenderer = lazy(() => import('../builder/components/PageRenderer').then(m => ({ default: m.PageRenderer })));
+
 const ContactPage = () => {
+  const { content: builderContent, loading: builderLoading } = usePublicPage('/contact');
+
+  if (builderLoading) return <div style={{ minHeight: '60vh' }} />;
+  if (builderContent) return (
+    <Suspense fallback={<div style={{ minHeight: '60vh' }} />}>
+      <PageRenderer craftState={builderContent} />
+    </Suspense>
+  );
   const formRef = useRef();
   const [formData, setFormData] = useState({
     from_name: '',

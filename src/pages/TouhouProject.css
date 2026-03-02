@@ -51,8 +51,9 @@
   position: relative;
   z-index: 2;
   max-width: 800px;
-  text-align: left;
+  text-align: center;
   padding: 0 var(--space-2xl);
+  margin: 0 auto;
 }
 
 .touhou-hero-content h1 {
@@ -76,6 +77,18 @@
 
 .touhou-hero-content .project-context span {
   color: rgba(255, 255, 255, 0.7);
+}
+
+.touhou-hero-content .project-context {
+  justify-content: center;
+}
+
+.touhou-hero-content .project-tags {
+  justify-content: center;
+}
+
+.touhou-hero-content .header-ctas {
+  justify-content: center;
 }
 
 .touhou-hero-content .tag {

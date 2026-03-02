@@ -16,17 +16,19 @@
   align-items: flex-start;
 }
 
-.about-photo-placeholder {
+.about-photo {
   width: 180px;
   height: 180px;
   min-width: 180px;
   border-radius: var(--radius-xl);
-  background: var(--bg-secondary);
+  overflow: hidden;
   border: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-muted);
+}
+
+.about-photo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .about-bio-text h2 {
@@ -189,7 +191,7 @@
     gap: var(--space-lg);
   }
 
-  .about-photo-placeholder {
+  .about-photo {
     width: 140px;
     height: 140px;
     min-width: 140px;

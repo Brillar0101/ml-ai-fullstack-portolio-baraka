@@ -1,12 +1,23 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { Github, Linkedin, ArrowRight } from 'lucide-react';
+import { usePublicPage } from '../hooks/usePublicPage';
 import { CONFIG } from '../config';
 import './HomePage.css';
+
+const PageRenderer = lazy(() => import('../builder/components/PageRenderer').then(m => ({ default: m.PageRenderer })));
 
 const YOUTUBE_VIDEO_ID = 'oqUrfFeTF88';
 
 const HomePage = () => {
+  const { content: builderContent, loading: builderLoading } = usePublicPage('/');
+
+  if (builderLoading) return <div style={{ minHeight: '100vh' }} />;
+  if (builderContent) return (
+    <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
+      <PageRenderer craftState={builderContent} />
+    </Suspense>
+  );
   const [showName, setShowName] = useState(false);
   const [showRole, setShowRole] = useState(false);
   const [showContent, setShowContent] = useState(false);
