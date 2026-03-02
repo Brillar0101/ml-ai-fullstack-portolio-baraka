@@ -3,34 +3,40 @@ import { supabase } from '../lib/supabase';
 
 /**
  * Hook for public pages to load published content from the page builder.
- * Returns { content, loading } where content is the serialized Craft.js state.
- * If no published content exists, returns null (page should render its hardcoded JSX).
+ * Non-blocking: pages render their hardcoded JSX immediately.
+ * Only switches to builder content after it successfully loads.
  */
 export function usePublicPage(slug) {
+  // Start with loading=false so pages render immediately
   const [content, setContent] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
 
     async function load() {
-      // Try Supabase first
+      // Try Supabase (non-blocking, with timeout)
       if (supabase) {
         try {
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 2000);
+
           const { data } = await supabase
             .from('page_content')
             .select('craft_state')
             .eq('page_slug', slug)
             .eq('is_published', true)
-            .single();
+            .single()
+            .abortSignal(controller.signal);
+
+          clearTimeout(timeout);
 
           if (!cancelled && data?.craft_state) {
             setContent(data.craft_state);
-            setLoading(false);
             return;
           }
         } catch {
-          // Fall through to localStorage
+          // Supabase failed — that's fine, use hardcoded content
         }
       }
 
@@ -41,17 +47,10 @@ export function usePublicPage(slug) {
           const parsed = JSON.parse(local);
           if (!cancelled && parsed.is_published && parsed.craft_state) {
             setContent(parsed.craft_state);
-            setLoading(false);
-            return;
           }
         }
       } catch {
-        // Ignore parse errors
-      }
-
-      if (!cancelled) {
-        setContent(null);
-        setLoading(false);
+        // Ignore
       }
     }
 

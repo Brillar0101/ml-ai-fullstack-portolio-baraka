@@ -123,6 +123,42 @@
   transform: translateX(4px);
 }
 
+/* In Development */
+.dev-tag {
+  padding: 2px 8px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.project-row-disabled {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  padding: var(--space-lg) 0;
+  border-bottom: 1px solid var(--border);
+  opacity: 0.55;
+  cursor: default;
+}
+
+.project-row-disabled:first-child {
+  border-top: 1px solid var(--border);
+}
+
+.project-row-disabled .project-row-title {
+  color: var(--text-secondary);
+}
+
+.project-row-disabled .project-row-desc {
+  color: var(--text-muted);
+}
+
 /* Empty State */
 .projects-empty {
   text-align: center;

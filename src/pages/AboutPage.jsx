@@ -58,7 +58,7 @@ const skillCategories = [
       { name: 'SPI', logo: null },
       { name: 'ADC14', logo: null },
       { name: 'Timer32', logo: null },
-      { name: 'Bare-Metal', logo: null },
+      { name: 'Bare Metal', logo: null },
       { name: 'ARM Cortex-M', logo: null },
     ]
   },
@@ -125,12 +125,12 @@ const AboutPage = () => {
             <p>
               I am a Computer Engineering student at Virginia Tech with a passion for
               building intelligent systems that sit at the intersection of hardware and software.
-              My work spans machine learning, embedded systems, and full-stack web development.
+              My work spans machine learning, embedded systems, and full stack web development.
             </p>
             <p>
-              I enjoy tackling challenging problems that require both low-level hardware
-              understanding and high-level software design, from training computer vision
-              models to programming bare-metal microcontrollers.
+              I enjoy tackling challenging problems that require both low level hardware
+              understanding and high level software design, from training computer vision
+              models to programming bare metal microcontrollers.
             </p>
           </div>
         </div>
@@ -160,7 +160,7 @@ const AboutPage = () => {
           <p>
             I want to work on systems that bridge the gap between intelligent software
             and physical hardware. Whether that means deploying ML models on edge devices,
-            building computer vision pipelines, or architecting full-stack platforms
+            building computer vision pipelines, or architecting full stack platforms
             that use AI to solve real problems, I want to be at the center of it.
           </p>
         </div>

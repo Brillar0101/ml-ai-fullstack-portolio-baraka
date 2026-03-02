@@ -52,27 +52,32 @@ const ProjectsPage = () => {
         </div>
       ) : (
         <div className="project-list">
-          {projects.map((project) => (
-            <Link
-              key={project.id}
-              to={project.route}
-              className="project-row"
-            >
-              <div className="project-row-content">
-                <div className="project-row-header">
-                  <h3 className="project-row-title">{project.title}</h3>
-                  {project.featured && <span className="featured-tag">Featured</span>}
+          {projects.map((project) => {
+            const isDev = project.status === 'in-development';
+            const Row = isDev ? 'div' : Link;
+            const rowProps = isDev
+              ? { className: 'project-row project-row-disabled' }
+              : { to: project.route, className: 'project-row' };
+
+            return (
+              <Row key={project.id} {...rowProps}>
+                <div className="project-row-content">
+                  <div className="project-row-header">
+                    <h3 className="project-row-title">{project.title}</h3>
+                    {project.featured && <span className="featured-tag">Featured</span>}
+                    {isDev && <span className="dev-tag">In Development</span>}
+                  </div>
+                  <p className="project-row-desc">{project.shortDesc}</p>
+                  <div className="project-row-tags">
+                    {project.tags.map((tag, index) => (
+                      <span key={index} className="project-row-tag">{tag}</span>
+                    ))}
+                  </div>
                 </div>
-                <p className="project-row-desc">{project.shortDesc}</p>
-                <div className="project-row-tags">
-                  {project.tags.map((tag, index) => (
-                    <span key={index} className="project-row-tag">{tag}</span>
-                  ))}
-                </div>
-              </div>
-              <ArrowRight className="project-row-arrow" size={20} />
-            </Link>
-          ))}
+                {!isDev && <ArrowRight className="project-row-arrow" size={20} />}
+              </Row>
+            );
+          })}
         </div>
       )}
     </div>

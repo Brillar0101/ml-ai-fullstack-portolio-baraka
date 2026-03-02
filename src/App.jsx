@@ -39,6 +39,8 @@ const pageTitles = {
   '/projects/swishvision': 'SwishVision',
   '/projects/pixel-monarch': 'Pixel Monarch',
   '/projects/touhou': 'Touhou',
+  '/projects/16bit-alu': '16 Bit Arithmetic Logic Unit',
+  '/projects/3-filter-audio': '3 Filter Audio System',
   '/about': 'About',
   '/blog': 'Blog'
 };

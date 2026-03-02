@@ -1,6 +1,7 @@
 import React from 'react';
 import { useEditor } from '@craftjs/core';
-import { Undo2, Redo2, Save, Eye, Monitor, Tablet, Smartphone, Upload } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Undo2, Redo2, Save, Eye, Monitor, Tablet, Smartphone, Upload } from 'lucide-react';
 
 const PAGES = [
   { slug: '/', label: 'Home' },
@@ -11,14 +12,30 @@ const PAGES = [
 ];
 
 export function EditorToolbar({ currentPage, onPageChange, onSave, onPublish, saving, preview, onPreviewToggle, viewport, onViewportChange }) {
-  const { canUndo, canRedo, actions } = useEditor((state, query) => ({
-    canUndo: query.history.canUndo(),
-    canRedo: query.history.canRedo(),
-  }));
+  const navigate = useNavigate();
+  const { canUndo, canRedo, actions } = useEditor((state, query) => {
+    try {
+      return {
+        canUndo: query.history?.canUndo() || false,
+        canRedo: query.history?.canRedo() || false,
+      };
+    } catch {
+      return { canUndo: false, canRedo: false };
+    }
+  });
 
   return (
     <div className="builder-toolbar">
       <div className="builder-toolbar-left">
+        <button
+          className="builder-toolbar-btn"
+          onClick={() => navigate('/admin')}
+          title="Back to Admin"
+        >
+          <ArrowLeft size={16} />
+          <span>Back</span>
+        </button>
+        <div className="builder-toolbar-divider" />
         <select
           className="builder-page-select"
           value={currentPage}

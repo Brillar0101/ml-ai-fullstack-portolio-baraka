@@ -370,7 +370,7 @@ const PSIVRentalsProject = () => {
             </div>
             <h3>What Success Looks Like</h3>
             <p>
-              A modern mobile-first experience with real-time availability, seamless payments, 
+              A modern mobile first experience with real time availability, seamless payments,
               and comprehensive admin tools for business management.
             </p>
           </div>

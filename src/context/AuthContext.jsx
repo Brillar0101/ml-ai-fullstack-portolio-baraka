@@ -10,13 +10,16 @@ export function AuthProvider({ children }) {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
+    // Check local dev mode first (works with or without Supabase)
+    const localAdmin = localStorage.getItem('admin_local_dev');
+    if (localAdmin === 'true') {
+      setUser({ id: 'local', user_metadata: { user_name: 'Local Admin' } });
+      setIsAdmin(true);
+      setLoading(false);
+      return;
+    }
+
     if (!supabase) {
-      // Check if user previously signed in via local dev mode
-      const localAdmin = localStorage.getItem('admin_local_dev');
-      if (localAdmin === 'true') {
-        setUser({ id: 'local', user_metadata: { user_name: 'Local Admin' } });
-        setIsAdmin(true);
-      }
       setLoading(false);
       return;
     }
@@ -79,14 +82,12 @@ export function AuthProvider({ children }) {
   }
 
   async function signOut() {
-    if (!supabase) {
-      localStorage.removeItem('admin_local_dev');
-      setUser(null);
-      setIsAdmin(false);
-      return;
-    }
-    await supabase.auth.signOut();
+    localStorage.removeItem('admin_local_dev');
+    setUser(null);
     setIsAdmin(false);
+    if (supabase) {
+      await supabase.auth.signOut();
+    }
   }
 
   return (

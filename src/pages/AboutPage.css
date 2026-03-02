@@ -113,21 +113,27 @@
 .skill-marquee-track {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 10px;
 }
 
 .skill-marquee-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  min-width: 80px;
-  padding: 12px 16px;
+  gap: 6px;
+  min-width: 72px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast);
+}
+
+.skill-marquee-item:hover {
+  background: var(--bg-secondary);
 }
 
 .skill-logo {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   object-fit: contain;
 }
 
@@ -136,25 +142,24 @@
 }
 
 .skill-logo-text {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-md);
   background: var(--bg-secondary);
   border: 1px solid var(--border);
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--primary);
 }
 
 .skill-name {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-secondary);
   white-space: nowrap;
 }
-
 
 /* Resume Embed */
 .about-resume-embed {
@@ -207,7 +212,30 @@
     font-size: 24px;
   }
 
+  .skill-marquee-track {
+    gap: 6px;
+  }
+
+  .skill-marquee-item {
+    min-width: 64px;
+    padding: 8px;
+  }
+
+  .skill-logo,
+  .skill-logo-text {
+    width: 32px;
+    height: 32px;
+  }
+
+  .skill-name {
+    font-size: 11px;
+  }
+
   .about-connect-links {
     flex-direction: column;
+  }
+
+  .resume-viewer {
+    height: 400px;
   }
 }

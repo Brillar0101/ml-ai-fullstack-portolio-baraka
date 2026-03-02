@@ -19,18 +19,37 @@ export default function AdminLogin() {
     return <Navigate to="/admin" replace />;
   }
 
+  const handleLocalAdmin = () => {
+    localStorage.setItem('admin_local_dev', 'true');
+    window.location.reload();
+  };
+
   return (
     <div className="admin-login-page">
       <div className="admin-login-card">
         <h1 className="admin-login-title">Admin Dashboard</h1>
         <p className="admin-login-desc">
-          {supabase
-            ? 'Sign in with GitHub to manage your portfolio.'
-            : 'Supabase not configured. Sign in with local dev mode to manage projects.'}
+          Sign in to manage your portfolio.
         </p>
-        <button className="admin-login-btn" onClick={signIn}>
-          {supabase ? <Github size={18} /> : <Monitor size={18} />}
-          {supabase ? 'Sign in with GitHub' : 'Enter Local Admin'}
+
+        {supabase && (
+          <button className="admin-login-btn" onClick={signIn} style={{ marginBottom: '12px' }}>
+            <Github size={18} />
+            Sign in with GitHub
+          </button>
+        )}
+
+        <button
+          className="admin-login-btn"
+          onClick={handleLocalAdmin}
+          style={{
+            background: supabase ? 'transparent' : undefined,
+            color: supabase ? 'var(--text)' : undefined,
+            border: supabase ? '1px solid var(--border)' : undefined,
+          }}
+        >
+          <Monitor size={18} />
+          Enter Local Admin
         </button>
       </div>
     </div>

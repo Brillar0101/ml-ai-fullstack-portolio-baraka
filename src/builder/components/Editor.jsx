@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Editor as CraftEditor, Frame, Element } from '@craftjs/core';
+import { Editor as CraftEditor, Frame, Element, useEditor } from '@craftjs/core';
 import { resolvers, Container, TextBlock, SectionHeader, GlassCard, InfoCard } from '../blocks';
 import { EditorToolbar } from './EditorToolbar';
 import { ComponentPalette } from './ComponentPalette';
@@ -14,19 +14,6 @@ const VIEWPORT_WIDTHS = {
   mobile: '375px',
 };
 
-// Default content when no saved state exists
-function DefaultContent() {
-  return (
-    <Element is={Container} canvas padding={32} maxWidth={1200}>
-      <SectionHeader heading="Welcome to the Page Builder" iconName="Layers" />
-      <TextBlock text="Drag components from the left panel to build your page. Click on any element to edit it. Use the property panel on the right to customize." />
-      <Element is={GlassCard} canvas padding={24}>
-        <InfoCard title="Getting Started" subtitle="Drag and drop" body="Drag components from the palette on the left into this canvas area. Click any text to edit it inline." />
-      </Element>
-    </Element>
-  );
-}
-
 export function PageBuilder() {
   const [currentPage, setCurrentPage] = useState('/');
   const [preview, setPreview] = useState(false);
@@ -36,15 +23,18 @@ export function PageBuilder() {
 
   const handleSave = useCallback(async () => {
     if (!editorRef) return;
-    const json = editorRef.query.serialize();
-    const result = await saveContent(json);
-    if (result.success) {
-      // Could show toast notification
+    try {
+      const json = editorRef.query.serialize();
+      const result = await saveContent(json);
+      if (result.success) {
+        alert('Page saved!');
+      }
+    } catch (err) {
+      console.error('Save failed:', err);
     }
   }, [editorRef, saveContent]);
 
   const handlePublish = useCallback(async () => {
-    // Save first, then publish
     await handleSave();
     const result = await publishContent();
     if (result.success) {
@@ -53,10 +43,11 @@ export function PageBuilder() {
   }, [handleSave, publishContent]);
 
   const handlePageChange = useCallback(async (newSlug) => {
-    // Save current page before switching
     if (editorRef) {
-      const json = editorRef.query.serialize();
-      await saveContent(json);
+      try {
+        const json = editorRef.query.serialize();
+        await saveContent(json);
+      } catch { /* ignore */ }
     }
     setCurrentPage(newSlug);
   }, [editorRef, saveContent]);
@@ -68,19 +59,11 @@ export function PageBuilder() {
         e.preventDefault();
         handleSave();
       }
-      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
-        e.preventDefault();
-        editorRef?.actions.history.undo();
-      }
-      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && e.shiftKey) {
-        e.preventDefault();
-        editorRef?.actions.history.redo();
-      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleSave, editorRef]);
+  }, [handleSave]);
 
   if (loading) {
     return (
@@ -94,12 +77,6 @@ export function PageBuilder() {
     <CraftEditor
       resolver={resolvers}
       enabled={!preview}
-      onRender={({ render }) => render}
-      onNodesChange={(query) => {
-        if (!editorRef) {
-          setEditorRef({ query, actions: query });
-        }
-      }}
     >
       <EditorInner
         currentPage={currentPage}
@@ -157,7 +134,13 @@ function EditorInner({ currentPage, onPageChange, onSave, onPublish, saving, pre
           style={{ maxWidth: VIEWPORT_WIDTHS[viewport] }}
         >
           <Frame>
-            <DefaultContent />
+            <Element is={Container} canvas padding={32} maxWidth={1200}>
+              <SectionHeader heading="Welcome to the Page Builder" iconName="Layers" />
+              <TextBlock text="Drag components from the left panel to build your page. Click on any element to edit it. Use the property panel on the right to customize." />
+              <Element is={GlassCard} canvas padding={24}>
+                <InfoCard title="Getting Started" subtitle="Drag and drop" body="Drag components from the palette on the left into this canvas area. Click any text to edit it inline." />
+              </Element>
+            </Element>
           </Frame>
         </div>
       </div>

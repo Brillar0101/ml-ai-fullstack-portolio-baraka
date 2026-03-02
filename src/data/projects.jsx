@@ -1,4 +1,4 @@
-import { Camera, Layers, Cpu, Crosshair } from 'lucide-react';
+import { Camera, Layers, Cpu, Crosshair, Music } from 'lucide-react';
 
 // Custom Basketball Icon
 const Basketball = () => (
@@ -63,11 +63,33 @@ export const PROJECTS = [
   {
     id: "touhou",
     title: "Touhou",
-    shortDesc: "Bullet-hell shooter on MSP432 with 6 enemy firing patterns, joystick control, power-ups, and custom sprite rendering on 128x128 LCD",
+    shortDesc: "Bullet hell shooter on MSP432 with 6 enemy firing patterns, joystick control, power ups, and custom sprite rendering on 128x128 LCD",
     icon: Crosshair,
     tags: ["MSP432", "C", "ADC14", "SPI", "LCD", "Timer32"],
     category: "embedded",
     featured: true,
     route: "/projects/touhou"
+  },
+  {
+    id: "16bit-alu",
+    title: "16 Bit Arithmetic Logic Unit",
+    shortDesc: "16-bit ALU designed for ECE 2544",
+    icon: Cpu,
+    tags: ["ECE 2544"],
+    category: "hardware",
+    featured: false,
+    status: "in-development",
+    route: "/projects/16bit-alu"
+  },
+  {
+    id: "3-filter-audio",
+    title: "3 Filter Audio System",
+    shortDesc: "3 filter audio system developed for IDP",
+    icon: Music,
+    tags: ["IDP"],
+    category: "hardware",
+    featured: false,
+    status: "in-development",
+    route: "/projects/3-filter-audio"
   }
 ];

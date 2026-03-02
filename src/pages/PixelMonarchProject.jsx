@@ -334,7 +334,7 @@ const PixelMonarchProject = () => {
           <div className="info-card">
             <div className="card-icon"><Radio /></div>
             <h3>Serial Communication</h3>
-            <p>Handle UART input/output at 4 different baud rates with real-time command parsing</p>
+            <p>Handle UART input/output at 4 different baud rates with real time command parsing</p>
           </div>
           <div className="info-card highlight">
             <div className="card-icon"><Target /></div>

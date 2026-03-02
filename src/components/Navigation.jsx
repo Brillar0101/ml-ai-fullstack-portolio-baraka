@@ -115,6 +115,26 @@ const Navigation = () => {
           >
             Resume
           </a>
+          <div className="mobile-social">
+            <a
+              href={`https://${CONFIG.github}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="nav-icon-btn"
+              aria-label="GitHub"
+            >
+              <Github size={18} />
+            </a>
+            <a
+              href={`https://${CONFIG.linkedin}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="nav-icon-btn"
+              aria-label="LinkedIn"
+            >
+              <Linkedin size={18} />
+            </a>
+          </div>
         </div>
       )}
     </nav>

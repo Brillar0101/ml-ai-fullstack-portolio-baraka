@@ -1,50 +1,41 @@
 import React from 'react';
 import { useEditor } from '@craftjs/core';
-import { Trash2, Copy, ChevronUp, ChevronDown } from 'lucide-react';
+import { Trash2, Copy } from 'lucide-react';
 
 export function PropertyPanel() {
-  const { selected, actions, query } = useEditor((state) => {
-    const currentNodeId = state.events.selected?.values().next().value;
-    let selected;
+  const { selectedNodeId, selectedName, selectedSettings, isDeletable, actions } = useEditor((state, query) => {
+    let nodeId = null;
 
-    if (currentNodeId) {
-      const node = state.nodes[currentNodeId];
-      if (node) {
-        selected = {
-          id: currentNodeId,
-          name: node.data.displayName || node.data.custom?.displayName || node.data.type?.craft?.displayName || 'Element',
-          settings: node.related?.settings,
-          isDeletable: query.node(currentNodeId).isDeletable(),
-        };
+    // Get selected node ID safely
+    if (state.events.selected) {
+      const sel = state.events.selected;
+      if (typeof sel.values === 'function') {
+        nodeId = sel.values().next().value || null;
+      } else if (sel.size > 0) {
+        nodeId = [...sel][0];
       }
     }
 
-    return { selected };
+    if (!nodeId || !state.nodes[nodeId]) {
+      return { selectedNodeId: null };
+    }
+
+    const node = state.nodes[nodeId];
+    return {
+      selectedNodeId: nodeId,
+      selectedName: node.data.displayName || node.data.name || 'Element',
+      selectedSettings: node.related?.settings || null,
+      isDeletable: nodeId !== 'ROOT',
+    };
   });
 
   const handleDelete = () => {
-    if (selected?.id) {
-      actions.delete(selected.id);
+    if (selectedNodeId) {
+      actions.delete(selectedNodeId);
     }
   };
 
-  const handleDuplicate = () => {
-    if (selected?.id) {
-      const node = query.node(selected.id).get();
-      const parentId = node.data.parent;
-      const serialized = query.node(selected.id).toSerializedNode();
-      // Clone and add to parent
-      const freshNode = query.parseFreshNode({
-        data: {
-          ...serialized,
-          parent: parentId,
-        },
-      }).toNode();
-      actions.add(freshNode, parentId);
-    }
-  };
-
-  if (!selected) {
+  if (!selectedNodeId) {
     return (
       <div className="builder-properties">
         <div className="builder-properties-header">
@@ -57,21 +48,14 @@ export function PropertyPanel() {
     );
   }
 
-  const SettingsComponent = selected.settings;
+  const SettingsComponent = selectedSettings;
 
   return (
     <div className="builder-properties">
       <div className="builder-properties-header">
-        <h3>{selected.name}</h3>
+        <h3>{selectedName}</h3>
         <div className="builder-properties-actions">
-          <button
-            className="builder-prop-action-btn"
-            onClick={handleDuplicate}
-            title="Duplicate"
-          >
-            <Copy size={14} />
-          </button>
-          {selected.isDeletable && (
+          {isDeletable && (
             <button
               className="builder-prop-action-btn builder-prop-delete"
               onClick={handleDelete}
@@ -86,7 +70,7 @@ export function PropertyPanel() {
         {SettingsComponent ? (
           <SettingsComponent />
         ) : (
-          <p className="builder-properties-empty">No settings available for this element.</p>
+          <p className="builder-properties-empty">No settings for this element.</p>
         )}
       </div>
     </div>

@@ -137,7 +137,7 @@ const ClapperboardProject = () => {
             <h1>Clapperboard Detection System</h1>
             <p className="project-tagline">
               Detect clapperboards instantly in footage to speed up editing workflows.
-              Built with YOLOv8n achieving 96.4% mAP@0.5 at 48 FPS real-time processing.
+              Built with YOLOv8n achieving 96.4% mAP@0.5 at 48 FPS real time processing.
             </p>
             <div className="project-tags">
               <span className="tag">Computer Vision</span>

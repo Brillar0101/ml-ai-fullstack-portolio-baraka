@@ -299,13 +299,13 @@ const screenshots = [
   },
   {
     src: '/assets/images/touhou/bullet-pattern.jpg',
-    alt: 'Enemy bullet-hell pattern',
-    caption: 'Bullet-hell in action as the enemy fires colored projectile patterns toward the player'
+    alt: 'Enemy bullet hell pattern',
+    caption: 'Bullet hell in action as the enemy fires colored projectile patterns toward the player'
   },
   {
     src: '/assets/images/touhou/gameplay-advanced.jpg',
     alt: 'Full gameplay with health bars, timer, and multi-colored bullets',
-    caption: 'Evolved combat with health bars, survival timer, multi-pattern bullets, and power-up system'
+    caption: 'Evolved combat with health bars, survival timer, multi pattern bullets, and power up system'
   },
   {
     src: '/assets/images/touhou/instructions.jpg',
@@ -428,9 +428,9 @@ const TouhouProject = () => {
           </div>
           <h1>Touhou</h1>
           <p className="project-tagline">
-            A bullet-hell shooter on the MSP432 LaunchPad featuring 6 enemy firing patterns,
-            joystick-controlled movement, power-up system, and custom sprite rendering on a 128x128 LCD,
-            all running bare-metal with no operating system.
+            A bullet hell shooter on the MSP432 LaunchPad featuring 6 enemy firing patterns,
+            joystick controlled movement, power up system, and custom sprite rendering on a 128x128 LCD,
+            all running bare metal with no operating system.
           </p>
           <div className="project-tags">
             <span className="tag">MSP432</span>
@@ -506,7 +506,7 @@ const TouhouProject = () => {
           <h2>Game Mechanics</h2>
         </div>
         <div className="content-block">
-          <p>A classic bullet-hell shooter where the player dodges enemy projectiles, fires back, and collects power-ups to survive.</p>
+          <p>A classic bullet hell shooter where the player dodges enemy projectiles, fires back, and collects power ups to survive.</p>
         </div>
 
         <div className="cards-grid two-col">
@@ -696,7 +696,7 @@ const TouhouProject = () => {
           </div>
           <div className="info-card">
             <h3>Pattern Rotation Timing</h3>
-            <p>Decoupling pattern switch time (5s) from bullet spawn time (1s) allows overlapping bullets from different patterns, creating the bullet-hell feel</p>
+            <p>Decoupling pattern switch time (5s) from bullet spawn time (1s) allows overlapping bullets from different patterns, creating the bullet hell feel</p>
           </div>
           <div className="info-card">
             <h3>Custom Sprite Rendering</h3>

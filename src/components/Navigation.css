@@ -163,8 +163,14 @@
   color: var(--primary);
 }
 
-.mobile-link:last-child {
+.mobile-link:last-of-type {
   border-bottom: none;
+}
+
+.mobile-social {
+  display: flex;
+  gap: 8px;
+  padding-top: var(--space-md);
 }
 
 /* ---- Responsive ---- */

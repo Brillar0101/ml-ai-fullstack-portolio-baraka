@@ -318,11 +318,11 @@ const SwishVisionProject = () => {
               </div>
               <div className="goal-item">
                 <div className="goal-phase">Phase 2 (Next)</div>
-                <div className="goal-text">Analyze plays: possession tracking, shot detection, play-by-play breakdown</div>
+                <div className="goal-text">Analyze plays: possession tracking, shot detection, play by play breakdown</div>
               </div>
               <div className="goal-item">
                 <div className="goal-phase">Phase 3 (Future)</div>
-                <div className="goal-text">Advanced features: player heatmaps, speed tracking, real-time processing</div>
+                <div className="goal-text">Advanced features: player heatmaps, speed tracking, real time processing</div>
               </div>
             </div>
           </div>

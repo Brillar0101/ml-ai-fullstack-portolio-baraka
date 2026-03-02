@@ -11,13 +11,6 @@ const YOUTUBE_VIDEO_ID = 'oqUrfFeTF88';
 
 const HomePage = () => {
   const { content: builderContent, loading: builderLoading } = usePublicPage('/');
-
-  if (builderLoading) return <div style={{ minHeight: '100vh' }} />;
-  if (builderContent) return (
-    <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
-      <PageRenderer craftState={builderContent} />
-    </Suspense>
-  );
   const [showName, setShowName] = useState(false);
   const [showRole, setShowRole] = useState(false);
   const [showContent, setShowContent] = useState(false);
@@ -31,14 +24,12 @@ const HomePage = () => {
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, []);
 
-  // Load YouTube IFrame API and create player for seamless looping
   const onPlayerReady = useCallback((event) => {
     event.target.mute();
     event.target.playVideo();
   }, []);
 
   const onPlayerStateChange = useCallback((event) => {
-    // When video ends (state 0), seek to start instantly
     if (event.data === 0) {
       event.target.seekTo(0);
       event.target.playVideo();
@@ -46,7 +37,6 @@ const HomePage = () => {
   }, []);
 
   useEffect(() => {
-    // Load the YouTube IFrame API script if not already loaded
     if (!window.YT) {
       const tag = document.createElement('script');
       tag.src = 'https://www.youtube.com/iframe_api';
@@ -89,6 +79,13 @@ const HomePage = () => {
       }
     };
   }, [onPlayerReady, onPlayerStateChange]);
+
+  if (builderLoading) return <div style={{ minHeight: '100vh' }} />;
+  if (builderContent) return (
+    <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
+      <PageRenderer craftState={builderContent} />
+    </Suspense>
+  );
 
   return (
     <div className="hero-wrapper">

@@ -254,8 +254,9 @@
 
 @media (max-width: 767px) {
   .contact-page {
-    height: 100%;
-    padding: 16px;
+    height: auto;
+    min-height: 100%;
+    padding: 80px 16px 24px;
     overflow: auto;
   }
 

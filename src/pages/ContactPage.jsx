@@ -9,13 +9,6 @@ const PageRenderer = lazy(() => import('../builder/components/PageRenderer').the
 
 const ContactPage = () => {
   const { content: builderContent, loading: builderLoading } = usePublicPage('/contact');
-
-  if (builderLoading) return <div style={{ minHeight: '60vh' }} />;
-  if (builderContent) return (
-    <Suspense fallback={<div style={{ minHeight: '60vh' }} />}>
-      <PageRenderer craftState={builderContent} />
-    </Suspense>
-  );
   const formRef = useRef();
   const [formData, setFormData] = useState({
     from_name: '',
@@ -25,6 +18,13 @@ const ContactPage = () => {
   });
   const [status, setStatus] = useState({ type: '', message: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  if (builderLoading) return <div style={{ minHeight: '60vh' }} />;
+  if (builderContent) return (
+    <Suspense fallback={<div style={{ minHeight: '60vh' }} />}>
+      <PageRenderer craftState={builderContent} />
+    </Suspense>
+  );
 
   const handleChange = (e) => {
     const { name, value } = e.target;
