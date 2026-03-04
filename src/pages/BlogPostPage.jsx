@@ -17,16 +17,17 @@ const GiscusComments = ({ slug }) => {
     const script = document.createElement('script');
     script.src = 'https://giscus.app/client.js';
     script.setAttribute('data-repo', 'Brillar0101/ml-ai-fullstack-portolio-baraka');
-    script.setAttribute('data-repo-id', ''); // Fill after enabling Discussions
+    script.setAttribute('data-repo-id', 'R_kgDOQ2c0nA');
     script.setAttribute('data-category', 'General');
-    script.setAttribute('data-category-id', ''); // Fill after enabling Discussions
+    script.setAttribute('data-category-id', 'DIC_kwDOQ2c0nM4C3pk9');
     script.setAttribute('data-mapping', 'specific');
     script.setAttribute('data-term', slug);
-    script.setAttribute('data-strict', '0');
+    script.setAttribute('data-strict', '1');
     script.setAttribute('data-reactions-enabled', '1');
     script.setAttribute('data-emit-metadata', '0');
-    script.setAttribute('data-input-position', 'top');
-    script.setAttribute('data-theme', 'dark');
+    script.setAttribute('data-input-position', 'bottom');
+    script.setAttribute('data-theme', 'preferred_color_scheme');
+    script.setAttribute('data-loading', 'lazy');
     script.setAttribute('data-lang', 'en');
     script.crossOrigin = 'anonymous';
     script.async = true;
