@@ -2,7 +2,7 @@
 /* Inherits from ClapperboardProject.css - only overrides and additions */
 
 .psiv-project .project-icon-large {
-  background: linear-gradient(135deg, var(--primary) 0%, #40A9FF 100%);
+  background: linear-gradient(135deg, #3d156b 0%, #df3562 50%, #feb97e 100%);
 }
 
 /* Header Badges */

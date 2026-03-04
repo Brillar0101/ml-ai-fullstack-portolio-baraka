@@ -1,7 +1,7 @@
 /* ============================================
    DESIGN SYSTEM -Micron/Crucial Inspired
    Font: DM Sans (Google Fonts)
-   Colors: Black, White, Blue (#0068FF)
+   Colors: Black, White, Gold (#d4882e)
    ============================================ */
 
 /* Code font for code blocks */
@@ -15,9 +15,9 @@
 
 /* ---- Light Theme (Default) ---- */
 :root {
-  --primary: #0068FF;
-  --primary-light: #3388FF;
-  --primary-dark: #0050CC;
+  --primary: #d4882e;
+  --primary-light: #e8a050;
+  --primary-dark: #b87020;
 
   --bg: #FFFFFF;
   --bg-secondary: #F2F2F2;

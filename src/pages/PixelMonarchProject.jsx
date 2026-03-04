@@ -39,7 +39,7 @@ const ArchPipelineDiagram = () => {
       id: 'app',
       label: 'LAYER 3',
       name: 'Application',
-      color: '#0068FF',
+      color: '#d4882e',
       icon: Crown,
       details: ['Game FSM', 'Event Handler', 'Display Logic', 'Score Tracking'],
       output: 'User Experience'
@@ -124,7 +124,7 @@ const ArchPipelineDiagram = () => {
       <div className="ml-models-summary">
         <div className="ml-summary-title">HAL Modules</div>
         <div className="ml-summary-items">
-          <div className="ml-summary-item" style={{ '--item-color': '#0068FF' }}>
+          <div className="ml-summary-item" style={{ '--item-color': '#d4882e' }}>
             <span className="ml-summary-name">LED</span>
             <span className="ml-summary-task">7 RGB LEDs</span>
           </div>
@@ -162,7 +162,7 @@ const FSMPipelineDiagram = () => {
       id: 'menu',
       label: 'START',
       name: 'Main Menu',
-      color: '#0068FF',
+      color: '#d4882e',
       icon: Gamepad2,
       details: ['Title Screen', 'BB1 → Instructions', 'BB2 → Start Game'],
       output: 'User Choice'

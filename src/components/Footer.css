@@ -1,0 +1,118 @@
+/* ============================================
+   SITE FOOTER — Micron-style
+   ============================================ */
+
+.site-footer {
+  background: #111113;
+  color: rgba(255, 255, 255, 0.7);
+  padding: 48px 0 32px;
+  margin-top: var(--space-4xl);
+}
+
+.footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-xl);
+}
+
+/* ---- Top Row ---- */
+.footer-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-xl);
+}
+
+.footer-logo {
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  text-decoration: none;
+  letter-spacing: -0.02em;
+}
+
+.footer-logo:hover {
+  text-decoration: none;
+  color: #fff;
+}
+
+/* ---- Nav Links ---- */
+.footer-nav {
+  display: flex;
+  gap: var(--space-xl);
+}
+
+.footer-nav a {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.footer-nav a:hover {
+  color: #fff;
+  text-decoration: none;
+}
+
+/* ---- Social Icons ---- */
+.footer-socials {
+  display: flex;
+  gap: 16px;
+}
+
+.footer-socials a {
+  color: rgba(255, 255, 255, 0.5);
+  transition: color var(--transition-fast);
+}
+
+.footer-socials a:hover {
+  color: #fff;
+  text-decoration: none;
+}
+
+/* ---- Divider ---- */
+.footer-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 32px 0 24px;
+}
+
+/* ---- Bottom Row ---- */
+.footer-bottom {
+  text-align: center;
+}
+
+.footer-bottom p {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 767px) {
+  .site-footer {
+    padding: 36px 0 24px;
+  }
+
+  .footer-top {
+    flex-direction: column;
+    gap: 24px;
+    text-align: center;
+  }
+
+  .footer-nav {
+    gap: var(--space-lg);
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 479px) {
+  .footer-nav {
+    gap: 16px;
+  }
+
+  .footer-nav a {
+    font-size: 13px;
+  }
+}

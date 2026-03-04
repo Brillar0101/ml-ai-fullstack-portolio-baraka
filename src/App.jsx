@@ -1,6 +1,7 @@
 import React, { lazy, Suspense, useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import Navigation from './components/Navigation';
+import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
 import ProjectsPage from './pages/ProjectsPage';
 import ContactPage from './pages/ContactPage';
@@ -18,6 +19,7 @@ const PixelMonarchProject = lazy(() => import('./pages/PixelMonarchProject'));
 const TouhouProject = lazy(() => import('./pages/TouhouProject'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
 const BlogPage = lazy(() => import('./pages/BlogPage'));
+const BlogPostPage = lazy(() => import('./pages/BlogPostPage'));
 
 // Lazy-load admin pages
 const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'));
@@ -42,7 +44,8 @@ const pageTitles = {
   '/projects/16bit-alu': '16 Bit Arithmetic Logic Unit',
   '/projects/3-filter-audio': '3 Filter Audio System',
   '/about': 'About',
-  '/blog': 'Blog'
+  '/blog': 'Blog',
+  '/blog/your-first-ai-agent': 'Your First AI Agent in 50 Lines of Python'
 };
 
 function LoadingFallback() {
@@ -104,6 +107,7 @@ export default function App() {
             <Route path="/projects/touhou" element={<TouhouProject />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/blog" element={<BlogPage />} />
+            <Route path="/blog/:slug" element={<BlogPostPage />} />
             <Route path="/contact" element={<ContactPage />} />
 
             {/* Admin routes */}
@@ -126,6 +130,7 @@ export default function App() {
           </Routes>
         </Suspense>
       </main>
+      <Footer />
     </div>
   );
 }

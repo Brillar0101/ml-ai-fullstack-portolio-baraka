@@ -39,7 +39,7 @@ const ArchPipelineDiagram = () => {
       id: 'app',
       label: 'LAYER 3',
       name: 'Application',
-      color: '#0068FF',
+      color: '#d4882e',
       icon: Crosshair,
       details: ['Game FSM (6 states)', 'Bullet Pool Manager', 'Collision Detection', 'Score System', 'Power-Up Logic'],
       output: 'Game Experience'
@@ -124,7 +124,7 @@ const ArchPipelineDiagram = () => {
       <div className="ml-models-summary">
         <div className="ml-summary-title">HAL Modules</div>
         <div className="ml-summary-items">
-          <div className="ml-summary-item" style={{ '--item-color': '#0068FF' }}>
+          <div className="ml-summary-item" style={{ '--item-color': '#d4882e' }}>
             <span className="ml-summary-name">Joystick</span>
             <span className="ml-summary-task">ADC14 12-bit</span>
           </div>
@@ -175,7 +175,7 @@ const FSMPipelineDiagram = () => {
       id: 'menu',
       label: 'START',
       name: 'Main Menu',
-      color: '#0068FF',
+      color: '#d4882e',
       icon: Gamepad2,
       details: ['Play / Instructions / Scores', 'S1/S2 navigate', 'JS button selects'],
       output: 'User Choice'

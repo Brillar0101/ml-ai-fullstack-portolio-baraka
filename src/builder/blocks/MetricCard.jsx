@@ -73,7 +73,7 @@ MetricCard.Settings = function MetricCardSettings() {
         <label>Icon Color</label>
         <input
           type="color"
-          value={props.iconColor || '#0068FF'}
+          value={props.iconColor || '#d4882e'}
           onChange={(e) => setProp((p) => { p.iconColor = e.target.value; })}
         />
       </div>

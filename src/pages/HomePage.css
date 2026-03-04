@@ -76,9 +76,13 @@
 
 /* Role */
 .hero-role {
+  display: inline-block;
   font-size: clamp(20px, 3vw, 32px);
-  font-weight: 500;
+  font-weight: 600;
   color: var(--primary);
+  background: rgba(212, 136, 46, 0.12);
+  padding: 6px 20px;
+  border-radius: 0;
   margin-bottom: var(--space-lg);
   opacity: 0;
   transform: translateY(20px);
