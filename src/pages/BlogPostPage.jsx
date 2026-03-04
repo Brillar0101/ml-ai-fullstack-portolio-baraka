@@ -1,8 +1,41 @@
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense, useEffect, useRef } from 'react';
 import { Link, useParams, Navigate } from 'react-router-dom';
 import { ChevronLeft, ArrowRight, Clock, Calendar } from 'lucide-react';
 import { BLOG_POSTS } from '../data/blog';
 import './BlogPostPage.css';
+
+// Giscus comments component
+// To configure: visit https://giscus.app and update repo, repoId, category, categoryId
+const GiscusComments = ({ slug }) => {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    // Clear previous instance
+    ref.current.innerHTML = '';
+
+    const script = document.createElement('script');
+    script.src = 'https://giscus.app/client.js';
+    script.setAttribute('data-repo', 'Brillar0101/ml-ai-fullstack-portolio-baraka');
+    script.setAttribute('data-repo-id', ''); // Fill after enabling Discussions
+    script.setAttribute('data-category', 'General');
+    script.setAttribute('data-category-id', ''); // Fill after enabling Discussions
+    script.setAttribute('data-mapping', 'specific');
+    script.setAttribute('data-term', slug);
+    script.setAttribute('data-strict', '0');
+    script.setAttribute('data-reactions-enabled', '1');
+    script.setAttribute('data-emit-metadata', '0');
+    script.setAttribute('data-input-position', 'top');
+    script.setAttribute('data-theme', 'dark');
+    script.setAttribute('data-lang', 'en');
+    script.crossOrigin = 'anonymous';
+    script.async = true;
+
+    ref.current.appendChild(script);
+  }, [slug]);
+
+  return <div ref={ref} className="blog-comments" />;
+};
 
 const postComponents = {
   'your-first-ai-agent': lazy(() => import('./blog/AIAgentPost')),
@@ -46,6 +79,11 @@ const BlogPostPage = () => {
               <PostContent />
             </Suspense>
           )}
+          {/* Comments */}
+          <section className="blog-comments-section">
+            <h2 className="blog-comments-heading">Comments</h2>
+            <GiscusComments slug={slug} />
+          </section>
         </article>
 
         <aside className="blog-post-sidebar">

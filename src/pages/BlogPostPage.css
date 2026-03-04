@@ -516,6 +516,24 @@
   color: var(--text-secondary);
 }
 
+/* ---- Comments Section ---- */
+.blog-comments-section {
+  margin-top: var(--space-3xl);
+  padding-top: var(--space-2xl);
+  border-top: 1px solid var(--border);
+}
+
+.blog-comments-heading {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: var(--space-xl);
+}
+
+.blog-comments {
+  min-height: 200px;
+}
+
 /* ---- Responsive ---- */
 @media (max-width: 1023px) {
   .blog-post-layout {
