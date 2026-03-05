@@ -39,7 +39,7 @@ const Navigation = () => {
     <nav className={`nav ${scrolled ? 'nav-scrolled' : ''}`}>
       <div className="nav-inner">
         <Link to="/" className="nav-logo">
-          Baraka
+          Barakaeli Lawuo
         </Link>
 
         <div className="nav-right">

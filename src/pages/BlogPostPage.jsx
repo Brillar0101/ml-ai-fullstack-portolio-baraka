@@ -1,41 +1,123 @@
-import React, { lazy, Suspense, useEffect, useRef } from 'react';
+import React, { lazy, Suspense, useState, useEffect, useCallback } from 'react';
 import { Link, useParams, Navigate } from 'react-router-dom';
-import { ChevronLeft, ArrowRight, Clock, Calendar } from 'lucide-react';
+import { ChevronLeft, ArrowRight, Clock, Calendar, Send, User } from 'lucide-react';
 import { BLOG_POSTS } from '../data/blog';
+import { supabase } from '../lib/supabase';
 import './BlogPostPage.css';
 
-// Giscus comments component
-// To configure: visit https://giscus.app and update repo, repoId, category, categoryId
-const GiscusComments = ({ slug }) => {
-  const ref = useRef(null);
+// Custom comments component using Supabase
+const BlogComments = ({ slug }) => {
+  const [comments, setComments] = useState([]);
+  const [name, setName] = useState('');
+  const [comment, setComment] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
-  useEffect(() => {
-    if (!ref.current) return;
-    // Clear previous instance
-    ref.current.innerHTML = '';
-
-    const script = document.createElement('script');
-    script.src = 'https://giscus.app/client.js';
-    script.setAttribute('data-repo', 'Brillar0101/ml-ai-fullstack-portolio-baraka');
-    script.setAttribute('data-repo-id', 'R_kgDOQ2c0nA');
-    script.setAttribute('data-category', 'General');
-    script.setAttribute('data-category-id', 'DIC_kwDOQ2c0nM4C3pk9');
-    script.setAttribute('data-mapping', 'specific');
-    script.setAttribute('data-term', slug);
-    script.setAttribute('data-strict', '1');
-    script.setAttribute('data-reactions-enabled', '1');
-    script.setAttribute('data-emit-metadata', '0');
-    script.setAttribute('data-input-position', 'bottom');
-    script.setAttribute('data-theme', 'preferred_color_scheme');
-    script.setAttribute('data-loading', 'lazy');
-    script.setAttribute('data-lang', 'en');
-    script.crossOrigin = 'anonymous';
-    script.async = true;
-
-    ref.current.appendChild(script);
+  const fetchComments = useCallback(async () => {
+    if (!supabase) return;
+    const { data } = await supabase
+      .from('blog_comments')
+      .select('*')
+      .eq('post_slug', slug)
+      .order('created_at', { ascending: true });
+    if (data) setComments(data);
   }, [slug]);
 
-  return <div ref={ref} className="blog-comments" />;
+  useEffect(() => {
+    fetchComments();
+  }, [fetchComments]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const trimmedName = name.trim();
+    const trimmedComment = comment.trim();
+
+    if (!trimmedName || !trimmedComment) {
+      setError('Please fill in both fields.');
+      return;
+    }
+
+    if (!supabase) {
+      setError('Comments are temporarily unavailable.');
+      return;
+    }
+
+    setSubmitting(true);
+    setError('');
+
+    const { error: insertError } = await supabase
+      .from('blog_comments')
+      .insert([{ post_slug: slug, author_name: trimmedName, comment: trimmedComment }]);
+
+    if (insertError) {
+      setError('Failed to post comment. Please try again.');
+      setSubmitting(false);
+      return;
+    }
+
+    setName('');
+    setComment('');
+    setSubmitting(false);
+    fetchComments();
+  };
+
+  const formatDate = (dateStr) => {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+
+  return (
+    <div className="blog-comments">
+      {/* Comment form */}
+      <form className="comment-form" onSubmit={handleSubmit}>
+        <div className="comment-form-fields">
+          <input
+            type="text"
+            placeholder="Your name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="comment-input"
+            maxLength={50}
+          />
+          <textarea
+            placeholder="Write a comment..."
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            className="comment-textarea"
+            rows={3}
+            maxLength={1000}
+          />
+        </div>
+        {error && <p className="comment-error">{error}</p>}
+        <button type="submit" className="comment-submit" disabled={submitting}>
+          <Send size={14} />
+          {submitting ? 'Posting...' : 'Post Comment'}
+        </button>
+      </form>
+
+      {/* Comments list */}
+      <div className="comments-list">
+        {comments.length === 0 ? (
+          <p className="comments-empty">No comments yet. Be the first to share your thoughts.</p>
+        ) : (
+          comments.map((c) => (
+            <div key={c.id} className="comment-item">
+              <div className="comment-avatar">
+                <User size={16} />
+              </div>
+              <div className="comment-body">
+                <div className="comment-header">
+                  <span className="comment-author">{c.author_name}</span>
+                  <span className="comment-date">{formatDate(c.created_at)}</span>
+                </div>
+                <p className="comment-text">{c.comment}</p>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
 };
 
 const postComponents = {
@@ -83,7 +165,7 @@ const BlogPostPage = () => {
           {/* Comments */}
           <section className="blog-comments-section">
             <h2 className="blog-comments-heading">Comments</h2>
-            <GiscusComments slug={slug} />
+            <BlogComments slug={slug} />
           </section>
         </article>
 

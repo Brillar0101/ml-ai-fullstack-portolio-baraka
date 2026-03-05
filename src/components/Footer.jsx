@@ -19,7 +19,7 @@ const Footer = () => {
         {/* Top row: name/brand + nav links + socials */}
         <div className="footer-top">
           <div className="footer-brand">
-            <Link to="/" className="footer-logo">Baraka</Link>
+            <Link to="/" className="footer-logo">Barakaeli Lawuo</Link>
           </div>
 
           <nav className="footer-nav">
