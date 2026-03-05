@@ -6,7 +6,7 @@ const AIAgentPost = () => (
     <p>
       Every AI agent framework, LangChain, CrewAI, LangGraph, is built on the same primitive:{' '}
       <strong>a loop that calls an LLM, checks if it wants to use a tool, executes that tool, and feeds the result back.</strong>{' '}
-      That's it. Before you reach for a framework, you should build this loop yourself.
+      That is it. Before you reach for a framework, you should build this loop yourself.
     </p>
 
     <p>
@@ -15,7 +15,7 @@ const AIAgentPost = () => (
       Once you see the pattern, every framework becomes transparent.
     </p>
 
-    <p>Here's exactly what I built and how it works. Watch the demo first:</p>
+    <p>Here is exactly what I built and how it works. Watch the demo first:</p>
 
     {/* Demo Video */}
     <div className="blog-video-embed">
@@ -51,7 +51,7 @@ const AIAgentPost = () => (
       </tbody>
     </table>
 
-    <p>Now let's break down how it works.</p>
+    <p>Now let us break down how it works.</p>
 
     {/* Step 01 */}
     <h2><span className="step-num">01</span> The ReAct Loop</h2>
@@ -69,7 +69,7 @@ const AIAgentPost = () => (
 
     <p>
       The key insight: <strong>the LLM doesn't execute tools.</strong> It returns a structured JSON block saying
-      "I'd like to call <code>get_weather</code> with <code>{`{"city": "Tokyo"}`}</code>."
+      "I would like to call <code>get_weather</code> with <code>{`{"city": "Tokyo"}`}</code>."
       Your code runs the function and sends the result back. The model then decides if it needs more tools or can answer.
     </p>
 
@@ -77,7 +77,7 @@ const AIAgentPost = () => (
     <h2><span className="step-num">02</span> Set Up the Client</h2>
 
     <p>
-      We're using <strong>NVIDIA's NIM API</strong> with <strong>Meta's Llama 3.3 70B</strong> model.
+      This project uses <strong>NVIDIA's NIM API</strong> with <strong>Meta's Llama 3.3 70B</strong> model.
       NIM uses the OpenAI-compatible format, so we use the standard OpenAI SDK pointed at NVIDIA's endpoint:
     </p>
 
@@ -161,7 +161,7 @@ DISPATCH = {"get_weather": get_weather, "calculator": calculator}`}</code></pre>
 
     <p>
       Nothing fancy. Each tool returns a dict, we <code>json.dumps()</code> it and send it back to the LLM.
-      That's the entire contract between your tools and the model.
+      That is the entire contract between your tools and the model.
     </p>
 
     {/* Step 05 */}
@@ -233,12 +233,12 @@ DISPATCH = {"get_weather": get_weather, "calculator": calculator}`}</code></pre>
     <p>
       This ~50 line script is the same pattern underneath every agent framework. LangChain adds abstraction layers
       and a tool ecosystem. LangGraph adds stateful graphs with cycles. CrewAI adds multi agent roles. But strip
-      the abstractions away, and you'll find this exact loop at the center.
+      the abstractions away, and you will find this exact loop at the center.
     </p>
 
     <p>
       <strong>Understanding the raw protocol means you can debug any framework, build custom agent patterns,
-      and know when a framework is adding value versus adding complexity.</strong> That's the difference between
+      and know when a framework is adding value versus adding complexity.</strong> That is the difference between
       using tools and understanding them.
     </p>
 
@@ -247,16 +247,10 @@ DISPATCH = {"get_weather": get_weather, "calculator": calculator}`}</code></pre>
       <div className="callout-label">Extend it</div>
       <ul>
         <li>Add a <code>web_search</code> tool using Tavily or Serper. The model will chain it with your other tools automatically</li>
-        <li>Add a <code>read_file</code> tool and you've got a basic code assistant</li>
+        <li>Add a <code>read_file</code> tool and you have a basic code assistant</li>
         <li>Swap <code>base_url</code> to use OpenAI, Anthropic, or any OpenAI-compatible API</li>
         <li>Wrap the whole thing in FastAPI and you have an agent API endpoint</li>
       </ul>
-    </div>
-
-    {/* Footer CTA */}
-    <div className="blog-cta">
-      <h3>Get the code</h3>
-      <p>Full <code>agent.py</code>, runnable in 5 minutes. <code>pip install openai httpx python-dotenv</code> and go.</p>
     </div>
   </>
 );
