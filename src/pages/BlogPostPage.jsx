@@ -21,7 +21,7 @@ const useAnalytics = (slug) => {
       event_type: 'pageview',
       referrer: document.referrer || null,
       user_agent: navigator.userAgent,
-    });
+    }]);
 
     // Track scroll depth
     const handleScroll = () => {
@@ -46,7 +46,7 @@ const useAnalytics = (slug) => {
         event_type: 'engagement',
         scroll_depth: maxScroll.current,
         time_on_page: timeOnPage,
-      });
+      }]);
     };
 
     window.addEventListener('beforeunload', handleLeave);
