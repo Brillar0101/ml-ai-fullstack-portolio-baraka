@@ -1,9 +1,62 @@
-import React, { lazy, Suspense, useState, useEffect, useCallback } from 'react';
+import React, { lazy, Suspense, useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useParams, Navigate } from 'react-router-dom';
 import { ChevronLeft, ArrowRight, Clock, Calendar, Send, User } from 'lucide-react';
 import { BLOG_POSTS } from '../data/blog';
 import { supabase } from '../lib/supabase';
 import './BlogPostPage.css';
+
+// Analytics tracking hook
+const useAnalytics = (slug) => {
+  const startTime = useRef(Date.now());
+  const maxScroll = useRef(0);
+  const tracked = useRef(false);
+
+  useEffect(() => {
+    if (!supabase || tracked.current) return;
+    tracked.current = true;
+
+    // Track pageview
+    supabase.from('analytics_events').insert([{
+      post_slug: slug,
+      event_type: 'pageview',
+      referrer: document.referrer || null,
+      user_agent: navigator.userAgent,
+    });
+
+    // Track scroll depth
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (docHeight > 0) {
+        const depth = Math.round((scrollTop / docHeight) * 100);
+        if (depth > maxScroll.current) maxScroll.current = depth;
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+
+    // Send scroll depth + time on page when leaving
+    let engagementSent = false;
+    const handleLeave = () => {
+      if (engagementSent) return;
+      const timeOnPage = Math.round((Date.now() - startTime.current) / 1000);
+      if (timeOnPage < 2) return; // skip if less than 2 seconds (cleanup noise)
+      engagementSent = true;
+      supabase.from('analytics_events').insert([{
+        post_slug: slug,
+        event_type: 'engagement',
+        scroll_depth: maxScroll.current,
+        time_on_page: timeOnPage,
+      });
+    };
+
+    window.addEventListener('beforeunload', handleLeave);
+    return () => {
+      handleLeave();
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('beforeunload', handleLeave);
+    };
+  }, [slug]);
+};
 
 // Custom comments component using Supabase
 const BlogComments = ({ slug }) => {
@@ -127,6 +180,7 @@ const postComponents = {
 const BlogPostPage = () => {
   const { slug } = useParams();
   const post = BLOG_POSTS.find(p => p.id === slug);
+  useAnalytics(slug);
 
   if (!post) return <Navigate to="/blog" replace />;
 
