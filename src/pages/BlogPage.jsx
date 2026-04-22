@@ -24,29 +24,50 @@ const BlogPage = () => {
       <div className="blog-cards-section container">
         {BLOG_POSTS.length > 0 ? (
           <div className="blog-cards-grid">
-            {BLOG_POSTS.map(post => (
-              <Link to={post.route} key={post.id} className="blog-card">
-                <div className="blog-card-cover" style={{ background: post.coverGradient }}>
-                  <div className="blog-card-cover-content">
-                    <span className="blog-card-series">{post.series}</span>
-                  </div>
-                </div>
-                <div className="blog-card-body">
-                  <div className="blog-card-category">{post.category}</div>
-                  <h2 className="blog-card-title">{post.title}</h2>
-                  <p className="blog-card-excerpt">{post.excerpt}</p>
-                  <div className="blog-card-footer">
-                    <div className="blog-card-meta">
-                      <span>Baraka</span>
-                      <span>{post.date}</span>
+            {BLOG_POSTS.map(post => {
+              const CardBody = (
+                <>
+                  <div className="blog-card-cover" style={{ background: post.coverGradient }}>
+                    <div className="blog-card-cover-content">
+                      <span className="blog-card-series">{post.series}</span>
                     </div>
-                    <div className="blog-card-link">
-                      Read more <ArrowRight size={16} />
+                    {post.comingSoon && (
+                      <span className="blog-card-coming-soon">Coming soon</span>
+                    )}
+                  </div>
+                  <div className="blog-card-body">
+                    <div className="blog-card-category">{post.category}</div>
+                    <h2 className="blog-card-title">{post.title}</h2>
+                    <p className="blog-card-excerpt">{post.excerpt}</p>
+                    <div className="blog-card-footer">
+                      <div className="blog-card-meta">
+                        <span>Baraka</span>
+                        <span>{post.date}</span>
+                      </div>
+                      {!post.comingSoon && (
+                        <div className="blog-card-link">
+                          Read more <ArrowRight size={16} />
+                        </div>
+                      )}
                     </div>
                   </div>
+                </>
+              );
+
+              return post.comingSoon ? (
+                <div
+                  key={post.id}
+                  className="blog-card blog-card-disabled"
+                  aria-disabled="true"
+                >
+                  {CardBody}
                 </div>
-              </Link>
-            ))}
+              ) : (
+                <Link to={post.route} key={post.id} className="blog-card">
+                  {CardBody}
+                </Link>
+              );
+            })}
           </div>
         ) : (
           <div className="blog-empty">

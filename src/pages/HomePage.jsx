@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
 import { usePublicPage } from '../hooks/usePublicPage';
 import { CONFIG } from '../config';
 import './HomePage.css';
@@ -11,9 +10,24 @@ const YOUTUBE_VIDEO_ID = 'oqUrfFeTF88';
 
 const HomePage = () => {
   const { content: builderContent, loading: builderLoading } = usePublicPage('/');
-  const [menuOpen, setMenuOpen] = useState(false);
   const playerRef = useRef(null);
   const containerRef = useRef(null);
+
+  const [videoActivated, setVideoActivated] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return undefined;
+    const mql = window.matchMedia('(max-width: 640px)');
+    const update = () => setIsMobile(mql.matches);
+    update();
+    mql.addEventListener('change', update);
+    return () => mql.removeEventListener('change', update);
+  }, []);
+
+  const shouldDefer =
+    isMobile ||
+    (typeof navigator !== 'undefined' && navigator.connection?.saveData === true);
 
   const onPlayerReady = useCallback((event) => {
     event.target.mute();
@@ -28,6 +42,10 @@ const HomePage = () => {
   }, []);
 
   useEffect(() => {
+    // Only load/initialize the YouTube IFrame API when we're actually
+    // rendering the iframe container (desktop, or after user activation).
+    if (shouldDefer && !videoActivated) return undefined;
+
     if (!window.YT) {
       const tag = document.createElement('script');
       tag.src = 'https://www.youtube.com/iframe_api';
@@ -69,7 +87,7 @@ const HomePage = () => {
         playerRef.current.destroy();
       }
     };
-  }, [onPlayerReady, onPlayerStateChange]);
+  }, [onPlayerReady, onPlayerStateChange, shouldDefer, videoActivated]);
 
   if (builderLoading) return <div style={{ minHeight: '100vh' }} />;
   if (builderContent) return (
@@ -81,47 +99,32 @@ const HomePage = () => {
   const githubUrl = `https://${CONFIG.github}`;
   const linkedinUrl = `https://${CONFIG.linkedin}`;
 
+  const renderIframePlayer = !shouldDefer || videoActivated;
+
   return (
     <div className="home-root">
-      {/* Background YouTube video */}
+      {/* Background YouTube video (or lite-youtube poster on mobile / save-data) */}
       <div className="home-video-bg">
-        <div ref={containerRef} />
-      </div>
-
-      {/* Top bar */}
-      <header className="home-topbar">
-        <Link to="/" className="home-brand">Princetekki</Link>
-
-        <nav className="home-nav" aria-label="Primary">
-          <Link to="/" className="home-nav-link active">Home</Link>
-          <Link to="/projects" className="home-nav-link">Projects</Link>
-          <Link to="/blog" className="home-nav-link">Blog</Link>
-          <Link to="/about" className="home-nav-link">About</Link>
-          <Link to="/contact" className="home-nav-link">Contact</Link>
-        </nav>
-
-        <Link to="/contact" className="home-cta-top">Let's talk</Link>
-
-        <button
-          className="home-menu-toggle"
-          onClick={() => setMenuOpen(!menuOpen)}
-          aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-          aria-expanded={menuOpen}
-        >
-          {menuOpen ? <X size={22} /> : <Menu size={22} />}
-        </button>
-
-        {menuOpen && (
-          <div className="home-mobile-menu">
-            <Link to="/" className="home-mobile-link" onClick={() => setMenuOpen(false)}>Home</Link>
-            <Link to="/projects" className="home-mobile-link" onClick={() => setMenuOpen(false)}>Projects</Link>
-            <Link to="/blog" className="home-mobile-link" onClick={() => setMenuOpen(false)}>Blog</Link>
-            <Link to="/about" className="home-mobile-link" onClick={() => setMenuOpen(false)}>About</Link>
-            <Link to="/contact" className="home-mobile-link" onClick={() => setMenuOpen(false)}>Contact</Link>
-            <Link to="/contact" className="home-mobile-cta" onClick={() => setMenuOpen(false)}>Let's talk</Link>
-          </div>
+        {renderIframePlayer ? (
+          <div ref={containerRef} />
+        ) : (
+          <button
+            type="button"
+            className="home-lite-yt"
+            aria-label="Play background video"
+            onClick={() => setVideoActivated(true)}
+          >
+            <img
+              className="home-lite-yt-poster"
+              src={`https://img.youtube.com/vi/${YOUTUBE_VIDEO_ID}/maxresdefault.jpg`}
+              alt=""
+            />
+            <span className="home-lite-yt-play" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+            </span>
+          </button>
         )}
-      </header>
+      </div>
 
       {/* Hero */}
       <section className="home-hero">

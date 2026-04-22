@@ -183,7 +183,7 @@ const BlogPostPage = () => {
   const post = BLOG_POSTS.find(p => p.id === slug);
   useAnalytics(slug);
 
-  if (!post) return <Navigate to="/blog" replace />;
+  if (!post || post.comingSoon) return <Navigate to="/blog" replace />;
 
   const PostContent = postComponents[slug];
   const relatedPosts = BLOG_POSTS.filter(p => p.id !== slug);

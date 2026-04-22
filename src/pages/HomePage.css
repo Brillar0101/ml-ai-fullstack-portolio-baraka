@@ -17,7 +17,8 @@
   width: 100%;
   height: 100%;
   min-height: 100vh;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   background: #000;
   color: #fff;
   display: flex;
@@ -44,6 +45,65 @@
   transform: translate(-50%, -50%);
   border: 0;
   pointer-events: none;
+}
+
+/* ---- Lite YouTube facade (poster + play button before iframe mounts) ---- */
+.home-lite-yt {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: #000;
+  cursor: pointer;
+  display: block;
+  overflow: hidden;
+}
+
+.home-lite-yt-poster {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  opacity: 0.85;
+}
+
+.home-lite-yt-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--home-navy-ink);
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.home-lite-yt:hover .home-lite-yt-play {
+  transform: translate(-50%, -50%) scale(1.08);
+  background: #fff;
+}
+
+.home-lite-yt-play svg {
+  width: 32px;
+  height: 32px;
+  margin-left: 4px;
+}
+
+@media (max-width: 640px) {
+  .home-lite-yt-play {
+    width: 56px;
+    height: 56px;
+  }
+  .home-lite-yt-play svg {
+    width: 24px;
+    height: 24px;
+  }
 }
 
 /* ============================================
@@ -190,53 +250,51 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 80px 56px 120px;
-  zoom: 1.5;
 }
 
 /* Eyebrow */
 .home-eyebrow {
   font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
-  letter-spacing: 3.2px;
+  font-size: clamp(10px, 1.4vw, 20px);
+  letter-spacing: clamp(1.6px, 0.35vw, 4.8px);
   color: #fff;
   text-transform: uppercase;
-  margin-bottom: 28px;
+  margin-bottom: clamp(16px, 3vw, 42px);
   display: inline-block;
   font-weight: 500;
 }
 
 .home-eyebrow .sep {
   opacity: 0.5;
-  margin: 0 10px;
+  margin: 0 clamp(6px, 1vw, 14px);
 }
 
 .home-eyebrow b {
   font-weight: 700;
 }
 
-/* H1 — Big name */
+/* H1 — Big name. clamp() prevents overflow at every viewport. */
 .home-h1 {
   font-family: 'Epilogue', sans-serif;
   font-weight: 800;
-  font-size: 76px;
+  font-size: clamp(32px, 9vw, 114px);
   line-height: 1.05;
-  letter-spacing: -1.5px;
+  letter-spacing: -0.025em;
   width: max-content;
   max-width: 100%;
-  margin-left: -4px; /* optical-align the "B" with the eyebrow's "C" */
-  margin-bottom: 20px;
+  margin-left: -6px; /* optical-align the "B" with the eyebrow's "C" */
+  margin-bottom: clamp(14px, 2vw, 30px);
   color: #fff;
 }
 
-/* Subhead — smaller statement under the name.
-   max-width tuned so the line breaks where "Barakaeli Lawuo" ends. */
+/* Subhead */
 .home-subhead {
   font-family: 'DM Sans', sans-serif;
-  font-size: 19px;
-  line-height: 1.5;
+  font-size: clamp(15px, 2.2vw, 28px);
+  line-height: 1.45;
   color: var(--home-body);
-  max-width: 640px;
-  margin-bottom: 26px;
+  max-width: 960px;
+  margin-bottom: clamp(18px, 2.6vw, 40px);
   font-weight: 400;
   text-wrap: balance;
 }
@@ -245,11 +303,11 @@
 .home-meta {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: clamp(8px, 1.2vw, 18px);
   font-family: 'DM Sans', sans-serif;
-  font-size: 19px;
+  font-size: clamp(13px, 2vw, 28px);
   color: var(--home-muted);
-  margin-bottom: 22px;
+  margin-bottom: clamp(20px, 2.4vw, 34px);
   flex-wrap: wrap;
 }
 
@@ -294,17 +352,17 @@
   background: var(--home-yellow);
   color: var(--home-navy-ink);
   border: 0;
-  height: 56px;
-  padding: 0 32px;
-  border-radius: 10px;
+  height: 84px;
+  padding: 0 48px;
+  border-radius: 15px;
   font-family: 'DM Sans', sans-serif;
   font-weight: 700;
-  font-size: 15px;
+  font-size: 22px;
   cursor: pointer;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   transition: background 0.15s, transform 0.1s;
 }
 
@@ -322,17 +380,17 @@
 .home-socials {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 18px;
 }
 
 .home-social {
-  width: 56px;
-  height: 56px;
+  width: 84px;
+  height: 84px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border: 1.5px solid rgba(255, 255, 255, 0.3);
-  border-radius: 10px;
+  border-radius: 15px;
   color: #fff;
   text-decoration: none;
   transition: border-color 0.15s, color 0.15s, background 0.15s;
@@ -346,19 +404,60 @@
 }
 
 .home-social svg {
-  width: 30px;
-  height: 30px;
+  width: 44px;
+  height: 44px;
 }
 
 /* ============================================
-   RESPONSIVE
+   RESPONSIVE — Tailwind-aligned breakpoints
    ============================================ */
 
-@media (max-width: 860px) {
+/* ---- Laptop tune-down ---- */
+@media (max-width: 1024px) {
+  .home-eyebrow {
+    font-size: 18px;
+  }
+
+  .home-h1 {
+    font-size: 92px;
+  }
+
+  .home-subhead {
+    font-size: 24px;
+  }
+
+  .home-meta {
+    font-size: 24px;
+  }
+
+  .home-btn-primary {
+    height: 72px;
+    padding: 0 40px;
+    font-size: 20px;
+  }
+
+  .home-social {
+    width: 72px;
+    height: 72px;
+  }
+
+  .home-social svg {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* ---- Mobile ---- */
+@media (max-width: 640px) {
   .home-topbar {
-    padding: 16px 24px;
+    padding: 14px 20px;
     gap: 16px;
     position: relative;
+  }
+
+  .home-brand {
+    font-size: 22px;
+    letter-spacing: -0.3px;
   }
 
   .home-nav,
@@ -381,7 +480,7 @@
     display: flex;
     flex-direction: column;
     background: var(--home-navy);
-    padding: 12px 24px 24px;
+    padding: 12px 20px 20px;
     gap: 4px;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
     z-index: 20;
@@ -391,7 +490,7 @@
     color: #fff;
     text-decoration: none;
     font-family: 'DM Sans', sans-serif;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 500;
     padding: 12px 4px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
@@ -409,9 +508,10 @@
     text-align: center;
     font-family: 'DM Sans', sans-serif;
     font-weight: 600;
-    font-size: 15px;
+    font-size: 14px;
     padding: 12px 20px;
     text-decoration: none;
+    border-radius: 8px;
   }
 
   .home-mobile-cta:hover {
@@ -420,45 +520,122 @@
   }
 
   .home-hero-inner {
-    padding: 70px 24px 90px;
+    padding: 48px 20px 60px;
+    max-width: 100%;
+  }
+
+  .home-eyebrow {
+    font-size: 11px;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+  }
+
+  .home-eyebrow .sep {
+    margin: 0 6px;
   }
 
   .home-h1 {
-    font-size: 44px;
-    letter-spacing: -0.8px;
+    font-size: 42px;
+    letter-spacing: -0.7px;
+    margin-left: -2px;
+    margin-bottom: 14px;
   }
 
   .home-subhead {
-    font-size: 17px;
+    font-size: 16px;
+    line-height: 1.45;
+    max-width: 100%;
+    margin-bottom: 18px;
+  }
+
+  .home-meta {
+    font-size: 13px;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+
+  .home-meta-divider {
+    height: 12px;
+  }
+
+  .home-actions {
+    gap: 14px;
+  }
+
+  .home-btn-primary {
+    height: 48px;
+    padding: 0 22px;
+    font-size: 14px;
+    border-radius: 8px;
+    gap: 6px;
+  }
+
+  .home-social {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+  }
+
+  .home-social svg {
+    width: 22px;
+    height: 22px;
   }
 
   .home-hero-overlay {
     background: linear-gradient(
       180deg,
-      rgba(0, 0, 0, 0.88) 0%,
-      rgba(0, 0, 0, 0.55) 60%,
+      rgba(0, 0, 0, 0.85) 0%,
+      rgba(0, 0, 0, 0.55) 55%,
       rgba(0, 0, 0, 0.9) 100%
     );
   }
 }
 
-@media (max-width: 520px) {
+/* ---- Small mobile (iPhone SE, tight Androids) ---- */
+@media (max-width: 380px) {
+  .home-topbar {
+    padding: 12px 16px;
+  }
+
+  .home-brand {
+    font-size: 20px;
+  }
+
+  .home-hero-inner {
+    padding: 40px 16px 56px;
+  }
+
   .home-h1 {
-    font-size: 36px;
+    font-size: 34px;
+    letter-spacing: -0.5px;
+    margin-bottom: 12px;
   }
 
   .home-eyebrow {
+    font-size: 10px;
+    letter-spacing: 1.6px;
+    margin-bottom: 16px;
+  }
+
+  .home-subhead {
+    font-size: 15px;
+    margin-bottom: 16px;
+  }
+
+  .home-meta {
     font-size: 12px;
-    letter-spacing: 2.4px;
+    gap: 6px;
+    margin-bottom: 20px;
   }
 
   .home-actions {
-    gap: 16px;
+    gap: 12px;
   }
 
   .home-btn-primary {
-    height: 48px;
-    padding: 0 24px;
+    height: 44px;
+    padding: 0 18px;
+    font-size: 13px;
   }
 
   .home-socials {
@@ -466,7 +643,25 @@
   }
 
   .home-social {
-    width: 48px;
-    height: 48px;
+    width: 44px;
+    height: 44px;
+  }
+
+  .home-social svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* ---- Reduced motion: static gradient hero instead of video ---- */
+@media (prefers-reduced-motion: reduce) {
+  .home-video-bg iframe,
+  .home-lite-yt {
+    display: none !important;
+  }
+  .home-root {
+    background:
+      radial-gradient(ellipse at 30% 50%, rgba(212, 136, 46, 0.15), transparent 60%),
+      linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
   }
 }
