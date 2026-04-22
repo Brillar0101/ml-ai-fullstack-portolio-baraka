@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react';
+import React, { useEffect, useRef, useCallback, lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { usePublicPage } from '../hooks/usePublicPage';
 import { CONFIG } from '../config';
@@ -13,22 +13,6 @@ const HomePage = () => {
   const playerRef = useRef(null);
   const containerRef = useRef(null);
 
-  const [videoActivated, setVideoActivated] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    if (typeof window === 'undefined' || !window.matchMedia) return undefined;
-    const mql = window.matchMedia('(max-width: 640px)');
-    const update = () => setIsMobile(mql.matches);
-    update();
-    mql.addEventListener('change', update);
-    return () => mql.removeEventListener('change', update);
-  }, []);
-
-  const shouldDefer =
-    isMobile ||
-    (typeof navigator !== 'undefined' && navigator.connection?.saveData === true);
-
   const onPlayerReady = useCallback((event) => {
     event.target.mute();
     event.target.playVideo();
@@ -42,10 +26,6 @@ const HomePage = () => {
   }, []);
 
   useEffect(() => {
-    // Only load/initialize the YouTube IFrame API when we're actually
-    // rendering the iframe container (desktop, or after user activation).
-    if (shouldDefer && !videoActivated) return undefined;
-
     if (!window.YT) {
       const tag = document.createElement('script');
       tag.src = 'https://www.youtube.com/iframe_api';
@@ -87,7 +67,7 @@ const HomePage = () => {
         playerRef.current.destroy();
       }
     };
-  }, [onPlayerReady, onPlayerStateChange, shouldDefer, videoActivated]);
+  }, [onPlayerReady, onPlayerStateChange]);
 
   if (builderLoading) return <div style={{ minHeight: '100vh' }} />;
   if (builderContent) return (
@@ -99,31 +79,11 @@ const HomePage = () => {
   const githubUrl = `https://${CONFIG.github}`;
   const linkedinUrl = `https://${CONFIG.linkedin}`;
 
-  const renderIframePlayer = !shouldDefer || videoActivated;
-
   return (
     <div className="home-root">
-      {/* Background YouTube video (or lite-youtube poster on mobile / save-data) */}
+      {/* Background YouTube video — autoplays muted on desktop and mobile */}
       <div className="home-video-bg">
-        {renderIframePlayer ? (
-          <div ref={containerRef} />
-        ) : (
-          <button
-            type="button"
-            className="home-lite-yt"
-            aria-label="Play background video"
-            onClick={() => setVideoActivated(true)}
-          >
-            <img
-              className="home-lite-yt-poster"
-              src={`https://img.youtube.com/vi/${YOUTUBE_VIDEO_ID}/maxresdefault.jpg`}
-              alt=""
-            />
-            <span className="home-lite-yt-play" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
-            </span>
-          </button>
-        )}
+        <div ref={containerRef} />
       </div>
 
       {/* Hero */}
