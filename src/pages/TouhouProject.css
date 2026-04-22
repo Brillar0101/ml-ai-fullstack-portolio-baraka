@@ -26,8 +26,8 @@
   left: 50%;
   width: 100vw;
   height: 56.25vw;
-  min-height: calc(100vh / 1.15);
-  min-width: calc(177.78vh / 1.15);
+  min-height: 100vh;
+  min-width: 177.78vh;
   transform: translate(-50%, -50%);
   border: 0;
   pointer-events: none;

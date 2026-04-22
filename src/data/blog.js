@@ -12,4 +12,17 @@ export const BLOG_POSTS = [
     route: '/blog/your-first-ai-agent',
     coverGradient: 'linear-gradient(135deg, #3d156b 0%, #df3562 50%, #feb97e 100%)',
   },
+  {
+    id: 'model-merging',
+    title: 'Model Merging: Frankenstein Your Way to a Better LLM',
+    excerpt: 'Merge OpenHermes-2.5 and WizardMath-7B into one model using TIES — no training, just weight arithmetic. Includes a live demo and eval results.',
+    category: 'ML',
+    date: 'April 2026',
+    readTime: '10 min read',
+    tags: ['Model Merging', 'LLM', 'Fine-tuning', 'mergekit', 'TIES'],
+    series: 'AI Engineering Series',
+    seriesNum: 2,
+    route: '/blog/model-merging',
+    coverGradient: 'linear-gradient(135deg, #3d156b 0%, #df3562 50%, #feb97e 100%)',
+  },
 ];

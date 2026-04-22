@@ -1426,3 +1426,223 @@
     font-size: 11px !important;
   }
 }
+
+/* ============================================
+   FEATURES SECTION (Detection + Analytics cards)
+   ============================================ */
+
+.swishvision-project .features-content {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.swishvision-project .features-card {
+  padding: 28px 28px 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+.swishvision-project .features-card > h3 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--glass-border);
+  letter-spacing: -0.01em;
+}
+
+.swishvision-project .features-card > h3 svg {
+  width: 20px;
+  height: 20px;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.swishvision-project .features-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.swishvision-project .feature-item {
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  gap: 14px;
+  align-items: start;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.swishvision-project .feature-item:hover {
+  border-color: var(--text-dim);
+  background: var(--glass-hover);
+  transform: translateY(-1px);
+}
+
+.swishvision-project .feature-item > svg {
+  width: 22px;
+  height: 22px;
+  padding: 4px;
+  border-radius: 8px;
+  box-sizing: content-box;
+}
+
+.swishvision-project .feature-item > svg.feature-done {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.swishvision-project .feature-item > svg.feature-progress {
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.12);
+}
+
+.swishvision-project .feature-item > svg.feature-pending {
+  color: var(--text-muted);
+  background: rgba(140, 140, 140, 0.1);
+}
+
+.swishvision-project .feature-item > div {
+  min-width: 0;
+}
+
+.swishvision-project .feature-item h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 3px;
+  line-height: 1.3;
+  letter-spacing: -0.005em;
+}
+
+.swishvision-project .feature-item p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  .swishvision-project .features-content {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================
+   ROADMAP / NEXT STEPS (numbered milestones)
+   ============================================ */
+
+.swishvision-project .challenges-content .future-work {
+  padding: 32px;
+}
+
+.swishvision-project .challenges-content .future-work > h3 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--glass-border);
+  letter-spacing: -0.01em;
+}
+
+.swishvision-project .challenges-content .future-work > h3 svg {
+  width: 20px;
+  height: 20px;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.swishvision-project .challenges-content .future-list {
+  counter-reset: roadmap-step;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  padding: 0;
+  margin: 0;
+}
+
+.swishvision-project .challenges-content .future-list li {
+  counter-increment: roadmap-step;
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 16px;
+  align-items: center;
+  padding: 18px 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.45;
+  transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
+  position: relative;
+}
+
+.swishvision-project .challenges-content .future-list li:hover {
+  border-color: var(--primary);
+  background: var(--glass-hover);
+  transform: translateX(3px);
+}
+
+.swishvision-project .challenges-content .future-list li::before {
+  content: counter(roadmap-step, decimal-leading-zero);
+  font-family: 'Fira Code', ui-monospace, monospace;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: var(--primary);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(212, 136, 46, 0.1);
+  border: 1px solid rgba(212, 136, 46, 0.25);
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.swishvision-project .challenges-content .future-list li svg {
+  display: none;
+}
+
+.swishvision-project .challenges-content .future-list li span {
+  color: var(--text);
+  font-weight: 500;
+  letter-spacing: -0.005em;
+}
+
+@media (max-width: 900px) {
+  .swishvision-project .challenges-content .future-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .swishvision-project .challenges-content .future-work {
+    padding: 22px 20px;
+  }
+  .swishvision-project .challenges-content .future-list li {
+    padding: 14px 16px;
+    grid-template-columns: 38px 1fr;
+    gap: 12px;
+  }
+  .swishvision-project .challenges-content .future-list li::before {
+    width: 36px;
+    height: 36px;
+    font-size: 12px;
+  }
+}
