@@ -76,12 +76,20 @@
 /* Metrics */
 .cs-metrics {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(var(--cs-metric-cols, 4), 1fr);
   gap: var(--space-md);
   margin-bottom: var(--space-3xl);
   padding: var(--space-xl) 0;
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
+}
+
+/* Context label above the headline */
+.cs-context {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 14px;
 }
 
 .cs-metric-value {
@@ -118,6 +126,89 @@
   line-height: 1.7;
   color: var(--text-secondary);
   max-width: 68ch;
+}
+
+/* Bullet lists */
+.cs-list {
+  margin: var(--space-md) 0 0;
+  padding-left: 1.1em;
+  max-width: 68ch;
+}
+
+.cs-list li {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.cs-list li::marker {
+  color: var(--primary);
+}
+
+/* Code block */
+.cs-code {
+  margin: var(--space-md) 0 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--bg-secondary);
+}
+
+.cs-code-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+}
+
+.cs-code pre {
+  margin: 0;
+  padding: 16px;
+  overflow-x: auto;
+}
+
+.cs-code code {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+/* Single figure */
+.cs-figure {
+  margin: var(--space-md) 0 0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.cs-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Tag chips */
+.cs-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: var(--space-md);
+}
+
+.cs-tag {
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
 }
 
 /* Process steps */

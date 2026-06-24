@@ -1,14 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, ArrowLeft } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Code2 } from 'lucide-react';
+import Gallery from './Gallery';
 import './CaseStudySpotlight.css';
 
 /**
  * Template A - "Spotlight"
  * Centered narrative layout. Renders a case study in the project-writeup
- * JSON shape. Any missing section is skipped automatically.
- *
- * @param {{ data: object }} props
+ * JSON shape. Any missing field or section is skipped automatically.
  */
 function isInternal(href) {
   return href && href.startsWith('/');
@@ -16,25 +15,71 @@ function isInternal(href) {
 
 function CtaButton({ cta }) {
   const className = cta.primary ? 'cs-btn cs-btn-primary' : 'cs-btn cs-btn-secondary';
-  if (isInternal(cta.href)) {
-    return (
-      <Link to={cta.href} className={className}>
-        {cta.label}
-        {cta.primary && <ArrowRight size={16} />}
-      </Link>
-    );
-  }
-  return (
-    <a className={className} href={cta.href} target="_blank" rel="noopener noreferrer">
+  const inner = (
+    <>
       {cta.label}
       {cta.primary && <ArrowRight size={16} />}
-    </a>
+    </>
+  );
+  return isInternal(cta.href) ? (
+    <Link to={cta.href} className={className}>{inner}</Link>
+  ) : (
+    <a className={className} href={cta.href} target="_blank" rel="noopener noreferrer">{inner}</a>
+  );
+}
+
+/* Renders every optional content field a section or step may carry. */
+function ContentBlocks({ block }) {
+  return (
+    <>
+      {block.body && <p className="cs-text">{block.body}</p>}
+
+      {Array.isArray(block.bullets) && block.bullets.length > 0 && (
+        <ul className="cs-list">
+          {block.bullets.map((b, i) => (
+            <li key={i}>{b}</li>
+          ))}
+        </ul>
+      )}
+
+      {block.code && (
+        <div className="cs-code">
+          {block.codeLabel && (
+            <div className="cs-code-head">
+              <Code2 size={14} />
+              <span>{block.codeLabel}</span>
+            </div>
+          )}
+          <pre>
+            <code>{block.code}</code>
+          </pre>
+        </div>
+      )}
+
+      {block.image && (
+        <figure className="cs-figure">
+          <img src={block.image} alt={block.imageAlt || ''} loading="lazy" />
+        </figure>
+      )}
+
+      {Array.isArray(block.images) && block.images.length > 0 && (
+        <Gallery images={block.images} columns={3} />
+      )}
+
+      {Array.isArray(block.tags) && block.tags.length > 0 && (
+        <div className="cs-tags">
+          {block.tags.map((t, i) => (
+            <span className="cs-tag" key={i}>{t}</span>
+          ))}
+        </div>
+      )}
+    </>
   );
 }
 
 export default function CaseStudySpotlight({ data }) {
   if (!data) return null;
-  const { eyebrow, headline, subhead, cover, metrics = [], sections = [], cta = [] } = data;
+  const { eyebrow, context, headline, subhead, cover, metrics = [], sections = [], cta = [] } = data;
 
   return (
     <article className="cs-spotlight">
@@ -46,6 +91,7 @@ export default function CaseStudySpotlight({ data }) {
         {/* Hero */}
         <header className="cs-hero">
           {eyebrow && <p className="cs-eyebrow">{eyebrow}</p>}
+          {context && <p className="cs-context">{context}</p>}
           {headline && <h1 className="cs-headline">{headline}</h1>}
           {subhead && <p className="cs-subhead">{subhead}</p>}
         </header>
@@ -56,9 +102,9 @@ export default function CaseStudySpotlight({ data }) {
           </div>
         )}
 
-        {/* Metrics row - skipped when empty */}
+        {/* Metrics row */}
         {metrics.length > 0 && (
-          <div className="cs-metrics">
+          <div className="cs-metrics" style={{ '--cs-metric-cols': Math.min(metrics.length, 4) }}>
             {metrics.map((m, i) => (
               <div className="cs-metric" key={i}>
                 <div className="cs-metric-value">{m.value}</div>
@@ -81,24 +127,19 @@ export default function CaseStudySpotlight({ data }) {
                       <div className="cs-step-index">{String(j + 1).padStart(2, '0')}</div>
                       <div className="cs-step-body">
                         {step.title && <h3 className="cs-step-title">{step.title}</h3>}
-                        {step.body && <p className="cs-text">{step.body}</p>}
-                        {step.image && (
-                          <div className="cs-step-art">
-                            <img src={step.image} alt={step.imageAlt || ''} loading="lazy" />
-                          </div>
-                        )}
+                        <ContentBlocks block={step} />
                       </div>
                     </li>
                   ))}
                 </ol>
               ) : (
-                section.body && <p className="cs-text">{section.body}</p>
+                <ContentBlocks block={section} />
               )}
             </section>
           ))}
         </div>
 
-        {/* CTA - skipped when empty */}
+        {/* CTA */}
         {cta.length > 0 && (
           <div className="cs-cta">
             {cta.map((c, i) => (

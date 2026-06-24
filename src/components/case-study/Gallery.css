@@ -1,0 +1,139 @@
+/* ============================================
+   CASE STUDY — shared image gallery + lightbox
+   ============================================ */
+
+.cs-gallery {
+  display: grid;
+  grid-template-columns: repeat(var(--cs-gallery-cols, 3), 1fr);
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+}
+
+.cs-gallery-item {
+  display: block;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--bg-secondary);
+  cursor: zoom-in;
+  aspect-ratio: 4 / 3;
+  transition: border-color var(--transition-base), transform var(--transition-base);
+}
+
+.cs-gallery-item:hover {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.cs-gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Lightbox */
+.cs-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(0, 0, 0, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.cs-lightbox-figure {
+  margin: 0;
+  max-width: 92vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cs-lightbox-figure img {
+  max-width: 92vw;
+  max-height: 80vh;
+  object-fit: contain;
+  border-radius: var(--radius-md);
+}
+
+.cs-lightbox-caption {
+  margin-top: 14px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 14px;
+  text-align: center;
+  max-width: 60ch;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cs-lightbox-count {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+}
+
+.cs-lightbox-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  cursor: pointer;
+  transition: background var(--transition-base);
+}
+
+.cs-lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.cs-lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  cursor: pointer;
+  transition: background var(--transition-base);
+}
+
+.cs-lightbox-nav:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.cs-lightbox-prev {
+  left: 18px;
+}
+
+.cs-lightbox-next {
+  right: 18px;
+}
+
+@media (max-width: 680px) {
+  .cs-gallery {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .cs-lightbox-nav {
+    width: 40px;
+    height: 40px;
+  }
+}

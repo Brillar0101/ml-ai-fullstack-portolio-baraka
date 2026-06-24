@@ -71,6 +71,13 @@
   margin-bottom: var(--space-md);
 }
 
+.ce-context {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 14px;
+}
+
 .ce-subhead {
   font-size: clamp(16px, 1.7vw, 21px);
   line-height: 1.5;
@@ -103,6 +110,43 @@
   margin-top: 4px;
   font-size: 13px;
   color: rgba(255, 255, 255, 0.75);
+}
+
+/* Full-width media under the hero (video or cover) */
+.ce-media {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: var(--space-2xl) var(--space-xl) 0;
+}
+
+.ce-video {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: #000;
+}
+
+.ce-video iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.ce-cover {
+  margin: 0;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.ce-cover img {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 /* Layout: sticky nav + content */
@@ -192,6 +236,75 @@
   display: block;
   width: 100%;
   height: auto;
+}
+
+/* Bullet lists */
+.ce-list {
+  margin: var(--space-md) 0 0;
+  padding-left: 1.1em;
+  max-width: 68ch;
+}
+
+.ce-list li {
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.ce-list li::marker {
+  color: var(--primary);
+}
+
+/* Code block */
+.ce-code {
+  margin: var(--space-md) 0 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--bg-secondary);
+}
+
+.ce-code-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+}
+
+.ce-code pre {
+  margin: 0;
+  padding: 16px;
+  overflow-x: auto;
+}
+
+.ce-code code {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+/* Tag chips */
+.ce-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: var(--space-md);
+}
+
+.ce-tag {
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
 }
 
 .ce-cta {
