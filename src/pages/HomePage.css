@@ -354,7 +354,7 @@
 
 .home-btn-primary {
   background: var(--home-yellow);
-  color: var(--home-navy-ink);
+  color: #ffffff;
   border: 0;
   height: 84px;
   padding: 0 48px;
@@ -373,7 +373,7 @@
 .home-btn-primary:hover {
   background: var(--home-yellow-hover);
   text-decoration: none;
-  color: var(--home-navy-ink);
+  color: #ffffff;
 }
 
 .home-btn-primary:active {

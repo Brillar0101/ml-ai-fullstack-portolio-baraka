@@ -108,6 +108,10 @@ const AboutPage = () => {
             <img
               src="/assets/images/profile.jpg"
               alt="Barakaeli Lawuo"
+              width="666"
+              height="1000"
+              loading="lazy"
+              decoding="async"
               style={photoCrop ? {
                 transform: `scale(${photoCrop.zoom})`,
                 transformOrigin: `${50 - photoCrop.position.x}% ${50 - photoCrop.position.y}%`,

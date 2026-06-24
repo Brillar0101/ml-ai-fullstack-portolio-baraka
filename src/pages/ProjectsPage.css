@@ -252,15 +252,16 @@
   flex-shrink: 0;
 }
 
-/* ---- Disabled Card (In Development) ---- */
+/* ---- Disabled Card (In Development) ----
+   State is signalled by the "In Development" badge + muted surface,
+   NOT by blanket opacity, so text stays WCAG AA legible. */
 .project-card-disabled {
   display: flex;
   flex-direction: column;
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: var(--bg-secondary);
+  border: 1px dashed var(--border);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  opacity: 0.55;
   cursor: default;
 }
 

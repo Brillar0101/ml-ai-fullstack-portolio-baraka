@@ -36,6 +36,7 @@ const HomePage = () => {
       if (!containerRef.current) return;
       playerRef.current = new window.YT.Player(containerRef.current, {
         videoId: YOUTUBE_VIDEO_ID,
+        host: 'https://www.youtube-nocookie.com',
         playerVars: {
           autoplay: 1,
           mute: 1,

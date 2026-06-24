@@ -182,7 +182,8 @@
 .submit-btn {
   width: 100%;
   padding: 12px;
-  background: var(--primary);
+  /* Fixed deep electric blue so white text clears WCAG AA on any theme */
+  background: #0068FF;
   border: none;
   border-radius: var(--radius-full);
   color: white;
@@ -199,7 +200,7 @@
 }
 
 .submit-btn:hover {
-  background: var(--primary-light);
+  background: #0052cc;
 }
 
 .submit-btn svg {

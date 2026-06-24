@@ -6,7 +6,8 @@
    Gradients: blue → purple, used for hero moments
    ============================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap');
+/* Fonts (Manrope + Fira Code) are loaded non-render-blocking
+   via <link> in index.html, not an @import here. */
 
 * {
   margin: 0;
@@ -84,6 +85,13 @@
 
 /* ---- Dark Theme — black is Micron's primary background ---- */
 [data-theme="dark"] {
+  /* Lightened accent so small accent text clears WCAG AA (4.5:1) on
+     black/near-black surfaces. The deep #0068FF is reserved for large
+     elements and gradients. */
+  --primary: #3585ff;
+  --primary-light: #5a9cff;
+  --primary-dark: #0068FF;
+
   --bg: #000000;
   --bg-secondary: #0a0a0c;
   --bg-tertiary: #15151a;
@@ -232,8 +240,9 @@ a:hover {
   justify-content: center;
   gap: var(--space-sm);
   padding: 13px 30px;
-  background: var(--primary);
-  border: 1px solid var(--primary);
+  /* Fixed deep electric blue so white text clears WCAG AA on any theme */
+  background: #0068FF;
+  border: 1px solid #0068FF;
   border-radius: var(--radius-full);
   color: #FFFFFF;
   font-family: inherit;
@@ -245,8 +254,9 @@ a:hover {
 }
 
 .btn-primary:hover {
-  background: var(--primary-dark);
-  border-color: var(--primary-dark);
+  background: #0052cc;
+  border-color: #0052cc;
+  color: #FFFFFF;
   text-decoration: none;
   transform: translateY(-1px);
 }

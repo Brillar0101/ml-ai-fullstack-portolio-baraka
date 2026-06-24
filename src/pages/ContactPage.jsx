@@ -102,6 +102,7 @@ const ContactPage = () => {
               href={`https://${CONFIG.github}`}
               target="_blank"
               rel="noopener noreferrer"
+              aria-label="GitHub profile"
             >
               <Github />
             </a>
@@ -110,6 +111,7 @@ const ContactPage = () => {
               href={`https://${CONFIG.linkedin}`}
               target="_blank"
               rel="noopener noreferrer"
+              aria-label="LinkedIn profile"
             >
               <Linkedin />
             </a>
