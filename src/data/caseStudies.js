@@ -6,6 +6,11 @@
 
 const SLIDE = (name) => `/assets/images/clapperboard/result_slideshow/${name}.jpg`;
 
+// Registry: maps a project route slug (the part after /projects/) to its
+// case-study data. A project appears in the new template once it's listed here.
+// Populated at the bottom of this file.
+export const caseStudies = {};
+
 export const clapperboardCaseStudy = {
   id: 'clapperboard',
   eyebrow: 'ML / AI',
@@ -162,3 +167,6 @@ results = model.train(
   // Demo video embedded near the top of the page (replaces the old standalone page).
   video: 'https://www.youtube.com/embed/Bmev1UZnyQY',
 };
+
+// Register projects so the generic ProjectCaseStudy page can render them.
+caseStudies.clapperboard = clapperboardCaseStudy;
