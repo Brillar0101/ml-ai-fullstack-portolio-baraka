@@ -222,7 +222,16 @@
   font-size: 17px;
   line-height: 1.75;
   color: var(--text-secondary);
-  max-width: 68ch;
+  /* Fill the full content column so paragraphs align with the image edges */
+  max-width: none;
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
+}
+
+/* Last line of a justified block should not stretch */
+.ce-text:last-child {
+  text-align-last: left;
 }
 
 .ce-figure {
@@ -242,7 +251,7 @@
 .ce-list {
   margin: var(--space-md) 0 0;
   padding-left: 1.1em;
-  max-width: 68ch;
+  max-width: none;
 }
 
 .ce-list li {
