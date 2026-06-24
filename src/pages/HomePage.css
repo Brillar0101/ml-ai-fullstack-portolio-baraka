@@ -286,7 +286,7 @@
   letter-spacing: -0.025em;
   width: max-content;
   max-width: 100%;
-  margin-left: -3px; /* optical-align the "B" with the eyebrow's "C" */
+  margin-left: 0; /* flush-left with eyebrow, subhead, meta and actions */
   margin-bottom: clamp(10px, 1.4vw, 18px);
   color: #fff;
 }
@@ -541,7 +541,7 @@
   .home-h1 {
     font-size: 42px;
     letter-spacing: -0.7px;
-    margin-left: -2px;
+    margin-left: 0;
     margin-bottom: 14px;
   }
 
