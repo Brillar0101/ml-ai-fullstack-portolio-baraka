@@ -1,15 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, ArrowLeft } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Code2 } from 'lucide-react';
+import Gallery from './Gallery';
 import './CaseStudyEditorial.css';
 
 /**
  * Template B - "Editorial"
  * Brand-gradient hero band with a sticky section nav beside a long-form
  * content column. Same project-writeup JSON shape as Template A; missing
- * sections are skipped.
- *
- * @param {{ data: object }} props
+ * fields and sections are skipped.
  */
 const slug = (s) => (s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
@@ -32,9 +31,57 @@ function Cta({ cta }) {
   );
 }
 
+function ContentBlocks({ block }) {
+  return (
+    <>
+      {block.body && <p className="ce-text">{block.body}</p>}
+
+      {Array.isArray(block.bullets) && block.bullets.length > 0 && (
+        <ul className="ce-list">
+          {block.bullets.map((b, i) => (
+            <li key={i}>{b}</li>
+          ))}
+        </ul>
+      )}
+
+      {block.code && (
+        <div className="ce-code">
+          {block.codeLabel && (
+            <div className="ce-code-head">
+              <Code2 size={14} />
+              <span>{block.codeLabel}</span>
+            </div>
+          )}
+          <pre>
+            <code>{block.code}</code>
+          </pre>
+        </div>
+      )}
+
+      {block.image && (
+        <figure className="ce-figure">
+          <img src={block.image} alt={block.imageAlt || ''} loading="lazy" />
+        </figure>
+      )}
+
+      {Array.isArray(block.images) && block.images.length > 0 && (
+        <Gallery images={block.images} columns={3} />
+      )}
+
+      {Array.isArray(block.tags) && block.tags.length > 0 && (
+        <div className="ce-tags">
+          {block.tags.map((t, i) => (
+            <span className="ce-tag" key={i}>{t}</span>
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
+
 export default function CaseStudyEditorial({ data }) {
   if (!data) return null;
-  const { eyebrow, headline, subhead, metrics = [], sections = [], cta = [] } = data;
+  const { eyebrow, context, headline, subhead, metrics = [], sections = [], cta = [], video, cover } = data;
   const navItems = sections.filter((s) => s.title).map((s) => ({ id: slug(s.title), title: s.title }));
 
   return (
@@ -47,6 +94,7 @@ export default function CaseStudyEditorial({ data }) {
           </Link>
           {eyebrow && <p className="ce-eyebrow">{eyebrow}</p>}
           {headline && <h1 className="ce-headline">{headline}</h1>}
+          {context && <p className="ce-context">{context}</p>}
           {subhead && <p className="ce-subhead">{subhead}</p>}
 
           {metrics.length > 0 && (
@@ -61,6 +109,29 @@ export default function CaseStudyEditorial({ data }) {
           )}
         </div>
       </header>
+
+      {/* Optional demo video / cover, full-width under the hero */}
+      {video ? (
+        <div className="ce-media">
+          <div className="ce-video">
+            <iframe
+              src={video}
+              title={headline || 'Demo video'}
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+        </div>
+      ) : (
+        cover && (
+          <div className="ce-media">
+            <figure className="ce-cover">
+              <img src={cover} alt={headline || 'Project cover'} loading="lazy" />
+            </figure>
+          </div>
+        )
+      )}
 
       {/* Body: sticky nav + content */}
       <div className="ce-layout">
@@ -85,16 +156,11 @@ export default function CaseStudyEditorial({ data }) {
                 section.steps.map((step, j) => (
                   <div className="ce-step" key={j}>
                     {step.title && <h3 className="ce-step-title">{step.title}</h3>}
-                    {step.body && <p className="ce-text">{step.body}</p>}
-                    {step.image && (
-                      <figure className="ce-figure">
-                        <img src={step.image} alt={step.imageAlt || ''} loading="lazy" />
-                      </figure>
-                    )}
+                    <ContentBlocks block={step} />
                   </div>
                 ))
               ) : (
-                section.body && <p className="ce-text">{section.body}</p>
+                <ContentBlocks block={section} />
               )}
             </section>
           ))}
