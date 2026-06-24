@@ -253,7 +253,19 @@
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 80px 56px 120px;
+  /* Horizontal gutter matches the nav bar (.nav-inner) so the hero
+     content lines up directly under the "Barakaeli Lawuo" wordmark. */
+  padding: 80px var(--space-xl) 120px;
+}
+
+/* Match the nav's wider container on large screens (nav grows to
+   1400px / 48px gutter at >=1440px — keep the hero in lockstep). */
+@media (min-width: 1440px) {
+  .home-hero-inner {
+    max-width: 1400px;
+    padding-left: var(--space-2xl);
+    padding-right: var(--space-2xl);
+  }
 }
 
 /* Eyebrow */
@@ -524,7 +536,7 @@
   }
 
   .home-hero-inner {
-    padding: 48px 20px 60px;
+    padding: 48px 16px 60px;
     max-width: 100%;
   }
 
