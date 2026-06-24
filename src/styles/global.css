@@ -1,11 +1,12 @@
 /* ============================================
-   DESIGN SYSTEM
-   Display: Fraunces (serif) | Body: DM Sans
-   Colors: Ink, paper, gold (#d4882e)
+   DESIGN SYSTEM — Crucial / Micron inspired
+   Display + Body: Manrope (geometric grotesque,
+   approximates Micron Basis: precise, rounded)
+   Colors: Black, white, electric blue accent (#0068FF)
+   Gradients: blue → purple, used for hero moments
    ============================================ */
 
-/* Code font for code blocks */
-@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap');
 
 * {
   margin: 0;
@@ -15,14 +16,25 @@
 
 /* ---- Light Theme (Default) ---- */
 :root {
-  /* Typography */
-  --font-display: 'Fraunces', 'Iowan Old Style', Georgia, serif;
-  --font-body: 'DM Sans', system-ui, Arial, sans-serif;
+  /* Typography — single brand family, like Micron Basis */
+  --font-display: 'Manrope', system-ui, 'Segoe UI', Arial, sans-serif;
+  --font-body: 'Manrope', system-ui, 'Segoe UI', Arial, sans-serif;
   --font-mono: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  --primary: #d4882e;
-  --primary-light: #e8a050;
-  --primary-dark: #b87020;
+  /* Accent — Crucial "electric" blue (digital/RGB value) */
+  --primary: #0068FF;
+  --primary-light: #3585ff;
+  --primary-dark: #0052cc;
+
+  /* Brand gradient stops */
+  --grad-blue: #0068FF;
+  --grad-violet: #3539F4;
+  --grad-purple: #BD03F7;
+  --grad-magenta: #E60177;
+
+  /* Signature brand gradient (blue → purple, diagonal) */
+  --gradient-brand: linear-gradient(120deg, #0068FF 0%, #3539F4 45%, #BD03F7 100%);
+  --gradient-dark: linear-gradient(160deg, #05060a 0%, #0a1a3a 60%, #050608 100%);
 
   --bg: #FFFFFF;
   --bg-secondary: #F2F2F2;
@@ -41,7 +53,7 @@
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.1);
 
-  /* Spacing -8px base */
+  /* Spacing — 8px base */
   --space-xs: 4px;
   --space-sm: 8px;
   --space-md: 16px;
@@ -51,11 +63,11 @@
   --space-3xl: 64px;
   --space-4xl: 96px;
 
-  /* Border radius */
+  /* Border radius — Micron favors tight corners + pill CTAs */
   --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
   --radius-full: 9999px;
 
   /* Transitions */
@@ -63,35 +75,35 @@
   --transition-base: 0.2s ease-out;
   --transition-smooth: 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
 
-  /* Legacy compat -project pages still reference these */
+  /* Legacy compat — project pages still reference these */
   --glass: rgba(255, 255, 255, 0.8);
   --glass-border: rgba(0, 0, 0, 0.08);
   --glass-hover: rgba(245, 245, 245, 0.95);
-  --radius-2xl: 22px;
+  --radius-2xl: 18px;
 }
 
-/* ---- Dark Theme ---- */
+/* ---- Dark Theme — black is Micron's primary background ---- */
 [data-theme="dark"] {
   --bg: #000000;
-  --bg-secondary: #111113;
-  --bg-tertiary: #1C1C1F;
-  --surface: #111113;
+  --bg-secondary: #0a0a0c;
+  --bg-tertiary: #15151a;
+  --surface: #0a0a0c;
 
   --text: #FFFFFF;
-  --text-secondary: #BFBFBF;
-  --text-muted: #8C8C8C;
-  --text-dim: #4D4D4D;
+  --text-secondary: #C4C4CC;
+  --text-muted: #8C8C96;
+  --text-dim: #4D4D55;
 
-  --border: #262626;
-  --border-light: #1C1C1F;
+  --border: #1f1f26;
+  --border-light: #15151a;
 
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
   --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.6);
 
-  --glass: rgba(17, 17, 19, 0.8);
+  --glass: rgba(10, 10, 12, 0.8);
   --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-hover: rgba(28, 28, 31, 0.95);
+  --glass-hover: rgba(21, 21, 26, 0.95);
 }
 
 /* ============================================
@@ -114,24 +126,6 @@ body {
   letter-spacing: 0;
   transition: background-color 0.3s ease, color 0.3s ease;
   position: relative;
-}
-
-/* Subtle grain overlay — kills the flat-white / flat-black look */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 1;
-  opacity: 0.35;
-  mix-blend-mode: multiply;
-  background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.08 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
-  background-size: 220px 220px;
-}
-
-[data-theme="dark"] body::before {
-  mix-blend-mode: screen;
-  opacity: 0.25;
 }
 
 a {
@@ -183,43 +177,41 @@ a:hover {
 }
 
 /* ============================================
-   TYPOGRAPHY
+   TYPOGRAPHY — bold sentence-case headlines,
+   uppercase eyebrows (Micron type hierarchy)
    ============================================ */
 
-/* Page header */
 .page-header {
   margin-bottom: var(--space-3xl);
 }
 
 .page-title {
   font-family: var(--font-display);
-  font-size: clamp(40px, 6vw, 68px);
-  font-weight: 500;
-  font-variation-settings: "opsz" 144, "SOFT" 30;
-  letter-spacing: -0.025em;
+  font-size: clamp(40px, 6vw, 72px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
   line-height: 1.02;
   margin-bottom: var(--space-md);
   color: var(--text);
 }
 
 .page-subtitle {
-  font-size: clamp(14px, 2vw, 18px);
+  font-size: clamp(15px, 2vw, 18px);
   color: var(--text-secondary);
   max-width: 600px;
   line-height: 1.6;
 }
 
-/* Eyebrow label -Micron style */
+/* Eyebrow label — uppercase, tracked, Micron "Eyebrow" style */
 .eyebrow {
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.12em;
   color: var(--primary);
   margin-bottom: 12px;
 }
 
-/* Section category (legacy compat) */
 .section-category {
   display: inline-block;
   font-size: 12px;
@@ -231,7 +223,7 @@ a:hover {
 }
 
 /* ============================================
-   BUTTONS
+   BUTTONS — accent-blue pill (Micron "Button style")
    ============================================ */
 
 .btn-primary {
@@ -239,23 +231,24 @@ a:hover {
   align-items: center;
   justify-content: center;
   gap: var(--space-sm);
-  padding: 12px 28px;
+  padding: 13px 30px;
   background: var(--primary);
   border: 1px solid var(--primary);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full);
   color: #FFFFFF;
   font-family: inherit;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 700;
   cursor: pointer;
   transition: all var(--transition-base);
   text-decoration: none;
 }
 
 .btn-primary:hover {
-  background: var(--primary-light);
-  border-color: var(--primary-light);
+  background: var(--primary-dark);
+  border-color: var(--primary-dark);
   text-decoration: none;
+  transform: translateY(-1px);
 }
 
 .btn-primary svg {
@@ -268,21 +261,22 @@ a:hover {
   align-items: center;
   justify-content: center;
   gap: var(--space-sm);
-  padding: 12px 28px;
+  padding: 13px 30px;
   background: transparent;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  color: var(--text);
+  border: 1.5px solid var(--primary);
+  border-radius: var(--radius-full);
+  color: var(--primary);
   font-family: inherit;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 700;
   cursor: pointer;
   transition: all var(--transition-base);
   text-decoration: none;
 }
 
 .btn-secondary:hover {
-  border-color: var(--text-muted);
+  background: var(--primary);
+  color: #FFFFFF;
   text-decoration: none;
 }
 
@@ -307,7 +301,19 @@ a:hover {
 }
 
 .glass-card:hover {
-  border-color: var(--text-dim);
+  border-color: var(--primary);
+}
+
+/* ============================================
+   BRAND HELPERS — gradient text + curve frame motif
+   ============================================ */
+
+.brand-gradient-text {
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
 }
 
 /* ============================================
@@ -331,13 +337,13 @@ a:hover {
   }
 
   .page-title {
-    font-size: 28px;
+    font-size: 30px;
   }
 
   .btn-primary,
   .btn-secondary {
     width: 100%;
-    padding: 12px 20px;
+    padding: 13px 20px;
   }
 }
 
@@ -384,11 +390,12 @@ a:hover {
 @media (hover: none) and (pointer: coarse) {
   .btn-primary:hover {
     background: var(--primary);
+    transform: none;
   }
 
   .btn-secondary:hover {
     background: transparent;
-    border-color: var(--border);
+    color: var(--primary);
   }
 }
 
