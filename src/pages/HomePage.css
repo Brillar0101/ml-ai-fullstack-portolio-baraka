@@ -259,13 +259,13 @@
 /* Eyebrow */
 .home-eyebrow {
   font-family: 'Manrope', system-ui, sans-serif;
-  font-size: clamp(10px, 1.4vw, 20px);
-  letter-spacing: clamp(1.6px, 0.35vw, 4.8px);
+  font-size: clamp(10px, 0.9vw, 13px);
+  letter-spacing: clamp(1.4px, 0.2vw, 2.6px);
   color: #fff;
   text-transform: uppercase;
-  margin-bottom: clamp(16px, 3vw, 42px);
+  margin-bottom: clamp(12px, 1.6vw, 22px);
   display: inline-block;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .home-eyebrow .sep {
@@ -281,24 +281,24 @@
 .home-h1 {
   font-family: 'Manrope', system-ui, sans-serif;
   font-weight: 800;
-  font-size: clamp(32px, 9vw, 114px);
+  font-size: clamp(30px, 5vw, 60px);
   line-height: 1.05;
   letter-spacing: -0.025em;
   width: max-content;
   max-width: 100%;
-  margin-left: -6px; /* optical-align the "B" with the eyebrow's "C" */
-  margin-bottom: clamp(14px, 2vw, 30px);
+  margin-left: -3px; /* optical-align the "B" with the eyebrow's "C" */
+  margin-bottom: clamp(10px, 1.4vw, 18px);
   color: #fff;
 }
 
 /* Subhead */
 .home-subhead {
   font-family: 'Manrope', system-ui, sans-serif;
-  font-size: clamp(15px, 2.2vw, 28px);
-  line-height: 1.45;
+  font-size: clamp(14px, 1.3vw, 18px);
+  line-height: 1.5;
   color: var(--home-body);
-  max-width: 960px;
-  margin-bottom: clamp(18px, 2.6vw, 40px);
+  max-width: 620px;
+  margin-bottom: clamp(14px, 1.6vw, 24px);
   font-weight: 400;
   text-wrap: balance;
 }
@@ -307,11 +307,11 @@
 .home-meta {
   display: flex;
   align-items: center;
-  gap: clamp(8px, 1.2vw, 18px);
+  gap: clamp(8px, 1vw, 14px);
   font-family: 'Manrope', system-ui, sans-serif;
-  font-size: clamp(13px, 2vw, 28px);
+  font-size: clamp(12px, 1vw, 15px);
   color: var(--home-muted);
-  margin-bottom: clamp(20px, 2.4vw, 34px);
+  margin-bottom: clamp(16px, 1.6vw, 24px);
   flex-wrap: wrap;
 }
 
@@ -356,17 +356,17 @@
   background: var(--home-yellow);
   color: #ffffff;
   border: 0;
-  height: 84px;
-  padding: 0 48px;
-  border-radius: 15px;
+  height: 52px;
+  padding: 0 30px;
+  border-radius: 10px;
   font-family: 'Manrope', system-ui, sans-serif;
   font-weight: 700;
-  font-size: 22px;
+  font-size: 15px;
   cursor: pointer;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   transition: background 0.15s, transform 0.1s;
 }
 
@@ -388,13 +388,13 @@
 }
 
 .home-social {
-  width: 84px;
-  height: 84px;
+  width: 52px;
+  height: 52px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border: 1.5px solid rgba(255, 255, 255, 0.3);
-  border-radius: 15px;
+  border-radius: 10px;
   color: #fff;
   text-decoration: none;
   transition: border-color 0.15s, color 0.15s, background 0.15s;
@@ -408,8 +408,8 @@
 }
 
 .home-social svg {
-  width: 44px;
-  height: 44px;
+  width: 22px;
+  height: 22px;
 }
 
 /* ============================================
@@ -419,35 +419,35 @@
 /* ---- Laptop tune-down ---- */
 @media (max-width: 1024px) {
   .home-eyebrow {
-    font-size: 18px;
+    font-size: 12px;
   }
 
   .home-h1 {
-    font-size: 92px;
+    font-size: 50px;
   }
 
   .home-subhead {
-    font-size: 24px;
+    font-size: 16px;
   }
 
   .home-meta {
-    font-size: 24px;
+    font-size: 14px;
   }
 
   .home-btn-primary {
-    height: 72px;
-    padding: 0 40px;
-    font-size: 20px;
+    height: 50px;
+    padding: 0 26px;
+    font-size: 15px;
   }
 
   .home-social {
-    width: 72px;
-    height: 72px;
+    width: 50px;
+    height: 50px;
   }
 
   .home-social svg {
-    width: 36px;
-    height: 36px;
+    width: 22px;
+    height: 22px;
   }
 }
 
