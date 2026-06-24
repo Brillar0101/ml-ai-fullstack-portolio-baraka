@@ -23,6 +23,7 @@ const BlogPostPage = lazy(() => import('./pages/BlogPostPage'));
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
 const CaseStudySpotlightDemo = lazy(() => import('./pages/CaseStudySpotlightDemo'));
 const CaseStudyEditorialDemo = lazy(() => import('./pages/CaseStudyEditorialDemo'));
+const ProjectCaseStudy = lazy(() => import('./pages/ProjectCaseStudy'));
 
 // Lazy-load admin pages
 const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'));
@@ -106,7 +107,7 @@ export default function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/projects" element={<ProjectsPage />} />
             <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
-            <Route path="/projects/clapperboard" element={<ClapperboardProject />} />
+            <Route path="/projects/clapperboard" element={<ProjectCaseStudy />} />
             <Route path="/projects/psiv-rentals" element={<PSIVRentalsProject />} />
             <Route path="/projects/swishvision" element={<SwishVisionProject />} />
             <Route path="/projects/pixel-monarch" element={<PixelMonarchProject />} />
