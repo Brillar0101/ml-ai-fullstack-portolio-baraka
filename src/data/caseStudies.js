@@ -168,5 +168,502 @@ results = model.train(
   video: 'https://www.youtube.com/embed/Bmev1UZnyQY',
 };
 
+// =====================================================================
+// SwishVision
+// =====================================================================
+const SV = (dir, name) => `/assets/images_sv/${dir}/${name}.jpg`;
+
+export const swishVisionCaseStudy = {
+  id: 'swishvision',
+  eyebrow: 'ML / AI',
+  context: 'Solo project · building since August 2025',
+  headline: 'Player tracking and a live tactical view from game film',
+  subhead:
+    'AI basketball analytics for college programs that cannot pay $50K to $100K a year for the enterprise tools. It pulls player tracking, team colors, and a 2D court view straight from game video.',
+  video: 'https://www.youtube.com/embed/oqUrfFeTF88',
+  metrics: [
+    { value: '5', label: 'ML models in the pipeline' },
+    { value: '4', label: 'tracking stages live' },
+    { value: '$50K+/yr', label: 'what rival tools cost' },
+  ],
+  sections: [
+    {
+      type: 'introduction',
+      title: 'Introduction',
+      body:
+        'Coaches spend hours combing through game footage to track players, shots, and tactics. The tools that automate this cost more than most college programs can spend. SwishVision does the same job from ordinary game video at a price a college team can actually afford, and it is being built solo with Virginia Tech Athletics as the pilot target.',
+    },
+    {
+      type: 'problem',
+      title: 'The problem',
+      body:
+        'The analytics that pro teams rely on are priced for pro budgets, so most college programs go without and fall back on manual film study.',
+      bullets: [
+        'Second Spectrum costs $100K+/year (NBA official partner).',
+        'Synergy Sports costs $50K+/year for pro and college.',
+        'Hudl runs about $10K+/year for basic analytics.',
+        'Coaches spend hours manually reviewing footage to track movement, shots, and patterns.',
+      ],
+    },
+    {
+      type: 'audience',
+      title: "Who it's for",
+      bullets: [
+        'College basketball programs across NCAA D1, D2, and D3.',
+        'Coaching staff preparing for games and scouting opponents.',
+        'Team analysts tracking performance and efficiency.',
+        'Player development coordinators.',
+      ],
+    },
+    {
+      type: 'process',
+      title: 'How it works',
+      steps: [
+        {
+          title: 'Player detection with YOLO',
+          body:
+            'YOLO handles the first pass, finding players and referees in each frame. It is solid frame by frame, but on its own it could not hold a track on the same player from one frame to the next.',
+          images: [
+            { src: SV('playerdetection', 'playerdetection_frame_01'), alt: 'Player detection frame 1', caption: 'Detected players and referees' },
+            { src: SV('playerdetection', 'playerdetection_frame_02'), alt: 'Player detection frame 2', caption: 'Detected players and referees' },
+            { src: SV('playerdetection', 'playerdetection_frame_03'), alt: 'Player detection frame 3', caption: 'Detected players and referees' },
+          ],
+        },
+        {
+          title: 'Continuous tracking with SAM2',
+          body:
+            'Adding SAM2 (Segment Anything Model 2) carried detections across frames, so a player keeps the same identity through a clip. The open issue is that anyone missed in the first frame stays missing for the rest of it, which I am still working on.',
+          images: [
+            { src: SV('playerdetection_tracked', 'playertracking_frame_01'), alt: 'Continuous tracking frame 1', caption: 'Tracked across frames' },
+            { src: SV('playerdetection_tracked', 'playertracking_frame_02'), alt: 'Continuous tracking frame 2', caption: 'Tracked across frames' },
+            { src: SV('playerdetection_tracked', 'playertracking_frame_03'), alt: 'Continuous tracking frame 3', caption: 'Tracked across frames' },
+          ],
+        },
+        {
+          title: 'Tactical 2D view with homography',
+          body:
+            'A homography transform maps the players onto a 2D court, giving a live minimap of where everyone is. Players are color coded by team, red for one side and green for the other, with yellow for referees.',
+          images: [
+            { src: SV('tactical_view', 'tracking_frame_01'), alt: 'Tactical 2D court view frame 1', caption: '2D court minimap' },
+            { src: SV('tactical_view', 'tracking_frame_02'), alt: 'Tactical 2D court view frame 2', caption: '2D court minimap' },
+            { src: SV('tactical_view', 'tracking_frame_03'), alt: 'Tactical 2D court view frame 3', caption: '2D court minimap' },
+          ],
+        },
+        {
+          title: 'Reading jersey numbers with SmolVLM2',
+          body:
+            'SmolVLM2, a vision-language model, reads jersey numbers for identity. It does well when a number is clearly in view, but it guesses when the number is hidden, which throws off tracking. Tightening that up is the current focus.',
+        },
+      ],
+    },
+    {
+      type: 'conclusion',
+      title: 'Where it stands and what is next',
+      body:
+        'Phase one is working: player tracking, team classification, and the tactical view. The hardest constraint right now is compute, since running YOLO, SAM2, and SmolVLM2 over video needs real GPU time and that slows down how fast I can iterate. Next comes the analysis layer.',
+      bullets: [
+        'Shot detection and possession tracking',
+        'Automatic play-by-play breakdown',
+        'Real-time processing of a live stream',
+        'Player movement heatmaps and speed tracking',
+      ],
+    },
+    {
+      type: 'extra',
+      title: 'Tech stack',
+      tags: [
+        'YOLO', 'SAM2', 'SmolVLM2', 'SigLIP', 'Homography', 'PyTorch',
+        'FastAPI', 'PostgreSQL', 'OpenCV', 'Supervision', 'RunPod', 'Supabase',
+        'Next.js 15', 'TypeScript', 'TailwindCSS', 'shadcn/ui',
+      ],
+    },
+  ],
+  cta: [
+    { label: 'View code', href: 'https://github.com/Brillar0101/swishvision', primary: true },
+    { label: 'Tracking demo', href: 'https://youtu.be/NVq8giX8RPI', primary: false },
+  ],
+};
+
+// =====================================================================
+// PSIV Rentals
+// =====================================================================
+const PSIV = (name) => `/assets/images/psiv-rentals/${name}`;
+
+export const psivRentalsCaseStudy = {
+  id: 'psiv-rentals',
+  eyebrow: 'Full-stack',
+  context: 'iOS and Android · full-stack build',
+  headline: 'An equipment-rental platform with a mobile app, API, and admin back office',
+  subhead:
+    'Rent photography and video gear from a phone, with real-time availability, Stripe checkout, and a full admin dashboard behind it.',
+  metrics: [
+    { value: '74+', label: 'mobile screens' },
+    { value: '65+', label: 'API endpoints' },
+    { value: '11', label: 'database tables' },
+    { value: '<200ms', label: 'API response' },
+  ],
+  sections: [
+    {
+      type: 'introduction',
+      title: 'Introduction',
+      body:
+        'PSIV Rentals lets photographers and videographers book gear from their phone. Customers browse cameras, lenses, lighting, audio, and accessories, check real availability, and pay through Stripe. Behind it sits an admin dashboard for running the actual rental business: inventory, bookings, promo codes, and analytics.',
+    },
+    {
+      type: 'problem',
+      title: 'The problem',
+      body:
+        'Most rental tools make the simple act of booking a camera harder than it should be, and they break down the moment two people want the same item.',
+      bullets: [
+        'Existing solutions have dated interfaces and clunky booking flows.',
+        'Manual inventory tracking causes double bookings and let-down customers.',
+        'Goal: a mobile-first experience with real-time availability, smooth payments, and proper admin tools.',
+      ],
+    },
+    {
+      type: 'audience',
+      title: "Who it's for",
+      bullets: [
+        'Independent photographers and videographers.',
+        'Content creators and social media influencers.',
+        'Small production companies.',
+        'Photography students and hobbyists.',
+      ],
+    },
+    {
+      type: 'process',
+      title: 'How it was built',
+      steps: [
+        {
+          title: 'The mobile app',
+          body:
+            'The customer app is React Native on Expo, covering 74+ screens from auth through checkout. It handles browsing with search and filters, a date-based booking flow that checks availability, a multi-item cart, Stripe payments with Apple Pay, and reviews on returned gear.',
+          bullets: [
+            'JWT login and registration',
+            'Category browse with search, filters, and sorting',
+            'Booking flow with availability check',
+            'Multi-item cart with quantities',
+            'Stripe payments with Apple Pay',
+            'Rate and review rented equipment',
+          ],
+          images: [
+            { src: PSIV('screen-01.PNG'), alt: 'Home screen', caption: 'Home' },
+            { src: PSIV('screen-02.PNG'), alt: 'Equipment browse', caption: 'Browse' },
+            { src: PSIV('screen-03.PNG'), alt: 'Equipment details', caption: 'Details' },
+            { src: PSIV('screen-04.PNG'), alt: 'Cart view', caption: 'Cart' },
+            { src: PSIV('screen-05.PNG'), alt: 'Checkout flow', caption: 'Checkout' },
+            { src: PSIV('screen-06.PNG'), alt: 'Booking confirmation', caption: 'Confirmation' },
+            { src: PSIV('screen-07.PNG'), alt: 'My bookings', caption: 'My bookings' },
+            { src: PSIV('screen-08.PNG'), alt: 'Profile screen', caption: 'Profile' },
+          ],
+        },
+        {
+          title: 'The backend and API',
+          body:
+            'A Node and Express API over PostgreSQL exposes 65+ endpoints across auth, equipment, bookings, payments, cart, and promo codes. Responses come back in under 200ms, with Redis handling caching and sessions.',
+          bullets: [
+            'Auth: 7 endpoints (signup, login, profile, password)',
+            'Equipment: 10 endpoints (CRUD, search, images)',
+            'Bookings: 12 endpoints (CRUD, status, extensions)',
+            'Payments: 3 endpoints (intent, confirm, status)',
+            'Cart: 6 endpoints (add, update, delete, checkout)',
+            'Promo: 12 endpoints (validate, apply, admin CRUD)',
+          ],
+        },
+        {
+          title: 'The admin dashboard',
+          body:
+            'The back office is a React app where staff manage stock, bookings, discount codes, and watch search trends and business metrics. It is the side that turns the app into something a real rental shop can run on.',
+          bullets: [
+            'Inventory: add, edit, and manage equipment',
+            'Bookings: view, update, and cancel',
+            'Promo codes: create and manage discounts',
+            'Analytics: search trends and business metrics',
+          ],
+          images: [
+            { src: PSIV('admin-dashboard.png'), alt: 'Admin dashboard overview', caption: 'Dashboard' },
+            { src: PSIV('admin-equipment.png'), alt: 'Equipment management', caption: 'Equipment' },
+            { src: PSIV('admin-bookings.png'), alt: 'Bookings management', caption: 'Bookings' },
+            { src: PSIV('admin-categories.png'), alt: 'Categories management', caption: 'Categories' },
+            { src: PSIV('admin-promo.png'), alt: 'Promo codes', caption: 'Promo codes' },
+            { src: PSIV('admin-login.png'), alt: 'Admin login', caption: 'Login' },
+          ],
+        },
+        {
+          title: 'The parts that were actually hard',
+          body:
+            'A booking app is mostly edge cases. These were the ones worth solving carefully.',
+          bullets: [
+            'Real-time availability across concurrent bookings: PostgreSQL date-range queries with conflict detection at O(log n).',
+            'Complex pricing with daily and weekly rates plus discounts: a pricing engine that factors duration, tax, and promos.',
+            'Payments with many failure modes: Stripe payment-intent flow with error handling and webhooks for async events.',
+            'State across 74+ screens: Zustand for global state and React Query for server state with caching.',
+          ],
+        },
+      ],
+    },
+    {
+      type: 'conclusion',
+      title: 'What is next',
+      bullets: [
+        'Email confirmations through SendGrid',
+        'Push notifications for rental reminders',
+        'Equipment recommendations',
+        'Multi-location support with pickup scheduling',
+      ],
+    },
+    {
+      type: 'extra',
+      title: 'Tech stack',
+      tags: [
+        'React Native', 'Expo SDK 54', 'TypeScript', 'Zustand', 'React Query',
+        'Node.js', 'Express', 'PostgreSQL', 'Redis', 'JWT', 'Stripe', 'AWS S3',
+        'React 19', 'React Router 7', 'Recharts',
+      ],
+    },
+  ],
+  cta: [
+    { label: 'App code', href: 'https://github.com/Brillar0101/psiv-rentals', primary: true },
+    { label: 'Admin code', href: 'https://github.com/Brillar0101/psiv-rentals-admin', primary: false },
+    { label: 'API code', href: 'https://github.com/Brillar0101/psiv-rentals-api', primary: false },
+  ],
+};
+
+// =====================================================================
+// Touhou
+// =====================================================================
+const TOUHOU = (name) => `/assets/images/touhou/${name}.jpg`;
+
+export const touhouCaseStudy = {
+  id: 'touhou',
+  eyebrow: 'Embedded',
+  context: 'Bare-metal firmware · MSP432',
+  headline: 'A bullet-hell shooter running bare-metal on an MSP432',
+  subhead:
+    'Six enemy fire patterns, joystick movement, power-ups, and custom sprites on a 128x128 LCD, all non-blocking with no operating system underneath.',
+  video: 'https://www.youtube.com/embed/wSuiJyFIlaU',
+  metrics: [
+    { value: '6', label: 'enemy fire patterns' },
+    { value: '10', label: 'concurrent bullets' },
+    { value: '48 MHz', label: 'ARM Cortex-M4F' },
+    { value: '128x128', label: 'LCD display' },
+  ],
+  sections: [
+    {
+      type: 'introduction',
+      title: 'Introduction',
+      body:
+        'Touhou is a classic bullet-hell shooter built on the MSP432 LaunchPad with no operating system to lean on. The player dodges enemy projectiles, fires back, and grabs power-ups, while the firmware juggles up to 10 bullets, collision math, sprite rendering, and input polling without ever blocking.',
+    },
+    {
+      type: 'problem',
+      title: 'The challenge',
+      body:
+        'The hard part is doing all of this on a microcontroller and keeping it smooth. The analog joystick is read through the ADC14 with deadzone filtering for clean 2-axis movement, and every system has to stay responsive with no busy-waits, since a single blocking call would stutter the whole game.',
+    },
+    {
+      type: 'process',
+      title: 'How it works',
+      steps: [
+        {
+          title: 'Three-layer architecture',
+          body:
+            'The code is split into three layers with strict separation. The application layer runs all game logic through the HAL and never touches a register directly.',
+          bullets: [
+            'Application: game FSM, bullet pool, collision detection, scoring, power-ups',
+            'HAL: joystick (ADC14), button debounce, UART, LCD graphics, software timers',
+            'TI DriverLib: GPIO, ADC14, eUSCI (SPI/UART), Timer32, interrupts',
+            'Hardware: ARM Cortex-M4F at 48 MHz, 128x128 ST7735 LCD, joystick, 5 buttons',
+          ],
+        },
+        {
+          title: 'Game state machine',
+          body:
+            'The game moves through six screen states driven by buttons and the joystick: a title screen that auto-advances, a menu, the active game loop, game over, and a high-scores board.',
+          bullets: [
+            'BOOT: title screen, 3-second auto-advance',
+            'START: main menu (play, instructions, scores)',
+            'ACTIVE: movement, bullet spawning, collisions, pattern rotation, power-ups',
+            'END: win or lose, score = time + HP x 10',
+            'RECORD: top 5 scores via insertion sort',
+          ],
+        },
+        {
+          title: 'Game mechanics',
+          body:
+            'Player and enemy each start at 25 HP and take 5 damage per hit. The player fires a single cyan bullet upward at 3 px/frame, and a green power-up drops every 8 to 12 seconds for +10 HP. The bullet-hell feel comes from six enemy patterns running on their own timers.',
+          bullets: [
+            'Vertical rain (red), straight down',
+            'Horizontal sweep (yellow), across from the left',
+            'Diagonal left to right (orange)',
+            'Diagonal right to left (pink)',
+            'Dual convergence (purple), both sides closing in',
+            'Random drop (green), random positions',
+          ],
+        },
+        {
+          title: 'Hardware abstraction layer',
+          body:
+            'Each peripheral is its own module. The Touhou build adds joystick support on top of the base HAL from the first project.',
+          bullets: [
+            'Joystick: ADC14 at 12-bit, deadzone of +/-3000 from center (8192)',
+            'Buttons: 4-state debounce FSM with a 5ms filter, tap vs hold',
+            'Graphics: custom 8BPP sprites, 16x16 player and 16x7 enemy, drawn through grlib',
+            'Timer: TIMER32_0 at 48 MHz (20.8ns/tick) with 64-bit cycle arithmetic',
+          ],
+        },
+      ],
+    },
+    {
+      type: 'gallery',
+      title: 'Screenshots',
+      images: [
+        { src: TOUHOU('startup'), alt: 'Title screen', caption: 'Title screen with a 3-second auto-advance to the menu.' },
+        { src: TOUHOU('menu'), alt: 'Main menu', caption: 'Main menu with S1/S2 navigation and joystick select.' },
+        { src: TOUHOU('gameplay-basic'), alt: 'Player and enemy with health', caption: 'Player at the bottom faces the enemy up top, health counters tracking damage.' },
+        { src: TOUHOU('bullet-pattern'), alt: 'Enemy bullet pattern', caption: 'Bullet hell in action as the enemy fires colored patterns.' },
+        { src: TOUHOU('gameplay-advanced'), alt: 'Full gameplay with bars and timer', caption: 'Health bars, survival timer, multiple bullet patterns, and the power-up system.' },
+        { src: TOUHOU('instructions'), alt: 'Instructions screen', caption: 'Instructions screen for controls and mechanics.' },
+      ],
+    },
+    {
+      type: 'conclusion',
+      title: 'The tricky parts',
+      bullets: [
+        'Bullet pool: a fixed array of 10 with active flags, so there is no dynamic allocation on a heap-less system.',
+        'Joystick deadzone: without +/-3000 around center, analog noise made the stick drift and the game unplayable.',
+        'Pattern timing: decoupling pattern rotation (5s) from bullet spawn (1s) lets patterns overlap, which is what makes it feel like bullet hell.',
+        'Sprites: stored as 8BPP hex arrays in Flash, 256 bytes for the 16x16 player ship.',
+      ],
+    },
+    {
+      type: 'extra',
+      title: 'Tech stack',
+      tags: ['MSP432P401R', 'ARM Cortex-M4F', 'C', 'TI DriverLib', 'TI grlib', 'ADC14', 'ST7735 LCD', 'eUSCI SPI', 'Timer32', 'Code Composer Studio'],
+    },
+  ],
+  cta: [{ label: 'View code', href: 'https://github.com/Brillar0101', primary: true }],
+};
+
+// =====================================================================
+// Pixel Monarch
+// =====================================================================
+export const pixelMonarchCaseStudy = {
+  id: 'pixel-monarch',
+  eyebrow: 'Embedded',
+  context: 'Bare-metal firmware · MSP432',
+  headline: 'A kingdom-management game on a bare-metal MSP432',
+  subhead:
+    'Balance people, treasury, and territory across 8 regions, driven by a finite state machine, UART commands, and a modular hardware abstraction layer, with no blocking calls anywhere.',
+  metrics: [
+    { value: '48 MHz', label: 'ARM Cortex-M4F' },
+    { value: '128x128', label: 'LCD display' },
+    { value: '5', label: 'game states' },
+    { value: '3-layer', label: 'architecture' },
+  ],
+  sections: [
+    {
+      type: 'introduction',
+      title: 'Introduction',
+      body:
+        'Pixel Monarch is a kingdom-management game on the MSP432 LaunchPad. You manage two resources, people and treasury, across 8 territory regions, and random events test your decisions each year. The whole thing runs bare-metal on a 128x128 LCD with UART serial control and a modular HAL.',
+    },
+    {
+      type: 'problem',
+      title: 'The challenge',
+      body:
+        'Build a fully interactive game on a resource-constrained microcontroller with no operating system. It has to take UART input and output at four different baud rates with live command parsing, and stay responsive at all times with no blocking calls or busy-waits.',
+    },
+    {
+      type: 'rules',
+      title: 'How the game plays',
+      body:
+        'You rule a kingdom managing two resources across 8 regions, with random events each year and three UART commands to act.',
+      bullets: [
+        'People (PE): your population. Too low and the kingdom collapses.',
+        'Treasury (TR): gold reserves. Bankruptcy ends the game.',
+        'Territory: 8 regions shown as a colored grid on the LCD.',
+        'Events: flood, famine, raid, or a calm spell where resources recover.',
+        'Commands: SP (spend people), AP (allocate people), IG (invest gold).',
+      ],
+    },
+    {
+      type: 'process',
+      title: 'How it was built',
+      steps: [
+        {
+          title: 'Layered design',
+          body:
+            'The project uses a clean three-layer architecture with strict separation of concerns. There are no global variables, everything is passed through parameters, which keeps the interfaces honest and the code portable.',
+          bullets: [
+            'Application: game FSM, event handler, display logic, score tracking',
+            'HAL: LED control, button debounce, UART, LCD graphics, software timers',
+            'TI DriverLib: GPIO, eUSCI (SPI/UART), Timer32, interrupts',
+            'Hardware: ARM Cortex-M4F, 128x128 LCD, 7 LEDs, 5 buttons, UART',
+          ],
+        },
+        {
+          title: 'Finite state machine',
+          body:
+            'A multi-screen FSM drives the game with clean transitions: a main menu, an instructions screen, the active game loop, game over when people or treasury hit zero, and a high-scores board.',
+          bullets: [
+            'START: title and main menu',
+            'INFO: rules and command reference',
+            'ACTIVE: random events, UART commands, resource updates, territory grid',
+            'END: game over when PE <= 0 or TR <= 0, final score',
+            'RECORD: top 3 scores and years survived',
+          ],
+        },
+        {
+          title: 'Hardware abstraction layer',
+          body:
+            'The HAL wraps every hardware interaction into modular components, each with a construct, refresh, and query API in an object-oriented C style. The struct below is the whole hardware surface in one place.',
+          bullets: [
+            'Buttons: 4-state debounce FSM with a 5ms filter, edge detection, 5 buttons',
+            'UART: eUSCI_A0 with 4 baud rates (9600 to 57600), non-blocking, hot-swappable',
+            'LCD: 128x128 ST7735 over SPI at 16 MHz with TI grlib',
+            'Timer: TIMER32_0 at 48 MHz with ISR rollover tracking',
+          ],
+          code: `struct _HAL {
+    // 7 LEDs (LaunchPad + BoosterPack RGB)
+    LED launchpadLED1;
+    LED launchpadLED2Red, launchpadLED2Green, launchpadLED2Blue;
+    LED boosterpackRed, boosterpackGreen, boosterpackBlue;
+
+    // 5 Buttons with debounce FSM
+    Button launchpadS1, launchpadS2;
+    Button boosterpackS1, boosterpackS2;
+    Button boosterpackJS;  // Joystick press
+
+    // UART serial communication
+    UART uart;
+};`,
+          codeLabel: 'HAL.h',
+        },
+      ],
+    },
+    {
+      type: 'conclusion',
+      title: 'What it taught me',
+      bullets: [
+        'Non-blocking design: every operation has to return fast. The LED toggle test must always respond instantly, which proves nothing stalls.',
+        'No global variables: passing all state through parameters forces clean interfaces and makes the code testable.',
+        'Debounce timing: mechanical bounce needed a 4-state FSM with 5ms timers to read presses reliably.',
+        'Baud-rate hot-swap: changing UART rates at runtime meant reconfiguring the eUSCI module without dropping data.',
+      ],
+    },
+    {
+      type: 'extra',
+      title: 'Tech stack',
+      tags: ['MSP432P401R', 'ARM Cortex-M4F', 'C', 'TI DriverLib', 'TI grlib', 'ST7735 LCD', 'eUSCI UART', 'eUSCI SPI', 'Timer32', 'Code Composer Studio'],
+    },
+  ],
+  cta: [{ label: 'View code', href: 'https://github.com/Brillar0101', primary: true }],
+};
+
 // Register projects so the generic ProjectCaseStudy page can render them.
 caseStudies.clapperboard = clapperboardCaseStudy;
+caseStudies.swishvision = swishVisionCaseStudy;
+caseStudies['psiv-rentals'] = psivRentalsCaseStudy;
+caseStudies.touhou = touhouCaseStudy;
+caseStudies['pixel-monarch'] = pixelMonarchCaseStudy;

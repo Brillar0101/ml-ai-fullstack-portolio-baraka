@@ -108,10 +108,10 @@ export default function App() {
             <Route path="/projects" element={<ProjectsPage />} />
             <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
             <Route path="/projects/clapperboard" element={<ProjectCaseStudy />} />
-            <Route path="/projects/psiv-rentals" element={<PSIVRentalsProject />} />
-            <Route path="/projects/swishvision" element={<SwishVisionProject />} />
-            <Route path="/projects/pixel-monarch" element={<PixelMonarchProject />} />
-            <Route path="/projects/touhou" element={<TouhouProject />} />
+            <Route path="/projects/psiv-rentals" element={<ProjectCaseStudy />} />
+            <Route path="/projects/swishvision" element={<ProjectCaseStudy />} />
+            <Route path="/projects/pixel-monarch" element={<ProjectCaseStudy />} />
+            <Route path="/projects/touhou" element={<ProjectCaseStudy />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/blog" element={<BlogPage />} />
             <Route path="/blog/:slug" element={<BlogPostPage />} />
