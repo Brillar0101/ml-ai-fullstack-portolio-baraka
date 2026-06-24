@@ -11,18 +11,12 @@ import { CONFIG } from './config';
 import './styles/global.css';
 
 // Lazy-load heavy project pages
-const ClapperboardProject = lazy(() => import('./pages/ClapperboardProject'));
-const PSIVRentalsProject = lazy(() => import('./pages/PSIVRentalsProject'));
-const SwishVisionProject = lazy(() => import('./pages/SwishVisionProject'));
 const ProjectDetailPage = lazy(() => import('./pages/ProjectDetailPage'));
-const PixelMonarchProject = lazy(() => import('./pages/PixelMonarchProject'));
-const TouhouProject = lazy(() => import('./pages/TouhouProject'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
 const BlogPage = lazy(() => import('./pages/BlogPage'));
 const BlogPostPage = lazy(() => import('./pages/BlogPostPage'));
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
-const CaseStudySpotlightDemo = lazy(() => import('./pages/CaseStudySpotlightDemo'));
-const CaseStudyEditorialDemo = lazy(() => import('./pages/CaseStudyEditorialDemo'));
+// All real project pages render through one data-driven template.
 const ProjectCaseStudy = lazy(() => import('./pages/ProjectCaseStudy'));
 
 // Lazy-load admin pages
@@ -50,8 +44,6 @@ const pageTitles = {
   '/about': 'About',
   '/blog': 'Blog',
   '/privacy': 'Privacy',
-  '/projects/clapperboard-spotlight': 'Clapperboard: Spotlight template',
-  '/projects/clapperboard-editorial': 'Clapperboard: Editorial template',
   '/blog/your-first-ai-agent': 'Your First AI Agent in 50 Lines of Python'
 };
 
@@ -117,8 +109,6 @@ export default function App() {
             <Route path="/blog/:slug" element={<BlogPostPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
-            <Route path="/projects/clapperboard-spotlight" element={<CaseStudySpotlightDemo />} />
-            <Route path="/projects/clapperboard-editorial" element={<CaseStudyEditorialDemo />} />
 
             {/* Admin routes */}
             <Route path="/admin/login" element={<AdminLogin />} />
