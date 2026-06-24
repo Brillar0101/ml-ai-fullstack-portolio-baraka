@@ -10,7 +10,7 @@ export const BLOG_POSTS = [
     series: 'AI Engineering Series',
     seriesNum: 1,
     route: '/blog/your-first-ai-agent',
-    coverGradient: 'linear-gradient(135deg, #3d156b 0%, #df3562 50%, #feb97e 100%)',
+    coverGradient: 'linear-gradient(120deg, #0068FF 0%, #3539F4 48%, #BD03F7 100%)',
   },
   {
     id: 'model-merging',
@@ -23,7 +23,7 @@ export const BLOG_POSTS = [
     series: 'AI Engineering Series',
     seriesNum: 2,
     route: '/blog/model-merging',
-    coverGradient: 'linear-gradient(135deg, #3d156b 0%, #df3562 50%, #feb97e 100%)',
+    coverGradient: 'linear-gradient(120deg, #0068FF 0%, #3539F4 48%, #BD03F7 100%)',
     comingSoon: true,
   },
 ];

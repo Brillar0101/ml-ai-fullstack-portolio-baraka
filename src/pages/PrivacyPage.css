@@ -1,0 +1,43 @@
+/* ============================================
+   PRIVACY PAGE
+   ============================================ */
+
+.privacy-page {
+  padding-top: var(--space-3xl);
+  padding-bottom: var(--space-4xl);
+  max-width: 760px;
+}
+
+.privacy-section {
+  margin-bottom: var(--space-2xl);
+}
+
+.privacy-section h2 {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  margin-bottom: var(--space-sm);
+}
+
+.privacy-section p {
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+.privacy-section a {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+@media (max-width: 479px) {
+  .privacy-section h2 {
+    font-size: 19px;
+  }
+
+  .privacy-section p {
+    font-size: 15px;
+  }
+}

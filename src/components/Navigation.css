@@ -1,4 +1,4 @@
-/* Navigation -Micron-inspired clean bar */
+/* Navigation — Micron-style dark header on every page */
 
 .nav {
   position: fixed;
@@ -6,13 +6,16 @@
   left: 0;
   right: 0;
   z-index: 1000;
-  background: var(--bg);
-  border-bottom: 1px solid var(--border);
+  background: #000000;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   transition: border-color 0.2s ease, background 0.3s ease;
 }
 
 .nav-scrolled {
-  border-bottom-color: var(--border);
+  background: rgba(0, 0, 0, 0.92);
+  backdrop-filter: saturate(140%) blur(10px);
+  -webkit-backdrop-filter: saturate(140%) blur(10px);
+  border-bottom-color: rgba(255, 255, 255, 0.1);
 }
 
 .nav-inner {
@@ -28,15 +31,15 @@
 /* Logo */
 .nav-logo {
   font-size: 20px;
-  font-weight: 700;
-  color: var(--text);
+  font-weight: 800;
+  color: #ffffff;
   text-decoration: none;
   letter-spacing: -0.02em;
 }
 
 .nav-logo:hover {
   text-decoration: none;
-  color: var(--text);
+  color: #ffffff;
 }
 
 /* Right side */
@@ -56,7 +59,7 @@
 .nav-link {
   font-size: 14px;
   font-weight: 500;
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.78);
   text-decoration: none;
   padding: 6px 0;
   border-bottom: 2px solid transparent;
@@ -64,12 +67,12 @@
 }
 
 .nav-link:hover {
-  color: var(--text);
+  color: #ffffff;
   text-decoration: none;
 }
 
 .nav-link.active {
-  color: var(--primary);
+  color: #ffffff;
   border-bottom-color: var(--primary);
 }
 
@@ -86,18 +89,19 @@
   justify-content: center;
   width: 36px;
   height: 36px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--radius-full);
   background: transparent;
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.75);
   cursor: pointer;
   transition: all 0.2s ease;
   text-decoration: none;
 }
 
 .nav-icon-btn:hover {
-  color: var(--text);
-  border-color: var(--text-muted);
+  color: #ffffff;
+  border-color: var(--primary);
+  background: rgba(0, 104, 255, 0.12);
   text-decoration: none;
 }
 
@@ -128,10 +132,10 @@
   justify-content: center;
   width: 36px;
   height: 36px;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: var(--radius-md);
   background: transparent;
-  color: var(--text);
+  color: #ffffff;
   cursor: pointer;
 }
 
@@ -140,8 +144,8 @@
   display: none;
   flex-direction: column;
   padding: var(--space-md) var(--space-xl);
-  border-top: 1px solid var(--border);
-  background: var(--bg);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: #000000;
 }
 
 .mobile-link {
@@ -149,13 +153,13 @@
   padding: 12px 0;
   font-size: 16px;
   font-weight: 500;
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.78);
   text-decoration: none;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .mobile-link:hover {
-  color: var(--text);
+  color: #ffffff;
   text-decoration: none;
 }
 

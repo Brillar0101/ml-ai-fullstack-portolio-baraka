@@ -6,19 +6,36 @@
   padding-bottom: var(--space-4xl);
 }
 
-/* ---- Hero Banner ---- */
+/* ---- Hero Banner — Micron/Crucial brand gradient + curve frame ---- */
 .projects-hero {
   position: relative;
   overflow: hidden;
-  padding: 64px 0;
+  padding: 88px 0;
   margin-bottom: var(--space-3xl);
+  background: #000;
 }
 
 .projects-hero-bg {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, #3d156b 0%, #df3562 50%, #feb97e 100%);
-  opacity: 0.9;
+  /* Diagonal blue → purple, the leading Crucial gradient */
+  background: linear-gradient(120deg, #0068FF 0%, #3539F4 48%, #BD03F7 100%);
+  opacity: 1;
+}
+
+/* Curve-frame motif — a soft oval cut sweeping in from the right,
+   the signature Crucial "curve frame" shape */
+.projects-hero-bg::after {
+  content: "";
+  position: absolute;
+  top: -40%;
+  right: -12%;
+  width: 60%;
+  height: 180%;
+  background: #000;
+  border-radius: 50%;
+  opacity: 0.55;
+  pointer-events: none;
 }
 
 .projects-hero-content {
@@ -93,8 +110,10 @@
   gap: var(--space-xl);
 }
 
-/* ---- Individual Card ---- */
+/* ---- Individual Card — Micron tile: accent label, bold headline,
+   gradient top edge that reveals on hover ---- */
 .project-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   background: var(--surface);
@@ -106,11 +125,29 @@
   color: inherit;
 }
 
+/* Brand gradient strip along the top edge */
+.project-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--gradient-brand);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--transition-smooth);
+}
+
 .project-card:hover {
-  border-color: var(--text-dim);
+  border-color: var(--primary);
   box-shadow: var(--shadow-md);
   text-decoration: none;
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+}
+
+.project-card:hover::before {
+  transform: scaleX(1);
 }
 
 .project-card-body {
@@ -125,7 +162,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1.5px;
-  color: var(--text-muted);
+  color: var(--primary);
   margin-bottom: 10px;
 }
 
@@ -138,9 +175,10 @@
 }
 
 .project-card-title {
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 1.25;
+  font-size: 21px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
   color: var(--text);
   margin: 0;
 }
@@ -214,15 +252,16 @@
   flex-shrink: 0;
 }
 
-/* ---- Disabled Card (In Development) ---- */
+/* ---- Disabled Card (In Development) ----
+   State is signalled by the "In Development" badge + muted surface,
+   NOT by blanket opacity, so text stays WCAG AA legible. */
 .project-card-disabled {
   display: flex;
   flex-direction: column;
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: var(--bg-secondary);
+  border: 1px dashed var(--border);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  opacity: 0.55;
   cursor: default;
 }
 

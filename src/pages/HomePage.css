@@ -4,11 +4,11 @@
    ============================================ */
 
 :root {
-  --home-navy: #0a0a0a;
+  --home-navy: #000000;
   --home-navy-ink: #000000;
-  --home-yellow: #d4882e;
-  --home-yellow-hover: #e8a050;
-  --home-muted: #8c8c8c;
+  --home-yellow: #0068FF;
+  --home-yellow-hover: #3585ff;
+  --home-muted: #8c8c96;
   --home-body: #e6e6e6;
 }
 
@@ -122,7 +122,7 @@
 }
 
 .home-brand {
-  font-family: 'Epilogue', sans-serif;
+  font-family: 'Manrope', system-ui, sans-serif;
   font-weight: 800;
   font-size: 28px;
   color: #fff;
@@ -145,7 +145,7 @@
 .home-nav-link {
   color: #fff;
   text-decoration: none;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Manrope', system-ui, sans-serif;
   font-weight: 500;
   font-size: 15px;
   opacity: 0.9;
@@ -168,7 +168,7 @@
   color: var(--home-navy);
   border: 0;
   padding: 14px 28px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Manrope', system-ui, sans-serif;
   font-weight: 600;
   font-size: 15px;
   cursor: pointer;
@@ -223,24 +223,28 @@
   background:
     linear-gradient(
       90deg,
-      rgba(0, 0, 0, 0.92) 0%,
-      rgba(0, 0, 0, 0.75) 35%,
-      rgba(0, 0, 0, 0.35) 65%,
+      rgba(2, 6, 23, 0.94) 0%,
+      rgba(3, 10, 40, 0.78) 35%,
+      rgba(5, 12, 45, 0.38) 65%,
       rgba(0, 0, 0, 0.25) 100%
     );
   pointer-events: none;
 }
 
+/* Brand color wash — electric-blue → purple bleed from the lower-left,
+   echoing Micron/Crucial gradient hero moments */
 .home-hero-overlay::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    180deg,
-    transparent 0%,
-    rgba(0, 0, 0, 0.25) 90%,
-    rgba(0, 0, 0, 0.55) 100%
-  );
+  background:
+    radial-gradient(120% 90% at 0% 100%, rgba(0, 104, 255, 0.42) 0%, rgba(189, 3, 247, 0.18) 38%, transparent 70%),
+    linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(0, 0, 0, 0.25) 90%,
+      rgba(0, 0, 0, 0.55) 100%
+    );
 }
 
 .home-hero-inner {
@@ -254,7 +258,7 @@
 
 /* Eyebrow */
 .home-eyebrow {
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Manrope', system-ui, sans-serif;
   font-size: clamp(10px, 1.4vw, 20px);
   letter-spacing: clamp(1.6px, 0.35vw, 4.8px);
   color: #fff;
@@ -275,7 +279,7 @@
 
 /* H1 — Big name. clamp() prevents overflow at every viewport. */
 .home-h1 {
-  font-family: 'Epilogue', sans-serif;
+  font-family: 'Manrope', system-ui, sans-serif;
   font-weight: 800;
   font-size: clamp(32px, 9vw, 114px);
   line-height: 1.05;
@@ -289,7 +293,7 @@
 
 /* Subhead */
 .home-subhead {
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Manrope', system-ui, sans-serif;
   font-size: clamp(15px, 2.2vw, 28px);
   line-height: 1.45;
   color: var(--home-body);
@@ -304,7 +308,7 @@
   display: flex;
   align-items: center;
   gap: clamp(8px, 1.2vw, 18px);
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Manrope', system-ui, sans-serif;
   font-size: clamp(13px, 2vw, 28px);
   color: var(--home-muted);
   margin-bottom: clamp(20px, 2.4vw, 34px);
@@ -331,7 +335,7 @@
 
 /* Description */
 .home-desc {
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Manrope', system-ui, sans-serif;
   font-size: 15px;
   line-height: 1.65;
   color: var(--home-body);
@@ -350,12 +354,12 @@
 
 .home-btn-primary {
   background: var(--home-yellow);
-  color: var(--home-navy-ink);
+  color: #ffffff;
   border: 0;
   height: 84px;
   padding: 0 48px;
   border-radius: 15px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Manrope', system-ui, sans-serif;
   font-weight: 700;
   font-size: 22px;
   cursor: pointer;
@@ -369,7 +373,7 @@
 .home-btn-primary:hover {
   background: var(--home-yellow-hover);
   text-decoration: none;
-  color: var(--home-navy-ink);
+  color: #ffffff;
 }
 
 .home-btn-primary:active {
@@ -399,7 +403,7 @@
 .home-social:hover {
   border-color: var(--home-yellow);
   color: var(--home-yellow);
-  background: rgba(245, 197, 24, 0.08);
+  background: rgba(0, 104, 255, 0.1);
   text-decoration: none;
 }
 
@@ -489,7 +493,7 @@
   .home-mobile-link {
     color: #fff;
     text-decoration: none;
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Manrope', system-ui, sans-serif;
     font-size: 15px;
     font-weight: 500;
     padding: 12px 4px;
@@ -506,7 +510,7 @@
     background: #fff;
     color: var(--home-navy);
     text-align: center;
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Manrope', system-ui, sans-serif;
     font-weight: 600;
     font-size: 14px;
     padding: 12px 20px;
@@ -661,7 +665,7 @@
   }
   .home-root {
     background:
-      radial-gradient(ellipse at 30% 50%, rgba(212, 136, 46, 0.15), transparent 60%),
-      linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+      radial-gradient(120% 90% at 0% 100%, rgba(0, 104, 255, 0.45) 0%, rgba(189, 3, 247, 0.25) 40%, transparent 72%),
+      linear-gradient(135deg, #02060f 0%, #0a1226 100%);
   }
 }

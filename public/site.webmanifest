@@ -1,0 +1,13 @@
+{
+  "name": "Barakaeli Lawuo — Computer Engineer",
+  "short_name": "Barakaeli",
+  "description": "Portfolio of Barakaeli Lawuo — ML/AI, embedded systems, and hardware design.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#0068FF",
+  "icons": [
+    { "src": "/favicon.svg", "type": "image/svg+xml", "sizes": "any", "purpose": "any maskable" }
+  ]
+}

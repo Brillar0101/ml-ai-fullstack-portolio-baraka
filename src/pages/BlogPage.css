@@ -17,7 +17,7 @@
 .blog-hero-bg {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, #3d156b 0%, #df3562 50%, #feb97e 100%);
+  background: linear-gradient(120deg, #0068FF 0%, #3539F4 48%, #BD03F7 100%);
   opacity: 0.9;
 }
 
