@@ -18,13 +18,9 @@ const useAnalytics = (slug) => {
     if (!supabase || tracked.current) return;
     tracked.current = true;
 
-    // Track pageview
-    supabase.from('analytics_events').insert([{
-      post_slug: slug,
-      event_type: 'pageview',
-      referrer: document.referrer || null,
-      user_agent: navigator.userAgent,
-    }]);
+    // Page views are recorded globally by usePageTracking (one `page_view`
+    // event per /blog/<slug>). Here we only add per-post engagement below:
+    // how far the reader scrolled and how long they stayed.
 
     // Track scroll depth
     const handleScroll = () => {
