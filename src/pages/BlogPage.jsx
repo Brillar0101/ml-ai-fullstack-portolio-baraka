@@ -34,9 +34,6 @@ const BlogPage = () => {
                     <div className="blog-card-cover-content">
                       <span className="blog-card-series">{post.series}</span>
                     </div>
-                    {post.comingSoon && (
-                      <span className="blog-card-coming-soon">Coming soon</span>
-                    )}
                   </div>
                   <div className="blog-card-body">
                     <div className="blog-card-category">{post.category}</div>
