@@ -42,6 +42,7 @@ const CORE_POSTS = [
     seriesNum: 1,
     route: '/blog/your-first-ai-agent',
     coverGradient: 'linear-gradient(120deg, #0068FF 0%, #3539F4 48%, #BD03F7 100%)',
+    publishAt: '2026-03-15T12:00:00Z',
   },
   {
     id: 'next-word-sampling',
@@ -61,5 +62,6 @@ const CORE_POSTS = [
   },
 ];
 
-// Public list = hand-built posts + the data-driven series posts.
-export const BLOG_POSTS = [...CORE_POSTS, ...seriesMeta];
+// Public list = hand-built posts + the data-driven series posts, newest first.
+const sortKey = (p) => new Date(p.publishAt || 0).getTime();
+export const BLOG_POSTS = [...CORE_POSTS, ...seriesMeta].sort((a, b) => sortKey(b) - sortKey(a));
