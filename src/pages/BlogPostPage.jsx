@@ -3,6 +3,7 @@ import { Link, useParams, Navigate } from 'react-router-dom';
 import { ChevronLeft, ArrowRight, Clock, Calendar, Send, User } from 'lucide-react';
 import { BLOG_POSTS } from '../data/blog';
 import { SERIES_POSTS } from '../data/seriesPosts';
+import { isPublished } from '../lib/publishing';
 import SeriesPost from './blog/SeriesPost';
 import { supabase } from '../lib/supabase';
 import './BlogPostPage.css';
@@ -185,7 +186,8 @@ const BlogPostPage = () => {
   const post = BLOG_POSTS.find(p => p.id === slug);
   useAnalytics(slug);
 
-  if (!post || post.comingSoon) return <Navigate to="/blog" replace />;
+  // Hide posts that are coming soon, or scheduled for a future publish date.
+  if (!post || post.comingSoon || !isPublished(post)) return <Navigate to="/blog" replace />;
 
   const PostContent = postComponents[slug];
   const seriesPost = SERIES_POSTS.find(p => p.id === slug);
