@@ -11,27 +11,6 @@ const GRAD = 'linear-gradient(120deg, #0068FF 0%, #3539F4 48%, #BD03F7 100%)';
 
 export const SERIES_POSTS = [
   {
-    id: 'what-ai-engineering-is',
-    title: 'What an AI engineer actually does',
-    excerpt: 'AI engineering is not training models from scratch. It is adapting models that already exist into something useful and reliable.',
-    category: 'AI', chapter: 'Chapter 1', tags: ['AI Engineering', 'Foundation Models'],
-    readTime: '5 min read', seriesNum: 4, publishAt: '2026-06-20T12:00:00Z',
-    body: [
-      { type: 'p', text: 'A few years ago, building with AI meant collecting a dataset, training a model, and hoping it generalized. Today most teams never train anything. They take a model that already exists and bend it to their problem. That shift has a name, and it changes what the job is.' },
-      { type: 'p', text: 'Here is the plain version. A handful of labs spend enormous money to train general-purpose models. Everyone else builds on top of those models the way web developers build on top of databases they did not write. The skill is no longer "can you train a network." It is "can you take a capable model and make it do your specific task well, cheaply, and safely."' },
-      { type: 'h2', text: 'The words for the parts' },
-      { type: 'terms', items: [
-        { term: 'Foundation model', def: 'a large model trained on broad data that can be adapted to many tasks without retraining.' },
-        { term: 'Adaptation', def: 'the techniques that shape a foundation model to your task: prompting, retrieval, and finetuning.' },
-        { term: 'AI engineering', def: 'the process of building applications on top of foundation models, end to end.' },
-      ]},
-      { type: 'h2', text: 'How the work actually breaks down' },
-      { type: 'p', text: 'Most AI engineering effort lands in a few places: choosing a model, writing prompts that get reliable behavior, feeding the model the right context, evaluating whether the output is good, and keeping latency and cost under control in production. Training rarely shows up. Evaluation shows up constantly, because the hard part is not getting an answer, it is knowing whether the answer is right.' },
-      { type: 'h2', text: 'What to take away' },
-      { type: 'p', text: 'If you came from traditional machine learning, the muscle to build is product judgment and evaluation, not bigger models. If you came from software, the new muscle is treating model behavior as something you measure rather than something you assume. The rest of this series is built around that second habit.' },
-    ],
-  },
-  {
     id: 'foundation-models-explained',
     title: 'Foundation models, in one sitting',
     excerpt: 'Where these models come from, why scale made them general, and what "pretraining" and "post-training" actually mean.',
