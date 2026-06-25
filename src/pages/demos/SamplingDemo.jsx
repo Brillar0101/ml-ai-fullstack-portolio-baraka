@@ -130,7 +130,7 @@ export default function SamplingDemo() {
       <div className="demo-container">
         <Link to="/demos" className="demo-back"><ArrowLeft size={16} /> All demos</Link>
 
-        <p className="demo-eyebrow">AI Engineering Lab · Chapter 2</p>
+        <p className="demo-eyebrow">AI Engineering Lab</p>
         <h1 className="demo-title">How a model picks the next word</h1>
         <p className="demo-lead">
           A language model does not output a word. It outputs a score for every word it knows,

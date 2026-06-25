@@ -44,20 +44,6 @@ const CORE_POSTS = [
     coverGradient: 'linear-gradient(120deg, #0068FF 0%, #3539F4 48%, #BD03F7 100%)',
   },
   {
-    id: 'model-merging',
-    title: 'Model Merging: Frankenstein Your Way to a Better LLM',
-    excerpt: 'Merge OpenHermes-2.5 and WizardMath-7B into one model using TIES — no training, just weight arithmetic. Includes a live demo and eval results.',
-    category: 'ML',
-    date: 'Coming soon',
-    readTime: '10 min read',
-    tags: ['Model Merging', 'LLM', 'Fine-tuning', 'mergekit', 'TIES'],
-    series: 'AI Engineering Series',
-    seriesNum: 2,
-    route: '/blog/model-merging',
-    coverGradient: 'linear-gradient(120deg, #0068FF 0%, #3539F4 48%, #BD03F7 100%)',
-    comingSoon: true,
-  },
-  {
     id: 'next-word-sampling',
     title: 'How a language model picks the next word',
     excerpt:
