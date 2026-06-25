@@ -18,6 +18,9 @@ const BlogPostPage = lazy(() => import('./pages/BlogPostPage'));
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
 // All real project pages render through one data-driven template.
 const ProjectCaseStudy = lazy(() => import('./pages/ProjectCaseStudy'));
+// Interactive AI Engineering demos / labs.
+const DemosPage = lazy(() => import('./pages/DemosPage'));
+const SamplingDemo = lazy(() => import('./pages/demos/SamplingDemo'));
 
 // Lazy-load admin pages
 const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'));
@@ -43,6 +46,8 @@ const pageTitles = {
   '/projects/3-filter-audio': '3 Filter Audio System',
   '/about': 'About',
   '/blog': 'Blog',
+  '/demos': 'Demos',
+  '/demos/sampling': 'How a model picks the next word',
   '/privacy': 'Privacy',
   '/blog/your-first-ai-agent': 'Your First AI Agent in 50 Lines of Python'
 };
@@ -104,6 +109,8 @@ export default function App() {
             <Route path="/projects/swishvision" element={<ProjectCaseStudy />} />
             <Route path="/projects/pixel-monarch" element={<ProjectCaseStudy />} />
             <Route path="/projects/touhou" element={<ProjectCaseStudy />} />
+            <Route path="/demos" element={<DemosPage />} />
+            <Route path="/demos/sampling" element={<SamplingDemo />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/blog" element={<BlogPage />} />
             <Route path="/blog/:slug" element={<BlogPostPage />} />

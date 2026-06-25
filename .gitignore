@@ -41,3 +41,6 @@ Thumbs.db
 
 # Misc
 nul
+
+# Local reference only — do not publish copyrighted book
+book/

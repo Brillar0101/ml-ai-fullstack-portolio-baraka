@@ -26,4 +26,20 @@ export const BLOG_POSTS = [
     coverGradient: 'linear-gradient(120deg, #0068FF 0%, #3539F4 48%, #BD03F7 100%)',
     comingSoon: true,
   },
+  {
+    id: 'next-word-sampling',
+    title: 'How a language model picks the next word',
+    excerpt:
+      'Temperature, top-k, and top-p, explained by doing. Includes an interactive lab and runnable NumPy you can edit in the browser.',
+    category: 'AI',
+    date: 'June 2026',
+    readTime: '6 min read',
+    tags: ['Sampling', 'Temperature', 'top-p', 'Foundation Models'],
+    series: 'AI Engineering Series',
+    seriesNum: 3,
+    route: '/blog/next-word-sampling',
+    coverGradient: 'linear-gradient(120deg, #0068FF 0%, #3539F4 48%, #BD03F7 100%)',
+    demo: '/demos/sampling',
+    publishAt: '2026-06-25T12:00:00Z', // test post — live now for review
+  },
 ];

@@ -2,9 +2,12 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { BLOG_POSTS } from '../data/blog';
+import { publishedItems } from '../lib/publishing';
 import './BlogPage.css';
 
 const BlogPage = () => {
+  // Only show posts whose publish date has arrived (drip publishing).
+  const posts = publishedItems(BLOG_POSTS);
   return (
     <div className="blog-page">
       {/* Hero Banner */}
@@ -22,9 +25,9 @@ const BlogPage = () => {
 
       {/* Cards Grid */}
       <div className="blog-cards-section container">
-        {BLOG_POSTS.length > 0 ? (
+        {posts.length > 0 ? (
           <div className="blog-cards-grid">
-            {BLOG_POSTS.map(post => {
+            {posts.map(post => {
               const CardBody = (
                 <>
                   <div className="blog-card-cover" style={{ background: post.coverGradient }}>

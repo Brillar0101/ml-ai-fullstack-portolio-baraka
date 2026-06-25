@@ -176,6 +176,7 @@ const BlogComments = ({ slug }) => {
 const postComponents = {
   'your-first-ai-agent': lazy(() => import('./blog/AIAgentPost')),
   'model-merging': lazy(() => import('./blog/ModelMergingPost')),
+  'next-word-sampling': lazy(() => import('./blog/SamplingPost')),
 };
 
 const BlogPostPage = () => {
