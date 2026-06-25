@@ -1,5 +1,9 @@
 // Interactive demos for the AI Engineering series.
 //
+// Rule: a blog can stand alone, but every demo MUST have a companion blog
+// (the `blog` field, required). The demo is the hands-on lab; the blog is the
+// written walkthrough behind it. They cross-link both ways.
+//
 // Each demo maps to a component in src/pages/demos/ and the slug→component map
 // in App.jsx. `publishAt` controls the drip: a demo only appears in the listing
 // once its date has arrived (see src/lib/publishing.js). The full series will be
@@ -15,6 +19,7 @@ export const DEMOS = [
     chapter: 'Chapter 2 · Understanding Foundation Models',
     tags: ['Sampling', 'Temperature', 'top-k', 'top-p', 'NumPy'],
     route: '/demos/sampling',
+    blog: '/blog/next-word-sampling', // required: every demo has a companion blog
     runnable: true,
     publishAt: '2026-06-25T12:00:00Z', // test demo — live now for review
   },

@@ -49,6 +49,17 @@
   margin-bottom: var(--space-xl);
 }
 
+.demo-companion {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: var(--space-xl);
+}
+
+.demo-companion a {
+  color: var(--primary);
+  font-weight: 600;
+}
+
 .demo-prompt {
   display: flex;
   align-items: center;

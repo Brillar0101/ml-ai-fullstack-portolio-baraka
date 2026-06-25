@@ -17,9 +17,9 @@ export default function DemosPage() {
           <p className="demos-hero-eyebrow">Interactive labs</p>
           <h1 className="demos-hero-title">AI Engineering, by doing</h1>
           <p className="demos-hero-desc">
-            A hands-on companion to Chip Huyen's AI Engineering. Every demo runs in your browser,
+            A hands-on series on building with foundation models. Every demo runs in your browser,
             no setup and no IDE. Move the sliders, edit the code, press run. The goal is simple:
-            finish a lab and walk away understanding the idea at least as well as reading the chapter.
+            finish a lab and walk away understanding the idea as well as you would from a deep read.
           </p>
         </div>
       </div>

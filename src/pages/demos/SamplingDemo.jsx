@@ -138,6 +138,10 @@ export default function SamplingDemo() {
           and top-p. Move them and watch the same model go from cautious to chaotic.
         </p>
 
+        <p className="demo-companion">
+          Prefer the written walkthrough? <Link to="/blog/next-word-sampling">Read the companion post →</Link>
+        </p>
+
         <div className="demo-prompt">
           <span className="demo-prompt-label">Prompt</span>
           {PROMPT}
