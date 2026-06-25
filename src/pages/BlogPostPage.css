@@ -98,6 +98,9 @@
   line-height: 1.7;
   color: var(--text-secondary);
   margin-bottom: 20px;
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
 }
 
 .blog-post-content strong {

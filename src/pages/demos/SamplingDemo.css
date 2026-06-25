@@ -47,6 +47,9 @@
   line-height: 1.6;
   color: var(--text-secondary);
   margin-bottom: var(--space-xl);
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
 }
 
 .demo-companion {
@@ -232,6 +235,9 @@
   font-size: 17px;
   line-height: 1.7;
   color: var(--text-secondary);
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
 }
 
 .demo-text code {
