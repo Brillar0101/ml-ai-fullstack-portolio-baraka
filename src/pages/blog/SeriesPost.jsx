@@ -16,19 +16,25 @@ import PythonLab from '../../components/labs/PythonLab';
  *   { type: 'lab', code, packages?, height? }
  *   { type: 'demoLink', to, label }
  */
+// Render inline **bold** markers as <strong> so important terms stand out.
+function rich(text) {
+  if (typeof text !== 'string') return text;
+  return text.split('**').map((part, i) => (i % 2 === 1 ? <strong key={i}>{part}</strong> : part));
+}
+
 function Block({ block }) {
   switch (block.type) {
     case 'h2':
       return <h2>{block.text}</h2>;
     case 'p':
-      return <p>{block.text}</p>;
+      return <p>{rich(block.text)}</p>;
     case 'ul':
-      return <ul>{block.items.map((it, i) => <li key={i}>{it}</li>)}</ul>;
+      return <ul>{block.items.map((it, i) => <li key={i}>{rich(it)}</li>)}</ul>;
     case 'terms':
       return (
         <ul className="series-terms">
           {block.items.map((t, i) => (
-            <li key={i}><strong>{t.term}</strong>: {t.def}</li>
+            <li key={i}><strong>{t.term}</strong>: {rich(t.def)}</li>
           ))}
         </ul>
       );
