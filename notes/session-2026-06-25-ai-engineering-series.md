@@ -31,16 +31,28 @@ Engineering content system, so a future session can pick up with full context.
   from both the list and its direct URL until its day.
 - The "Demo" tab is in the main nav; `/demos` lists published demos.
 
-## Publishing state
+## Publishing state (rolling rollout, restaged 2026-06-25)
 
-- The original 20 scheduled posts ran **one per day, 2026-06-26 through
-  2026-07-15**. The rest of the original 26 are live.
-- The 9 backlog ideas continue the daily drip, **2026-07-16 through 2026-07-24**
-  (seriesNum 31-39): probabilistic nature, multilingual quality, domain-specific
-  models, functional correctness, AI as a judge, jailbreaking, build vs buy,
-  evaluation pipeline, capabilities that matter. All pushed to GitHub and gated.
-- New backlog posts append before the final `];` in `seriesPosts.js`, use the
-  next seriesNum, and take the next open daily date (continue from 2026-07-25).
+The model changed from "everything queued in the future" to "established
+back-catalog + ongoing daily drip", at the user's request.
+
+- **Back-catalog (history, already live):** the original 26 series posts
+  (seriesNum 5-30) are backdated **one per week, 2025-12-31 through 2026-06-24**,
+  oldest = most foundational (foundation-models) to newest (kv-cache). They look
+  like a blog that has been running ~6 months and are all visible now.
+- **Daily drip (new content, forward):** backlog ideas publish **one per day
+  from 2026-06-26** (seriesNum 31+). The first 10 built land 2026-06-26 through
+  2026-07-05 (probabilistic nature, multilingual, domain-specific, functional
+  correctness, AI as a judge, jailbreaking, build vs buy, eval pipeline,
+  capabilities that matter, information-extraction prompts).
+- Two CORE_POSTS in `blog.js`: your-first-ai-agent (March 2026) and
+  next-word-sampling (2026-06-25). Left as-is.
+- **Convention for new posts:** append before the final `];` in
+  `seriesPosts.js`, use the next seriesNum (41+), and take the next open daily
+  date (continue from 2026-07-06). Re-date logic keys off seriesNum:
+  <=30 weekly history, >=31 daily from 2026-06-26.
+- Watch out: 5 posts once had duplicate metadata lines (now cleaned). Keep one
+  `readTime/seriesNum/publishAt` line per post.
 - There is no "coming soon" state by design: a post is either out or it is not.
 - The drip gate is **client-side**: a future-dated post is hidden from the list
   and redirects from its direct URL, but its text still ships in the JS bundle.

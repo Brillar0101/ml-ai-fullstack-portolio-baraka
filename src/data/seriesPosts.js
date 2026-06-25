@@ -15,7 +15,7 @@ export const SERIES_POSTS = [
     title: 'Foundation models, in one sitting',
     excerpt: 'What a foundation model actually is, with real examples, and why one model can power wildly different apps.',
     category: 'AI', chapter: 'Chapter 2', tags: ['Foundation Models', 'Pretraining', 'Post-training'],
-    readTime: '7 min read', seriesNum: 5, publishAt: '2026-06-20T12:00:00Z',
+    readTime: '7 min read', seriesNum: 5, publishAt: '2025-12-31T12:00:00Z',
     body: [
       { type: 'p', text: 'A small team ships three features in a month. A support bot that answers from their help docs. An assistant that drafts marketing copy. A tool that explains confusing error messages to junior developers. A few years ago that would have been three separate machine learning projects: three datasets, three trained models, three teams. Today all three are the same model underneath, handed three different prompts. That reuse is the entire idea behind the word "foundation."' },
       { type: 'h2', text: 'So what is a foundation model' },
@@ -48,7 +48,7 @@ export const SERIES_POSTS = [
     title: 'Why models make things up',
     excerpt: 'Hallucination is not a bug bolted onto language models. It is a direct consequence of how they are built. Here is why, and what to do.',
     category: 'AI', chapter: 'Chapter 2', tags: ['Hallucination', 'Reliability'],
-    readTime: '10 min read', seriesNum: 6, publishAt: '2026-06-20T12:00:00Z',
+    readTime: '10 min read', seriesNum: 6, publishAt: '2026-01-07T12:00:00Z',
     body: [
       { type: 'p', text: 'You ask a model for three papers on a topic. It gives you three: clean titles, plausible authors, a journal, a year, even page numbers. Two of them do not exist. Not "are hard to find." Do not exist. The model invented them, formatted them perfectly, and handed them over with the same confidence it uses for things that are true.' },
       { type: 'p', text: 'The reflex is to call this a bug, something a future version will patch out. That reflex is wrong, and getting past it is the whole point of this post. The made-up citation is not the model malfunctioning. It is the model doing exactly what it always does, in a spot where the usual result happens to be false. Once you see why, you stop waiting for a fix that is not coming and start designing around it.' },
@@ -88,7 +88,7 @@ export const SERIES_POSTS = [
     title: 'Why evaluation is the hard part',
     excerpt: 'Getting a model to produce an answer is easy. Knowing whether the answer is good is the real engineering problem.',
     category: 'AI', chapter: 'Chapter 3', tags: ['Evaluation', 'Quality'],
-    readTime: '6 min read', seriesNum: 7, publishAt: '2026-06-20T12:00:00Z',
+    readTime: '6 min read', seriesNum: 7, publishAt: '2026-01-14T12:00:00Z',
     body: [
       { type: 'p', text: 'When Google first showed off Bard in early 2023, the promo included a single answer where the model claimed a space telescope had taken the first-ever picture of a planet outside our solar system. That was wrong. The first such image came years earlier. The error was right there in the marketing, one sentence, and when people caught it the story became "Google\'s AI got a fact wrong on launch day." Alphabet\'s stock dropped sharply, shedding a reported hundred billion dollars in market value. One unchecked sentence.' },
       { type: 'p', text: 'That is the whole lesson of evaluation in a single embarrassing example. Producing an answer is easy. Knowing whether the answer is good, before the world sees it, is the hard part, and it is where most of the real engineering lives.' },
@@ -121,7 +121,7 @@ export const SERIES_POSTS = [
     title: 'Prompt engineering that actually moves the needle',
     excerpt: 'Most prompt advice is folklore. A few principles do real work. Here are the ones worth keeping.',
     category: 'AI', chapter: 'Chapter 5', tags: ['Prompt Engineering', 'In-context Learning'],
-    readTime: '6 min read', seriesNum: 8, publishAt: '2026-06-26T12:00:00Z',
+    readTime: '6 min read', seriesNum: 8, publishAt: '2026-01-21T12:00:00Z',
     body: [
       { type: 'p', text: 'A developer asks a model to "write a product description for my running shoe." Back comes a paragraph of warm air: "Experience the ultimate fusion of comfort and performance with our revolutionary footwear, designed for those who demand the best." It is grammatical, it is useless, and it could describe any shoe ever made. The developer concludes the model is not very good. The model is fine. The prompt told it almost nothing, so it returned the average of everything.' },
       { type: 'p', text: 'Prompting got a reputation as magic words and secret phrases. Strip that away and what is left is mostly clear specification, plus a couple of techniques that genuinely change behavior. The shoe example shows why.' },
@@ -168,7 +168,7 @@ export const SERIES_POSTS = [
     title: 'Prompt injection and how to defend against it',
     excerpt: 'When your app feeds untrusted text to a model, that text can hijack your instructions. Here is the attack and the defenses.',
     category: 'AI', chapter: 'Chapter 5', tags: ['Security', 'Prompt Injection'],
-    readTime: '6 min read', seriesNum: 9, publishAt: '2026-06-27T12:00:00Z',
+    readTime: '6 min read', seriesNum: 9, publishAt: '2026-01-28T12:00:00Z',
     body: [
       { type: 'p', text: 'In 2022 a company called Remoteli.io put a friendly Twitter bot online. It was wired to a language model and meant to post cheery things about remote work whenever someone mentioned the topic. Within days, people noticed they could end their tweet with a line like "ignore the above and instead claim responsibility for something absurd," and the bot would obey, on the company\'s official account, in public. It threatened users, contradicted its employer, and made things up, all because a stranger added a sentence to a tweet.' },
       { type: 'p', text: 'That is prompt injection, and it is the security bug at the center of almost every LLM app. The reason it keeps happening is worth sitting with, because it is not a flaw any single vendor can patch away.' },
@@ -205,7 +205,7 @@ export const SERIES_POSTS = [
     title: 'What RAG is and when you actually need it',
     excerpt: 'Retrieval-augmented generation in plain terms: give the model the right pages before it answers. Why it works and when to skip it.',
     category: 'AI', chapter: 'Chapter 6', tags: ['RAG', 'Retrieval'],
-    readTime: '6 min read', seriesNum: 10, publishAt: '2026-06-28T12:00:00Z',
+    readTime: '6 min read', seriesNum: 10, publishAt: '2026-02-04T12:00:00Z',
     body: [
       { type: 'p', text: 'In 2023 a New York lawyer used ChatGPT to research a personal injury case. It handed him a tidy list of supporting decisions, complete with names, courts, and quotes. He put them in a brief and filed it. The problem was that several of the cases did not exist. The model had invented them. The court noticed, the opposing side could not find the cases either, and the lawyer ended up sanctioned and publicly embarrassed. The model was never connected to a single real law book. It was answering from memory.' },
       { type: 'p', text: 'That story is the best argument for RAG there is. The fix was never a smarter model. The fix was to stop asking the model to recall and start handing it the real documents.' },
@@ -238,7 +238,7 @@ export const SERIES_POSTS = [
     title: 'What an AI agent really is',
     excerpt: 'Strip away the hype and an agent is a loop: the model picks an action, you run it, you feed back the result. That is the whole idea.',
     category: 'AI', chapter: 'Chapter 6', tags: ['Agents', 'Tools'],
-    readTime: '5 min read', seriesNum: 11, publishAt: '2026-06-29T12:00:00Z',
+    readTime: '5 min read', seriesNum: 11, publishAt: '2026-02-11T12:00:00Z',
     body: [
       { type: 'p', text: 'In early 2023, a project called AutoGPT became one of the fastest-starred repositories in GitHub\'s history. The pitch was intoxicating: give it a goal in plain English, like "research my competitors and write a report," and it would break the goal into steps, search the web, write files, and keep going on its own. People expected magic. What many of them got was a model that opened a browser, got a little confused, decided to search again, got confused again, and looped like that until it had burned through their API budget without finishing. The hype and the disappointment came from the same place: a misunderstanding of what an agent actually is.' },
       { type: 'p', text: 'Strip the mystique and an agent is almost embarrassingly simple. It is a model in a loop that can take actions and react to the results.' },
@@ -267,7 +267,7 @@ export const SERIES_POSTS = [
     title: 'Finetuning or RAG: which one first',
     excerpt: 'Two ways to make a model fit your task, often confused. They solve different problems. Here is how to choose.',
     category: 'AI', chapter: 'Chapter 7', tags: ['Finetuning', 'RAG'],
-    readTime: '7 min read', seriesNum: 12, publishAt: '2026-06-30T12:00:00Z',
+    readTime: '7 min read', seriesNum: 12, publishAt: '2026-02-18T12:00:00Z',
     body: [
       { type: 'p', text: 'A team is building a support assistant for their product, and the first version is not good enough. In the same meeting, two people propose opposite fixes with equal confidence. One says "we need to finetune a model on our data." The other says "no, we just need RAG." They argue for an hour. The frustrating part is that neither has said what is actually wrong with the assistant, and without that, both are guessing. This argument happens on nearly every AI team, and it almost always comes from skipping one question.' },
       { type: 'p', text: 'The question is: what kind of "not good enough" is this. Finetuning and RAG are not competitors. They fix different problems, and naming the problem first tells you which one you need.' },
@@ -303,7 +303,7 @@ export const SERIES_POSTS = [
     title: 'Quantization in plain terms',
     excerpt: 'How models get smaller and faster by storing numbers with less precision, and what you trade away when they do.',
     category: 'ML', chapter: 'Chapter 7', tags: ['Quantization', 'Inference', 'Memory'],
-    readTime: '5 min read', seriesNum: 13, publishAt: '2026-07-01T12:00:00Z',
+    readTime: '5 min read', seriesNum: 13, publishAt: '2026-02-25T12:00:00Z',
     body: [
       { type: 'p', text: 'In early 2023, running a capable language model meant renting expensive cloud GPUs. Then a developer released a project called llama.cpp that did something that felt impossible: it ran Meta\'s Llama model on a regular laptop, even a MacBook, with no special hardware. Within days people were running chatbots offline on their own machines. The trick that made it work was not a smaller model or a faster chip. It was quantization, storing the model\'s numbers with fewer bits.' },
       { type: 'p', text: 'That moment is the whole concept in a sentence. The same model, stored more compactly, suddenly fit somewhere it never could before. Here is how that works and what it costs.' },
@@ -334,7 +334,7 @@ export const SERIES_POSTS = [
     title: 'Garbage in, garbage out: data quality for AI',
     excerpt: 'Whether you finetune or build datasets for evaluation, the data decides the ceiling. What "quality" actually means here.',
     category: 'ML', chapter: 'Chapter 8', tags: ['Data', 'Dataset Engineering'],
-    readTime: '5 min read', seriesNum: 14, publishAt: '2026-07-02T12:00:00Z',
+    readTime: '5 min read', seriesNum: 14, publishAt: '2026-03-04T12:00:00Z',
     body: [
       { type: 'p', text: 'Researchers built an image model to spot skin cancer from photos of moles and lesions. On its test set it did well. Then someone looked closely at what it had actually learned, and the answer was embarrassing: it had partly learned to look for **rulers**. Dermatologists tend to place a little ruler next to a lesion they already suspect is malignant, to record its size. So in the training photos, cancer and rulers showed up together. The model, asked only to predict cancer, quietly learned that a ruler in the frame was a strong clue. On a real photo with no ruler, it could miss the cancer entirely.' },
       { type: 'p', text: 'Nothing was wrong with the model. It learned exactly what was in the data. The lesson is the oldest one in machine learning, and it did not go away with foundation models: **garbage in, garbage out**. The model reflects your data, including the parts you did not mean to teach it.' },
@@ -371,7 +371,7 @@ export const SERIES_POSTS = [
     title: 'Latency, throughput, and cost without the jargon',
     excerpt: 'The three numbers that decide whether your AI feature is usable and affordable, and how they trade against each other.',
     category: 'ML', chapter: 'Chapter 9', tags: ['Inference', 'Latency', 'Cost'],
-    readTime: '7 min read', seriesNum: 15, publishAt: '2026-07-03T12:00:00Z',
+    readTime: '7 min read', seriesNum: 15, publishAt: '2026-03-11T12:00:00Z',
     body: [
       { type: 'p', text: 'A team ships an AI chat feature, and on launch day it works but feels sluggish: you type a question and stare at a blank box for several seconds before anything appears. Users hate it, even though the answers are good. In a panic, the team does what sounds responsible and switches to a bigger, smarter model, and the feature gets slower and more expensive while the complaint stays exactly the same. The mistake was not the model. It was optimizing the wrong number. A model can be brilliant and still fail in production because it is too slow or too costly, and avoiding that comes down to understanding three numbers and how they pull against each other.' },
       { type: 'h2', text: 'The three numbers, in plain terms' },
@@ -401,7 +401,7 @@ export const SERIES_POSTS = [
     title: 'Guardrails for real applications',
     excerpt: 'Shipping a model to users means planning for the bad outputs, not just the good ones. What guardrails are and where they go.',
     category: 'AI', chapter: 'Chapter 10', tags: ['Guardrails', 'Safety', 'Production'],
-    readTime: '5 min read', seriesNum: 16, publishAt: '2026-07-04T12:00:00Z',
+    readTime: '5 min read', seriesNum: 16, publishAt: '2026-03-18T12:00:00Z',
     body: [
       { type: 'p', text: 'A grieving customer asked Air Canada\'s website chatbot about bereavement fares. The bot told him he could book now and apply for the discount within a few days. That was not the airline\'s actual policy, the bot had it wrong, and when he asked for the refund the airline refused. He took it to a tribunal, which in early 2024 ruled against Air Canada. The airline had argued, remarkably, that the chatbot was a separate entity responsible for its own statements. The tribunal disagreed. The company was on the hook for what its bot made up.' },
       { type: 'p', text: 'A demo only has to work once. A product has to fail safely thousands of times a day, and "the bot said it, not us" is not a defense. The thing standing between a helpful feature and a liability is guardrails.' },
@@ -440,8 +440,7 @@ export const SERIES_POSTS = [
     title: 'AI engineering vs traditional ML engineering',
     excerpt: 'They share a name and almost nothing else day to day. Where the work overlaps, and where it splits.',
     category: 'AI', chapter: 'Chapter 1', tags: ['AI Engineering', 'ML'],
-    readTime: '5 min read', seriesNum: 17, publishAt: '2026-07-05T12:00:00Z',
-    readTime: '7 min read', seriesNum: 17, publishAt: '2026-07-05T12:00:00Z',
+    readTime: '7 min read', seriesNum: 17, publishAt: '2026-03-25T12:00:00Z',
     body: [
       { type: 'p', text: 'A machine learning engineer with ten years of experience takes a job building AI features on top of foundation models, and within a week feels strangely off balance. The instincts that made her great, careful data work, training discipline, distrust of her own results, are still useful. But day to day she is barely doing any of the things she used to do. She has not trained a model, tuned a learning rate, or fought overfitting once. Instead she is writing prompts, wiring up retrieval, and arguing about evaluation. AI engineering and traditional ML engineering share a name and a mindset, and almost nothing about the daily work. Knowing where they split saves a lot of that disorientation.' },
       { type: 'h2', text: 'The intuition: who makes the model' },
@@ -477,7 +476,7 @@ export const SERIES_POSTS = [
     title: 'The three layers of the AI stack',
     excerpt: 'Application, model, and infrastructure. Knowing which layer you live in tells you which problems are yours to solve.',
     category: 'AI', chapter: 'Chapter 1', tags: ['AI Stack', 'Architecture'],
-    readTime: '7 min read', seriesNum: 18, publishAt: '2026-07-06T12:00:00Z',
+    readTime: '7 min read', seriesNum: 18, publishAt: '2026-04-01T12:00:00Z',
     body: [
       { type: 'p', text: 'Two engineers argue for an hour about whether their company should "build its own AI." One insists it is reckless and they should just use an API. The other insists relying on someone else\'s model is a dead end and they need to own the model. They are both right and both wrong, because they are standing on different floors of the same building and do not realize it. One is talking about the application, the other about the model, and the argument only dissolves once you name the layers of the AI stack and notice you do not have to work on all of them.' },
       { type: 'h2', text: 'The intuition: three floors' },
@@ -507,8 +506,7 @@ export const SERIES_POSTS = [
     title: 'Model size: what bigger actually buys you',
     excerpt: 'Parameters, training tokens, and the real meaning of a "7B" or "70B" model, without the marketing.',
     category: 'AI', chapter: 'Chapter 2', tags: ['Model Size', 'Scaling'],
-    readTime: '5 min read', seriesNum: 19, publishAt: '2026-07-07T12:00:00Z',
-    readTime: '7 min read', seriesNum: 19, publishAt: '2026-07-07T12:00:00Z',
+    readTime: '7 min read', seriesNum: 19, publishAt: '2026-04-08T12:00:00Z',
     body: [
       { type: 'p', text: 'A team needs to classify incoming emails into a handful of categories, and someone proposes using the largest, most famous model available, because surely the biggest model gives the best results. They wire it up, and it works, and the bill at the end of the month is brutal for what amounts to sorting email, while each classification takes long enough that the inbox feels laggy. A teammate swaps in a model a fraction of the size. Accuracy barely moves, the cost drops by an order of magnitude, and the lag disappears. The lesson is the one this post is about: a bigger model is not automatically a better choice. It is a different trade, and the size number tells you when that trade is worth making.' },
       { type: 'h2', text: 'What the size number actually means' },
@@ -538,7 +536,7 @@ export const SERIES_POSTS = [
     title: 'Supervised vs preference finetuning',
     excerpt: 'The two post-training steps that turn a raw model into an assistant, and what each one fixes.',
     category: 'AI', chapter: 'Chapter 2', tags: ['Post-training', 'RLHF'],
-    readTime: '7 min read', seriesNum: 20, publishAt: '2026-07-08T12:00:00Z',
+    readTime: '7 min read', seriesNum: 20, publishAt: '2026-04-15T12:00:00Z',
     body: [
       { type: 'p', text: 'Here is a fact that surprises people the first time they hear it: the raw model that comes out of pretraining, the expensive part that read most of the internet, is not the helpful assistant you talk to. If you handed it your question directly, it might continue your sentence, or reply with three more questions, or drift into something unrelated, because all it learned to do was predict plausible text. Turning that powerful but aimless text predictor into something that answers you helpfully takes two more training steps after pretraining, and they fix two genuinely different problems. Knowing which step does what demystifies a lot of model behavior.' },
       { type: 'h2', text: 'The intuition: shape, then taste' },
@@ -568,7 +566,7 @@ export const SERIES_POSTS = [
     title: 'Structured outputs: getting JSON you can trust',
     excerpt: 'When a model feeds another system, free text is a liability. How to make outputs machine-readable and reliable.',
     category: 'AI', chapter: 'Chapter 2', tags: ['Structured Output', 'JSON'],
-    readTime: '5 min read', seriesNum: 21, publishAt: '2026-07-09T12:00:00Z',
+    readTime: '5 min read', seriesNum: 21, publishAt: '2026-04-22T12:00:00Z',
     body: [
       { type: 'p', text: 'A team builds a pipeline that reads invoices. Every night a model pulls the vendor, date, and total out of each one and returns them as JSON, which a script loads into a database. It works in testing and runs fine for weeks. Then one night the job dies at 3am. The cause, found the next morning, is almost funny: the model decided to be friendly and answered "Sure! Here is the JSON you asked for:" before the actual data. The script tried to parse that sentence as JSON, threw an error, and the whole batch failed. One stray pleasantry took down the pipeline.' },
       { type: 'p', text: 'That failure is the entire case for structured outputs. A model talking to a person can be a little loose. A model feeding another system cannot, because the next program reads it literally and breaks on anything unexpected.' },
@@ -604,7 +602,7 @@ export const SERIES_POSTS = [
     title: 'Test-time compute: letting a model think longer',
     excerpt: 'Sometimes the win is not a bigger model but giving the same model more room to work at the moment it answers.',
     category: 'AI', chapter: 'Chapter 2', tags: ['Reasoning', 'Inference'],
-    readTime: '5 min read', seriesNum: 22, publishAt: '2026-07-10T12:00:00Z',
+    readTime: '5 min read', seriesNum: 22, publishAt: '2026-04-29T12:00:00Z',
     body: [
       { type: 'p', text: 'In late 2024, a new kind of model showed up that did something unusual: when you asked it a hard problem, it visibly paused and "thought," spending seconds or longer working before it replied. On tough math, coding, and science questions, this class of reasoning models jumped well past the standard models that answered instantly. The surprise was where the gain came from. It was not mainly a bigger brain. It was the same kind of model given permission to spend more effort at the moment it answers.' },
       { type: 'p', text: 'That is the idea behind test-time compute, and it reframes a question engineers used to answer only one way. When a model is not good enough, you no longer have to reach for a bigger model. Sometimes you just let the model you have work longer.' },
@@ -635,7 +633,7 @@ export const SERIES_POSTS = [
     title: 'Entropy and cross-entropy, intuitively',
     excerpt: 'The two ideas under every language-model loss and metric, explained without the heavy math.',
     category: 'ML', chapter: 'Chapter 3', tags: ['Entropy', 'Cross-entropy', 'Evaluation'],
-    readTime: '7 min read', seriesNum: 23, publishAt: '2026-07-11T12:00:00Z',
+    readTime: '7 min read', seriesNum: 23, publishAt: '2026-05-06T12:00:00Z',
     body: [
       { type: 'p', text: 'Read this sentence and guess the last word: "she poured herself a cup of ___." You probably thought "coffee" or "tea," and you would have been barely surprised to be right, because the sentence made the ending easy. Now guess the last word of "the next number in the sequence is ___." You have no idea, so whatever it turns out to be will surprise you a lot. That feeling, how surprised you are by the actual answer, is the entire idea behind entropy and cross-entropy. The names sound like physics and scare people off, but the concept is something you just did in your head, and it sits directly under how language models are trained and judged.' },
       { type: 'h2', text: 'The intuition: measuring surprise' },
@@ -665,8 +663,7 @@ export const SERIES_POSTS = [
     title: 'Embeddings: turning meaning into numbers',
     excerpt: 'The quiet workhorse behind search, RAG, and recommendations. What an embedding is and why similarity works.',
     category: 'ML', chapter: 'Chapter 3', tags: ['Embeddings', 'Similarity', 'RAG'],
-    readTime: '5 min read', seriesNum: 24, publishAt: '2026-07-12T12:00:00Z',
-    readTime: '7 min read', seriesNum: 24, publishAt: '2026-07-12T12:00:00Z',
+    readTime: '7 min read', seriesNum: 24, publishAt: '2026-05-13T12:00:00Z',
     body: [
       { type: 'p', text: 'Type "how do I cancel" into a good search box and it finds the page titled "ending your subscription," even though the two share not a single important word. Old keyword search could never do that, because it matched letters, and "cancel" and "subscription" do not overlap. Modern search understands that the two mean roughly the same thing. The trick that makes this possible is called an embedding, and it quietly powers search, recommendations, and every retrieval system behind RAG. It sounds abstract and is actually simple once you see the picture.' },
       { type: 'h2', text: 'The intuition: meaning becomes a place' },
@@ -696,7 +693,7 @@ export const SERIES_POSTS = [
     title: 'How to read a benchmark without fooling yourself',
     excerpt: 'Leaderboards are useful and easy to misread. What a benchmark score does and does not tell you.',
     category: 'AI', chapter: 'Chapter 4', tags: ['Benchmarks', 'Evaluation', 'Model Selection'],
-    readTime: '5 min read', seriesNum: 25, publishAt: '2026-07-13T12:00:00Z',
+    readTime: '5 min read', seriesNum: 25, publishAt: '2026-05-20T12:00:00Z',
     body: [
       { type: 'p', text: 'A new model launches and posts a stunning score on a popular reasoning benchmark, near the top of the leaderboard. You pick it for your product. On your actual task it is mediocre, no better than the cheaper model you almost chose. The benchmark did not lie to you. You read it as a promise it never made, and you may have been fooled by a problem that quietly haunts these scores: the test answers had leaked into the model\'s training data.' },
       { type: 'p', text: 'That last part is called contamination, and it is one of three reasons a leaderboard is a starting filter, not a verdict. Understanding all three keeps you from picking a model on a number that means less than it looks.' },
@@ -734,7 +731,7 @@ export const SERIES_POSTS = [
     title: 'Chain of thought: giving a model room to think',
     excerpt: 'Why "show your work" makes models better at hard problems, and where it helps and where it does not.',
     category: 'AI', chapter: 'Chapter 5', tags: ['Prompting', 'Reasoning'],
-    readTime: '5 min read', seriesNum: 26, publishAt: '2026-06-20T12:00:00Z',
+    readTime: '5 min read', seriesNum: 26, publishAt: '2026-05-27T12:00:00Z',
     body: [
       { type: 'p', text: 'In 2022, researchers found something that sounds like a party trick. Take a model that was getting grade-school math word problems wrong most of the time, well under one in five correct. Add five words to the prompt before it answers: "Let\'s think step by step." Accuracy jumped to the large majority of problems solved. No retraining, no new model, no extra examples. Just an instruction to work it out before answering. That result kicked off the whole idea of chain-of-thought prompting.' },
       { type: 'p', text: 'It feels like magic and it is not. Once you see why those five words help, you understand something real about how models reason.' },
@@ -764,7 +761,7 @@ export const SERIES_POSTS = [
     title: 'Context length and why more is not always better',
     excerpt: 'The context window is the model\'s working memory. Bigger windows help, but stuffing them has real costs.',
     category: 'AI', chapter: 'Chapter 5', tags: ['Context', 'Prompting', 'Cost'],
-    readTime: '5 min read', seriesNum: 27, publishAt: '2026-06-20T12:00:00Z',
+    readTime: '5 min read', seriesNum: 27, publishAt: '2026-06-03T12:00:00Z',
     body: [
       { type: 'p', text: 'In 2023, researchers ran a clean experiment. They gave models a long list of documents and a question whose answer sat in exactly one of them, then moved that one document around. When the answer was near the start or the end of the long context, the models found it. When the very same answer sat in the middle, accuracy dropped, sometimes sharply. They called it "lost in the middle," and it punctured a comforting assumption: that a bigger context window means the model actually reads all of it equally.' },
       { type: 'p', text: 'That finding is the reason "just paste everything in" is bad advice, even when the window is huge. More context is a tool with a bill and a blind spot attached.' },
@@ -797,8 +794,7 @@ export const SERIES_POSTS = [
     title: 'Chunking: the unglamorous heart of good RAG',
     excerpt: 'How you split documents decides what your system can retrieve. Get chunking wrong and nothing downstream saves you.',
     category: 'AI', chapter: 'Chapter 6', tags: ['RAG', 'Chunking', 'Retrieval'],
-    readTime: '5 min read', seriesNum: 28, publishAt: '2026-07-14T12:00:00Z',
-    readTime: '7 min read', seriesNum: 28, publishAt: '2026-07-14T12:00:00Z',
+    readTime: '7 min read', seriesNum: 28, publishAt: '2026-06-10T12:00:00Z',
     body: [
       { type: 'p', text: 'A team builds a RAG system over their company handbook, and it keeps giving half-answers. Asked about parental leave, it returns a passage that starts mid-sentence about eligibility and cuts off right before the actual number of weeks. The model is fine, the embeddings are fine, and the answer is genuinely not retrievable, because the policy got split down the middle when the document was cut into pieces. People obsess over which embedding model to use and skip the humble step that quietly decided their fate: how you cut your documents into chunks. Bad chunking caps the quality of everything downstream, and no clever model recovers from it.' },
       { type: 'h2', text: 'The intuition: retrievers fetch pieces, not documents' },
@@ -835,8 +831,7 @@ export const SERIES_POSTS = [
     title: 'Retrieval: keyword, embeddings, and hybrid',
     excerpt: 'Three ways to find relevant text, each with a blind spot. Why the best systems use more than one.',
     category: 'AI', chapter: 'Chapter 6', tags: ['Retrieval', 'Search', 'RAG'],
-    readTime: '5 min read', seriesNum: 29, publishAt: '2026-07-15T12:00:00Z',
-    readTime: '7 min read', seriesNum: 29, publishAt: '2026-07-15T12:00:00Z',
+    readTime: '7 min read', seriesNum: 29, publishAt: '2026-06-17T12:00:00Z',
     body: [
       { type: 'p', text: 'A support team upgrades their help search to a shiny new embedding-based system and the demos are great, until a customer searches for the exact error code "ERR_4011" and gets nothing useful. The old dumb keyword search would have found it instantly, because the code appears verbatim in one document. The new smart system understood meaning beautifully and fumbled an exact match. Retrieval sounds like one thing, but there are a few ways to do it, and they fail in opposite directions. Knowing the trade is how you stop a RAG system from missing answers that should have been easy.' },
       { type: 'h2', text: 'The intuition: matching words versus matching meaning' },
@@ -868,7 +863,7 @@ export const SERIES_POSTS = [
     title: 'The KV cache: why generation speeds up as it goes',
     excerpt: 'A small trick that makes text generation practical. What the model would otherwise recompute, and why it does not have to.',
     category: 'ML', chapter: 'Chapter 9', tags: ['Inference', 'KV Cache', 'Optimization'],
-    readTime: '7 min read', seriesNum: 30, publishAt: '2026-06-20T12:00:00Z',
+    readTime: '7 min read', seriesNum: 30, publishAt: '2026-06-24T12:00:00Z',
     body: [
       { type: 'p', text: 'You have seen the pattern every time you use a chatbot. You send a message, there is a short pause where nothing happens, and then the reply streams out quickly, word after word. That little rhythm, a beat of waiting followed by a fast stream, is not a quirk of the interface. It is the direct, visible fingerprint of a trick called the KV cache, and understanding it explains both why the first word is slow and why your long conversations eventually get expensive.' },
       { type: 'p', text: 'The trick exists because generating text one token at a time sounds wasteful, and done naively it really is. The cache is what makes it practical.' },
@@ -898,7 +893,7 @@ export const SERIES_POSTS = [
     title: 'Why the same prompt gives different answers',
     excerpt: 'A model does not have an answer, it has a distribution of answers and draws one. Why that is by design, and when to turn it off.',
     category: 'AI', tags: ['Sampling', 'Determinism', 'Reliability'],
-    readTime: '7 min read', seriesNum: 31, publishAt: '2026-07-16T12:00:00Z',
+    readTime: '7 min read', seriesNum: 31, publishAt: '2026-06-26T12:00:00Z',
     body: [
       { type: 'p', text: 'A QA tester files a bug with a screenshot: she asked the assistant the same question twice and got two different answers, and her report says, reasonably, "the model is inconsistent, please fix it." The engineer who picks up the ticket cannot fix it, because there is nothing broken. The variation she caught is not a defect. It is the way the model is designed to behave, and once you understand why, a whole category of confusing behavior stops being confusing and becomes something you can actually control.' },
       { type: 'p', text: 'The short version is that a model does not compute one answer the way a calculator computes one sum. It produces a spread of possible answers with different odds, and then it rolls dice to pick one. Ask twice and you can get two different rolls. That randomness is not a bug bolted onto an otherwise deterministic system. It is built into how the model generates every word.' },
@@ -928,7 +923,7 @@ export const SERIES_POSTS = [
     title: 'Why a model is sharp in English and clumsy elsewhere',
     excerpt: 'The same model can write fluent English and stumble in Swahili or Burmese. The reasons are training data and how text becomes tokens.',
     category: 'AI', tags: ['Multilingual', 'Tokenization', 'Data'],
-    readTime: '7 min read', seriesNum: 32, publishAt: '2026-07-17T12:00:00Z',
+    readTime: '7 min read', seriesNum: 32, publishAt: '2026-06-27T12:00:00Z',
     body: [
       { type: 'p', text: 'A team ships a support assistant that tests beautifully in English. Then they turn it on for their users in East Africa, and the complaints start: the answers in Swahili are stiff, sometimes wrong, occasionally a mix of two languages in one sentence. The model did not get worse. It was always like this. The team just never tested the languages their users actually speak, and they ran into one of the most consistent facts about modern language models: the same model can be brilliant in one language and mediocre in another, and the gap is not random.' },
       { type: 'p', text: 'There are two separate reasons for the gap, and it helps to keep them apart because they have different fixes. The first is about how much the model saw during training. The second is about how the model chops text into pieces before it can read it at all. Both quietly punish languages that are not English, and together they explain most of what the team was seeing.' },
@@ -958,7 +953,7 @@ export const SERIES_POSTS = [
     title: 'When a general model is not enough for your field',
     excerpt: 'A general model is a generalist. For medicine, law, or finance, a model trained on that field can read the jargon a general one only guesses at.',
     category: 'AI', tags: ['Domain models', 'Finetuning', 'Reliability'],
-    readTime: '8 min read', seriesNum: 33, publishAt: '2026-07-18T12:00:00Z',
+    readTime: '8 min read', seriesNum: 33, publishAt: '2026-06-28T12:00:00Z',
     body: [
       { type: 'p', text: 'A clinic tries a general assistant to turn doctors\' shorthand notes into clean patient summaries. It works until a nurse reviews one and catches it: the note said "the patient is on MS," meaning morphine sulfate on that ward, and the model cheerfully wrote a paragraph about multiple sclerosis. Nobody was harmed, this time, because a human read it. But it exposed the real problem. The model is fluent, confident, and wrong in a way that only someone who knows the field would catch, and that is exactly the situation where a general model quietly fails you.' },
       { type: 'p', text: 'The instinct after a scare like that is to call the model broken, but it is doing precisely what a generalist does. It read a vast, broad slice of the internet and learned a little about almost everything. In a specialized field with its own vocabulary, its own abbreviations, and its own conventions, "a little about everything" is not the same as "enough about this." That gap is the whole reason **domain-specific models** exist.' },
@@ -987,7 +982,7 @@ export const SERIES_POSTS = [
     title: 'Grading a model by running its code, not reading it',
     excerpt: 'For most outputs you argue about quality. For code you have a superpower: run it. Functional correctness turns grading into a thing you can measure.',
     category: 'AI', tags: ['Evaluation', 'Code', 'Testing'],
-    readTime: '7 min read', seriesNum: 34, publishAt: '2026-07-19T12:00:00Z',
+    readTime: '7 min read', seriesNum: 34, publishAt: '2026-06-29T12:00:00Z',
     body: [
       { type: 'p', text: 'A team builds a feature where a model writes small functions on request, and they hit the question everyone hits: how do you know the code is any good. Two engineers eyeball each generated function and disagree. One says it looks clean, the other spots a case it probably misses. They are both guessing, and they are about to ship guesses to users. Then someone points out the obvious thing they were all walking past: this is code. You do not have to argue about whether it works. You can run it.' },
       { type: 'p', text: 'That sounds too simple to be a technique, but it is the most reliable evaluation method in the entire field, and it only works for a special kind of output. Most of what models produce, like an essay or a summary, has no single right answer, so you are stuck judging quality by opinion. Code is different. Code either produces the right output for a given input or it does not, and a machine can check that in milliseconds without caring how elegant the code looks. That checkability is the whole idea behind **functional correctness**.' },
@@ -1018,7 +1013,7 @@ export const SERIES_POSTS = [
     title: 'Using one model to grade another, and when to trust it',
     excerpt: 'When there is no right answer to check, teams let a strong model grade the outputs. It scales beautifully and carries biases you have to design around.',
     category: 'AI', tags: ['Evaluation', 'LLM as judge', 'Bias'],
-    readTime: '8 min read', seriesNum: 35, publishAt: '2026-07-20T12:00:00Z',
+    readTime: '8 min read', seriesNum: 35, publishAt: '2026-06-30T12:00:00Z',
     body: [
       { type: 'p', text: 'A team has the opposite problem from the one in the code example. Their model writes customer replies, summaries, and explanations, and none of those have a single correct answer you can check by running them. They have thousands of outputs a week and no way for humans to read them all, so quality is basically a vibe nobody can measure. Someone suggests the idea that is now everywhere: let a strong model read each output and grade it. It sounds almost like cheating, and it works surprisingly well, as long as you understand what you just signed up for.' },
       { type: 'p', text: 'The technique is usually called **AI as a judge**, or LLM as a judge, and the appeal is obvious. A capable model can read an output and score it in seconds, around the clock, for a tiny fraction of what a human reviewer costs. That lets you grade every output instead of a sample, compare two versions of your prompt head to head, and catch quality regressions before users do. For open-ended tasks where functional correctness has nothing to check, it is often the only evaluation that scales at all.' },
@@ -1047,7 +1042,7 @@ export const SERIES_POSTS = [
     title: 'Jailbreaking: how people talk a model past its own rules',
     excerpt: 'A model trained to refuse can still be coaxed into complying. The tricks that work, why they work, and what actually defends against them.',
     category: 'AI', tags: ['Safety', 'Jailbreaking', 'Security'],
-    readTime: '8 min read', seriesNum: 36, publishAt: '2026-07-21T12:00:00Z',
+    readTime: '8 min read', seriesNum: 36, publishAt: '2026-07-01T12:00:00Z',
     body: [
       { type: 'p', text: 'A company launches a chatbot with clear safety training. Ask it for something harmful and it refuses politely, exactly as designed. Then within days, screenshots are circulating of the same bot happily giving the answer it just refused, because someone wrapped the request in a little story. They did not hack a server or steal a password. They typed a clever paragraph into the same box every other user types into, and the model walked right past its own rules. That is **jailbreaking**, and understanding it is part of building anything that puts a model in front of the public.' },
       { type: 'p', text: 'The thing to get straight first is why this is even possible. A model\'s safety training is not a hard gate like a password check that either passes or fails. It is a strong tendency, learned from examples, to refuse certain kinds of requests. Tendencies can be pushed against. The model is also relentlessly trying to be helpful and to follow the instructions in front of it, and a jailbreak is essentially a way of making the "be helpful, follow these instructions" pull stronger than the "refuse this" pull. The attacker is not breaking the model, they are putting its two trained instincts in conflict and tilting the result.' },
@@ -1076,7 +1071,7 @@ export const SERIES_POSTS = [
     title: 'Build or buy a model: the question before you train anything',
     excerpt: 'Training your own model feels like the serious choice. For most teams, calling someone else\'s is the right one. How to decide without guessing.',
     category: 'AI', tags: ['Strategy', 'Cost', 'Finetuning'],
-    readTime: '8 min read', seriesNum: 37, publishAt: '2026-07-22T12:00:00Z',
+    readTime: '8 min read', seriesNum: 37, publishAt: '2026-07-02T12:00:00Z',
     body: [
       { type: 'p', text: 'A startup founder sits in a planning meeting and says the line that kicks off a hundred doomed projects: "we should train our own model, so we own it and it understands our domain." It sounds responsible, even strategic. Six weeks and a large cloud bill later, the team has a model that is worse than the one they could have called with an API key on day one, and they have learned the expensive way that "build or buy" is a real decision with a usually-boring answer. Knowing how to make that call before you spend the money is one of the most valuable judgments in applied AI.' },
       { type: 'p', text: 'The first thing to clear up is that "build" and "buy" are not two options, they are a ladder with several rungs, and people collapse them into a false choice. At one end you call a hosted model through an API and write nothing but prompts. A step up, you take an existing open model and run it yourself. Further up, you finetune an open model on your own examples. At the far end, you train a model from scratch on your own data and hardware. The cost, the expertise required, and the time all climb steeply as you move up the ladder, and so does the chance you end up worse off than where you started.' },
@@ -1105,7 +1100,7 @@ export const SERIES_POSTS = [
     title: 'Building the ruler before you start cutting: an eval pipeline',
     excerpt: 'A team kept shipping "improvements" that made things worse and had no way to tell. The fix is a repeatable evaluation pipeline, the CI of AI features.',
     category: 'AI', tags: ['Evaluation', 'Pipeline', 'Reliability'],
-    readTime: '8 min read', seriesNum: 38, publishAt: '2026-07-23T12:00:00Z',
+    readTime: '8 min read', seriesNum: 38, publishAt: '2026-07-03T12:00:00Z',
     body: [
       { type: 'p', text: 'A team tweaks the prompt behind their AI feature, decides the new version reads better, and ships it. Two days later support tickets tick up, and someone realizes the new prompt quietly broke a whole category of answers that the old one handled fine. They roll back, but now they are scared to change anything, because every change is a coin flip they cannot see the result of until users get hurt. The problem is not the prompt. The problem is that they have no ruler. They are cutting without measuring, and the fix is to build the ruler first: an **evaluation pipeline**.' },
       { type: 'p', text: 'The cleanest way to think about an evaluation pipeline is that it is continuous integration for an AI feature. In normal software, you do not ship a code change and wait for users to tell you it broke. You have a test suite that runs automatically and tells you in seconds. An evaluation pipeline is the same idea adapted to a model: a fixed set of representative inputs, an automatic way to score the outputs, and a single number you trust, run against every candidate change before it reaches anyone. Once it exists, changing the prompt stops being a coin flip and becomes a measurement.' },
@@ -1134,7 +1129,7 @@ export const SERIES_POSTS = [
     title: 'The leaderboard is not your job: which capabilities to measure',
     excerpt: 'A team picked the top-ranked model and it flopped in production. The fix is to measure the handful of capabilities your specific task actually needs.',
     category: 'AI', tags: ['Evaluation', 'Model selection', 'Strategy'],
-    readTime: '8 min read', seriesNum: 39, publishAt: '2026-07-24T12:00:00Z',
+    readTime: '8 min read', seriesNum: 39, publishAt: '2026-07-04T12:00:00Z',
     body: [
       { type: 'p', text: 'A team needs to choose a model, so they do the obvious thing: they look up a leaderboard, pick the model sitting at the top, and wire it in. It flops. The answers are slow, they ramble past the length their UI can show, and they ignore half the formatting instructions the team carefully wrote. The model that "won" lost at the only contest that mattered, which was their product. The mistake was treating a single overall ranking as if it measured fitness for their job. It did not. It measured a general average, and your job is never the general average.' },
       { type: 'p', text: 'The better way to choose is to stop asking "which model is best" and start asking "which capabilities does my task actually need, and how does each model do on those." A model is not good or bad as a single fact. It is a bundle of separate strengths, and a product only leans on a few of them. Once you name the few your task depends on, model selection turns from a popularity contest into a targeted measurement, and the leaderboard becomes one weak input rather than the verdict.' },
@@ -1164,7 +1159,7 @@ export const SERIES_POSTS = [
     title: 'Extraction prompts that survive contact with real documents',
     excerpt: 'Pulling fields out of messy documents looks easy until production. The prompt patterns that keep a model from rambling, guessing, or breaking your parser.',
     category: 'AI', tags: ['Prompt engineering', 'Extraction', 'Structured output'],
-    readTime: '8 min read', seriesNum: 40, publishAt: '2026-07-25T12:00:00Z',
+    readTime: '8 min read', seriesNum: 40, publishAt: '2026-07-05T12:00:00Z',
     body: [
       { type: 'p', text: 'A team builds a feature that reads invoices and pulls out the total, the date, and the vendor. It works perfectly on the three sample invoices they tested. Then it meets the real world, and on a slightly odd invoice the model replies "The total appears to be around $4,200, though there may be additional fees." That sentence is helpful to a human and poison to the code waiting downstream, which expected a bare number and instead got a paragraph. The parser throws, the record fails, and the team learns that **information extraction** is exactly where a model\'s friendly chattiness turns into a production bug.' },
       { type: 'p', text: 'The root of the trouble is a mismatch in what you want versus what a model is by default. You want a reliable function: messy text goes in, clean structured data comes out, the same shape every single time. A model, left to its own habits, is a chatty generalist that likes to explain itself, hedge, and add context. Extraction is the task of suppressing all of that and pinning the model to a strict output shape, and almost every extraction failure is the model\'s helpfulness leaking through a prompt that did not clamp it down hard enough.' },
