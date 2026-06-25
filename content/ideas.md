@@ -11,7 +11,7 @@ live, and add new ideas as they come up.
 
 ---
 
-## Already shipped (26 posts + 1 demo)
+## Already shipped (31 posts + 1 demo)
 
 Foundation models, hallucination, sampling [DEMO], why evaluation is hard,
 prompt engineering, prompt injection, what RAG is, what an agent is,
@@ -21,20 +21,19 @@ preference finetuning, structured outputs, test-time compute, entropy &
 cross-entropy, embeddings, reading benchmarks, chunking for RAG, retrieval
 algorithms, KV cache.
 
+Backlog now live (scheduled on the daily drip, 2026-07-16 onward):
+probabilistic nature of AI, multilingual quality, domain-specific models,
+functional correctness, AI as a judge.
+
 ---
 
 ## Planned
 
 ### Foundation models
 - How attention works, visually **[DEMO]** — watch a token attend to others
-- Multilingual models and why quality is uneven across languages
-- Domain-specific models: when a general model is not enough
-- The probabilistic nature of AI: same prompt, different answer
 
 ### Evaluation
-- Functional correctness: grading code by running it
 - Similarity metrics **[DEMO]** — BLEU / ROUGE / exact-match, side by side
-- AI as a judge: rubrics, biases, and when to trust it
 - Comparative evaluation and ranking **[DEMO]** — an arena / Elo simulator
 
 ### Evaluate AI systems
