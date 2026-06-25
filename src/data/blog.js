@@ -3,10 +3,14 @@ import { SERIES_POSTS } from './seriesPosts';
 const GRAD = 'linear-gradient(120deg, #0068FF 0%, #3539F4 48%, #BD03F7 100%)';
 
 // Turn a data-driven series post into blog-list metadata (strips the body).
-const monthLabel = (iso) => {
+// Full day-level date, e.g. "Jun 24, 2026".
+const fullDate = (iso) => {
   try {
-    const d = new Date(iso);
-    return d.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+    return new Date(iso).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
   } catch {
     return '';
   }
@@ -17,7 +21,7 @@ const seriesMeta = SERIES_POSTS.map((p) => ({
   title: p.title,
   excerpt: p.excerpt,
   category: p.category || 'AI',
-  date: monthLabel(p.publishAt),
+  date: fullDate(p.publishAt),
   readTime: p.readTime || '5 min read',
   tags: p.tags || [],
   series: 'AI Engineering Series',
@@ -35,7 +39,7 @@ const CORE_POSTS = [
     title: 'Your First AI Agent in 50 Lines of Python',
     excerpt: 'Build a ReAct agent from scratch using Claude\'s tool use API. No frameworks. No LangChain. Just raw function calling.',
     category: 'AI',
-    date: 'March 2026',
+    date: 'Mar 15, 2026',
     readTime: '5 min read',
     tags: ['Claude API', 'Python', 'AI Agents'],
     series: 'AI Engineering Series',
@@ -50,7 +54,7 @@ const CORE_POSTS = [
     excerpt:
       'Temperature, top-k, and top-p, explained by doing. Includes an interactive lab and runnable NumPy you can edit in the browser.',
     category: 'AI',
-    date: 'June 2026',
+    date: 'Jun 25, 2026',
     readTime: '6 min read',
     tags: ['Sampling', 'Temperature', 'top-p', 'Foundation Models'],
     series: 'AI Engineering Series',
