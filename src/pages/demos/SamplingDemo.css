@@ -58,6 +58,34 @@
   margin-bottom: var(--space-xl);
 }
 
+/* Defined-terms block — names every term before the sliders use it */
+.demo-terms {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px 20px;
+  padding: var(--space-lg);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--primary);
+  border-radius: var(--radius-md);
+  background: var(--bg-secondary);
+  margin-bottom: var(--space-xl);
+}
+
+.demo-term {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.demo-term b {
+  color: var(--text);
+  margin-right: 6px;
+}
+
+@media (max-width: 680px) {
+  .demo-terms { grid-template-columns: 1fr; }
+}
+
 .demo-companion a {
   color: var(--primary);
   font-weight: 600;

@@ -2,6 +2,8 @@ import React, { lazy, Suspense, useState, useEffect, useCallback, useRef } from 
 import { Link, useParams, Navigate } from 'react-router-dom';
 import { ChevronLeft, ArrowRight, Clock, Calendar, Send, User } from 'lucide-react';
 import { BLOG_POSTS } from '../data/blog';
+import { SERIES_POSTS } from '../data/seriesPosts';
+import SeriesPost from './blog/SeriesPost';
 import { supabase } from '../lib/supabase';
 import './BlogPostPage.css';
 
@@ -187,6 +189,7 @@ const BlogPostPage = () => {
   if (!post || post.comingSoon) return <Navigate to="/blog" replace />;
 
   const PostContent = postComponents[slug];
+  const seriesPost = SERIES_POSTS.find(p => p.id === slug);
   const relatedPosts = BLOG_POSTS.filter(p => p.id !== slug);
 
   return (
@@ -213,11 +216,15 @@ const BlogPostPage = () => {
       {/* Main layout: content + sidebar */}
       <div className="blog-post-layout">
         <article className="blog-post-content">
-          {PostContent && (
+          {PostContent ? (
             <Suspense fallback={<div style={{ minHeight: '40vh' }} />}>
               <PostContent />
             </Suspense>
-          )}
+          ) : seriesPost ? (
+            <Suspense fallback={<div style={{ minHeight: '40vh' }} />}>
+              <SeriesPost post={seriesPost} />
+            </Suspense>
+          ) : null}
           {/* Comments */}
           <section className="blog-comments-section">
             <h2 className="blog-comments-heading">Comments</h2>

@@ -103,6 +103,22 @@
   hyphens: auto;
 }
 
+/* Defined-terms block in data-driven series posts */
+.blog-post-content .series-terms {
+  border-left: 3px solid var(--primary);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  padding: 16px 18px 16px 22px;
+  margin: 0 0 24px;
+  list-style: none;
+}
+.blog-post-content .series-terms li {
+  margin-bottom: 8px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+.blog-post-content .series-terms li:last-child { margin-bottom: 0; }
+
 .blog-post-content strong {
   color: var(--text);
   font-weight: 600;

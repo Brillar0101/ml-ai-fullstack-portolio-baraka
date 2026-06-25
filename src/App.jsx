@@ -46,7 +46,7 @@ const pageTitles = {
   '/projects/3-filter-audio': '3 Filter Audio System',
   '/about': 'About',
   '/blog': 'Blog',
-  '/demos': 'Demos',
+  '/demos': 'Demo',
   '/demos/sampling': 'How a model picks the next word',
   '/privacy': 'Privacy',
   '/blog/your-first-ai-agent': 'Your First AI Agent in 50 Lines of Python'

@@ -2,7 +2,7 @@ import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Dices } from 'lucide-react';
 import PythonLab from '../../components/labs/PythonLab';
-import './SamplingDemo.css';
+import './demos-shared.css';
 
 // A frozen "next-token" distribution for the prompt below. These are raw logits,
 // the unnormalized scores a model produces before softmax. The demo reshapes
@@ -141,6 +141,20 @@ export default function SamplingDemo() {
         <p className="demo-companion">
           Prefer the written walkthrough? <Link to="/blog/next-word-sampling">Read the companion post →</Link>
         </p>
+
+        <p className="demo-text">
+          Before the knobs, the idea. When a model writes, it does not choose a word. It scores every
+          word it knows for how well it fits next, turns those scores into probabilities, and draws
+          one at random, favoring the high scorers without always taking the top one. The three
+          controls below decide how greedy or how adventurous that draw is.
+        </p>
+
+        <div className="demo-terms">
+          <div className="demo-term"><b>Token</b> the unit a model reads and writes, roughly a word.</div>
+          <div className="demo-term"><b>Logit</b> the raw score for each candidate word, before normalizing.</div>
+          <div className="demo-term"><b>Probability</b> the logits turned into odds that add up to 100%.</div>
+          <div className="demo-term"><b>Sampling</b> drawing one word at random from those odds.</div>
+        </div>
 
         <div className="demo-prompt">
           <span className="demo-prompt-label">Prompt</span>
