@@ -421,7 +421,7 @@ export const SERIES_POSTS = [
         'Log what the guardrails catch, so you learn what users and attackers actually send.',
       ]},
       { type: 'h2', text: 'What to take away' },
-      { type: 'p', text: 'Design for the bad path, because a court will not accept "the model did it." Assume the model will sometimes be confidently wrong, and build the system so that being wrong is caught before it becomes a promise to a customer. The teams whose AI features survive contact with the public are the ones who planned for the failure, not just the demo.' },
+      { type: 'p', text: 'Design for the bad path, because a court will not accept "the model did it." Assume the model will sometimes be confidently wrong, and build the system so that being wrong is caught before it becomes a promise to a customer. The teams whose AI features survive contact with the public are the ones who planned for the failure, not just the demo. Screen what goes in, check what comes out, give the model a safe way to say nothing, and keep its power small enough that any failure stays survivable.' },
     ],
   },
 
@@ -546,7 +546,7 @@ export const SERIES_POSTS = [
       { type: 'h2', text: 'Keep the schema as small as the task allows' },
       { type: 'p', text: 'One practical rule saves a lot of pain: ask for the least structure you actually need. Every field you demand is another thing the model can get wrong, another place a value can come back null or mistyped, another branch your validation has to handle. A schema with three required fields is far more reliable than one with fifteen optional ones. If you find yourself asking the model for a deeply nested object with a dozen keys, that is often a sign to break the work into two simpler steps rather than one fragile mega-call. Simpler schemas are not just easier to write, they fail less, which in production is the same as being smarter.' },
       { type: 'h2', text: 'What to take away' },
-      { type: 'p', text: 'Treat any model output bound for another system as untrusted until validated, the same way you would treat a string from the internet. Constrain the generation so malformed output cannot happen, check it against a schema anyway, keep that schema as small as the task allows, and a flaky text generator becomes a dependable component your pipeline, and your agents, can actually rely on at 3am.' },
+      { type: 'p', text: 'Treat any model output bound for another system as untrusted until validated, the same way you would treat a string from the internet. Constrain the generation so malformed output cannot happen, check it against a schema anyway, keep that schema as small as the task allows, and a flaky text generator becomes a dependable component your pipeline, and your agents, can actually rely on at 3am. The goal is not to ask the model nicely for good output. It is to build a system where bad output cannot reach the next step, whether that step is a database row or an action in the world.' },
     ],
   },
   {
@@ -577,7 +577,7 @@ export const SERIES_POSTS = [
       { type: 'h2', text: 'A caution: more thinking is not always better' },
       { type: 'p', text: 'It is easy to assume that if a little extra thinking helps, a lot must help more, and that is not reliably true. On easy problems, forcing a model to deliberate at length wastes time and money for no gain, and can even talk it out of a correct first instinct. The benefit shows up specifically on hard, multi-step problems where there is real work to do, and it flattens out or reverses on simple ones. So test-time compute is not a quality dial you crank to the top and leave there. It is something you spend where the difficulty justifies it, which means matching the effort to the problem rather than paying for maximum deliberation on every request.' },
       { type: 'h2', text: 'What to take away' },
-      { type: 'p', text: 'When a model struggles, before paying for a bigger one, ask whether letting it think longer would close the gap. Often the same model, given room and time to work, gets there. Spend that effort where the problem is genuinely hard and skip it where the task is easy, because thinking time is real money and only pays off when there is real thinking to do. Spending compute at answer time is now a first-class lever, not an afterthought.' },
+      { type: 'p', text: 'When a model struggles, before paying for a bigger one, ask whether letting it think longer would close the gap. Often the same model, given room and time to work, gets there. Spend that effort where the problem is genuinely hard and skip it where the task is easy, because thinking time is real money and only pays off when there is real thinking to do. Spending compute at answer time is now a first-class lever, not an afterthought, and it is one of the few levers an application builder can pull without waiting for a new model to be trained.' },
     ],
   },
   {
@@ -789,7 +789,7 @@ export const SERIES_POSTS = [
       { type: 'h2', text: 'Why this is worth knowing' },
       { type: 'p', text: 'The KV cache connects a few things that otherwise seem unrelated. It is why time-to-first-token and time-per-token are two different numbers worth measuring separately: prefill controls the first, decode controls the rest. It is why a long prompt makes you wait longer before anything appears, since prefill has more to chew through. And it is why memory, not just raw speed, is often the thing that limits how many users a server can handle. If you ever tune a serving setup, the cache is one of the first levers and one of the biggest costs.' },
       { type: 'h2', text: 'What to take away' },
-      { type: 'p', text: 'Generation is fast because the model remembers its own past work instead of redoing it from scratch, and the pause-then-stream rhythm you feel in every chatbot is that cache being filled and then reused. The price of the remembering is memory that grows with context length. So when you hear about context limits, serving memory, or why long chats get pricey, the KV cache is usually the thing being managed underneath.' },
+      { type: 'p', text: 'Generation is fast because the model remembers its own past work instead of redoing it from scratch, and the pause-then-stream rhythm you feel in every chatbot is that cache being filled and then reused. The price of the remembering is memory that grows with context length. So when you hear about context limits, serving memory, or why long chats get pricey, the KV cache is usually the thing being managed underneath. Once you can see it, a lot of otherwise mysterious behavior falls into place at once: the initial pause is prefill, the steady stream is decode, the creeping cost of a long conversation is the cache growing, and the limit a provider puts on context length is partly a limit on how much of this cache a server can afford to hold for you.' },
     ],
   },
 ];
