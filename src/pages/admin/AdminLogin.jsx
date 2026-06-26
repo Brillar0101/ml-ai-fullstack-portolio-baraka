@@ -39,18 +39,28 @@ export default function AdminLogin() {
           </button>
         )}
 
-        <button
-          className="admin-login-btn"
-          onClick={handleLocalAdmin}
-          style={{
-            background: supabase ? 'transparent' : undefined,
-            color: supabase ? 'var(--text)' : undefined,
-            border: supabase ? '1px solid var(--border)' : undefined,
-          }}
-        >
-          <Monitor size={18} />
-          Enter Local Admin
-        </button>
+        {/* Local admin is a development convenience only. Never rendered in
+            the production build, and AuthContext ignores the flag there too. */}
+        {import.meta.env.DEV && (
+          <button
+            className="admin-login-btn"
+            onClick={handleLocalAdmin}
+            style={{
+              background: supabase ? 'transparent' : undefined,
+              color: supabase ? 'var(--text)' : undefined,
+              border: supabase ? '1px solid var(--border)' : undefined,
+            }}
+          >
+            <Monitor size={18} />
+            Enter Local Admin
+          </button>
+        )}
+
+        {!supabase && (
+          <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '12px' }}>
+            Sign-in is unavailable until Supabase is configured.
+          </p>
+        )}
       </div>
     </div>
   );
