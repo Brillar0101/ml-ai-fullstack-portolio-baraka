@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
+import { BLOG_POSTS } from '../../data/blog';
 
 const DATE_RANGES = [
   { label: '7d', days: 7 },
@@ -7,9 +8,14 @@ const DATE_RANGES = [
   { label: '90d', days: 90 },
 ];
 
+// Seconds -> "1m 20s" / "45s".
+const fmtTime = (s) => (s >= 60 ? `${Math.floor(s / 60)}m ${s % 60}s` : `${s}s`);
+
 export default function AdminAnalytics() {
   const [range, setRange] = useState(7);
-  const [data, setData] = useState({ pageViews: [], topPages: [], referrers: [], totalViews: 0 });
+  const [data, setData] = useState({
+    pageViews: [], topPages: [], referrers: [], totalViews: 0, blogStats: [],
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -67,11 +73,52 @@ export default function AdminAnalytics() {
         .slice(0, 10)
         .map(([host, count]) => ({ host, count }));
 
+      // Per-blog views, derived from /blog/<slug> page paths.
+      const blogViews = {};
+      events.forEach(event => {
+        const path = event.page_path || '';
+        if (path.startsWith('/blog/')) {
+          const slug = path.slice('/blog/'.length).replace(/\/+$/, '');
+          if (slug) blogViews[slug] = (blogViews[slug] || 0) + 1;
+        }
+      });
+
+      // Engagement (scroll depth + time on page), averaged per post.
+      const { data: engagement } = await supabase
+        .from('analytics_events')
+        .select('post_slug, scroll_depth, time_on_page')
+        .eq('event_type', 'engagement')
+        .gte('created_at', since);
+
+      const engBySlug = {};
+      (engagement || []).forEach(e => {
+        if (!e.post_slug) return;
+        if (!engBySlug[e.post_slug]) engBySlug[e.post_slug] = { time: 0, scroll: 0, n: 0 };
+        engBySlug[e.post_slug].time += e.time_on_page || 0;
+        engBySlug[e.post_slug].scroll += e.scroll_depth || 0;
+        engBySlug[e.post_slug].n += 1;
+      });
+
+      const blogStats = Object.entries(blogViews)
+        .map(([slug, views]) => {
+          const post = BLOG_POSTS.find(p => p.id === slug);
+          const e = engBySlug[slug];
+          return {
+            slug,
+            title: post ? post.title : slug,
+            views,
+            avgTime: e && e.n ? Math.round(e.time / e.n) : null,
+            avgScroll: e && e.n ? Math.round(e.scroll / e.n) : null,
+          };
+        })
+        .sort((a, b) => b.views - a.views);
+
       setData({
         totalViews: events.length,
         topPages,
         referrers,
-        pageViews: events
+        pageViews: events,
+        blogStats,
       });
     } catch {
       // Silent fail
@@ -117,6 +164,40 @@ export default function AdminAnalytics() {
               <div className="admin-stat-value">{data.referrers.length}</div>
             </div>
           </div>
+
+          <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '16px', color: 'var(--text)' }}>
+            Blog posts
+          </h2>
+          {data.blogStats.length === 0 ? (
+            <div className="admin-empty" style={{ marginBottom: '32px' }}>
+              <p>No blog views in this period.</p>
+            </div>
+          ) : (
+            <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '32px' }}>
+              <thead>
+                <tr style={{ textAlign: 'left', color: 'var(--text-muted)', fontSize: '13px' }}>
+                  <th style={{ padding: '8px 0' }}>Post</th>
+                  <th style={{ padding: '8px 0', textAlign: 'right' }}>Views</th>
+                  <th style={{ padding: '8px 0', textAlign: 'right' }}>Avg time</th>
+                  <th style={{ padding: '8px 0', textAlign: 'right' }}>Avg scroll</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.blogStats.map(b => (
+                  <tr key={b.slug} style={{ borderTop: '1px solid var(--border, rgba(255,255,255,0.08))' }}>
+                    <td style={{ padding: '10px 0', color: 'var(--text)' }} title={b.slug}>{b.title}</td>
+                    <td style={{ padding: '10px 0', textAlign: 'right', color: 'var(--text)' }}>{b.views}</td>
+                    <td style={{ padding: '10px 0', textAlign: 'right', color: 'var(--text-muted)' }}>
+                      {b.avgTime != null ? fmtTime(b.avgTime) : '—'}
+                    </td>
+                    <td style={{ padding: '10px 0', textAlign: 'right', color: 'var(--text-muted)' }}>
+                      {b.avgScroll != null ? `${b.avgScroll}%` : '—'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
 
           <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '16px', color: 'var(--text)' }}>
             Top Pages

@@ -10,9 +10,10 @@ export function AuthProvider({ children }) {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    // Check local dev mode first (works with or without Supabase)
-    const localAdmin = localStorage.getItem('admin_local_dev');
-    if (localAdmin === 'true') {
+    // Local dev backdoor: only active under `npm run dev`. In the production
+    // build import.meta.env.DEV is false, so this is stripped and the admin
+    // area can only be reached via real GitHub OAuth + admin_users check.
+    if (import.meta.env.DEV && localStorage.getItem('admin_local_dev') === 'true') {
       setUser({ id: 'local', user_metadata: { user_name: 'Local Admin' } });
       setIsAdmin(true);
       setLoading(false);
@@ -67,10 +68,12 @@ export function AuthProvider({ children }) {
 
   async function signIn() {
     if (!supabase) {
-      // Local dev mode: grant admin access without OAuth
-      localStorage.setItem('admin_local_dev', 'true');
-      setUser({ id: 'local', user_metadata: { user_name: 'Local Admin' } });
-      setIsAdmin(true);
+      // No Supabase: only grant the no-OAuth local admin in development.
+      if (import.meta.env.DEV) {
+        localStorage.setItem('admin_local_dev', 'true');
+        setUser({ id: 'local', user_metadata: { user_name: 'Local Admin' } });
+        setIsAdmin(true);
+      }
       return;
     }
     await supabase.auth.signInWithOAuth({
