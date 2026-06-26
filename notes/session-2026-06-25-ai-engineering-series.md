@@ -77,6 +77,28 @@ back-catalog + ongoing daily drip", at the user's request.
 - Word-count verification uses a node script that counts quoted strings of 4+
   words (it slightly undercounts, so aim a bit over 1000).
 
+## Analytics / viewer tracking (added 2026-06-26)
+
+- Blog viewer tracking is wired end to end. A global `usePageTracking` hook
+  logs one `page_view` per route (incl. each `/blog/<slug>`); `BlogPostPage`
+  adds per-post `engagement` (scroll depth + time on page). Reader is the admin
+  dashboard at `/admin -> Analytics`.
+- Added the missing table migration `supabase/create_analytics_events.sql`
+  (RLS: anyone can INSERT, only authenticated admin can SELECT, so visitor data
+  is private). Removed a duplicate mismatched `pageview` insert in BlogPostPage.
+- `AdminAnalytics.jsx` now has a private **Blog posts** panel: title, views,
+  avg time, avg scroll (joins page_view counts with engagement averages).
+- Hardened admin auth: the `admin_local_dev` localStorage backdoor and the
+  "Enter Local Admin" login button are now gated behind `import.meta.env.DEV`,
+  so they are stripped from the production build. Live admin = GitHub OAuth +
+  `admin_users` row only. `/admin` is behind `ProtectedRoute`.
+- TWO manual steps the owner must do (no repo/CLI access for them here):
+  1. Run `supabase/create_analytics_events.sql` in the Supabase SQL editor.
+  2. Ensure `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY` exist in Vercel
+     (already set if blog comments work), then redeploy.
+- Dates now render as full day-level dates ("Jun 24, 2026") via `fullDate()` in
+  `blog.js`; blog list is sorted newest-first.
+
 ## Backlog
 
 - See `content/ideas.md` for remaining planned ideas, kept current as items
