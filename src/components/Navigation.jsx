@@ -13,7 +13,6 @@ const Navigation = () => {
     { to: '/', label: 'Home' },
     { to: '/about', label: 'About' },
     { to: '/projects', label: 'Projects' },
-    { to: '/demos', label: 'Demo' },
     { to: '/blog', label: 'Blog' },
     { to: '/contact', label: 'Contact' }
   ];

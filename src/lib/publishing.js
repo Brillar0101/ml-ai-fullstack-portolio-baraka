@@ -1,6 +1,6 @@
 // Date-gated drip publishing.
 //
-// Every blog post and demo carries a `publishAt` ISO date. The site only shows
+// Every blog post carries a `publishAt` ISO date. The site only shows
 // an item once that date has arrived, so content publishes itself one piece at a
 // time with no server, no cron, and no manual step. Spread the dates across the
 // year and everything is live by December 31 on its own.

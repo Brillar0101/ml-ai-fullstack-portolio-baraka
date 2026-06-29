@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import PythonLab from '../../components/labs/PythonLab';
 
 const PROBE = `import numpy as np
@@ -78,16 +77,6 @@ const SamplingPost = () => (
       adaptiveness is why top-p usually reads better than a fixed top-k.
     </p>
 
-    {/* 5. Do it */}
-    <h2>Feel it move</h2>
-    <p>
-      Numbers on a page only go so far. The interactive version of this post lets you drag all three
-      knobs and watch the probabilities reshape live, then sample from them and run the same NumPy in
-      your browser.
-    </p>
-    <p>
-      <Link to="/demos/sampling" className="blog-cta-link">Open the interactive lab →</Link>
-    </p>
 
     {/* 6. Takeaway */}
     <h2>What to remember</h2>

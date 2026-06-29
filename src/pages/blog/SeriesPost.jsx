@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import PythonLab from '../../components/labs/PythonLab';
 
 /**
@@ -14,7 +13,6 @@ import PythonLab from '../../components/labs/PythonLab';
  *   { type: 'ul', items: [string] }
  *   { type: 'terms', items: [{ term, def }] }
  *   { type: 'lab', code, packages?, height? }
- *   { type: 'demoLink', to, label }
  */
 // Render inline **bold** markers as <strong> so important terms stand out.
 function rich(text) {
@@ -40,12 +38,6 @@ function Block({ block }) {
       );
     case 'lab':
       return <PythonLab code={block.code} packages={block.packages || []} height={block.height || 300} />;
-    case 'demoLink':
-      return (
-        <p>
-          <Link to={block.to} className="blog-cta-link">{block.label || 'Open the interactive lab'} →</Link>
-        </p>
-      );
     default:
       return null;
   }
