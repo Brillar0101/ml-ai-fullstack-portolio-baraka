@@ -1,0 +1,49 @@
+/* ArchDiagram ("option B"): clean icon-based architecture diagram */
+
+.arch-diagram {
+  margin: 24px 0 28px;
+  text-align: center;
+}
+
+.arch-diagram svg {
+  width: 100%;
+  height: auto;
+  color: var(--text);
+  display: inline-block;
+}
+
+.arch-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.arch-node-label {
+  font-size: 14px;
+  fill: var(--text);
+}
+
+.arch-edge-label {
+  font-size: 12px;
+  font-weight: 700;
+  fill: var(--text);
+}
+
+.arch-group {
+  fill: var(--bg-secondary);
+}
+
+.arch-group-label {
+  font-size: 14px;
+  font-weight: 700;
+  fill: var(--text);
+}
+
+.arch-diagram figcaption {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.5;
+}

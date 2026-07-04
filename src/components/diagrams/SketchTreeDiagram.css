@@ -1,0 +1,41 @@
+/* SketchTreeDiagram ("option A"): hand-drawn pastel decision tree */
+
+.sketch-tree {
+  margin: 24px 0 28px;
+  text-align: center;
+}
+
+.sketch-tree svg {
+  width: 100%;
+  height: auto;
+  color: var(--text);
+  display: inline-block;
+}
+
+.sketch-tree-title {
+  font-family: 'Chalkboard SE', 'Comic Neue', 'Comic Sans MS', 'Segoe Print', cursive;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.sketch-node-text {
+  font-family: 'Chalkboard SE', 'Comic Neue', 'Comic Sans MS', 'Segoe Print', cursive;
+  font-size: 14px;
+  fill: #1c1c1c;
+}
+
+.sketch-edge-text {
+  font-family: 'Chalkboard SE', 'Comic Neue', 'Comic Sans MS', 'Segoe Print', cursive;
+  font-size: 13px;
+  fill: var(--text-secondary);
+}
+
+.sketch-tree figcaption {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.5;
+}

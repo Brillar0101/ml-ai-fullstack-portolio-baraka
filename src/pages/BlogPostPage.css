@@ -103,21 +103,88 @@
   hyphens: auto;
 }
 
-/* Defined-terms block in data-driven series posts */
+/* Defined-terms list in data-driven series posts: plain bullets, no box */
 .blog-post-content .series-terms {
-  border-left: 3px solid var(--primary);
-  background: var(--bg-secondary);
-  border-radius: var(--radius-md);
-  padding: 16px 18px 16px 22px;
+  list-style: disc;
+  padding: 0 0 0 22px;
   margin: 0 0 24px;
-  list-style: none;
 }
 .blog-post-content .series-terms li {
   margin-bottom: 8px;
   color: var(--text-secondary);
-  line-height: 1.55;
+  line-height: 1.6;
+}
+.blog-post-content .series-terms li::marker {
+  color: var(--primary);
 }
 .blog-post-content .series-terms li:last-child { margin-bottom: 0; }
+
+/* Static code walkthrough block in data-driven series posts */
+.blog-post-content .series-code {
+  margin: 16px 0 24px;
+}
+.blog-post-content .series-code figcaption {
+  font-family: 'Fira Code', monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  padding: 8px 16px;
+}
+.blog-post-content .series-code figcaption + pre {
+  margin-top: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+.blog-post-content .series-code pre { margin-bottom: 0; }
+
+/* Callout / key-idea aside in data-driven series posts */
+.blog-post-content .series-callout {
+  border-left: 3px solid var(--primary);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  margin: 16px 0 24px;
+}
+.blog-post-content .series-callout-title {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 15px;
+}
+.blog-post-content .series-callout p {
+  margin-bottom: 0;
+  font-size: 15px;
+}
+
+/* Sources & further reading section at the end of series posts */
+.blog-post-content .series-sources {
+  margin-top: 48px;
+  padding-top: 8px;
+}
+.blog-post-content .series-sources h2 {
+  font-size: 17px;
+  margin-top: 0;
+}
+.blog-post-content .series-sources ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.blog-post-content .series-sources li {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+.blog-post-content .series-sources .series-source-title {
+  color: var(--text);
+  font-weight: 600;
+}
+.blog-post-content .series-sources .series-source-note {
+  color: var(--text-muted);
+}
 
 .blog-post-content strong {
   color: var(--text);
