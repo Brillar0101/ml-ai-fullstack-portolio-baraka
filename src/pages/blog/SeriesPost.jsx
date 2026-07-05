@@ -4,6 +4,7 @@ import FlowDiagram from '../../components/diagrams/FlowDiagram';
 import SketchTreeDiagram from '../../components/diagrams/SketchTreeDiagram';
 import ArchDiagram from '../../components/diagrams/ArchDiagram';
 import BarChart from '../../components/diagrams/BarChart';
+import LineChart from '../../components/diagrams/LineChart';
 import Schematic from '../../components/diagrams/Schematic';
 
 /**
@@ -65,7 +66,7 @@ function Block({ block }) {
       }
       return <FlowDiagram nodes={block.nodes} rows={block.rows} caption={block.caption} />;
     case 'chart':
-      // Only bar charts so far; `kind` selects future chart renderers.
+      // `kind` selects the chart renderer.
       if (block.kind === 'bar') {
         return (
           <BarChart
@@ -77,6 +78,23 @@ function Block({ block }) {
             series={block.series}
             data={block.data}
             gapArrow={block.gapArrow}
+          />
+        );
+      }
+      if (block.kind === 'line') {
+        return (
+          <LineChart
+            title={block.title}
+            caption={block.caption}
+            xLabel={block.xLabel}
+            yLabel={block.yLabel}
+            yLabelRight={block.yLabelRight}
+            xMax={block.xMax}
+            yMax={block.yMax}
+            yMaxRight={block.yMaxRight}
+            series={block.series}
+            data={block.data}
+            regions={block.regions}
           />
         );
       }

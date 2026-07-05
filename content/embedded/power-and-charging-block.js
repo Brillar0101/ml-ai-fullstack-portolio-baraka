@@ -81,6 +81,25 @@ export const POST = {
       caption: 'Two one-way devices OR the sources into VSYS. Diodes are drawn here; swapping each for a P-FET ideal diode removes the forward-drop penalty.' },
     { type: 'h2', text: 'Scenario 4: run and charge at the same time' },
     { type: 'p', text: 'This is the real project, and the one that browns out. The device has a rechargeable lithium cell, and while USB is plugged in it must both charge the battery and keep running. First, charging itself: a lithium cell wants a specific ritual called **CC/CV**, constant current up to about 4.2 volts, then constant voltage while the current tapers off, and stopping at the right moment. A **linear charger IC** like the Microchip MCP73831 does this whole ritual in one small package, with the charge current set by a single resistor. So far so good. The trap is where you connect the load.' },
+    { type: 'chart', kind: 'line',
+      title: 'How a Li-ion cell charges: CC then CV',
+      xLabel: 'charge time →', yLabel: 'cell voltage (V)', yLabelRight: 'charge current (%)',
+      xMax: 100, yMax: 4.5, yMaxRight: 100,
+      series: [
+        { label: 'cell voltage', key: 'v', axis: 'left' },
+        { label: 'charge current', key: 'i', axis: 'right', dashed: true },
+      ],
+      data: [
+        { x: 0, values: { v: 3.4, i: 100 } }, { x: 10, values: { v: 3.62, i: 100 } }, { x: 20, values: { v: 3.78, i: 100 } },
+        { x: 30, values: { v: 3.92, i: 100 } }, { x: 40, values: { v: 4.04, i: 100 } }, { x: 50, values: { v: 4.15, i: 100 } },
+        { x: 55, values: { v: 4.2, i: 100 } }, { x: 62, values: { v: 4.2, i: 78 } }, { x: 70, values: { v: 4.2, i: 52 } },
+        { x: 80, values: { v: 4.2, i: 32 } }, { x: 90, values: { v: 4.2, i: 18 } }, { x: 100, values: { v: 4.2, i: 10 } },
+      ],
+      regions: [
+        { from: 0, to: 55, label: 'Constant current (CC)' },
+        { from: 55, to: 100, label: 'Constant voltage (CV)' },
+      ],
+      caption: 'The CC/CV ritual: voltage climbs at a fixed current until 4.2V, then holds at 4.2V while current tapers to a termination threshold. A charger IC runs this whole curve for you.' },
     { type: 'p', text: 'The intuitive wiring, the one that browns out, hangs the load off the battery terminal and lets the charger feed the same terminal. Now the charger is trying to push a controlled current into the cell while the load is pulling its own current out of that same node. The charger sees the load\'s draw as if the battery were still hungry, so it may never detect a full charge and never terminate, and if the load is heavy and the charger small, the load simply wins and the battery drains even with the cable plugged in. The fix has a name: **load sharing**, sometimes called power-path management. You route USB power to a **system node** that feeds the load directly, and let the charger sip whatever current is left over to fill the battery. The load runs from the wall; the battery charges in parallel; the two are no longer fighting over one wire.' },
     { type: 'diagram', nodes: [
       { label: 'USB 5V', detail: 'the only source when plugged' },
