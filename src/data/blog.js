@@ -1,6 +1,8 @@
 import { SERIES_POSTS } from './seriesPosts';
+import { EMBEDDED_POSTS } from './embeddedPosts';
 
 const GRAD = 'linear-gradient(120deg, #0068FF 0%, #3539F4 48%, #BD03F7 100%)';
+const EMBEDDED_GRAD = 'linear-gradient(120deg, #3539F4 0%, #0068FF 50%, #BD03F7 100%)';
 
 // Turn a data-driven series post into blog-list metadata (strips the body).
 // Full day-level date, e.g. "Jun 24, 2026".
@@ -28,6 +30,22 @@ const seriesMeta = SERIES_POSTS.map((p) => ({
   seriesNum: p.seriesNum,
   route: `/blog/${p.id}`,
   coverGradient: GRAD,
+  publishAt: p.publishAt,
+  draft: p.draft,
+}));
+
+const embeddedMeta = EMBEDDED_POSTS.map((p) => ({
+  id: p.id,
+  title: p.title,
+  excerpt: p.excerpt,
+  category: p.category || 'Hardware',
+  date: fullDate(p.publishAt),
+  readTime: p.readTime || '5 min read',
+  tags: p.tags || [],
+  series: p.series || 'Embedded Systems Series',
+  seriesNum: p.seriesNum,
+  route: `/blog/${p.id}`,
+  coverGradient: EMBEDDED_GRAD,
   publishAt: p.publishAt,
   draft: p.draft,
 }));
@@ -66,4 +84,4 @@ const CORE_POSTS = [
 
 // Public list = hand-built posts + the data-driven series posts, newest first.
 const sortKey = (p) => new Date(p.publishAt || 0).getTime();
-export const BLOG_POSTS = [...CORE_POSTS, ...seriesMeta].sort((a, b) => sortKey(b) - sortKey(a));
+export const BLOG_POSTS = [...CORE_POSTS, ...seriesMeta, ...embeddedMeta].sort((a, b) => sortKey(b) - sortKey(a));

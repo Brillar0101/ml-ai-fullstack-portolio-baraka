@@ -3,6 +3,7 @@ import { Link, useParams, Navigate } from 'react-router-dom';
 import { ChevronLeft, ArrowRight, Clock, Calendar, Send, User } from 'lucide-react';
 import { BLOG_POSTS } from '../data/blog';
 import { SERIES_POSTS } from '../data/seriesPosts';
+import { EMBEDDED_POSTS } from '../data/embeddedPosts';
 import { isPublished } from '../lib/publishing';
 import SeriesPost from './blog/SeriesPost';
 import { supabase } from '../lib/supabase';
@@ -186,7 +187,7 @@ const BlogPostPage = () => {
   if (!post || !isPublished(post)) return <Navigate to="/blog" replace />;
 
   const PostContent = postComponents[slug];
-  const seriesPost = SERIES_POSTS.find(p => p.id === slug);
+  const seriesPost = SERIES_POSTS.find(p => p.id === slug) || EMBEDDED_POSTS.find(p => p.id === slug);
   // Keep the sidebar short so it never makes the page taller than the article.
   const relatedPosts = BLOG_POSTS.filter(p => p.id !== slug).slice(0, 4);
 
