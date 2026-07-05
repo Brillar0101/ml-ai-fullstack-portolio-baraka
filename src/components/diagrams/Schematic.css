@@ -1,0 +1,86 @@
+/* Schematic: original circuit diagrams in the site brand palette */
+
+.schematic {
+  margin: 24px 0 28px;
+  text-align: center;
+}
+
+.schematic svg {
+  width: 100%;
+  height: auto;
+  display: inline-block;
+}
+
+.schematic-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.schematic .sch-wire {
+  stroke: var(--text);
+  stroke-width: 1.6;
+  fill: none;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.schematic .sch-body {
+  stroke: var(--text);
+  stroke-width: 1.8;
+  fill: none;
+}
+
+.schematic .sch-body-fill {
+  stroke: var(--text);
+  stroke-width: 1.6;
+  fill: var(--bg);
+}
+
+.schematic .sch-node {
+  fill: var(--primary);
+}
+
+.schematic .sch-box {
+  fill: var(--bg-secondary);
+  stroke: var(--primary);
+  stroke-width: 1.8;
+}
+
+.schematic .sch-box-label {
+  font-size: 12px;
+  font-weight: 600;
+  fill: var(--text);
+}
+
+.schematic .sch-box-label,
+.schematic .sch-label,
+.schematic .sch-rail,
+.schematic .sch-pin {
+  font-family: var(--font-sans, system-ui, sans-serif);
+}
+
+.schematic .sch-label {
+  font-size: 11px;
+  fill: var(--text-secondary);
+}
+
+.schematic .sch-rail {
+  font-size: 12px;
+  font-weight: 700;
+  fill: var(--primary);
+}
+
+.schematic .sch-pin {
+  font-size: 9px;
+  fill: var(--text-muted);
+}
+
+.schematic figcaption {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.5;
+}

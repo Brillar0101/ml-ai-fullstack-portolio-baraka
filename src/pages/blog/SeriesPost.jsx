@@ -3,6 +3,8 @@ import PythonLab from '../../components/labs/PythonLab';
 import FlowDiagram from '../../components/diagrams/FlowDiagram';
 import SketchTreeDiagram from '../../components/diagrams/SketchTreeDiagram';
 import ArchDiagram from '../../components/diagrams/ArchDiagram';
+import BarChart from '../../components/diagrams/BarChart';
+import Schematic from '../../components/diagrams/Schematic';
 
 /**
  * Generic renderer for data-driven series blog posts. A post's `body` is an
@@ -62,6 +64,25 @@ function Block({ block }) {
         return <ArchDiagram title={block.title} caption={block.caption} nodes={block.nodes} edges={block.edges} groups={block.groups} />;
       }
       return <FlowDiagram nodes={block.nodes} rows={block.rows} caption={block.caption} />;
+    case 'chart':
+      // Only bar charts so far; `kind` selects future chart renderers.
+      if (block.kind === 'bar') {
+        return (
+          <BarChart
+            title={block.title}
+            caption={block.caption}
+            yLabel={block.yLabel}
+            stacked={block.stacked}
+            valueLabels={block.valueLabels}
+            series={block.series}
+            data={block.data}
+            gapArrow={block.gapArrow}
+          />
+        );
+      }
+      return null;
+    case 'schematic':
+      return <Schematic title={block.title} caption={block.caption} parts={block.parts} wires={block.wires} />;
     case 'callout':
       return (
         <aside className="series-callout">

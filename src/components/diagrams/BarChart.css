@@ -1,0 +1,94 @@
+/* BarChart: data-driven comparison bars in the site brand palette */
+
+.bar-chart {
+  margin: 24px 0 28px;
+  text-align: center;
+}
+
+.bar-chart svg {
+  width: 100%;
+  height: auto;
+  color: var(--primary);
+  display: inline-block;
+}
+
+.bar-chart-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.bar-chart .bc-grid {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.bar-chart .bc-axis {
+  stroke: var(--text-muted);
+  stroke-width: 1.5;
+}
+
+.bar-chart .bc-tick {
+  font-size: 11px;
+  fill: var(--text-muted);
+}
+
+.bar-chart .bc-cat {
+  font-size: 12px;
+  font-weight: 600;
+  fill: var(--text);
+}
+
+.bar-chart .bc-value {
+  font-size: 11px;
+  font-weight: 700;
+  fill: var(--text);
+}
+
+.bar-chart .bc-axis-label {
+  font-size: 12px;
+  fill: var(--text-secondary);
+}
+
+.bar-chart .bc-gap line {
+  stroke: var(--text);
+  stroke-width: 1.5;
+}
+
+.bar-chart .bc-gap text {
+  font-size: 13px;
+  font-weight: 700;
+  fill: var(--text);
+}
+
+.bar-chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 18px;
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.bar-chart .bc-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bar-chart .bc-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+.bar-chart figcaption {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.5;
+}
