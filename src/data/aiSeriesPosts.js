@@ -30,6 +30,10 @@ import { POST as whyDeployment } from '../../content/ai-series/why-llm-deploymen
 import { POST as vllmBatching } from '../../content/ai-series/vllm-continuous-batching.js';
 import { POST as servingFrameworks } from '../../content/ai-series/serving-frameworks-compared.js';
 import { POST as autoscaling } from '../../content/ai-series/autoscaling-cold-starts.js';
+import { POST as evalVsObs } from '../../content/ai-series/evaluation-vs-observability.js';
+import { POST as tracing } from '../../content/ai-series/tracing-llm-requests.js';
+import { POST as whatToLog } from '../../content/ai-series/what-to-log-and-alert.js';
+import { POST as costObs } from '../../content/ai-series/cost-token-observability.js';
 
 const SERIES = 'AI Engineering Series';
 
@@ -62,6 +66,10 @@ const SCHEDULE = [
   [vllmBatching, '2026-09-09', 64, 'LLM Deployment'],
   [servingFrameworks, '2026-09-11', 65, 'LLM Deployment'],
   [autoscaling, '2026-09-14', 66, 'LLM Deployment'],
+  [evalVsObs, '2026-09-16', 67, 'LLM Observability'],
+  [tracing, '2026-09-19', 68, 'LLM Observability'],
+  [whatToLog, '2026-09-21', 69, 'LLM Observability'],
+  [costObs, '2026-09-24', 70, 'LLM Observability'],
 ];
 
 export const AI_SERIES_POSTS = SCHEDULE.map(([post, publishAt, seriesNum, chapter]) => ({
