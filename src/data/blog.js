@@ -1,5 +1,6 @@
 import { SERIES_POSTS } from './seriesPosts';
 import { EMBEDDED_POSTS } from './embeddedPosts';
+import { BLOG_COVERS } from './blogCovers';
 
 const GRAD = 'linear-gradient(120deg, #0068FF 0%, #3539F4 48%, #BD03F7 100%)';
 const EMBEDDED_GRAD = 'linear-gradient(120deg, #3539F4 0%, #0068FF 50%, #BD03F7 100%)';
@@ -85,4 +86,6 @@ const CORE_POSTS = [
 
 // Public list = hand-built posts + the data-driven series posts, newest first.
 const sortKey = (p) => new Date(p.publishAt || 0).getTime();
-export const BLOG_POSTS = [...CORE_POSTS, ...seriesMeta, ...embeddedMeta].sort((a, b) => sortKey(b) - sortKey(a));
+export const BLOG_POSTS = [...CORE_POSTS, ...seriesMeta, ...embeddedMeta]
+  .map((p) => ({ ...p, coverImage: p.coverImage || BLOG_COVERS[p.id] || null }))
+  .sort((a, b) => sortKey(b) - sortKey(a));

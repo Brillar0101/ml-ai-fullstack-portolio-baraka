@@ -31,6 +31,9 @@ const BlogPage = () => {
               const CardBody = (
                 <>
                   <div className="blog-card-cover" style={{ background: post.coverGradient }}>
+                    {post.coverImage && (
+                      <img src={post.coverImage} alt="" className="blog-card-cover-img" loading="lazy" />
+                    )}
                     {post.comingSoon && <span className="blog-card-coming-soon">Coming soon</span>}
                     <div className="blog-card-cover-content">
                       <span className="blog-card-series">{post.series}</span>

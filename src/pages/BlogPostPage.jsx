@@ -196,6 +196,7 @@ const BlogPostPage = () => {
     <div className="blog-post-page container">
       {/* Hero */}
       <div className="blog-post-hero" style={{ background: post.coverGradient }}>
+        {post.coverImage && <img src={post.coverImage} alt="" className="blog-post-hero-img" />}
         <div className="blog-post-hero-overlay" />
         <div className="blog-post-hero-content">
           <div className="blog-post-category">{post.category}</div>

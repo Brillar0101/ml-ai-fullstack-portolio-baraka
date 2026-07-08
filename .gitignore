@@ -44,3 +44,6 @@ nul
 
 # Local reference only — do not publish copyrighted book
 book/
+
+# Full-res blog cover originals (local only; web copies live in public/blog-covers/)
+blog-cover-originals/
