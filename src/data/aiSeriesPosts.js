@@ -34,6 +34,11 @@ import { POST as evalVsObs } from '../../content/ai-series/evaluation-vs-observa
 import { POST as tracing } from '../../content/ai-series/tracing-llm-requests.js';
 import { POST as whatToLog } from '../../content/ai-series/what-to-log-and-alert.js';
 import { POST as costObs } from '../../content/ai-series/cost-token-observability.js';
+import { POST as mixtureOfExperts } from '../../content/ai-series/mixture-of-experts.js';
+import { POST as runningLocally } from '../../content/ai-series/running-llms-locally.js';
+import { POST as finetuningDataset } from '../../content/ai-series/build-finetuning-dataset.js';
+import { POST as grpoReasoning } from '../../content/ai-series/grpo-rl-for-reasoning.js';
+import { POST as trainingFromScratch } from '../../content/ai-series/training-llm-from-scratch.js';
 
 const SERIES = 'AI Engineering Series';
 
@@ -70,6 +75,11 @@ const SCHEDULE = [
   [tracing, '2026-09-19', 68, 'LLM Observability'],
   [whatToLog, '2026-09-21', 69, 'LLM Observability'],
   [costObs, '2026-09-24', 70, 'LLM Observability'],
+  [mixtureOfExperts, '2026-09-26', 71, 'LLM Fundamentals'],
+  [runningLocally, '2026-09-29', 72, 'LLM Fundamentals'],
+  [finetuningDataset, '2026-10-01', 73, 'LLM Fundamentals'],
+  [grpoReasoning, '2026-10-04', 74, 'LLM Fundamentals'],
+  [trainingFromScratch, '2026-10-06', 75, 'LLM Fundamentals'],
 ];
 
 export const AI_SERIES_POSTS = SCHEDULE.map(([post, publishAt, seriesNum, chapter]) => ({
