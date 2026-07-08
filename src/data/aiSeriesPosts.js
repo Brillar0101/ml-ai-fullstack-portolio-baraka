@@ -26,6 +26,10 @@ import { POST as hyde } from '../../content/ai-series/hyde.js';
 import { POST as cagVsRag } from '../../content/ai-series/cag-vs-rag.js';
 import { POST as reranking } from '../../content/ai-series/reranking.js';
 import { POST as ragEvaluation } from '../../content/ai-series/rag-evaluation.js';
+import { POST as whyDeployment } from '../../content/ai-series/why-llm-deployment-is-different.js';
+import { POST as vllmBatching } from '../../content/ai-series/vllm-continuous-batching.js';
+import { POST as servingFrameworks } from '../../content/ai-series/serving-frameworks-compared.js';
+import { POST as autoscaling } from '../../content/ai-series/autoscaling-cold-starts.js';
 
 const SERIES = 'AI Engineering Series';
 
@@ -54,6 +58,10 @@ const SCHEDULE = [
   [cagVsRag, '2026-08-30', 60, 'RAG Variants'],
   [reranking, '2026-09-01', 61, 'RAG Variants'],
   [ragEvaluation, '2026-09-04', 62, 'RAG Variants'],
+  [whyDeployment, '2026-09-06', 63, 'LLM Deployment'],
+  [vllmBatching, '2026-09-09', 64, 'LLM Deployment'],
+  [servingFrameworks, '2026-09-11', 65, 'LLM Deployment'],
+  [autoscaling, '2026-09-14', 66, 'LLM Deployment'],
 ];
 
 export const AI_SERIES_POSTS = SCHEDULE.map(([post, publishAt, seriesNum, chapter]) => ({
