@@ -13,7 +13,7 @@ const BlogPage = () => {
       {/* Hero Banner */}
       <div className="blog-hero">
         <div className="blog-hero-bg" />
-        <div className="blog-hero-content">
+        <div className="blog-hero-content container">
           <p className="blog-hero-eyebrow">ABOUT</p>
           <h1 className="blog-hero-title">Blog</h1>
           <p className="blog-hero-desc">

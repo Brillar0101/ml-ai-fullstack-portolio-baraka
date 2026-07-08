@@ -24,9 +24,8 @@
 .blog-hero-content {
   position: relative;
   z-index: 1;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 var(--space-xl);
+  /* width, margin, and padding come from .container so the hero text lines up
+     exactly with the cards grid at every screen size. */
 }
 
 .blog-hero-eyebrow {
@@ -49,14 +48,12 @@
 .blog-hero-desc {
   font-size: 16px;
   color: rgba(255, 255, 255, 0.75);
-  max-width: 480px;
   line-height: 1.6;
+  /* No max-width: the line runs the full content width and only wraps at the
+     right edge of the last card. */
 }
 
-/* ---- Cards Grid ---- */
-.blog-cards-section {
-  max-width: 1200px;
-}
+/* ---- Cards Grid ---- (width governed by the shared .container) */
 
 .blog-cards-grid {
   display: grid;
@@ -268,19 +265,8 @@
   }
 }
 
-/* Large monitors: widen the blog to match the site container, more columns. */
-@media (min-width: 1440px) {
-  .blog-hero-content,
-  .blog-cards-section { max-width: 1440px; }
-}
-
+/* Large monitors: hero and cards share .container width; add a 4th column so
+   cards do not become oversized on very wide screens. */
 @media (min-width: 1920px) {
-  .blog-hero-content,
-  .blog-cards-section { max-width: 1680px; }
   .blog-cards-grid { grid-template-columns: repeat(4, 1fr); }
-}
-
-@media (min-width: 2560px) {
-  .blog-hero-content,
-  .blog-cards-section { max-width: 1880px; }
 }
