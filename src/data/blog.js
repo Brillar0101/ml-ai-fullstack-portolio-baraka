@@ -1,5 +1,6 @@
 import { SERIES_POSTS } from './seriesPosts';
 import { EMBEDDED_POSTS } from './embeddedPosts';
+import { AI_SERIES_POSTS } from './aiSeriesPosts';
 import { BLOG_COVERS } from './blogCovers';
 
 const GRAD = 'linear-gradient(120deg, #0068FF 0%, #3539F4 48%, #BD03F7 100%)';
@@ -52,6 +53,22 @@ const embeddedMeta = EMBEDDED_POSTS.map((p) => ({
   comingSoon: p.comingSoon,
 }));
 
+const aiSeriesMeta = AI_SERIES_POSTS.map((p) => ({
+  id: p.id,
+  title: p.title,
+  excerpt: p.excerpt,
+  category: p.category || 'AI',
+  date: fullDate(p.publishAt),
+  readTime: p.readTime || '8 min read',
+  tags: p.tags || [],
+  series: 'AI Engineering Series',
+  seriesNum: p.seriesNum,
+  route: `/blog/${p.id}`,
+  coverGradient: GRAD,
+  publishAt: p.publishAt,
+  draft: p.draft,
+}));
+
 const CORE_POSTS = [
   {
     id: 'your-first-ai-agent',
@@ -86,6 +103,6 @@ const CORE_POSTS = [
 
 // Public list = hand-built posts + the data-driven series posts, newest first.
 const sortKey = (p) => new Date(p.publishAt || 0).getTime();
-export const BLOG_POSTS = [...CORE_POSTS, ...seriesMeta, ...embeddedMeta]
+export const BLOG_POSTS = [...CORE_POSTS, ...seriesMeta, ...embeddedMeta, ...aiSeriesMeta]
   .map((p) => ({ ...p, coverImage: p.coverImage || BLOG_COVERS[p.id] || null }))
   .sort((a, b) => sortKey(b) - sortKey(a));

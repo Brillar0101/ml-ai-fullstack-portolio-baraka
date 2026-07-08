@@ -4,6 +4,7 @@ import { ChevronLeft, ArrowRight, Clock, Calendar, Send, User } from 'lucide-rea
 import { BLOG_POSTS } from '../data/blog';
 import { SERIES_POSTS } from '../data/seriesPosts';
 import { EMBEDDED_POSTS } from '../data/embeddedPosts';
+import { AI_SERIES_POSTS } from '../data/aiSeriesPosts';
 import { isPublished } from '../lib/publishing';
 import SeriesPost from './blog/SeriesPost';
 import { supabase } from '../lib/supabase';
@@ -188,7 +189,7 @@ const BlogPostPage = () => {
   if (!post || !isPublished(post) || post.comingSoon) return <Navigate to="/blog" replace />;
 
   const PostContent = postComponents[slug];
-  const seriesPost = SERIES_POSTS.find(p => p.id === slug) || EMBEDDED_POSTS.find(p => p.id === slug);
+  const seriesPost = SERIES_POSTS.find(p => p.id === slug) || EMBEDDED_POSTS.find(p => p.id === slug) || AI_SERIES_POSTS.find(p => p.id === slug);
   // Keep the sidebar short so it never makes the page taller than the article.
   const relatedPosts = BLOG_POSTS.filter(p => p.id !== slug).slice(0, 4);
 
