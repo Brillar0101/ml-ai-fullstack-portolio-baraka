@@ -391,8 +391,21 @@ a:hover {
 
 @media (min-width: 1440px) {
   .container {
-    max-width: 1400px;
+    max-width: 1440px;
     padding: 0 var(--space-2xl);
+  }
+}
+
+/* Large monitors: use more of the screen instead of huge side margins. */
+@media (min-width: 1920px) {
+  .container {
+    max-width: 1680px;
+  }
+}
+
+@media (min-width: 2560px) {
+  .container {
+    max-width: 1880px;
   }
 }
 
