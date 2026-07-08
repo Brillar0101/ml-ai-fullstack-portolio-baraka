@@ -14,6 +14,12 @@ import { POST as mcpArchitecture } from '../../content/ai-series/mcp-architectur
 import { POST as mcpPrimitives } from '../../content/ai-series/mcp-primitives.js';
 import { POST as mcpToolOverload } from '../../content/ai-series/mcp-tool-overload.js';
 import { POST as buildMcpServer } from '../../content/ai-series/build-an-mcp-server.js';
+import { POST as agentLevels } from '../../content/ai-series/levels-of-agentic-autonomy.js';
+import { POST as singleVsMulti } from '../../content/ai-series/single-vs-multi-agent.js';
+import { POST as multiAgentOrchestration } from '../../content/ai-series/multi-agent-orchestration.js';
+import { POST as a2aProtocol } from '../../content/ai-series/a2a-protocol.js';
+import { POST as agentDeployment } from '../../content/ai-series/agent-deployment.js';
+import { POST as agentFlywheel } from '../../content/ai-series/agent-improvement-flywheel.js';
 
 const SERIES = 'AI Engineering Series';
 
@@ -30,6 +36,12 @@ const SCHEDULE = [
   [mcpPrimitives, '2026-07-31', 48, 'MCP'],
   [mcpToolOverload, '2026-08-02', 49, 'MCP'],
   [buildMcpServer, '2026-08-05', 50, 'MCP'],
+  [agentLevels, '2026-08-07', 51, 'Advanced Agents'],
+  [singleVsMulti, '2026-08-10', 52, 'Advanced Agents'],
+  [multiAgentOrchestration, '2026-08-12', 53, 'Advanced Agents'],
+  [a2aProtocol, '2026-08-15', 54, 'Advanced Agents'],
+  [agentDeployment, '2026-08-17', 55, 'Advanced Agents'],
+  [agentFlywheel, '2026-08-20', 56, 'Advanced Agents'],
 ];
 
 export const AI_SERIES_POSTS = SCHEDULE.map(([post, publishAt, seriesNum, chapter]) => ({
