@@ -48,6 +48,7 @@ const embeddedMeta = EMBEDDED_POSTS.map((p) => ({
   coverGradient: EMBEDDED_GRAD,
   publishAt: p.publishAt,
   draft: p.draft,
+  comingSoon: p.comingSoon,
 }));
 
 const CORE_POSTS = [

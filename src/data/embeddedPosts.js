@@ -6,5 +6,5 @@ import { POST as POWER_AND_CHARGING } from '../../content/embedded/power-and-cha
 const SERIES = 'Embedded Systems Series';
 
 export const EMBEDDED_POSTS = [
-  { ...POWER_AND_CHARGING, series: SERIES, seriesNum: 1, chapter: 'Chapter 1' },
+  { ...POWER_AND_CHARGING, series: SERIES, seriesNum: 1, chapter: 'Chapter 1', comingSoon: true },
 ];

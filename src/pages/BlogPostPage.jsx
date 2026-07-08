@@ -183,8 +183,9 @@ const BlogPostPage = () => {
   const post = BLOG_POSTS.find(p => p.id === slug);
   useAnalytics(slug);
 
-  // A post is either out or it is not. Hide anything not yet published.
-  if (!post || !isPublished(post)) return <Navigate to="/blog" replace />;
+  // A post is either out or it is not. Hide anything not yet published or
+  // explicitly marked coming soon.
+  if (!post || !isPublished(post) || post.comingSoon) return <Navigate to="/blog" replace />;
 
   const PostContent = postComponents[slug];
   const seriesPost = SERIES_POSTS.find(p => p.id === slug) || EMBEDDED_POSTS.find(p => p.id === slug);
