@@ -31,7 +31,7 @@ const ProjectsPage = () => {
       {/* Hero Banner */}
       <div className="projects-hero">
         <div className="projects-hero-bg" />
-        <div className="projects-hero-content">
+        <div className="projects-hero-content container">
           <p className="projects-hero-eyebrow">PORTFOLIO</p>
           <h1 className="projects-hero-title">Projects</h1>
           <p className="projects-hero-desc">

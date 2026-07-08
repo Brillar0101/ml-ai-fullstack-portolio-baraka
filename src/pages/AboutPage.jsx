@@ -103,7 +103,7 @@ const AboutPage = () => {
       {/* Hero Bio — Micron style */}
       <div className="about-hero">
         <div className="about-hero-bg" />
-        <div className="about-hero-content">
+        <div className="about-hero-content container">
           <div className="about-hero-photo">
             <img
               src="/assets/images/profile.jpg"
