@@ -240,7 +240,9 @@ const BlogPostPage = () => {
               <div className="sidebar-posts">
                 {relatedPosts.map(rp => (
                   <Link to={rp.route} key={rp.id} className="sidebar-card">
-                    <div className="sidebar-card-cover" style={{ background: rp.coverGradient }} />
+                    <div className="sidebar-card-cover" style={{ background: rp.coverGradient }}>
+                      {rp.coverImage && <img src={rp.coverImage} alt="" className="sidebar-card-cover-img" loading="lazy" />}
+                    </div>
                     <div className="sidebar-card-body">
                       <div className="sidebar-card-category">{rp.category}</div>
                       <div className="sidebar-card-title">{rp.title}</div>
