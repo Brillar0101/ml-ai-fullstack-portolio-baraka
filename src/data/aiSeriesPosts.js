@@ -20,6 +20,12 @@ import { POST as multiAgentOrchestration } from '../../content/ai-series/multi-a
 import { POST as a2aProtocol } from '../../content/ai-series/a2a-protocol.js';
 import { POST as agentDeployment } from '../../content/ai-series/agent-deployment.js';
 import { POST as agentFlywheel } from '../../content/ai-series/agent-improvement-flywheel.js';
+import { POST as vectorDatabases } from '../../content/ai-series/vector-databases-explained.js';
+import { POST as agenticRag } from '../../content/ai-series/agentic-rag.js';
+import { POST as hyde } from '../../content/ai-series/hyde.js';
+import { POST as cagVsRag } from '../../content/ai-series/cag-vs-rag.js';
+import { POST as reranking } from '../../content/ai-series/reranking.js';
+import { POST as ragEvaluation } from '../../content/ai-series/rag-evaluation.js';
 
 const SERIES = 'AI Engineering Series';
 
@@ -42,6 +48,12 @@ const SCHEDULE = [
   [a2aProtocol, '2026-08-15', 54, 'Advanced Agents'],
   [agentDeployment, '2026-08-17', 55, 'Advanced Agents'],
   [agentFlywheel, '2026-08-20', 56, 'Advanced Agents'],
+  [vectorDatabases, '2026-08-22', 57, 'RAG Variants'],
+  [agenticRag, '2026-08-25', 58, 'RAG Variants'],
+  [hyde, '2026-08-27', 59, 'RAG Variants'],
+  [cagVsRag, '2026-08-30', 60, 'RAG Variants'],
+  [reranking, '2026-09-01', 61, 'RAG Variants'],
+  [ragEvaluation, '2026-09-04', 62, 'RAG Variants'],
 ];
 
 export const AI_SERIES_POSTS = SCHEDULE.map(([post, publishAt, seriesNum, chapter]) => ({
