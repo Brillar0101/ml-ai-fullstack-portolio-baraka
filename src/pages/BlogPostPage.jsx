@@ -191,7 +191,9 @@ const BlogPostPage = () => {
   const PostContent = postComponents[slug];
   const seriesPost = SERIES_POSTS.find(p => p.id === slug) || EMBEDDED_POSTS.find(p => p.id === slug) || AI_SERIES_POSTS.find(p => p.id === slug);
   // Keep the sidebar short so it never makes the page taller than the article.
-  const relatedPosts = BLOG_POSTS.filter(p => p.id !== slug).slice(0, 4);
+  const relatedPosts = BLOG_POSTS
+    .filter(p => p.id !== slug && isPublished(p) && !p.comingSoon)
+    .slice(0, 4);
 
   return (
     <div className="blog-post-page container">
