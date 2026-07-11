@@ -103,6 +103,31 @@ research is not lost.
 
 ---
 
+## Context rot & long-context tests (runnable demos, with sources)
+
+From Chroma's "Context Rot" research (Kelly Hong): a big context window does NOT mean
+reliable performance at that length; models degrade with input length even on tasks they
+ace when short. Each test below is reproducible locally on `llama3.1:8b` via Ollama, to give
+the context-rot and context-budgeting posts their own real before/after evidence (then shown
+as a curve or interactive demo).
+Sources: Chroma "Context Rot" report, https://research.trychroma.com ; video,
+https://www.youtube.com/watch?v=TUjQuC4ugak ; U-shaped basis, Liu et al. 2023, arXiv:2307.03172
+("Lost in the Middle").
+
+- **The "just copy this" stress test** **[DEMO]** — repeat one word N times with a single
+  unique word inserted; ask the model to reproduce the list exactly; score by edit distance.
+  Sweep N from ~50 to ~2000 and watch a trivial task break down with length. Cover keyword: `echo`.
+- **Needle-in-a-haystack: depth + ambiguity** **[DEMO]** — insert one fact at 0/25/50/75/100%
+  depth in long filler text; run an exact-match needle vs a paraphrased one; sweep length; plot
+  the U-shaped curve that worsens with ambiguity and length. Cover keyword: `needle`.
+- **Distractor test** **[DEMO]** — add a topically-similar-but-wrong sentence near the needle;
+  measure how disambiguation collapses as input grows, though the task never changes. Cover keyword: `lookalike`.
+- **Condensed vs full context** **[DEMO]** — bury a fact in a long synthetic chat history;
+  compare the full history against only the relevant snippet, and show the condensed version
+  scoring higher. The core evidence for context budgeting. Cover keyword: `condense`.
+
+---
+
 ## Priority order (suggested)
 
 1. Finish the 3 stubbed demos: tokenization, embeddings-search, quantization.
