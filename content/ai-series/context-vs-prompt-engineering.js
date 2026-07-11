@@ -61,6 +61,12 @@ export const POST = {
       text: 'It helps to picture the window as a stack of layers, each competing for the same fixed space. When people say an agent "has a big context window," they often imagine one open field of instructions. In reality it is shared real estate, and every layer you add takes tokens away from the others.',
     },
     {
+      type: 'image',
+      src: '/blog-images/context/context-window.png',
+      alt: 'What fills a context window: six system-internal layers on the left (system prompt, tools and MCP, knowledge base and RAG, skills, memory, guard rails) and two user-visible layers on the right (conversation, user prompt).',
+      caption: 'What fills a context window. The left group is context the system assembles on your behalf; the right group is what the user actually sees and types. Prompt engineering only touches the right side. Context engineering owns the whole picture.',
+    },
+    {
       type: 'diagram',
       rows: [
         [{ label: 'System prompt', detail: 'role, rules, tone; written once' }],
@@ -81,43 +87,8 @@ export const POST = {
       text: 'A bigger window does not rescue you here, and it is worth being blunt about why. Suppose you swap in a model with four times the context length. The stale tracking blob still sits in the history, the two irrelevant policy chunks still get retrieved, and the important sentence still lands in the middle where the model reads worst. You have not removed any noise. You have just given the noise more room to spread out, and you are paying for every token of it on every turn. Space buys you time before the window overflows. It does nothing about relevance, and relevance is what decides the answer.',
     },
     {
-      type: 'h2',
-      text: 'Assembling Context on Purpose With a Budget',
-    },
-    {
       type: 'p',
-      text: 'The fix is to stop letting the window fill itself and start assembling it deliberately. Before each model call, you decide what to include, you trim what you do not need, and you enforce a token budget so no single source can eat the whole space. Here is a stripped down version of that assembly step. It is not a framework, just the shape of the idea.',
-    },
-    {
-      type: 'code',
-      lang: 'python',
-      title: 'assemble_context.py',
-      code: `def assemble_context(system, tools, memory, retrieved, history, user_msg,
-                     budget=8000):
-    # Order matters: put durable, high-value layers first,
-    # keep the user's actual question last where the model reads best.
-    layers = [
-        ("system", system),
-        ("tools", tools),
-        ("memory", memory),
-        ("retrieved", rank_and_trim(retrieved, keep=2)),  # drop noisy chunks
-        ("history", summarize_old_turns(history)),         # compress the past
-    ]
-
-    used = count_tokens(user_msg)
-    packed = []
-    for name, text in layers:
-        cost = count_tokens(text)
-        if used + cost > budget:
-            text = truncate_to(text, budget - used)  # spend what remains
-        packed.append(text)
-        used += count_tokens(text)
-
-    return "\\n\\n".join(packed) + "\\n\\n" + user_msg`,
-    },
-    {
-      type: 'p',
-      text: 'Three moves in that snippet do the real work. First, retrieval is ranked and trimmed to the two chunks that matter instead of dumping five. Second, old turns are summarized rather than carried word for word, so a long conversation stops crowding out the present. Third, the user message is appended last, in the end zone where the model reads most reliably. None of this is clever prompting. It is inventory management for a small shelf.',
+      text: 'So the real lever is neither a longer window nor a more clever prompt. It is deciding, on purpose, what goes into the window on each call and what stays out. That discipline is context engineering, and it is a different job from prompt engineering. Prompt engineering perfects the one instruction you write. Context engineering curates everything the model reads around that instruction: the system prompt, the tools, the retrieved passages, the memory, the history. The mechanics of trimming and summarizing to fit a token budget are their own topic, but the mindset is the point here. Stop treating the window as something that fills itself, and start treating it as something you assemble, where every token earns its place. Once you see the window as a budget you own rather than a bucket that overflows, most of the reliability problems in the support agent stop being mysteries and become choices.',
     },
     {
       type: 'callout',

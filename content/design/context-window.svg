@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 1160 1150">
+  <!-- Generator: Adobe Illustrator 30.6.0, SVG Export Plug-In . SVG Version: 2.1.4 Build 109)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: #bd03f7;
+        fill-opacity: .52;
+      }
+
+      .st1 {
+        fill: url(#linear-gradient);
+      }
+
+      .st2 {
+        font-size: 32px;
+      }
+
+      .st2, .st3, .st4, .st5, .st6 {
+        isolation: isolate;
+      }
+
+      .st2, .st3, .st5, .st7 {
+        fill: #14141a;
+      }
+
+      .st2, .st3, .st5, .st6 {
+        font-family: Helvetica-Bold, Helvetica;
+        font-weight: 700;
+      }
+
+      .st3 {
+        font-size: 20px;
+      }
+
+      .st8 {
+        fill: #f6f7fb;
+      }
+
+      .st5 {
+        font-size: 27px;
+      }
+
+      .st9 {
+        fill: none;
+        stroke: #14141a;
+      }
+
+      .st9, .st10 {
+        stroke-width: 2px;
+      }
+
+      .st10 {
+        fill-opacity: .06;
+        stroke: #0068ff;
+        stroke-dasharray: 3 8;
+        stroke-opacity: .55;
+      }
+
+      .st10, .st11 {
+        fill: #0068ff;
+      }
+
+      .st7 {
+        font-family: Helvetica, Helvetica;
+        font-size: 16px;
+      }
+
+      .st6 {
+        fill: #0b0b12;
+        font-size: 22px;
+      }
+
+      .st11 {
+        fill-opacity: .55;
+      }
+    </style>
+    <linearGradient id="linear-gradient" x1="-361.22" y1="1118.89" x2="-360.22" y2="1117.89" gradientTransform="translate(7364 21197) scale(18 -18)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0068ff"/>
+      <stop offset=".45" stop-color="#3539f4"/>
+      <stop offset="1" stop-color="#bd03f7"/>
+    </linearGradient>
+  </defs>
+  <rect class="st8" width="1160" height="1150"/>
+  <g id="title">
+    <path class="st9" d="M123,50.29h454c18.23,0,33,14.77,33,33h0c0,18.23-14.77,33-33,33H123c-18.23,0-33-14.77-33-33h0c0-18.23,14.77-33,33-33Z"/>
+    <text class="st2" transform="translate(122 92.29)"><tspan x="0" y="0">What fills a context window</tspan></text>
+  </g>
+  <g id="system-internal">
+    <rect class="st10" x="70" y="170" width="560" height="905" rx="28" ry="28"/>
+    <text class="st5" transform="translate(196.96 234)"><tspan x="0" y="0">System-internal context</tspan></text>
+    <g>
+      <circle class="st11" cx="215" cy="430" r="100"/>
+      <circle class="st11" cx="445" cy="430" r="100"/>
+      <circle class="st11" cx="215" cy="670" r="100"/>
+      <circle class="st11" cx="445" cy="670" r="100"/>
+      <circle class="st11" cx="215" cy="910" r="100"/>
+      <circle class="st11" cx="445" cy="910" r="100"/>
+    </g>
+    <g>
+      <text class="st6" transform="translate(175.87 423)"><tspan x="0" y="0">System</tspan></text>
+      <text class="st6" transform="translate(177.12 451)"><tspan x="0" y="0">prompt</tspan></text>
+      <text class="st6" transform="translate(416.48 424)"><tspan x="0" y="0">Tools</tspan></text>
+      <g class="st4">
+        <text class="st7" transform="translate(427.22 458)"><tspan x="0" y="0">MCP</tspan></text>
+      </g>
+      <text class="st6" transform="translate(156.33 662)"><tspan x="0" y="0">Knowledge</tspan></text>
+      <text class="st6" transform="translate(189.93 690)"><tspan x="0" y="0">base</tspan></text>
+      <g class="st4">
+        <text class="st7" transform="translate(197.66 724)"><tspan x="0" y="0">RAG</tspan></text>
+      </g>
+      <text class="st6" transform="translate(416.26 678)"><tspan x="0" y="0">Skills</tspan></text>
+      <text class="st6" transform="translate(172.82 918)"><tspan x="0" y="0">Memory</tspan></text>
+      <text class="st6" transform="translate(386.92 918)"><tspan x="0" y="0">Guard rails</tspan></text>
+    </g>
+  </g>
+  <g id="user-visible">
+    <text class="st5" transform="translate(763.96 410)"><tspan x="0" y="0">Visible to the user</tspan></text>
+    <g>
+      <circle class="st0" cx="880" cy="580" r="100"/>
+      <circle class="st0" cx="880" cy="820" r="100"/>
+    </g>
+    <g>
+      <text class="st6" transform="translate(809.71 588)"><tspan x="0" y="0">Conversation</tspan></text>
+      <text class="st6" transform="translate(814.6 828)"><tspan x="0" y="0">User prompt</tspan></text>
+    </g>
+  </g>
+  <g id="mark">
+    <circle class="st1" cx="871" cy="1066" r="9"/>
+    <text class="st3" transform="translate(889 1073)"><tspan x="0" y="0">AI Engineering Series</tspan></text>
+  </g>
+</svg>
