@@ -1,0 +1,5 @@
+# Real source documents and raw model outputs stay local (may contain PII).
+# Only redacted samples/ and the committed lab code are versioned.
+private/
+outputs/
+screenshots/

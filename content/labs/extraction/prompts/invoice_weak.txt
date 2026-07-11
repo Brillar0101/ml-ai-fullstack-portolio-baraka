@@ -1,0 +1,1 @@
+Extract the important information from this invoice.

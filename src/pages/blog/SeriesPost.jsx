@@ -42,7 +42,11 @@ function Block({ block }) {
       return (
         <ul className="series-terms">
           {block.items.map((t, i) => (
-            <li key={i}><strong>{t.term}</strong>: {rich(t.def)}</li>
+            <li key={i}>
+              {t.url
+                ? <a href={t.url} target="_blank" rel="noopener noreferrer"><strong>{t.term}</strong></a>
+                : <strong>{t.term}</strong>}: {rich(t.def)}
+            </li>
           ))}
         </ul>
       );
@@ -101,6 +105,13 @@ function Block({ block }) {
       return null;
     case 'schematic':
       return <Schematic title={block.title} caption={block.caption} parts={block.parts} wires={block.wires} />;
+    case 'image':
+      return (
+        <figure className="series-image">
+          <img src={block.src} alt={block.alt || ''} loading="lazy" />
+          {block.caption ? <figcaption>{rich(block.caption)}</figcaption> : null}
+        </figure>
+      );
     case 'callout':
       return (
         <aside className="series-callout">

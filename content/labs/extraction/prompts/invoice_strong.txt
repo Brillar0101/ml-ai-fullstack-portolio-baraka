@@ -1,0 +1,27 @@
+You are extracting fields from an invoice. The text comes from OCR of a scanned
+invoice, so the table columns may be scrambled and numbers may use a comma as the
+decimal separator (2,00 means 2.00). Return ONLY a JSON object, with no preamble,
+no explanation, and no markdown code fences, with exactly this shape:
+
+{
+  "invoice_number": string or null,
+  "date_of_issue": string or null,
+  "currency": string or null,
+  "seller":  {"name": string or null, "address": string or null, "tax_id": string or null, "iban": string or null},
+  "client":  {"name": string or null, "address": string or null, "tax_id": string or null},
+  "line_items": [
+    {"description": string, "qty": number, "unit_price": number, "net_worth": number, "vat_percent": number or null, "gross_worth": number or null}
+  ],
+  "summary": {"net_total": number or null, "vat_total": number or null, "gross_total": number or null}
+}
+
+Rules:
+- Use ONLY information present in the document. Do not infer or add anything.
+- If a field is missing or unreadable, set it to null. Do not guess.
+- Numbers must be plain numbers: strip currency symbols and convert a decimal
+  comma to a dot (1.234,56 becomes 1234.56).
+- date_of_issue must be a real calendar date in YYYY-MM-DD format, or null.
+- Return values only, with no labels or commentary.
+
+Example of the exact shape (placeholder values only, do NOT copy them):
+{"invoice_number":"000000","date_of_issue":"2000-01-01","currency":"USD","seller":{"name":"ACME","address":"1 A St","tax_id":"000-00-0000","iban":"XX00"},"client":{"name":"Buyer","address":"2 B St","tax_id":"000-00-0000"},"line_items":[{"description":"Item","qty":1,"unit_price":9.99,"net_worth":9.99,"vat_percent":10,"gross_worth":10.99}],"summary":{"net_total":9.99,"vat_total":1.0,"gross_total":10.99}}
