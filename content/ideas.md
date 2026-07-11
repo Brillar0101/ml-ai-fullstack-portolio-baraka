@@ -76,6 +76,33 @@ functional correctness, AI as a judge.
 
 ---
 
+## Document extraction & OCR (spillover from the extraction post, with sources)
+
+Concepts that came up while reworking "Extraction prompts that survive contact
+with real documents" but belong in their own posts. Each keeps its source so the
+research is not lost.
+
+- **OCR with vision-language models** — doing OCR + layout with a VLM instead of
+  tesseract: free / markdown / grounding modes, plus OCR-aware fine-tuning on
+  synthetic degraded data and visual chain-of-thought. Cover keyword: `scanner`.
+  - Sources: Simon Willison, DeepSeek-OCR prompts guide,
+    https://github.com/simonw/research/blob/main/deepseek-ocr-nvidia-spark/PROMPTS_GUIDE.md
+    ; arXiv:2605.16409 (OCR-aware fine-tuning + prompt-guided CoT).
+- **Grounding and bounding boxes** — which pixels a field came from, and why
+  coordinates matter for trust and correction. Cover keyword: `pushpin`.
+  - Source: DeepSeek-OCR grounding mode (simonw guide above).
+- **Pipeline and multi-pass prompting for hard extraction** — read → normalize →
+  classify → validate, and re-reading low-confidence regions. Cover keyword: `assembly`.
+  - Source: https://zenn.dev/coffin299/articles/60ba24446c0c27 (sections 3 and 9).
+- **Self-verifying prompts** — a model checking its own output against rules before
+  you trust it. Cover keyword: `checklist`.
+  - Source: https://zenn.dev/coffin299/articles/60ba24446c0c27 (section 10).
+- **Lexicon injection** — giving the model a domain word list with common OCR
+  misreads so it self-corrects (e.g. Amlodibin → Amlodipine). Cover keyword: `dictionary`.
+  - Source: https://zenn.dev/coffin299/articles/60ba24446c0c27 (section 5).
+
+---
+
 ## Priority order (suggested)
 
 1. Finish the 3 stubbed demos: tokenization, embeddings-search, quantization.
