@@ -30,10 +30,20 @@ function rich(text) {
   return text.split('**').map((part, i) => (i % 2 === 1 ? <strong key={i}>{part}</strong> : part));
 }
 
+// Stable anchor ids for h2 headings, used by the in-post table of contents.
+function slugify(text) {
+  return String(text)
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .slice(0, 60);
+}
+
 function Block({ block }) {
   switch (block.type) {
     case 'h2':
-      return <h2>{block.text}</h2>;
+      return <h2 id={slugify(block.text)}>{block.text}</h2>;
     case 'p':
       return <p>{rich(block.text)}</p>;
     case 'ul':
@@ -144,8 +154,21 @@ function Block({ block }) {
 
 export default function SeriesPost({ post }) {
   if (!post || !Array.isArray(post.body)) return null;
+  // Layer-cake scanning support: posts with 4+ sections get a jump list so
+  // readers can navigate by heading instead of scrolling blind.
+  const headings = post.body.filter((b) => b.type === 'h2');
   return (
     <>
+      {headings.length >= 4 && (
+        <nav className="series-toc" aria-label="In this post">
+          <span className="series-toc-label">In this post</span>
+          <ol>
+            {headings.map((h, i) => (
+              <li key={i}><a href={'#' + slugify(h.text)}>{h.text}</a></li>
+            ))}
+          </ol>
+        </nav>
+      )}
       {post.body.map((block, i) => <Block block={block} key={i} />)}
     </>
   );
