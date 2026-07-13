@@ -93,13 +93,13 @@ const HomePage = () => {
 
         <div className="home-hero-inner">
           <div className="home-eyebrow">
-            COMPUTER ENGINEER <span className="sep">·</span> <b>VIRGINIA TECH</b>
+            Computer Engineer <span className="sep">·</span> <b>Virginia Tech</b>
           </div>
 
           <h1 className="home-h1">Barakaeli Lawuo</h1>
 
           <p className="home-subhead">
-            My work lies at the intersection of cybersecurity, artificial intelligence, and embedded systems.
+            I work across cybersecurity, artificial intelligence, and embedded systems.
           </p>
 
           <div className="home-meta">

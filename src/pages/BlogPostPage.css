@@ -172,8 +172,8 @@
 
 /* Callout / key-idea aside in data-driven series posts */
 .blog-post-content .series-callout {
-  border-left: 3px solid var(--primary);
   background: var(--bg-secondary);
+  border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: 16px 20px;
   margin: 16px 0 24px;
@@ -492,8 +492,8 @@
 /* ---- Callout ---- */
 .blog-callout {
   background: var(--bg-secondary);
-  border-left: 3px solid var(--primary);
-  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
   padding: 20px 24px;
   margin: 28px 0;
 }
@@ -501,7 +501,6 @@
 .blog-callout .callout-label {
   font-weight: 700;
   font-size: 13px;
-  text-transform: uppercase;
   letter-spacing: 1px;
   color: var(--primary);
   margin-bottom: 8px;
@@ -563,7 +562,6 @@
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 1.5px;
-  text-transform: uppercase;
   color: var(--text);
   padding-bottom: 12px;
   border-bottom: 2px solid var(--text);
