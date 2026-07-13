@@ -67,18 +67,6 @@ export const POST = {
       caption: 'What fills a context window. The left group is context the system assembles on your behalf; the right group is what the user actually sees and types. Prompt engineering only touches the right side. Context engineering owns the whole picture.',
     },
     {
-      type: 'diagram',
-      rows: [
-        [{ label: 'System prompt', detail: 'role, rules, tone; written once' }],
-        [{ label: 'Tool definitions', detail: 'names, params, when to call' }],
-        [{ label: 'Retrieved documents', detail: 'RAG chunks; often the noisiest layer' }],
-        [{ label: 'Memory', detail: 'durable facts about the user or task' }],
-        [{ label: 'Conversation history', detail: 'past turns and tool outputs; grows every step' }],
-        [{ label: 'Current user message', detail: 'the actual question, at the very end' }],
-      ],
-      caption: 'Everything the model reads shares one fixed budget. History and retrieved chunks are the layers that quietly swell and push the important sentence out of the reliable start and end zones.',
-    },
-    {
       type: 'p',
       text: 'The two layers that cause most trouble are retrieved documents and conversation history, because both grow without anyone deciding they should. A retrieval step that returns five chunks feels harmless until you realize it runs on every turn. Tool outputs feel harmless until a single call dumps fifty JSON fields you will never read. The system prompt, which is where teams spend most of their tuning effort, is often the most stable and least guilty layer in the whole stack.',
     },
