@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1250" viewBox="0 0 1600 1250" font-family="Manrope, Helvetica, Arial, sans-serif">
+  <defs>
+    <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0068FF"/>
+      <stop offset="45%" stop-color="#3539F4"/>
+      <stop offset="100%" stop-color="#BD03F7"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1600" height="1250" fill="#FFFFFF"/>
+
+  <!-- title -->
+  <text x="40" y="52" font-size="28" font-weight="800" fill="#000000">The six types of context for AI agents</text>
+
+  <!-- ============ connectors: clean orthogonal tree ============ -->
+  <g stroke="#C4CCD8" stroke-width="1.5" fill="none" stroke-linecap="round">
+    <!-- root to trunk -->
+    <path d="M 280 630 H 322"/>
+    <!-- trunk -->
+    <path d="M 322 176 V 1112"/>
+    <!-- trunk to type nodes -->
+    <path d="M 322 176 H 360"/>
+    <path d="M 322 380 H 360"/>
+    <path d="M 322 556 H 360"/>
+    <path d="M 322 732 H 360"/>
+    <path d="M 322 908 H 360"/>
+    <path d="M 322 1112 H 360"/>
+    <!-- 1 Instructions -->
+    <path d="M 580 176 H 620"/>
+    <path d="M 620 92 V 232"/>
+    <path d="M 620 92 H 660"/>
+    <path d="M 620 148 H 660"/>
+    <path d="M 620 232 H 660"/>
+    <path d="M 840 92 H 904"/>
+    <path d="M 840 148 H 904"/>
+    <path d="M 840 232 H 872"/>
+    <path d="M 872 204 V 260"/>
+    <path d="M 872 204 H 904"/>
+    <path d="M 872 260 H 904"/>
+    <!-- 2 Examples -->
+    <path d="M 580 380 H 620"/>
+    <path d="M 620 352 V 408"/>
+    <path d="M 620 352 H 660"/>
+    <path d="M 620 408 H 660"/>
+    <path d="M 840 352 H 904"/>
+    <path d="M 840 408 H 904"/>
+    <!-- 3 Knowledge -->
+    <path d="M 580 556 H 620"/>
+    <path d="M 620 500 V 584"/>
+    <path d="M 620 500 H 660"/>
+    <path d="M 620 584 H 660"/>
+    <path d="M 840 500 H 904"/>
+    <path d="M 840 584 H 872"/>
+    <path d="M 872 556 V 612"/>
+    <path d="M 872 556 H 904"/>
+    <path d="M 872 612 H 904"/>
+    <!-- 4 Memory -->
+    <path d="M 580 732 H 620"/>
+    <path d="M 620 704 V 760"/>
+    <path d="M 620 704 H 660"/>
+    <path d="M 620 760 H 660"/>
+    <path d="M 840 704 H 904"/>
+    <path d="M 840 760 H 904"/>
+    <!-- 5 Tools -->
+    <path d="M 580 908 H 620"/>
+    <path d="M 620 852 V 964"/>
+    <path d="M 620 852 H 660"/>
+    <path d="M 620 908 H 660"/>
+    <path d="M 620 964 H 660"/>
+    <path d="M 840 852 H 904"/>
+    <path d="M 840 908 H 904"/>
+    <path d="M 840 964 H 904"/>
+    <!-- 6 Guardrails -->
+    <path d="M 580 1112 H 620"/>
+    <path d="M 620 1056 V 1168"/>
+    <path d="M 620 1056 H 660"/>
+    <path d="M 620 1112 H 660"/>
+    <path d="M 620 1168 H 660"/>
+    <path d="M 840 1056 H 904"/>
+    <path d="M 840 1112 H 904"/>
+    <path d="M 840 1168 H 904"/>
+  </g>
+
+  <!-- ============ root node (black, brand primary) ============ -->
+  <g id="root">
+    <rect x="40" y="590" width="240" height="80" rx="16" fill="#000000"/>
+    <text x="160" y="623" font-size="18" font-weight="800" fill="#FFFFFF" text-anchor="middle">6 types of context</text>
+    <text x="160" y="648" font-size="18" font-weight="800" fill="#FFFFFF" text-anchor="middle">for AI agents</text>
+  </g>
+
+  <!-- ============ type nodes (flat accent) ============ -->
+  <g id="type-nodes">
+    <g id="t1">
+      <rect x="360" y="154" width="220" height="44" rx="12" fill="#0068FF"/>
+      <text x="386" y="183" font-size="17" font-weight="800" fill="#FFFFFF" opacity="0.75">1</text>
+      <text x="412" y="183" font-size="17" font-weight="800" fill="#FFFFFF">Instructions</text>
+    </g>
+    <g id="t2">
+      <rect x="360" y="358" width="220" height="44" rx="12" fill="#0068FF"/>
+      <text x="386" y="387" font-size="17" font-weight="800" fill="#FFFFFF" opacity="0.75">2</text>
+      <text x="412" y="387" font-size="17" font-weight="800" fill="#FFFFFF">Examples</text>
+    </g>
+    <g id="t3">
+      <rect x="360" y="534" width="220" height="44" rx="12" fill="#0068FF"/>
+      <text x="386" y="563" font-size="17" font-weight="800" fill="#FFFFFF" opacity="0.75">3</text>
+      <text x="412" y="563" font-size="17" font-weight="800" fill="#FFFFFF">Knowledge</text>
+    </g>
+    <g id="t4">
+      <rect x="360" y="710" width="220" height="44" rx="12" fill="#0068FF"/>
+      <text x="386" y="739" font-size="17" font-weight="800" fill="#FFFFFF" opacity="0.75">4</text>
+      <text x="412" y="739" font-size="17" font-weight="800" fill="#FFFFFF">Memory</text>
+    </g>
+    <g id="t5">
+      <rect x="360" y="886" width="220" height="44" rx="12" fill="#0068FF"/>
+      <text x="386" y="915" font-size="17" font-weight="800" fill="#FFFFFF" opacity="0.75">5</text>
+      <text x="412" y="915" font-size="17" font-weight="800" fill="#FFFFFF">Tools</text>
+    </g>
+    <g id="t6">
+      <rect x="360" y="1090" width="220" height="44" rx="12" fill="#0068FF"/>
+      <text x="386" y="1119" font-size="17" font-weight="800" fill="#FFFFFF" opacity="0.75">6</text>
+      <text x="412" y="1119" font-size="17" font-weight="800" fill="#FFFFFF">Guardrails</text>
+    </g>
+  </g>
+
+  <!-- ============ sub-nodes (light accent pills) ============ -->
+  <g id="sub-nodes" font-size="15" font-weight="700" fill="#0068FF" text-anchor="middle">
+    <rect x="660" y="76"   width="180" height="32" rx="16" fill="#EAF2FF"/><text x="750" y="97">Role</text>
+    <rect x="660" y="132"  width="180" height="32" rx="16" fill="#EAF2FF"/><text x="750" y="153">Objective</text>
+    <rect x="660" y="216"  width="180" height="32" rx="16" fill="#EAF2FF"/><text x="750" y="237">Requirements</text>
+    <rect x="660" y="336"  width="180" height="32" rx="16" fill="#EAF2FF"/><text x="750" y="357">Behaviour</text>
+    <rect x="660" y="392"  width="180" height="32" rx="16" fill="#EAF2FF"/><text x="750" y="413">Responses</text>
+    <rect x="660" y="484"  width="180" height="32" rx="16" fill="#EAF2FF"/><text x="750" y="505">External</text>
+    <rect x="660" y="568"  width="180" height="32" rx="16" fill="#EAF2FF"/><text x="750" y="589">Task</text>
+    <rect x="660" y="688"  width="180" height="32" rx="16" fill="#EAF2FF"/><text x="750" y="709">Short-term</text>
+    <rect x="660" y="744"  width="180" height="32" rx="16" fill="#EAF2FF"/><text x="750" y="765">Long-term</text>
+    <rect x="660" y="836"  width="180" height="32" rx="16" fill="#EAF2FF"/><text x="750" y="857">Description</text>
+    <rect x="660" y="892"  width="180" height="32" rx="16" fill="#EAF2FF"/><text x="750" y="913">Parameters</text>
+    <rect x="660" y="948"  width="180" height="32" rx="16" fill="#EAF2FF"/><text x="750" y="969">Results</text>
+    <rect x="660" y="1040" width="180" height="32" rx="16" fill="#EAF2FF"/><text x="750" y="1061">Inputs</text>
+    <rect x="660" y="1096" width="180" height="32" rx="16" fill="#EAF2FF"/><text x="750" y="1117">Actions</text>
+    <rect x="660" y="1152" width="180" height="32" rx="16" fill="#EAF2FF"/><text x="750" y="1173">Outputs</text>
+  </g>
+
+  <!-- ============ descriptions (plain text, no boxes) ============ -->
+  <g id="descriptions" font-size="15" font-weight="500" fill="#4D4D55">
+    <text x="916" y="97">Define a persona for the LLM, e.g. coding agent, PM</text>
+    <text x="916" y="153">Clearly define what needs to be achieved</text>
+    <text x="916" y="209">Define steps, conventions and constraints</text>
+    <text x="916" y="265">Response format (JSON, XML, plain text)</text>
+    <text x="916" y="357">Example of how to think through a problem</text>
+    <text x="916" y="413">Example of how the response should look</text>
+    <text x="916" y="505">General context, background, domain specifics</text>
+    <text x="916" y="561">Material needed for the specific task</text>
+    <text x="916" y="617">E.g. docs, API specs, workflow schemas</text>
+    <text x="916" y="709">Memory of what happens in a user session</text>
+    <text x="916" y="765">Dedicated storage to remember facts across sessions</text>
+    <text x="916" y="857">Description of what the tool does</text>
+    <text x="916" y="913">Tool inputs, their types, required or not</text>
+    <text x="916" y="969">Outputs of the tools going back to the LLM</text>
+    <text x="916" y="1061">Clean and tag inputs before the model sees them</text>
+    <text x="916" y="1117">Use only safe tools within the allowed list for the agent</text>
+    <text x="916" y="1173">Outputs must fit the schema and safety rules</text>
+  </g>
+
+  <!-- ============ brand mark ============ -->
+  <g id="mark">
+    <circle cx="1348" cy="1224" r="9" fill="url(#brandGrad)"/>
+    <text x="1366" y="1231" font-size="18" font-weight="700" fill="#000000">AI Engineering Series</text>
+  </g>
+</svg>
