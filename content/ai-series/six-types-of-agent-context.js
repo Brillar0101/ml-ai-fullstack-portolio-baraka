@@ -28,12 +28,6 @@ export const POST = {
     { type: 'p', text: 'Four of the six are authored by you before the agent ever runs: instructions, examples, tools, and guardrails. Knowledge is fetched from outside based on what you asked. Memory is accumulated, short-term as the session runs and long-term across sessions. That grouping is worth holding onto, because it tells you who is responsible when each one goes wrong.' },
     { type: 'h2', text: 'How the six share one crowded window' },
     { type: 'p', text: 'Picture the window as a fixed-height container. Everything below competes for the same vertical space, measured in tokens. When the job is small the container is roomy. When the agent has read ten files and made twenty tool calls, the memory layer swells with transcript and tool output and starts crowding out the rest.' },
-    { type: 'diagram', rows: [
-      [{ label: 'Context window', detail: 'one fixed token budget, shared by all six' }],
-      [{ label: '1. Instructions', detail: 'role, objective, requirements' }, { label: '2. Examples', detail: 'behaviour and response demos' }],
-      [{ label: '3. Knowledge', detail: 'external context + task material' }, { label: '4. Memory', detail: 'short-term session + long-term store' }],
-      [{ label: '5. Tools', detail: 'descriptions, parameters, results' }, { label: '6. Guardrails', detail: 'inputs, actions, outputs' }],
-    ], caption: 'Six layers, one budget. Instructions, examples, tools, and guardrails are authored up front; knowledge is fetched per request; memory grows as the session runs, and tool results grow fastest of all.' },
     { type: 'p', text: 'Because they all draw from one budget, assembling context is a packing problem with a hard ceiling. You cannot dump your entire codebase, every past chat, and a novel of reasoning into the window. You choose. A sane assembler reserves room for the authored layers first, gives knowledge a capped slice, and lets short-term memory use what remains, trimming the oldest tool output when it overflows. Here is that logic as a small function.' },
     { type: 'code', lang: 'python', title: 'assemble_context.py', code: `def assemble_context(request, budget=8000):
     # Authored layers get first claim on the budget.
