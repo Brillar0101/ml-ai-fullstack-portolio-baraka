@@ -4,12 +4,14 @@
    ============================================ */
 
 :root {
-  --home-navy: #000000;
-  --home-navy-ink: #000000;
-  --home-yellow: #0068FF;
-  --home-yellow-hover: #3585ff;
-  --home-muted: #8c8c96;
-  --home-body: #e6e6e6;
+  --home-navy: #151515;
+  /* Dark ink: sits on white/light chips (e.g. the play button circle). */
+  --home-navy-ink: #151515;
+  --home-yellow: #0066CC;
+  --home-yellow-hover: #004D99;
+  /* Muted + body sit on the dark video hero, so they stay light. */
+  --home-muted: #A3A3A3;
+  --home-body: #E0E0E0;
 }
 
 .home-root {
@@ -122,7 +124,7 @@
 }
 
 .home-brand {
-  font-family: 'Manrope', system-ui, sans-serif;
+  font-family: var(--font-body);
   font-weight: 800;
   font-size: 28px;
   color: #fff;
@@ -145,7 +147,7 @@
 .home-nav-link {
   color: #fff;
   text-decoration: none;
-  font-family: 'Manrope', system-ui, sans-serif;
+  font-family: var(--font-body);
   font-weight: 500;
   font-size: 15px;
   opacity: 0.9;
@@ -168,7 +170,7 @@
   color: var(--home-navy);
   border: 0;
   padding: 14px 28px;
-  font-family: 'Manrope', system-ui, sans-serif;
+  font-family: var(--font-body);
   font-weight: 600;
   font-size: 15px;
   cursor: pointer;
@@ -179,7 +181,8 @@
 
 .home-cta-top:hover {
   background: var(--home-yellow);
-  color: var(--home-navy-ink);
+  /* White on PatternFly blue, per --pf-t--global--text--color--on-brand. */
+  color: #FFFFFF;
   text-decoration: none;
 }
 
@@ -238,7 +241,7 @@
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(120% 90% at 0% 100%, rgba(0, 104, 255, 0.42) 0%, rgba(189, 3, 247, 0.18) 38%, transparent 70%),
+    radial-gradient(120% 90% at 0% 100%, rgba(0, 102, 204, 0.42) 0%, rgba(0, 77, 153, 0.18) 38%, transparent 70%),
     linear-gradient(
       180deg,
       transparent 0%,
@@ -270,7 +273,7 @@
 
 /* Eyebrow */
 .home-eyebrow {
-  font-family: 'Manrope', system-ui, sans-serif;
+  font-family: var(--font-body);
   font-size: clamp(10px, 0.9vw, 13px);
   letter-spacing: clamp(1.4px, 0.2vw, 2.6px);
   color: #fff;
@@ -291,7 +294,7 @@
 
 /* H1 — Big name. clamp() prevents overflow at every viewport. */
 .home-h1 {
-  font-family: 'Manrope', system-ui, sans-serif;
+  font-family: var(--font-body);
   font-weight: 800;
   font-size: clamp(30px, 5vw, 60px);
   line-height: 1.05;
@@ -305,7 +308,7 @@
 
 /* Subhead */
 .home-subhead {
-  font-family: 'Manrope', system-ui, sans-serif;
+  font-family: var(--font-body);
   font-size: clamp(14px, 1.3vw, 18px);
   line-height: 1.5;
   color: var(--home-body);
@@ -320,7 +323,7 @@
   display: flex;
   align-items: center;
   gap: clamp(8px, 1vw, 14px);
-  font-family: 'Manrope', system-ui, sans-serif;
+  font-family: var(--font-body);
   font-size: clamp(12px, 1vw, 15px);
   color: var(--home-muted);
   margin-bottom: clamp(16px, 1.6vw, 24px);
@@ -347,7 +350,7 @@
 
 /* Description */
 .home-desc {
-  font-family: 'Manrope', system-ui, sans-serif;
+  font-family: var(--font-body);
   font-size: 15px;
   line-height: 1.65;
   color: var(--home-body);
@@ -371,7 +374,7 @@
   height: 52px;
   padding: 0 30px;
   border-radius: 10px;
-  font-family: 'Manrope', system-ui, sans-serif;
+  font-family: var(--font-body);
   font-weight: 700;
   font-size: 15px;
   cursor: pointer;
@@ -415,7 +418,7 @@
 .home-social:hover {
   border-color: var(--home-yellow);
   color: var(--home-yellow);
-  background: rgba(0, 104, 255, 0.1);
+  background: rgba(0, 102, 204, 0.1);
   text-decoration: none;
 }
 
@@ -505,7 +508,7 @@
   .home-mobile-link {
     color: #fff;
     text-decoration: none;
-    font-family: 'Manrope', system-ui, sans-serif;
+    font-family: var(--font-body);
     font-size: 15px;
     font-weight: 500;
     padding: 12px 4px;
@@ -522,7 +525,7 @@
     background: #fff;
     color: var(--home-navy);
     text-align: center;
-    font-family: 'Manrope', system-ui, sans-serif;
+    font-family: var(--font-body);
     font-weight: 600;
     font-size: 14px;
     padding: 12px 20px;
@@ -677,7 +680,7 @@
   }
   .home-root {
     background:
-      radial-gradient(120% 90% at 0% 100%, rgba(0, 104, 255, 0.45) 0%, rgba(189, 3, 247, 0.25) 40%, transparent 72%),
+      radial-gradient(120% 90% at 0% 100%, rgba(0, 102, 204, 0.45) 0%, rgba(0, 77, 153, 0.25) 40%, transparent 72%),
       linear-gradient(135deg, #02060f 0%, #0a1226 100%);
   }
 }

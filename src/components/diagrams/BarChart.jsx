@@ -15,7 +15,7 @@ import './BarChart.css';
  * reads before any label does. Axes, text, and gridlines use CSS variables so
  * the chart stays legible in both light and dark themes.
  */
-const BRAND = ['#0068FF', '#3539F4', '#BD03F7', '#3585ff'];
+const BRAND = ['#0066CC', '#004D99', '#003366', '#4394E5'];
 const BASELINE_GRAY = '#8b909b';
 
 const W = 720;

@@ -47,12 +47,12 @@
 }
 
 .lab-run {
-  background: #0068FF;
+  background: #0066CC;
   color: #fff;
 }
 
 .lab-run:hover:not(:disabled) {
-  background: #0052cc;
+  background: #004D99;
 }
 
 .lab-reset {

@@ -6,7 +6,7 @@
 //
 // publishAt drips posts out over time; see src/lib/publishing.js for gating.
 
-const GRAD = 'linear-gradient(120deg, #0068FF 0%, #3539F4 48%, #BD03F7 100%)';
+const GRAD = 'linear-gradient(120deg, #0066CC 0%, #004D99 48%, #003366 100%)';
 
 export const SERIES_POSTS = [
   {

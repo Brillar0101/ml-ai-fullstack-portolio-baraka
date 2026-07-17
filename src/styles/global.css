@@ -1,13 +1,14 @@
 /* ============================================
-   DESIGN SYSTEM — Crucial / Micron inspired
-   Display + Body: Manrope (geometric grotesque,
-   approximates Micron Basis: precise, rounded)
-   Colors: Black, white, electric blue accent (#0068FF)
-   Gradients: blue → purple, used for hero moments
+   DESIGN SYSTEM — PatternFly (light mode)
+   Mirrors PatternFly v6 global tokens.
+   Display: Red Hat Display / Body: Red Hat Text / Mono: Red Hat Mono
+   Colors: brand blue #0066CC, page #F2F2F2, surface #FFFFFF,
+   text #151515 / #4D4D4D, border #E0E0E0
+   Flat by design: no gradients, no glass material.
    ============================================ */
 
-/* Fonts (Manrope + Fira Code) are loaded non-render-blocking
-   via <link> in index.html, not an @import here. */
+/* Red Hat fonts are loaded non-render-blocking via <link>
+   in index.html, not an @import here. */
 
 * {
   margin: 0;
@@ -17,42 +18,44 @@
 
 /* ---- Light Theme (Default) ---- */
 :root {
-  /* Typography — single brand family, like Micron Basis */
-  --font-display: 'Manrope', system-ui, 'Segoe UI', Arial, sans-serif;
-  --font-body: 'Manrope', system-ui, 'Segoe UI', Arial, sans-serif;
-  --font-mono: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* Typography — PatternFly: Red Hat Display headings, Red Hat Text body */
+  --font-display: 'Red Hat Display', 'RedHatDisplay', Helvetica, Arial, sans-serif;
+  --font-body: 'Red Hat Text', 'RedHatText', Helvetica, Arial, sans-serif;
+  --font-mono: 'Red Hat Mono', 'RedHatMono', 'Courier New', Courier, monospace;
 
-  /* Accent — Crucial "electric" blue (digital/RGB value) */
-  --primary: #0068FF;
-  --primary-light: #3585ff;
-  --primary-dark: #0052cc;
+  /* Accent — PatternFly brand blue (--pf-t--global--color--brand--default) */
+  --primary: #0066CC;
+  --primary-light: #4394E5;
+  --primary-dark: #004D99;
 
-  /* Brand gradient stops */
-  --grad-blue: #0068FF;
-  --grad-violet: #3539F4;
-  --grad-purple: #BD03F7;
-  --grad-magenta: #E60177;
+  /* PatternFly blue palette */
+  --grad-blue: #0066CC;
+  --grad-violet: #004D99;
+  --grad-purple: #003366;
+  --grad-magenta: #0066CC;
 
-  /* Signature brand gradient (blue → purple, diagonal) */
-  --gradient-brand: linear-gradient(120deg, #0068FF 0%, #3539F4 45%, #BD03F7 100%);
-  --gradient-dark: linear-gradient(160deg, #05060a 0%, #0a1a3a 60%, #050608 100%);
+  /* PatternFly is flat: no brand gradient. Kept as solids so any remaining
+     `background: var(--gradient-brand)` renders a clean PatternFly surface. */
+  --gradient-brand: #0066CC;
+  --gradient-dark: #151515;
 
   --bg: #FFFFFF;
   --bg-secondary: #F2F2F2;
-  --bg-tertiary: #E6E6E6;
+  --bg-tertiary: #E0E0E0;
   --surface: #FFFFFF;
 
-  --text: #000000;
+  --text: #151515;
   --text-secondary: #4D4D4D;
-  --text-muted: #8C8C8C;
-  --text-dim: #BFBFBF;
+  --text-muted: #707070;
+  --text-dim: #A3A3A3;
 
-  --border: #E6E6E6;
+  --border: #E0E0E0;
   --border-light: #F2F2F2;
 
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.1);
+  /* PatternFly box shadows (rgb(41,41,41,0.15)) */
+  --shadow-sm: 0 1px 6px 0 rgba(41, 41, 41, 0.15);
+  --shadow-md: 0 4px 10px 0 rgba(41, 41, 41, 0.15);
+  --shadow-lg: 0 10px 20px 0 rgba(41, 41, 41, 0.15);
 
   /* Spacing — 8px base */
   --space-xs: 4px;
@@ -64,33 +67,34 @@
   --space-3xl: 64px;
   --space-4xl: 96px;
 
-  /* Border radius — Micron favors tight corners + pill CTAs */
+  /* Border radius — PatternFly: tiny 4, small 6, medium 16, large 24, pill 999 */
   --radius-sm: 4px;
   --radius-md: 6px;
-  --radius-lg: 10px;
-  --radius-xl: 14px;
-  --radius-full: 9999px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 999px;
 
   /* Transitions */
   --transition-fast: 0.15s ease-out;
   --transition-base: 0.2s ease-out;
   --transition-smooth: 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
 
-  /* Legacy compat — project pages still reference these */
-  --glass: rgba(255, 255, 255, 0.8);
-  --glass-border: rgba(0, 0, 0, 0.08);
-  --glass-hover: rgba(245, 245, 245, 0.95);
-  --radius-2xl: 18px;
+  /* Legacy compat — project pages still reference these. PatternFly has no
+     glass material, so these resolve to flat surfaces. */
+  --glass: #FFFFFF;
+  --glass-border: #E0E0E0;
+  --glass-hover: #F2F2F2;
+  --radius-2xl: 24px;
 }
 
 /* ---- Dark Theme — black is Micron's primary background ---- */
 [data-theme="dark"] {
   /* Lightened accent so small accent text clears WCAG AA (4.5:1) on
-     black/near-black surfaces. The deep #0068FF is reserved for large
+     black/near-black surfaces. The deep #0066CC is reserved for large
      elements and gradients. */
-  --primary: #3585ff;
+  --primary: #4394E5;
   --primary-light: #5a9cff;
-  --primary-dark: #0068FF;
+  --primary-dark: #0066CC;
 
   --bg: #000000;
   --bg-secondary: #0a0a0c;
@@ -241,8 +245,8 @@ a:hover {
   gap: var(--space-sm);
   padding: 13px 30px;
   /* Fixed deep electric blue so white text clears WCAG AA on any theme */
-  background: #0068FF;
-  border: 1px solid #0068FF;
+  background: #0066CC;
+  border: 1px solid #0066CC;
   border-radius: var(--radius-full);
   color: #FFFFFF;
   font-family: inherit;
@@ -254,8 +258,8 @@ a:hover {
 }
 
 .btn-primary:hover {
-  background: #0052cc;
-  border-color: #0052cc;
+  background: #004D99;
+  border-color: #004D99;
   color: #FFFFFF;
   text-decoration: none;
   transform: translateY(-1px);

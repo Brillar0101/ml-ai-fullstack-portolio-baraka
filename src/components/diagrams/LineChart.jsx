@@ -16,7 +16,7 @@ import './LineChart.css';
  * Axes, text, gridlines use CSS variables (theme-aware); data marks use brand
  * hex. Put an arrow in a label ("time →") for the direction-of-goodness hint.
  */
-const BRAND = ['#0068FF', '#BD03F7', '#3539F4', '#3585ff'];
+const BRAND = ['#0066CC', '#003366', '#004D99', '#4394E5'];
 
 const W = 720;
 const PAD = { top: 34, right: 60, bottom: 52, left: 60 };

@@ -133,7 +133,7 @@
   margin: 16px 0 24px;
 }
 .blog-post-content .series-code figcaption {
-  font-family: 'Fira Code', monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   color: var(--text-muted);
   background: var(--bg-tertiary);
@@ -291,7 +291,7 @@
 }
 
 .blog-post-content h2 .step-num {
-  font-family: 'Fira Code', monospace;
+  font-family: var(--font-mono);
   color: var(--primary);
   font-size: 24px;
   font-weight: 700;
@@ -326,7 +326,7 @@
   position: absolute;
   top: 8px;
   right: 12px;
-  font-family: 'Fira Code', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -335,7 +335,7 @@
 }
 
 .blog-post-content code {
-  font-family: 'Fira Code', monospace;
+  font-family: var(--font-mono);
   font-size: 13px;
   line-height: 1.7;
   color: var(--text);
@@ -385,7 +385,7 @@
 }
 
 .blog-diagram .diagram-title {
-  font-family: 'Fira Code', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 1.5px;
   text-transform: uppercase;
@@ -399,7 +399,7 @@
   justify-content: center;
   gap: 0;
   flex-wrap: wrap;
-  font-family: 'Fira Code', monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
 }
 
@@ -425,7 +425,7 @@
 
 .blog-diagram .diagram-loop {
   margin-top: 12px;
-  font-family: 'Fira Code', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--text-muted);
   display: flex;
@@ -468,7 +468,7 @@
 .blog-terminal .dot-g { background: #27c93f; }
 
 .blog-terminal .terminal-bar span {
-  font-family: 'Fira Code', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: #555;
   margin-left: 8px;
@@ -476,7 +476,7 @@
 
 .blog-terminal .terminal-body {
   padding: 20px 24px;
-  font-family: 'Fira Code', monospace;
+  font-family: var(--font-mono);
   font-size: 12.5px;
   line-height: 1.8;
   color: #bbb;
@@ -522,7 +522,7 @@
 .blog-callout li::before {
   content: '\2192  ';
   color: var(--primary);
-  font-family: 'Fira Code', monospace;
+  font-family: var(--font-mono);
 }
 
 /* ---- CTA box ---- */

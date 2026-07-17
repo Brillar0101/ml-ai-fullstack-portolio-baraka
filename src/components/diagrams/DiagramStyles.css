@@ -97,7 +97,7 @@
 .db-table-name {
   font-size: 13px;
   font-weight: 700;
-  font-family: 'Fira Code', monospace;
+  font-family: var(--font-mono);
   flex: 1;
   white-space: nowrap;
   overflow: hidden;
@@ -170,13 +170,13 @@
 
 .db-column-name {
   flex: 1;
-  font-family: 'Fira Code', monospace;
+  font-family: var(--font-mono);
   color: var(--text-secondary);
 }
 
 .db-column-type {
   color: var(--text-dim);
-  font-family: 'Fira Code', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
 }
 
@@ -257,7 +257,7 @@
 
 .db-rel-from {
   color: var(--primary);
-  font-family: 'Fira Code', monospace;
+  font-family: var(--font-mono);
   font-weight: 600;
 }
 
@@ -267,7 +267,7 @@
 
 .db-rel-to {
   color: var(--text-muted);
-  font-family: 'Fira Code', monospace;
+  font-family: var(--font-mono);
 }
 
 .db-rel-type {
@@ -763,7 +763,7 @@
   font-size: 13px;
   font-weight: 700;
   color: var(--item-color);
-  font-family: 'Fira Code', monospace;
+  font-family: var(--font-mono);
 }
 
 .ml-summary-task {

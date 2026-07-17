@@ -47,7 +47,7 @@ function Icon({ type, x, y }) {
     case 'user':
       return (
         <g>
-          <circle cx={x} cy={y} r="28" fill="#0068FF" />
+          <circle cx={x} cy={y} r="28" fill="#0066CC" />
           <circle cx={x} cy={y - 8} r="8" fill="#fff" />
           <path d={`M ${x - 13} ${y + 17} L ${x - 7} ${y + 3} L ${x + 7} ${y + 3} L ${x + 13} ${y + 17} Z`} fill="#fff" />
         </g>
@@ -55,24 +55,24 @@ function Icon({ type, x, y }) {
     case 'datastore':
       return (
         <g>
-          <rect x={x - 28} y={y - 28} width="56" height="56" rx="4" fill="#BD03F7" />
+          <rect x={x - 28} y={y - 28} width="56" height="56" rx="4" fill="#003366" />
           <ellipse cx={x} cy={y - 13} rx="14" ry="5" fill="#fff" />
           <path d={`M ${x - 14} ${y - 13} V ${y + 11} A 14 5 0 0 0 ${x + 14} ${y + 11} V ${y - 13}`} fill="#fff" />
-          <path d={`M ${x - 14} ${y - 5} A 14 5 0 0 0 ${x + 14} ${y - 5}`} fill="none" stroke="#BD03F7" strokeWidth="2" />
-          <path d={`M ${x - 14} ${y + 3} A 14 5 0 0 0 ${x + 14} ${y + 3}`} fill="none" stroke="#BD03F7" strokeWidth="2" />
+          <path d={`M ${x - 14} ${y - 5} A 14 5 0 0 0 ${x + 14} ${y - 5}`} fill="none" stroke="#003366" strokeWidth="2" />
+          <path d={`M ${x - 14} ${y + 3} A 14 5 0 0 0 ${x + 14} ${y + 3}`} fill="none" stroke="#003366" strokeWidth="2" />
         </g>
       );
     case 'model': {
       const dots = [[0, -13], [12, -4], [7, 11], [-7, 11], [-12, -4]];
       return (
         <g>
-          <polygon points={hexPoints(x, y, 32)} fill="none" stroke="#3585ff" strokeWidth="3" />
+          <polygon points={hexPoints(x, y, 32)} fill="none" stroke="#4394E5" strokeWidth="3" />
           {dots.map(([dx, dy], i) =>
             dots.slice(i + 1).map(([dx2, dy2], j) => (
-              <line key={`${i}-${j}`} x1={x + dx} y1={y + dy} x2={x + dx2} y2={y + dy2} stroke="#3585ff" strokeWidth="1.1" />
+              <line key={`${i}-${j}`} x1={x + dx} y1={y + dy} x2={x + dx2} y2={y + dy2} stroke="#4394E5" strokeWidth="1.1" />
             ))
           )}
-          {dots.map(([dx, dy], i) => <circle key={i} cx={x + dx} cy={y + dy} r="3.4" fill="#3585ff" />)}
+          {dots.map(([dx, dy], i) => <circle key={i} cx={x + dx} cy={y + dy} r="3.4" fill="#4394E5" />)}
         </g>
       );
     }
@@ -80,7 +80,7 @@ function Icon({ type, x, y }) {
     default:
       return (
         <g>
-          <polygon points={hexPoints(x, y, 32)} fill="#3539F4" />
+          <polygon points={hexPoints(x, y, 32)} fill="#004D99" />
           <circle cx={x} cy={y - 11} r="4.5" fill="#fff" />
           <line x1={x} y1={y - 7} x2={x} y2={y + 2} stroke="#fff" strokeWidth="2" />
           <line x1={x - 12} y1={y + 2} x2={x + 12} y2={y + 2} stroke="#fff" strokeWidth="2" />
