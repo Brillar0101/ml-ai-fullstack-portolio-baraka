@@ -16,6 +16,8 @@ const AboutPage = lazy(() => import('./pages/AboutPage'));
 const BlogPage = lazy(() => import('./pages/BlogPage'));
 const BlogPostPage = lazy(() => import('./pages/BlogPostPage'));
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
+// NeuralCard landing: NFC taps and QR scans from the PCB business card
+const CardPage = lazy(() => import('./pages/CardPage'));
 // All real project pages render through one data-driven template.
 const ProjectCaseStudy = lazy(() => import('./pages/ProjectCaseStudy'));
 
@@ -109,6 +111,7 @@ export default function App() {
             <Route path="/blog/:slug" element={<BlogPostPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/card" element={<CardPage />} />
 
             {/* Admin routes */}
             <Route path="/admin/login" element={<AdminLogin />} />

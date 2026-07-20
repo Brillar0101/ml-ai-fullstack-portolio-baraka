@@ -1,0 +1,13 @@
+BEGIN:VCARD
+VERSION:3.0
+N:Lawuo;Barakaeli;;;
+FN:Barakaeli Lawuo
+TITLE:Computer Engineer
+EMAIL;TYPE=INTERNET:barakaeli@vt.edu
+TEL;TYPE=CELL:+15409982037
+URL:https://www.princetekki.com
+ADR;TYPE=WORK:;;;Blacksburg;VA;;USA
+X-SOCIALPROFILE;TYPE=linkedin:https://linkedin.com/in/barakaeli
+X-SOCIALPROFILE;TYPE=github:https://github.com/Brillar0101
+NOTE:Met via NeuralCard - the PCB business card that reads air-written digits.
+END:VCARD
