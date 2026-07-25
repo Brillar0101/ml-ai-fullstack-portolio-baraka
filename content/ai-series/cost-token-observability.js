@@ -64,11 +64,11 @@ export const POST = {
     },
     { type: 'lab', height: 460,
         title: 'Cost per call, then the breakdown that makes it actionable',
-        caption: 'An untagged bill is one number you cannot act on. Tagging by feature turns "spend is up" into "the summariser is the problem".',
+        caption: 'One feature is 99 percent of the bill, and it is the one pasting the most context into every call. The 30x input-to-output ratio underneath is where that money actually goes. An untagged invoice shows a single number and no way to act on it.',
         code: `from collections import defaultdict
 
-PRICES = {   # dollars per 1,000 tokens. Illustrative round numbers, not a
-             # price list for any real provider: check your own.
+PRICES = {   # dollars per 1,000 tokens. Illustrative round
+             # numbers, not any real provider's price list.
     "big-model":   {"in": 0.003,  "out": 0.015},
     "small-model": {"in": 0.0005, "out": 0.0015},
 }
@@ -79,12 +79,12 @@ def emit(record):
 
 def log_cost(model, usage, feature, customer_id):
     rate = PRICES[model]
-    cost_in  = usage["input_tokens"]  / 1000 * rate["in"]
-    cost_out = usage["output_tokens"] / 1000 * rate["out"]
-    total = cost_in + cost_out
-    emit({                          # send this to your metrics store
+    cin = usage["input_tokens"] / 1000 * rate["in"]
+    cout = usage["output_tokens"] / 1000 * rate["out"]
+    total = cin + cout
+    emit({                    # send to your metrics store
         "model": model,
-        "feature": feature,          # tags are what make spend attributable
+        "feature": feature,   # tags make spend attributable
         "customer_id": customer_id,
         "input_tokens": usage["input_tokens"],
         "output_tokens": usage["output_tokens"],
@@ -92,44 +92,69 @@ def log_cost(model, usage, feature, customer_id):
     })
     return total
 
-# A day of traffic. The summarizer stuffs a lot of context into every call.
+# A day of traffic. The summariser stuffs a lot of context
+# into every call; the chat replies are small.
 TRAFFIC = [
-    ("big-model",   {"input_tokens": 12000, "output_tokens": 300}, "doc-summary", "acme"),
-    ("big-model",   {"input_tokens": 12000, "output_tokens": 300}, "doc-summary", "acme"),
-    ("big-model",   {"input_tokens": 11500, "output_tokens": 280}, "doc-summary", "globex"),
-    ("small-model", {"input_tokens": 400,   "output_tokens": 120}, "chat-reply",  "acme"),
-    ("small-model", {"input_tokens": 380,   "output_tokens": 110}, "chat-reply",  "globex"),
-    ("small-model", {"input_tokens": 420,   "output_tokens": 130}, "chat-reply",  "acme"),
+    ("big-model", 12000, 300, "doc-summary", "acme"),
+    ("big-model", 12000, 300, "doc-summary", "acme"),
+    ("big-model", 11500, 280, "doc-summary", "globex"),
+    ("small-model", 400, 120, "chat-reply", "acme"),
+    ("small-model", 380, 110, "chat-reply", "globex"),
+    ("small-model", 420, 130, "chat-reply", "acme"),
 ]
+for model, tin, tout, feature, cust in TRAFFIC:
+    usage = {"input_tokens": tin, "output_tokens": tout}
+    log_cost(model, usage, feature, cust)
 
-for model, usage, feature, customer in TRAFFIC:
-    log_cost(model, usage, feature, customer)
-
-by_feature = defaultdict(float)
-by_customer = defaultdict(float)
-in_tokens = out_tokens = 0
-for r in LEDGER:
-    by_feature[r["feature"]] += r["cost_usd"]
-    by_customer[r["customer_id"]] += r["cost_usd"]
-    in_tokens += r["input_tokens"]; out_tokens += r["output_tokens"]
+# ---- Report --------------------------------------------
+E = chr(27)
+DIM, OFF, BOLD = E + "[2m", E + "[0m", E + "[1m"
+BAD, OK, INFO = E + "[31m", E + "[32m", E + "[34m"
+note = lambda s: print(DIM + s + OFF)
 
 total = sum(r["cost_usd"] for r in LEDGER)
-print("total spend: $%.4f across %d calls" % (total, len(LEDGER)))
-print()
-print("by feature:")
-for k, v in sorted(by_feature.items(), key=lambda x: -x[1]):
-    print("   %-12s $%.4f  (%4.1f%%)" % (k, v, 100 * v / total))
-print("by customer:")
-for k, v in sorted(by_customer.items(), key=lambda x: -x[1]):
-    print("   %-12s $%.4f  (%4.1f%%)" % (k, v, 100 * v / total))
-print()
-print("input tokens: %d,  output tokens: %d" % (in_tokens, out_tokens))
-print("Input is %.0fx the output volume here, which is where the bill lives." %
-      (in_tokens / out_tokens))
 
-# An untagged bill would show one number and no way to act on it. Tagging by
-# feature is what turns "spend is up" into "the summarizer is the problem".
-# Try it: halve the doc-summary input tokens and watch the split move.
+def group(key):
+    out = defaultdict(float)
+    for r in LEDGER:
+        out[r[key]] += r["cost_usd"]
+    return sorted(out.items(), key=lambda x: -x[1])
+
+def bar(share, width=16):
+    filled = round(share * width)
+    return "#" * filled + "." * (width - filled)
+
+print(BOLD + "SPEND" + OFF + "  $%.4f across %d calls"
+      % (total, len(LEDGER)))
+note("-" * 52)
+
+for label, rows in [("BY FEATURE", group("feature")),
+                    ("BY CUSTOMER", group("customer_id"))]:
+    note(label)
+    for name, amount in rows:
+        share = amount / total
+        colour = BAD if share > 0.5 else OK
+        print("  %-13s $%.4f  %s%s%s %3.0f%%"
+              % (name, amount, colour, bar(share), OFF,
+                 share * 100))
+    note("")
+
+tin = sum(r["input_tokens"] for r in LEDGER)
+tout = sum(r["output_tokens"] for r in LEDGER)
+note("-" * 52)
+ratio = tin / tout
+head = BOLD + "TOKENS" + OFF
+print(head + "  in %s%d%s  out %d  %s%.0fx%s"
+      % (INFO, tin, OFF, tout, BAD, ratio, OFF))
+
+print()
+note("One feature is nearly the whole bill, and it is")
+note("the one pasting the most context in. An untagged")
+note("invoice shows one number and no way to act on it.")
+note("Tagging is what turns a rising bill into a name.")
+
+# Try it: halve the doc-summary input tokens and watch both
+# the feature split and the customer split move together.
 ` },
     { type: 'p', text: 'The prices here are placeholders, so read the current numbers off your provider page before you trust them. What matters is the shape.' },
       { type: 'p', text: 'Notice the tags for feature and customer. Those are what make the number attributable. Once every request carries them, you can group your spend by feature to see which one is expensive, or by customer to see whether one heavy account is quietly eating the margin on your flat-rate plan. Without tags you have one big total and no way to ask where it came from.' },
