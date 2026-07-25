@@ -1545,7 +1545,7 @@ print("Same model, same prompt, one setting. Not a bug: a dial.")
       { type: 'p', text: 'Here is the heart of a runner that uses the ladder, small enough to read in one sitting:' },
       { type: 'lab', height: 460,
         title: 'eval_runner.py, with a flaky case and an outage in the set',
-        caption: 'Case 3 passes some runs and fails others. A pipeline that runs each case once would report that as a clean pass or a clean fail, and you would never know which.',
+        caption: 'The flaky row is the one that matters. It passes some runs and fails others, so a pipeline running each case once reports a confident PASS or FAIL and never tells you it was a coin flip.',
         code: `import json, random
 
 # ---- Stand-ins for the two things you would really call -------------------
@@ -1554,23 +1554,23 @@ print("Same model, same prompt, one setting. Not a bug: a dial.")
 random.seed(7)
 
 REPLIES = {
-    "refund-policy": '{"answer": "Refunds within 30 days. [doc:policy-1]"}',
-    "no-citation":   '{"answer": "Refunds within 30 days."}',    # forgot the source
-    "broken-json":   'Sure! Here is the answer you asked for.',  # not JSON at all
+    "refund-policy": '{"answer": "Refunds in 30 days. [doc:policy-1]"}',
+    "no-citation":   '{"answer": "Refunds within 30 days."}',
+    "broken-json":   'Sure! Here is the answer you asked for.',
 }
 
 def system(case_input):
     if case_input == "flaky":
         # A genuinely unstable case: right about half the time.
-        return ('{"answer": "Annual plans renew automatically. [doc:billing-4]"}'
+        return ('{"answer": "Annual plans renew. [doc:billing-4]"}'
                 if random.random() < 0.5
                 else '{"answer": "I am not sure about annual plans."}')
     if case_input == "outage":
-        raise ConnectionError("provider timed out")   # infra, not quality
+        raise ConnectionError("provider timed out")
     return REPLIES[case_input]
 
 def judge(rubric, case_input, out):
-    # A real judge is a model reading a rubric. This stand-in only checks
+    # A real judge is a model reading a rubric. This one only checks
     # whether the rubric's required phrase survived into the answer.
     return 1.0 if rubric.lower() in out.lower() else 0.0
 
@@ -1581,7 +1581,7 @@ def is_valid_json(out):
     except Exception:
         return False
 
-# ---- The pipeline code itself ---------------------------------------------
+# ---- The pipeline itself ---------------------------------------------------
 CHECKS = [
     ("valid_json",   lambda out: is_valid_json(out)),
     ("cites_source", lambda out: "[doc" in out),
@@ -1608,21 +1608,67 @@ def run_case(system, judge, case, runs=5):
     }
 
 CASES = [
-    {"id": "1-happy",       "input": "refund-policy", "rubric": "30 days"},
-    {"id": "2-no-citation", "input": "no-citation",   "rubric": "30 days"},
-    {"id": "3-flaky",       "input": "flaky",         "rubric": "renew"},
-    {"id": "4-bad-json",    "input": "broken-json",   "rubric": "30 days"},
-    {"id": "5-outage",      "input": "outage",        "rubric": "30 days"},
+    {"id": "happy",       "input": "refund-policy", "rubric": "30 days"},
+    {"id": "no-citation", "input": "no-citation",   "rubric": "30 days"},
+    {"id": "flaky",       "input": "flaky",         "rubric": "renew"},
+    {"id": "bad-json",    "input": "broken-json",   "rubric": "30 days"},
+    {"id": "outage",      "input": "outage",        "rubric": "30 days"},
 ]
 
-for case in CASES:
-    r = run_case(system, judge, case)
-    bar = "#" * int(r["stability"] * 10)
-    print("%-14s stability %.1f %-10s errors=%d"
-          % (r["case"], r["stability"], bar, r["errors"]))
+# ---- Report ----------------------------------------------------------------
+# Colour follows status meaning, not decoration: green passes, gold needs a
+# human, red blocks the ship, grey is infrastructure rather than quality.
+E = chr(27)
+DIM, OFF = E + "[2m", E + "[0m"
+OK, WARN, BAD, INFO = E + "[32m", E + "[33m", E + "[31m", E + "[90m"
+BOLD = E + "[1m"
 
-# Try it: set runs=1 and run again. Case 3 now reports a confident pass or a
-# confident fail, and nothing on screen tells you which one you got.
+def bar(v, width=10):
+    filled = round(v * width)
+    return "#" * filled + "." * (width - filled)
+
+def classify(r):
+    if r["errors"]:
+        return INFO, "INFRA", "not a quality signal"
+    if r["stability"] == 1.0:
+        return OK, "PASS", ""
+    if r["stability"] == 0.0:
+        return BAD, "FAIL", "every run"
+    return WARN, "FLAKY", "coin flip, unnoticed"
+
+RUNS = 5
+print(BOLD + "EVAL RUN" + OFF + "  %d cases x %d runs" % (len(CASES), RUNS))
+print(DIM + "-" * 46 + OFF)
+print(DIM + "%-12s %-12s %5s  %s" % ("CASE", "STABILITY", "RATE", "VERDICT") + OFF)
+
+results = []
+for case in CASES:
+    r = run_case(system, judge, case, runs=RUNS)
+    results.append(r)
+    colour, verdict, note = classify(r)
+    print("%-12s %s%-12s%s %4.0f%%  %s%s%s"
+          % (r["case"], colour, bar(r["stability"]), OFF,
+             r["stability"] * 100, colour, verdict, OFF))
+    if note:
+        print(DIM + "%-12s %s" % ("", note) + OFF)
+
+print(DIM + "-" * 46 + OFF)
+
+blocked = [r for r in results if not r["errors"] and r["stability"] < 1.0]
+infra = [r for r in results if r["errors"]]
+gate = BAD + "BLOCKED" + OFF if blocked else OK + "CLEAR" + OFF
+plural = lambda n, word: "%d %s%s" % (n, word, "" if n == 1 else "s")
+print(BOLD + "SHIP GATE" + OFF + "  %s  %s, %s"
+      % (gate, plural(len(blocked), "failing case"),
+         plural(len(infra), "infra error")))
+
+print()
+print(DIM + "The flaky case is the one to look at. It passes some runs" + OFF)
+print(DIM + "and fails others, so a pipeline running each case once" + OFF)
+print(DIM + "reports a confident PASS or FAIL and tells you nothing." + OFF)
+
+# Try it: set RUNS = 1 and run again. The flaky row becomes a clean
+# verdict, and nothing on screen warns you it was a coin flip.
 ` },
       { type: 'p', text: 'Two details in that snippet do more work than their size suggests. Each case runs five times because a model is not deterministic: a case that passes three runs out of five is not passing, it is a coin flip you have not noticed yet, and the **stability rate** makes that visible. And an exception from the API records an ERROR, never a FAIL, because an infrastructure hiccup is not a quality regression. Letting timeouts bleed into your score is how a team spends a day debugging a prompt that was never the problem.' },
       { type: 'h2', text: 'What actually goes in the dataset' },

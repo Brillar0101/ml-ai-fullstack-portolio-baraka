@@ -1048,3 +1048,13 @@
 .blog-post-content > * {
   max-width: 100%;
 }
+
+/* The lab output panel is a terminal and must stay dark in both themes: the
+   status palette it uses (green pass, gold flaky, red fail) is built for a
+   dark ground, and the generic `pre` rule above would otherwise repaint it
+   light and leave the text unreadable. Specificity is deliberate here. */
+.blog-post-content .lab .lab-output {
+  background: #05060a;
+  color: var(--lab-fg);
+  border-radius: 0;
+}

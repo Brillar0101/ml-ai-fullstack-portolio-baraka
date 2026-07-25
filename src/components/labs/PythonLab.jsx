@@ -1,5 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { Play, RotateCcw, Loader2 } from 'lucide-react';
+import { parseAnsi, hasAnsi } from './ansi';
 import './PythonLab.css';
 
 /**
@@ -110,7 +111,11 @@ export default function PythonLab({ code, packages = [], height = 260 }) {
 
       {(output || status === 'done' || status === 'error') && (
         <pre className={`lab-output ${status === 'error' ? 'lab-output-error' : ''}`}>
-          {output || '(no output)'}
+          {hasAnsi(output)
+            ? parseAnsi(output).map((part, i) => (
+              <span key={i} style={part.style}>{part.text}</span>
+            ))
+            : (output || '(no output)')}
         </pre>
       )}
     </div>
