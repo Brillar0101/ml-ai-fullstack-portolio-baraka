@@ -14,10 +14,9 @@ def group_advantages(rewards, group_size, eps=1e-4):
 # Four problems of different difficulty.
 # 1.0 = the answer checked out against a verifier.
 PROBLEMS = [
-    ("A  hard",  [1.0, 0.0, 0.0, 0.0]),
-    ("B  medium", [1.0, 0.0, 1.0, 0.0]),
-    ("C  easy",   [1.0, 1.0, 1.0, 0.0]),
-    ("D  solved", [1.0, 1.0, 1.0, 1.0]),
+    ("A  hard",   [1.0, 0.0, 0.0, 0.0]),
+    ("B  easy",   [1.0, 1.0, 1.0, 0.0]),
+    ("C  solved", [1.0, 1.0, 1.0, 1.0]),
 ]
 
 rewards = np.array([r for _, rs in PROBLEMS for r in rs])
@@ -38,7 +37,7 @@ def arrow(a):
         return OK, "  push toward"
     return BAD, "  push away"
 
-print(BOLD + "GRPO" + OFF + "  4 problems x 4 samples")
+print(BOLD + "GRPO" + OFF + "  3 problems x 4 samples")
 note("-" * 54)
 note("%-11s %7s %5s %9s %s"
      % ("PROBLEM", "SOLVED", "REWARD", "ADVANTAGE", "UPDATE"))
@@ -61,9 +60,9 @@ print("         where fewer samples got it right")
 
 print()
 note("Being right on A, which one sample solved, earns")
-note("a bigger push than being right on C, which most")
-note("already solved. D gives nothing at all: when the")
-note("whole group agrees, there is nothing to learn.")
+note("three times the push of being right on B, which")
+note("most already solved. C gives nothing at all: when")
+note("the whole group agrees there is nothing to learn.")
 note("That is why training data must mix difficulties.")
 
 # Try it: make problem A all zeros. It goes flat too,

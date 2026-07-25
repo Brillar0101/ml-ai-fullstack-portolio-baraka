@@ -8,9 +8,18 @@
 // An item with no `publishAt` is treated as already published (legacy posts).
 // Set `draft: true` to hide an item regardless of date.
 
+// Preview mode: `?preview` on any post URL shows it regardless of its date,
+// so scheduled work can be reviewed before it goes live. It never affects the
+// blog index or what a normal visitor sees, and a drafted item stays hidden.
+export function isPreviewing() {
+  if (typeof window === 'undefined') return false;
+  return new URLSearchParams(window.location.search).has('preview');
+}
+
 export function isPublished(item, now = new Date()) {
   if (!item) return false;
   if (item.draft) return false;
+  if (isPreviewing()) return true;
   if (!item.publishAt) return true;
   const when = new Date(item.publishAt);
   if (Number.isNaN(when.getTime())) return true;

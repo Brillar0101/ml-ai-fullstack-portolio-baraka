@@ -71,7 +71,7 @@ export const POST = {
       { type: 'p', text: 'The advantage for each answer becomes its reward minus the group mean, sometimes divided by the group standard deviation to keep the scale steady. That single swap cuts the memory footprint, removes an entire training loop, and takes out a component that was often finicky to get right. You pay for it by needing several samples per problem, but for tasks with cheap automatic checking that trade is usually worth it.' },
     { type: 'lab', packages: ['numpy'], height: 460,
         title: 'Group-relative advantages, on an easy problem and a hard one',
-        caption: 'Four problems of different difficulty. Being right on the hard one, which a single sample solved, earns a far bigger push than being right on the easy one. When every sample agrees, the signal is exactly zero.',
+        caption: 'Three problems of different difficulty. Being right on the hard one, which a single sample solved, earns three times the push of being right on the easy one. When every sample agrees, the signal is exactly zero.',
         code: `import numpy as np
 
 # GRPO's core move: instead of a separate value network
@@ -88,10 +88,9 @@ def group_advantages(rewards, group_size, eps=1e-4):
 # Four problems of different difficulty.
 # 1.0 = the answer checked out against a verifier.
 PROBLEMS = [
-    ("A  hard",  [1.0, 0.0, 0.0, 0.0]),
-    ("B  medium", [1.0, 0.0, 1.0, 0.0]),
-    ("C  easy",   [1.0, 1.0, 1.0, 0.0]),
-    ("D  solved", [1.0, 1.0, 1.0, 1.0]),
+    ("A  hard",   [1.0, 0.0, 0.0, 0.0]),
+    ("B  easy",   [1.0, 1.0, 1.0, 0.0]),
+    ("C  solved", [1.0, 1.0, 1.0, 1.0]),
 ]
 
 rewards = np.array([r for _, rs in PROBLEMS for r in rs])
@@ -112,7 +111,7 @@ def arrow(a):
         return OK, "  push toward"
     return BAD, "  push away"
 
-print(BOLD + "GRPO" + OFF + "  4 problems x 4 samples")
+print(BOLD + "GRPO" + OFF + "  3 problems x 4 samples")
 note("-" * 54)
 note("%-11s %7s %5s %9s %s"
      % ("PROBLEM", "SOLVED", "REWARD", "ADVANTAGE", "UPDATE"))
@@ -135,9 +134,9 @@ print("         where fewer samples got it right")
 
 print()
 note("Being right on A, which one sample solved, earns")
-note("a bigger push than being right on C, which most")
-note("already solved. D gives nothing at all: when the")
-note("whole group agrees, there is nothing to learn.")
+note("three times the push of being right on B, which")
+note("most already solved. C gives nothing at all: when")
+note("the whole group agrees there is nothing to learn.")
 note("That is why training data must mix difficulties.")
 
 # Try it: make problem A all zeros. It goes flat too,
