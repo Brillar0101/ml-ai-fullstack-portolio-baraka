@@ -77,17 +77,19 @@ export const POST = {
     },
     { type: 'lab', height: 460,
         title: 'A structured event, and the four questions it answers',
-        caption: 'Alert on speed, health and safety. Put cost on a dashboard: spend creeping up is a conversation, not a page at three in the morning.',
-        code: `import json, time
+        caption: 'Every signal with the response it earns. Speed, quality and safety page someone; cost goes on a dashboard. Underneath is the single event all five rows were derived from, which is the point: none of these questions are answerable unless the field was logged in the first place.',
+        code: `import json
 from collections import Counter
 
-# One structured event per request, then the four questions you can only ask
-# because the event was structured.
+# One structured event per request, then the questions
+# you can only ask because the event was structured.
 
-def estimate_cost(usage, model):
-    rates = {"big-model": (0.003, 0.015), "small-model": (0.0005, 0.0015)}
+def cost_of(usage, model):
+    rates = {"big-model": (0.003, 0.015),
+             "small-model": (0.0005, 0.0015)}
     cin, cout = rates[model]
-    return usage["input"] / 1000 * cin + usage["output"] / 1000 * cout
+    return (usage["in"] * cin
+            + usage["out"] * cout) / 1000
 
 def emit_llm_event(req, resp, timings, safety):
     return {
@@ -96,16 +98,16 @@ def emit_llm_event(req, resp, timings, safety):
         "user_id": req["user_id"],
         # operational
         "model": resp["model"],
-        "time_to_first_token_ms": timings["first_token_ms"],
+        "ttft_ms": timings["ttft_ms"],
         "total_ms": timings["total_ms"],
-        "input_tokens": resp["usage"]["input"],
-        "output_tokens": resp["usage"]["output"],
-        "cost_usd": round(estimate_cost(resp["usage"], resp["model"]), 6),
-        "tool_calls": resp["tool_calls"],
+        "input_tokens": resp["usage"]["in"],
+        "output_tokens": resp["usage"]["out"],
+        "cost_usd": round(
+            cost_of(resp["usage"], resp["model"]), 6),
         "tool_errors": resp["tool_errors"],
         # quality and behaviour
         "refused": resp["refused"],
-        "used_fallback": resp["used_fallback"],
+        "used_fallback": resp["tool_errors"] > 0,
         # safety scores from classifiers, 0..1
         "jailbreak_score": safety["jailbreak"],
         "pii_in_output": safety["pii"],
@@ -113,47 +115,94 @@ def emit_llm_event(req, resp, timings, safety):
         "thumbs": None,
     }
 
-def ev(i, model, ttft, total, tin, tout, calls, errs, refused, fb, jb=0.02, pii=False):
+def ev(i, model, ttft, tin, tout, errs,
+       refused, jb=0.02):
     return emit_llm_event(
-        {"ts": 1750000000 + i, "id": "r%d" % i, "user_id": "u%d" % (i % 3)},
-        {"model": model, "usage": {"input": tin, "output": tout}, "tool_calls": calls,
-         "tool_errors": errs, "refused": refused, "used_fallback": errs > 0},
-        {"first_token_ms": ttft, "total_ms": total},
-        {"jailbreak": jb, "pii": pii})
+        {"ts": 1750000000 + i, "id": "r%d" % i,
+         "user_id": "u%d" % (i % 3)},
+        {"model": model, "usage": {"in": tin, "out": tout},
+         "tool_errors": errs, "refused": refused},
+        {"ttft_ms": ttft, "total_ms": ttft * 4},
+        {"jailbreak": jb, "pii": False})
 
 EVENTS = [
-    ev(1, "small-model", 210, 900, 800, 120, 1, 0, False, "up"),
-    ev(2, "small-model", 240, 950, 820, 140, 1, 0, False, "up"),
-    ev(3, "big-model", 1900, 8200, 14000, 300, 3, 1, False, "down"),
-    ev(4, "small-model", 260, 1000, 810, 130, 1, 0, True, "down", jb=0.81),
-    ev(5, "big-model", 2100, 9000, 15000, 280, 3, 1, False, None),
-    ev(6, "small-model", 230, 940, 790, 125, 1, 0, False, "up"),
+    ev(1, "small-model", 210, 800, 120, 0, False),
+    ev(2, "small-model", 240, 820, 140, 0, False),
+    ev(3, "big-model", 1900, 14000, 300, 1, False),
+    ev(4, "small-model", 260, 810, 130, 0, True, jb=0.81),
+    ev(5, "big-model", 2100, 15000, 280, 1, False),
+    ev(6, "small-model", 230, 790, 125, 0, False),
 ]
-for e, fb in zip(EVENTS, ["up", "up", "down", "down", None, "up"]):
+FEEDBACK = ["up", "up", "down", "down", None, "up"]
+for e, fb in zip(EVENTS, FEEDBACK):
     e["thumbs"] = fb
 
-print("one event looks like this:")
-print(json.dumps(EVENTS[0], indent=2)[:340] + "\\n  ...")
-print()
+# ---- Report --------------------------------------------
+E = chr(27)
+DIM, OFF, BOLD = E + "[2m", E + "[0m", E + "[1m"
+OK, WARN, BAD, INFO = (E + "[32m", E + "[33m",
+                       E + "[31m", E + "[34m")
+note = lambda s: print(DIM + s + OFF)
 
-ttfts = sorted(e["time_to_first_token_ms"] for e in EVENTS)
+ttfts = sorted(e["ttft_ms"] for e in EVENTS)
 p95 = ttfts[int(0.95 * (len(ttfts) - 1))]
-print("1. is it fast?        p95 time-to-first-token %d ms" % p95)
-print("2. what does it cost? $%.4f over %d calls, %.0f%% of it on big-model"
-      % (sum(e["cost_usd"] for e in EVENTS), len(EVENTS),
-         100 * sum(e["cost_usd"] for e in EVENTS if e["model"] == "big-model")
-         / sum(e["cost_usd"] for e in EVENTS)))
-print("3. is it working?     thumbs %s, refusals %d, tool errors %d"
-      % (dict(Counter(e["thumbs"] for e in EVENTS)),
-         sum(e["refused"] for e in EVENTS), sum(e["tool_errors"] for e in EVENTS)))
-flagged = [e for e in EVENTS if e["jailbreak_score"] > 0.5 or e["pii_in_output"]]
-print("4. is it safe?        %d request(s) flagged: %s"
-      % (len(flagged), [e["request_id"] for e in flagged]))
-print()
-print("Alert on 1, 3 and 4. Review 2 on a dashboard: cost creeping up is a")
-print("conversation, not a page at three in the morning.")
+spend = sum(e["cost_usd"] for e in EVENTS)
+big = sum(e["cost_usd"] for e in EVENTS
+          if e["model"] == "big-model")
+thumbs = Counter(e["thumbs"] for e in EVENTS)
+refusals = sum(e["refused"] for e in EVENTS)
+tool_errs = sum(e["tool_errors"] for e in EVENTS)
+def risky(e):
+    return e["jailbreak_score"] > 0.5 or e["pii_in_output"]
 
-# Try it: drop "model" from the event and try to answer question 2 again.
+flagged = [e for e in EVENTS if risky(e)]
+
+# group, signal, value, breached?, response
+ROWS = [
+    ("speed", "p95 time to first token",
+     "%d ms" % p95, p95 > 1500, "PAGE"),
+    ("cost", "spend, %.0f%% big" % (100 * big / spend),
+     "$%.4f" % spend, False, "DASH"),
+    ("quality", "thumbs down",
+     "%d of %d" % (thumbs["down"], len(EVENTS)),
+     thumbs["down"] >= 2, "PAGE"),
+    ("quality", "refusals and tool errors",
+     "%d / %d" % (refusals, tool_errs),
+     tool_errs > 0, "PAGE"),
+    ("safety", "requests flagged",
+     "%d" % len(flagged), len(flagged) > 0, "PAGE"),
+]
+
+hdr = BOLD + "SIGNALS" + OFF
+print(hdr + "  %d requests" % len(EVENTS))
+note("-" * 54)
+note("%-9s %-26s %-9s %s"
+     % ("GROUP", "SIGNAL", "VALUE", "ACTION"))
+
+for group, signal, value, breached, action in ROWS:
+    if action == "DASH":
+        colour, label = INFO, "dashboard"
+    elif breached:
+        colour, label = BAD, "PAGE ME"
+    else:
+        colour, label = OK, "ok"
+    print("%-9s %-26s %-9s %s%s%s"
+          % (group, signal, value, colour, label, OFF))
+
+note("-" * 54)
+print(BOLD + "ONE EVENT" + OFF + "  where that came from")
+note(json.dumps({k: EVENTS[3][k] for k in
+                 ("request_id", "model", "ttft_ms",
+                  "cost_usd", "refused",
+                  "jailbreak_score", "thumbs")}, indent=1))
+
+print()
+note("Speed, quality and safety page you. Cost goes on")
+note("a dashboard, because a bill creeping up is a")
+note("conversation, not a reason to wake someone at 3am.")
+
+# Try it: drop "model" from the event, then answer the
+# cost row again. Every row needs a field to exist.
 ` },
     {
       type: 'p',
