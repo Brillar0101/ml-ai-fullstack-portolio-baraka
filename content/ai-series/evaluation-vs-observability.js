@@ -67,85 +67,92 @@ export const POST = {
     },
     { type: 'lab', height: 460,
         title: 'One structured record per call, then the questions it answers',
-        caption: 'The same chunk appears in the happy answers and the unhappy ones, so it is not obviously the culprit. That is a question you can only ask if the retrieved ids are on the record next to the outcome.',
-        code: `import json, time, uuid
-from collections import Counter
+        caption: 'The eval set scored 100 percent and was not wrong. It measured the questions someone thought to write down. Every unhappy request in production is a refund edge case, and not one of them appears in the eval set, which is the gap the two halves exist to close.',
+        code: `from collections import Counter
 
-# Offline evaluation tells you a change is safe to try. Observability tells you
-# what actually happened once real people used it. This is the second one: one
-# structured record per call, and the aggregation that makes it worth logging.
+# Offline evaluation says a change is safe to try.
+# Online observability says whether it helped the
+# people you built it for. Both run here, same
+# assistant.
 
-class FakeResult:
-    def __init__(self, text, pt, ot):
-        self.text, self.prompt_tokens, self.output_tokens = text, pt, ot
-
-class FakeModel:
-    """Stand-in. Returns a canned answer so the record shape is the point."""
-    def answer(self, question, context):
-        time.sleep(0.005)
-        return FakeResult("Refunds take 5 business days.", 800 + 40 * len(context), 24)
-
-SINK = []
-def write(line):
-    SINK.append(json.loads(line))
-
-class Sink:
-    def write(self, line):
-        write(line)
-
-def call_and_log(model, question, retrieved, sink):
-    start = time.time()
-    result = model.answer(question, context=retrieved)
-    record = {
-        "trace_id": str(uuid.uuid4()),
-        "question": question,
-        "retrieved_ids": [p["id"] for p in retrieved],
-        "answer": result.text,
-        "latency_ms": round((time.time() - start) * 1000),
-        "prompt_tokens": result.prompt_tokens,
-        "output_tokens": result.output_tokens,
-        "feedback": None,        # filled in later: "up", "down", "escalated"
-        "ts": time.time(),
-    }
-    sink.write(json.dumps(record) + "\\n")
-    return record
-
-def attach_feedback(trace_id, signal):
-    for r in SINK:
-        if r["trace_id"] == trace_id:
-            r["feedback"] = signal
-
-model, sink = FakeModel(), Sink()
-TRAFFIC = [
-    ("how long do refunds take?",       [{"id": "billing-2"}],                    "up"),
-    ("how long do refunds take?",       [{"id": "billing-2"}],                    "up"),
-    ("can I get a refund after 60 days?", [{"id": "billing-2"}, {"id": "policy-9"}], "down"),
-    ("why was I charged twice?",        [{"id": "billing-2"}, {"id": "billing-7"}], "escalated"),
-    ("where is my order?",              [{"id": "ship-1"}],                       None),
+# ---- Offline: the eval set, run before shipping ---------
+# Curated questions with a known-good answer.
+EVAL_SET = [
+    ("how long do refunds take?", "5 business days", True),
+    ("how do I cancel?", "from the billing page", True),
+    ("do you support SSO?", "on the enterprise plan", True),
+    ("what are the rate limits?", "100 per minute", True),
+    ("where is my order?", "check the orders page", True),
 ]
 
-for question, retrieved, signal in TRAFFIC:
-    rec = call_and_log(model, question, retrieved, sink)
-    if signal:
-        attach_feedback(rec["trace_id"], signal)
+# ---- Online: what real traffic actually did -------------
+# Same assistant, questions nobody thought to curate.
+TRAFFIC = [
+    ("how long do refunds take?", ["billing-2"], "up"),
+    ("how long do refunds take?", ["billing-2"], "up"),
+    ("refund after 60 days?",
+     ["billing-2", "policy-9"], "down"),
+    ("charged twice?",
+     ["billing-2", "billing-7"], "escalated"),
+    ("refund on a gift order?",
+     ["billing-2"], "down"),
+    ("where is my order?", ["ship-1"], "up"),
+]
 
-print("logged %d calls" % len(SINK))
-print()
-print("what the aggregate says:")
-print("   median latency   %d ms" % sorted(r["latency_ms"] for r in SINK)[len(SINK) // 2])
-print("   total tokens in  %d" % sum(r["prompt_tokens"] for r in SINK))
-print("   feedback         %s" % dict(Counter(r["feedback"] for r in SINK)))
-print()
-bad = [r for r in SINK if r["feedback"] in ("down", "escalated")]
-print("the %d unhappy calls, and what they retrieved:" % len(bad))
-for r in bad:
-    print("   %-34s %-11s %s" % (r["question"], r["feedback"], r["retrieved_ids"]))
-print()
-print("billing-2 is in both unhappy answers and both happy ones, so the chunk")
-print("is not obviously the problem. That is the kind of question you can only")
-print("ask once the retrieved ids are on the record next to the outcome.")
+# ---- Report --------------------------------------------
+E = chr(27)
+DIM, OFF, BOLD = E + "[2m", E + "[0m", E + "[1m"
+OK, WARN, BAD = E + "[32m", E + "[33m", E + "[31m"
+note = lambda s: print(DIM + s + OFF)
 
-# Try it: log only latency and tokens, then try to answer the same question.
+passed = sum(1 for _, _, ok in EVAL_SET if ok)
+score = passed / len(EVAL_SET)
+
+print(BOLD + "OFFLINE" + OFF + "  eval set, before ship")
+note("-" * 52)
+print("  cases          %d" % len(EVAL_SET))
+n = len(EVAL_SET)
+print("  passing        %s%d of %d  (%.0f%%)%s"
+      % (OK, passed, n, score * 100, OFF))
+print("  verdict        %sSAFE TO SHIP%s" % (OK, OFF))
+print()
+
+SAD = ("down", "escalated")
+unhappy = [t for t in TRAFFIC if t[2] in SAD]
+fb = Counter(t[2] for t in TRAFFIC)
+rate = len(unhappy) / len(TRAFFIC)
+
+print(BOLD + "ONLINE" + OFF + "   real traffic, after ship")
+note("-" * 52)
+print("  requests       %d" % len(TRAFFIC))
+m = len(TRAFFIC)
+print("  unhappy        %s%d of %d  (%.0f%%)%s"
+      % (BAD, len(unhappy), m, rate * 100, OFF))
+print("  feedback       %s" % dict(fb))
+print()
+
+note("the unhappy ones, and what they retrieved:")
+for q, chunks, signal in unhappy:
+    colour = BAD if signal == "escalated" else WARN
+    print("  %s%-10s%s %-23s %s"
+          % (colour, signal, OFF, q[:23],
+             ",".join(chunks)))
+
+print()
+note("-" * 52)
+gap = BOLD + "THE GAP" + OFF
+print(gap + "  every unhappy question is")
+print("         a refund edge case, and not one")
+print("         of them is in the eval set above.")
+
+print()
+note("Offline scored 100% and was not wrong. It measured")
+note("the questions someone thought to write down.")
+note("Production is where you meet the ones nobody")
+note("imagined, and each belongs in the eval set tomorrow.")
+
+# Try it: add the 60-day refund case to EVAL_SET with
+# ok=False. Offline drops and predicts the problem.
 ` },
     {
       type: 'p',
