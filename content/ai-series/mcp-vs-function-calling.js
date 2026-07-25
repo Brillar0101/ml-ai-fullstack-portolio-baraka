@@ -33,10 +33,8 @@ export const POST = {
       type: 'p',
       text: 'Now imagine every restaurant in a city agreed on one standard ticket format and one standard way for any waiter to learn which dishes a kitchen offers. A new waiter could walk into any kitchen and get to work without a custom briefing. That shared agreement is **MCP**, the Model Context Protocol. It does not cook and it does not take the order. It standardizes how a kitchen advertises what it can make and how tickets travel between rooms.'
     },
-    {
-      type: 'p',
-      text: 'Hold that picture. The stove, the waiter, and the citywide standard are not rivals. They are three parts of getting one plate served. Notice too that you could run a kitchen with no citywide standard at all. Plenty of restaurants do. The standard only pays off when the same waiter needs to serve many kitchens or many waiters need to read the same menu. Keep that condition in mind, because it is the whole reason MCP exists and the main signal for when to bother with it.'
-    },
+    { type: 'p', text: 'Hold that picture. The stove, the waiter, and the citywide standard are not rivals. They are three parts of getting one plate served.' },
+      { type: 'p', text: 'Notice too that you could run a kitchen with no citywide standard at all. Plenty of restaurants do. The standard only pays off when the same waiter needs to serve many kitchens or many waiters need to read the same menu. Keep that condition in mind, because it is the whole reason MCP exists and the main signal for when to bother with it.' },
     {
       type: 'h2',
       text: 'Walking through one order-status lookup'
@@ -57,10 +55,8 @@ export const POST = {
       type: 'p',
       text: 'So where does MCP come in? If getOrderStatus lives on an MCP server, then the description the model saw, the argument shape it filled, and the channel that carried the call all followed one shared spec. Any MCP-aware app could connect to that same server and discover getOrderStatus without you rewriting the wiring. Without MCP, you hand-code that tool definition inside one app and it stays there.'
     },
-    {
-      type: 'p',
-      text: 'Read that sequence once more and count how many layers the model actually participated in. Exactly one, the function-calling step. It read a description, made a judgment, and wrote arguments. It did not open a socket, run a query, or read a config file. Everything after the arguments was ordinary application code and an ordinary HTTP call. This is worth dwelling on because a lot of anxiety about giving a model tools comes from imagining the model doing far more than it does. In practice the model is a decision maker handing tickets to code you already trust. The database credentials, the retry logic, and the error handling all stay on your side of the line.'
-    },
+    { type: 'p', text: 'Read that sequence once more and count how many layers the model actually participated in. Exactly one, the function-calling step. It read a description, made a judgment, and wrote arguments. It did not open a socket, run a query, or read a config file.' },
+      { type: 'p', text: 'Everything after the arguments was ordinary application code and an ordinary HTTP call. This is worth dwelling on because a lot of anxiety about giving a model tools comes from imagining the model doing far more than it does. In practice the model is a decision maker handing tickets to code you already trust. The database credentials, the retry logic, and the error handling all stay on your side of the line.' },
     {
       type: 'diagram',
       nodes: [
@@ -89,10 +85,8 @@ export const POST = {
       type: 'h2',
       text: 'What actually happens under the hood'
     },
-    {
-      type: 'p',
-      text: 'Here is the part that clears up most of the confusion. MCP uses function calling; it does not replace it. When an MCP server exposes a tool, the client fetches that tool schema and hands it to the model. The model still does the same job it always did: read the schemas, decide, and emit arguments. MCP standardized the two things around that moment. First, discovery, meaning how the app learns which tools exist. Second, exposure, meaning the common format tools and their results are wrapped in so any client understands them.'
-    },
+    { type: 'p', text: 'Here is the part that clears up most of the confusion. MCP uses function calling; it does not replace it. When an MCP server exposes a tool, the client fetches that tool schema and hands it to the model.' },
+      { type: 'p', text: 'The model still does the same job it always did: read the schemas, decide, and emit arguments. MCP standardized the two things around that moment. First, discovery, meaning how the app learns which tools exist. Second, exposure, meaning the common format tools and their results are wrapped in so any client understands them.' },
     {
       type: 'p',
       text: 'The clearest way to feel the difference is to define the exact same tool twice. Once as a raw function-calling schema you paste into a single app, and once registered on an MCP server that any client can reach.'
@@ -184,10 +178,8 @@ app.run(transport="stdio")`
       type: 'p',
       text: 'The engineer with the order lookup was never really choosing between MCP and function calling. She was going to use function calling no matter what, because a model had to decide when to fetch an order. She was going to hit a plain API no matter what, because something had to touch the database. The only open question was whether to standardize the tool behind MCP, and that depended entirely on whether other apps would ever need the same tool.'
     },
-    {
-      type: 'p',
-      text: 'So drop the versus framing. Function calling is the model deciding and filling in arguments. A plain API is the raw work getting done. MCP is the shared contract that lets any client find and reach your tools. Start with function calling and a plain API for a single app. Reach for MCP the moment you want that tool to be reused somewhere else without copying wiring around. Seen that way, they stack neatly, and the afternoon of confusion turns into a fifteen-minute decision.'
-    },
+    { type: 'p', text: 'So drop the versus framing. Function calling is the model deciding and filling in arguments.' },
+      { type: 'p', text: 'A plain API is the raw work getting done. MCP is the shared contract that lets any client find and reach your tools. Start with function calling and a plain API for a single app. Reach for MCP the moment you want that tool to be reused somewhere else without copying wiring around. Seen that way, they stack neatly, and the afternoon of confusion turns into a fifteen-minute decision.' },
     {
       type: 'sources',
       items: [

@@ -5,10 +5,8 @@ export const POST = {
   category: 'AI',
   tags: ['MCP', 'Hands-on', 'Python'],
   body: [
-    {
-      type: 'p',
-      text: 'You keep a folder of notes. Meeting jottings, half-formed ideas, the command you always forget, a running log of what broke last Tuesday. Your AI assistant has no idea any of it exists. You can paste a note into the chat and it will happily reason about it, but the moment you ask \'what did I write about the deploy failure,\' the model shrugs, because the folder lives on your machine and the model lives somewhere else. There is no wire between them. This post is about building that wire, and the smallest useful version of it takes maybe forty lines of Python.'
-    },
+    { type: 'p', text: 'You keep a folder of notes. Meeting jottings, half-formed ideas, the command you always forget, a running log of what broke last Tuesday. Your AI assistant has no idea any of it exists. You can paste a note into the chat and it will happily reason about it, but the moment you ask \'what did I write about the deploy failure,\' the model shrugs, because the folder lives on your machine and the model lives somewhere else.' },
+      { type: 'p', text: 'There is no wire between them. This post is about building that wire, and the smallest useful version of it takes maybe forty lines of Python.' },
     {
       type: 'p',
       text: 'The wire has a name. It is the **Model Context Protocol**, or MCP, an open standard for how an AI application asks an outside program for tools and data. Instead of every assistant inventing its own plugin format, MCP gives them one shared language. You write a small server that knows how to search your notes, and any MCP-aware host can talk to it. We are going to write exactly that server, run it, and watch a client discover the tool and call it.'
@@ -17,10 +15,8 @@ export const POST = {
       type: 'h2',
       text: 'Why the model cannot just read your folder'
     },
-    {
-      type: 'p',
-      text: 'Start with the intuition, because it explains every design choice that follows. A language model is a function that turns text into text. It has no hands. It cannot open a file, hit an API, or list a directory. When an assistant appears to do those things, something else is doing them on the model\'s behalf and feeding the results back in as more text. That something is the gap MCP fills. The model says \'I would like to call the tool named search_notes with the query deploy failure,\' and a separate program actually runs the search and returns the matching lines.'
-    },
+    { type: 'p', text: 'Start with the intuition, because it explains every design choice that follows. A language model is a function that turns text into text. It has no hands. It cannot open a file, hit an API, or list a directory.' },
+      { type: 'p', text: 'When an assistant appears to do those things, something else is doing them on the model\'s behalf and feeding the results back in as more text. That something is the gap MCP fills. The model says \'I would like to call the tool named search_notes with the query deploy failure,\' and a separate program actually runs the search and returns the matching lines.' },
     {
       type: 'p',
       text: 'So there are always two sides. On one side is the thing that wants information: the host application, with the model inside it. On the other side is the thing that has information: your notes folder, wrapped in a small program. MCP is the agreement about how those two sides speak. Your job, when you build a server, is to describe what you can do in a way the model can understand, and to actually do it when asked.'
@@ -47,10 +43,8 @@ export const POST = {
       ],
       caption: 'The model never touches your files. It asks the client, the client speaks MCP to your server, and your server runs a plain Python function that reads the folder.'
     },
-    {
-      type: 'p',
-      text: 'Read that left to right. The host holds the model and decides it needs help. The client is the host\'s mouthpiece for MCP; it knows the protocol so the host does not have to. It connects to your server. Your server exposes one tool. When the tool is called, a normal Python function reads the folder and hands back text. Nothing exotic happens at any step, which is the point.'
-    },
+    { type: 'p', text: 'Read that left to right. The host holds the model and decides it needs help.' },
+      { type: 'p', text: 'The client is the host\'s mouthpiece for MCP; it knows the protocol so the host does not have to. It connects to your server. Your server exposes one tool. When the tool is called, a normal Python function reads the folder and hands back text. Nothing exotic happens at any step, which is the point.' },
     {
       type: 'h2',
       text: 'The four words you need before writing a line'
@@ -107,10 +101,8 @@ def search_notes(query: str, limit: int = 5) -> str:
                     return "\\n".join(hits)
     return "\\n".join(hits) if hits else "No matching notes found."`
     },
-    {
-      type: 'p',
-      text: 'Walk through what the decorator captured. The tool name is search_notes, taken from the function name. The description is the docstring, and it is written for the model, not for you; it says plainly when to reach for this tool. The input schema comes from the signature: query is a required string, limit is an optional integer that defaults to five. The model reads all of that and knows it can call search_notes with a query and, if it wants, a limit. The body is just Python. It globs the folder, scans each file for the query, collects matches, and stops once it has enough.'
-    },
+    { type: 'p', text: 'Walk through what the decorator captured. The tool name is search_notes, taken from the function name. The description is the docstring, and it is written for the model, not for you; it says plainly when to reach for this tool.' },
+      { type: 'p', text: 'The input schema comes from the signature: query is a required string, limit is an optional integer that defaults to five. The model reads all of that and knows it can call search_notes with a query and, if it wants, a limit. The body is just Python. It globs the folder, scans each file for the query, collects matches, and stops once it has enough.' },
     {
       type: 'p',
       text: 'That single decorator is the registration step. There is no separate table you maintain, no list you have to remember to update. Decorate a function and it becomes part of the server\'s tools capability. Want a second tool that lists recent notes? Write another function, add the decorator, done.'
@@ -217,14 +209,10 @@ asyncio.run(main())`
       type: 'h2',
       text: 'What you actually built'
     },
-    {
-      type: 'p',
-      text: 'Step back and count the pieces, because there were fewer than it felt like. You wrote one function that searches a folder. You put a decorator on it, which named it, described it, and built its input schema. You started the server on the stdio transport with a single call. Then you watched a client connect, discover the tool through the capability handshake, and call it. That is a complete MCP server, and it is genuinely useful the moment you point a real assistant at it instead of the test client.'
-    },
-    {
-      type: 'p',
-      text: 'The reason this matters is that the pattern does not stop at notes. The exact same four moves, define a handler, let the decorator build the schema, register it, start the transport, expose anything you can write a Python function for. Your calendar, a database, the ticket system at work, the weather. Each one is another door you hand your assistant. Today you built the smallest one so the shape is clear. The next one is just a different function behind the same decorator.'
-    },
+    { type: 'p', text: 'Step back and count the pieces, because there were fewer than it felt like. You wrote one function that searches a folder. You put a decorator on it, which named it, described it, and built its input schema. You started the server on the stdio transport with a single call.' },
+      { type: 'p', text: 'Then you watched a client connect, discover the tool through the capability handshake, and call it. That is a complete MCP server, and it is genuinely useful the moment you point a real assistant at it instead of the test client.' },
+    { type: 'p', text: 'The reason this matters is that the pattern does not stop at notes. The exact same four moves, define a handler, let the decorator build the schema, register it, start the transport, expose anything you can write a Python function for. Your calendar, a database, the ticket system at work, the weather.' },
+      { type: 'p', text: 'Each one is another door you hand your assistant. Today you built the smallest one so the shape is clear. The next one is just a different function behind the same decorator.' },
     {
       type: 'sources',
       items: [

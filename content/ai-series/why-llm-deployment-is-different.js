@@ -17,30 +17,20 @@ export const POST = {
       type: 'h2',
       text: 'The instinct that works for CRUD and fails for models'
     },
-    {
-      type: 'p',
-      text: 'Here is the mental model that got them in trouble, and it is a good one for normal services. A typical web request is short and self-contained. It reads a row, checks a permission, writes a record, returns JSON. It finishes in a few milliseconds and leaves nothing behind. Because each request is cheap and stateless, you can treat capacity as a simple ratio. If one replica handles 200 requests per second and you need 1000, you run five replicas. Traffic doubles, you double the boxes. The unit of work is tiny, so packing and scaling are easy.'
-    },
-    {
-      type: 'p',
-      text: 'A language model request breaks almost every assumption in that sentence. It is not short. It is not cheap. It does not finish and leave nothing behind. And the resource it fights over, the GPU, does not behave like a CPU you can casually slice into small pieces. The team applied a ratio that only holds when work is small and uniform, to work that is large and lumpy.'
-    },
+    { type: 'p', text: 'Here is the mental model that got them in trouble, and it is a good one for normal services. A typical web request is short and self-contained. It reads a row, checks a permission, writes a record, returns JSON. It finishes in a few milliseconds and leaves nothing behind. Because each request is cheap and stateless, you can treat capacity as a simple ratio.' },
+      { type: 'p', text: 'If one replica handles 200 requests per second and you need 1000, you run five replicas. Traffic doubles, you double the boxes. The unit of work is tiny, so packing and scaling are easy.' },
+    { type: 'p', text: 'A language model request breaks almost every assumption in that sentence. It is not short. It is not cheap. It does not finish and leave nothing behind.' },
+      { type: 'p', text: 'And the resource it fights over, the GPU, does not behave like a CPU you can casually slice into small pieces. The team applied a ratio that only holds when work is small and uniform, to work that is large and lumpy.' },
     {
       type: 'h2',
       text: 'Walk one request through, token by token'
     },
-    {
-      type: 'p',
-      text: 'Say a user sends the prompt "Summarize this email in one line" plus the email text. A CRUD endpoint would look something like a lookup and a response. The model does something different. It reads the whole prompt, then produces the answer one word-piece at a time. First it emits a token, maybe "The". To pick the next token it feeds "The" back in and runs the entire model again to get "sender". Then again for "wants", again for "a", and so on until it decides to stop.'
-    },
-    {
-      type: 'p',
-      text: 'So a 40-token answer means roughly 40 full passes through a multi-billion-parameter network, in sequence, one after another. You cannot compute token 5 before you have token 4, because token 4 is part of the input that decides token 5. That single fact explains the slow replies. The response time is not fixed. It grows with how many tokens you generate. A one-line summary is quick. A three-paragraph answer to the same prompt takes several times longer, not because the prompt changed, but because there are more sequential steps.'
-    },
-    {
-      type: 'p',
-      text: 'It helps to split that time into two parts. The first is the wait until the very first token shows up, which covers how long the request sat in a queue and how long the model took to read the whole prompt. The second is the steady drip of every token after that. A user who asks for a long essay feels the second part. A user stuck behind a busy queue feels the first. When you measure a model service, you have to watch both, because a fast per-token rate hides a slow start, and a quick start hides a long tail. The team had only one latency number on their dashboard, so they never saw which half was hurting them.'
-    },
+    { type: 'p', text: 'Say a user sends the prompt "Summarize this email in one line" plus the email text. A CRUD endpoint would look something like a lookup and a response.' },
+      { type: 'p', text: 'The model does something different. It reads the whole prompt, then produces the answer one word-piece at a time. First it emits a token, maybe "The". To pick the next token it feeds "The" back in and runs the entire model again to get "sender". Then again for "wants", again for "a", and so on until it decides to stop.' },
+    { type: 'p', text: 'So a 40-token answer means roughly 40 full passes through a multi-billion-parameter network, in sequence, one after another. You cannot compute token 5 before you have token 4, because token 4 is part of the input that decides token 5. That single fact explains the slow replies.' },
+      { type: 'p', text: 'The response time is not fixed. It grows with how many tokens you generate. A one-line summary is quick. A three-paragraph answer to the same prompt takes several times longer, not because the prompt changed, but because there are more sequential steps.' },
+    { type: 'p', text: 'It helps to split that time into two parts. The first is the wait until the very first token shows up, which covers how long the request sat in a queue and how long the model took to read the whole prompt. The second is the steady drip of every token after that.' },
+      { type: 'p', text: 'A user who asks for a long essay feels the second part. A user stuck behind a busy queue feels the first. When you measure a model service, you have to watch both, because a fast per-token rate hides a slow start, and a quick start hides a long tail. The team had only one latency number on their dashboard, so they never saw which half was hurting them.' },
     {
       type: 'callout',
       title: 'The shape of the latency',
@@ -64,18 +54,12 @@ export const POST = {
       type: 'h2',
       text: 'Why one request per GPU wastes the machine'
     },
-    {
-      type: 'p',
-      text: 'Now the mechanism behind that idle-but-expensive hardware. A GPU is thousands of small arithmetic units built to do enormous amounts of math in parallel. To do that math it first has to load the model weights from memory. Generating the next token for a single request needs a small amount of actual computation but still forces the GPU to pull those billions of weights across the memory bus. So the expensive units sit around waiting on memory while doing very little math. This is what memory-bound means in practice. You paid for a wide compute engine and then fed it one thin request at a time.'
-    },
-    {
-      type: 'p',
-      text: 'Batching fixes this. If you gather 32 requests and run them through the same pass, the GPU loads the weights once and reuses them for all 32. The math units finally have enough to chew on. Throughput can climb roughly an order of magnitude while the cost of loading weights stays flat. The team that gave each GPU a single request never batched anything, so every machine did the memory-heavy work of a full model pass to serve exactly one user. That is why the bill was high and the boxes looked idle at the same time.'
-    },
-    {
-      type: 'p',
-      text: 'There is a second memory pressure worth naming. As the model generates, it keeps a running cache of internal state for every token so far, so it does not recompute the past on each step. That cache is called the KV cache, and it grows with every token and with every request you batch together. It lives in the same scarce GPU memory as the weights. So batching helps throughput but also eats memory, and long conversations eat more. Serving an LLM is largely the job of packing as many requests as possible into a batch without running out of memory.'
-    },
+    { type: 'p', text: 'Now the mechanism behind that idle-but-expensive hardware. A GPU is thousands of small arithmetic units built to do enormous amounts of math in parallel. To do that math it first has to load the model weights from memory. Generating the next token for a single request needs a small amount of actual computation but still forces the GPU to pull those billions of weights across the memory bus.' },
+      { type: 'p', text: 'So the expensive units sit around waiting on memory while doing very little math. This is what memory-bound means in practice. You paid for a wide compute engine and then fed it one thin request at a time.' },
+    { type: 'p', text: 'Batching fixes this. If you gather 32 requests and run them through the same pass, the GPU loads the weights once and reuses them for all 32.' },
+      { type: 'p', text: 'The math units finally have enough to chew on. Throughput can climb roughly an order of magnitude while the cost of loading weights stays flat. The team that gave each GPU a single request never batched anything, so every machine did the memory-heavy work of a full model pass to serve exactly one user. That is why the bill was high and the boxes looked idle at the same time.' },
+    { type: 'p', text: 'There is a second memory pressure worth naming. As the model generates, it keeps a running cache of internal state for every token so far, so it does not recompute the past on each step.' },
+      { type: 'p', text: 'That cache is called the KV cache, and it grows with every token and with every request you batch together. It lives in the same scarce GPU memory as the weights. So batching helps throughput but also eats memory, and long conversations eat more. Serving an LLM is largely the job of packing as many requests as possible into a batch without running out of memory.' },
     {
       type: 'h2',
       text: 'A queue, a batch, and a stream'
@@ -176,18 +160,14 @@ print("weights get read once and serve everyone in the batch.")
         'Waiting for the full answer before responding. Without streaming, users stared at a spinner for the entire generation instead of watching words arrive.'
       ]
     },
-    {
-      type: 'p',
-      text: 'The fix is not a bigger GPU. It is putting a real inference server in front of the model, one that batches incoming requests, streams tokens, and manages the KV cache carefully. Utilization goes up, cost per answer comes down, and time to first token falls because users no longer wait on a full response. The hardware is identical. The serving strategy is the whole difference. The useful shift is less an infrastructure upgrade than admitting the workload is a different kind of thing: stop picturing tiny stateless requests, start picturing a GPU that wants to stay full, and every other decision falls into place.'
-    },
+    { type: 'p', text: 'The fix is not a bigger GPU. It is putting a real inference server in front of the model, one that batches incoming requests, streams tokens, and manages the KV cache carefully. Utilization goes up, cost per answer comes down, and time to first token falls because users no longer wait on a full response.' },
+      { type: 'p', text: 'The hardware is identical. The serving strategy is the whole difference. The useful shift is less an infrastructure upgrade than admitting the workload is a different kind of thing: stop picturing tiny stateless requests, start picturing a GPU that wants to stay full, and every other decision falls into place.' },
     {
       type: 'h2',
       text: 'What to carry into your next deploy'
     },
-    {
-      type: 'p',
-      text: 'When you put a model in production, stop reasoning about requests and start reasoning about tokens and batches. Ask how many tokens a typical answer produces, because that sets your latency. Ask how many requests you can pack onto one GPU before memory runs out, because that sets your cost. Scale on GPU signals, not CPU. Stream so the first token arrives quickly even when the full answer is long. And use a serving layer built for this, since batching and cache management are hard to get right by hand. A CRUD API rewards keeping each request small and independent. An LLM rewards the opposite: gather work together, and keep the expensive machine full.'
-    },
+    { type: 'p', text: 'When you put a model in production, stop reasoning about requests and start reasoning about tokens and batches. Ask how many tokens a typical answer produces, because that sets your latency. Ask how many requests you can pack onto one GPU before memory runs out, because that sets your cost. Scale on GPU signals, not CPU. Stream so the first token arrives quickly even when the full answer is long.' },
+      { type: 'p', text: 'And use a serving layer built for this, since batching and cache management are hard to get right by hand. A CRUD API rewards keeping each request small and independent. An LLM rewards the opposite: gather work together, and keep the expensive machine full.' },
     {
       type: 'sources',
       items: [

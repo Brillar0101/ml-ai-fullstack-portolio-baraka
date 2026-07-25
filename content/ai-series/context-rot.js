@@ -9,18 +9,14 @@ export const POST = {
       type: 'p',
       text: 'Picture a support bot backed by retrieval, working well enough that nobody is worried about it. Then someone notices the model occasionally misses an answer that clearly lives in the docs, and makes what feels like an obvious fix. They bump the number of retrieved documents from 4 to 20. More context, more chances to include the right passage, better answers. That is the theory.',
     },
-    {
-      type: 'p',
-      text: 'The opposite is the documented result. Answers get worse, not better. A bot in this state starts citing the wrong policy, blending two unrelated tickets into one confident paragraph, and sometimes ignoring a fact sitting right there in document number 11. Nothing about the model changed. The prompt template is identical. The only thing that moved is how much text got poured into the window.'
-    },
+    { type: 'p', text: 'The opposite is the documented result. Answers get worse, not better. A bot in this state starts citing the wrong policy, blending two unrelated tickets into one confident paragraph, and sometimes ignoring a fact sitting right there in document number 11.' },
+      { type: 'p', text: 'Nothing about the model changed. The prompt template is identical. The only thing that moved is how much text got poured into the window.' },
     {
       type: 'p',
       text: 'This is context rot. The intuition that more context is always safer is wrong, and the failure is measurable. Let me walk through why it happens and what to actually do about it.'
     },
-    {
-      type: 'p',
-      text: 'I want to be clear about what did and did not change here, because that is the part people skip. The retriever was still returning the right document. Recall, in the retrieval sense, went up: the correct passage was inside the window more often at k=20 than at k=4. And yet the final answer got worse. That gap between what you retrieve and what the model uses is the whole story. You can win the retrieval step and still lose the answer step, and if you only measure retrieval you will never see it happen.'
-    },
+    { type: 'p', text: 'I want to be clear about what did and did not change here, because that is the part people skip. The retriever was still returning the right document. Recall, in the retrieval sense, went up: the correct passage was inside the window more often at k=20 than at k=4.' },
+      { type: 'p', text: 'And yet the final answer got worse. That gap between what you retrieve and what the model uses is the whole story. You can win the retrieval step and still lose the answer step, and if you only measure retrieval you will never see it happen.' },
     {
       type: 'h2',
       text: 'The plain intuition: a long context is not a filing cabinet'
@@ -29,14 +25,10 @@ export const POST = {
       type: 'p',
       text: 'It is tempting to imagine the context window as storage. You put a fact in, the fact stays there, and the model reads it when needed. That mental model is where the trouble starts.'
     },
-    {
-      type: 'p',
-      text: 'A better picture is a crowded room where you are trying to have a conversation. If two people are talking, you hear both clearly. If forty people are talking and you need to remember the one useful thing the person in the middle said twenty minutes ago, you probably lost it. The room did not delete their words. Your attention just got spread too thin to hold onto them. Language models behave in a surprisingly similar way. Every extra token competes for a fixed budget of attention, and the model does not weight all positions equally.'
-    },
-    {
-      type: 'p',
-      text: 'This is not a bug in one model or a quirk of one vendor. It falls out of how attention works. The mechanism that lets a transformer look across the whole input has to share its focus among every token present. Add more tokens and each one gets a thinner slice on average. Training also plays a role, since models see a lot of examples where the key information sits near the start of an instruction or the end of a prompt, and less practice pulling a single detail out of the middle of a long block. The result is a model that reads the edges of a long input with more care than the center.'
-    },
+    { type: 'p', text: 'A better picture is a crowded room where you are trying to have a conversation. If two people are talking, you hear both clearly. If forty people are talking and you need to remember the one useful thing the person in the middle said twenty minutes ago, you probably lost it.' },
+      { type: 'p', text: 'The room did not delete their words. Your attention just got spread too thin to hold onto them. Language models behave in a surprisingly similar way. Every extra token competes for a fixed budget of attention, and the model does not weight all positions equally.' },
+    { type: 'p', text: 'This is not a bug in one model or a quirk of one vendor. It falls out of how attention works.' },
+      { type: 'p', text: 'The mechanism that lets a transformer look across the whole input has to share its focus among every token present. Add more tokens and each one gets a thinner slice on average. Training also plays a role, since models see a lot of examples where the key information sits near the start of an instruction or the end of a prompt, and less practice pulling a single detail out of the middle of a long block. The result is a model that reads the edges of a long input with more care than the center.' },
     {
       type: 'h2',
       text: 'Lost in the middle, shown with a concrete example'
@@ -45,10 +37,8 @@ export const POST = {
       type: 'p',
       text: 'Here is the effect that surprises people the most. Suppose you give a model twenty retrieved passages and ask a question whose answer is in exactly one of them. You would expect performance to stay flat no matter which slot holds the answer. It does not.'
     },
-    {
-      type: 'p',
-      text: 'When the answer sits in the first passage or the last passage, models tend to find it. When the same answer sits in passage 9 or 10, out in the middle of the pile, accuracy sags. Researchers measured this and found a U-shaped curve: strong at the edges, weak in the belly. The finding held even for models built and marketed for long contexts. So the failure your bot showed, ignoring document 11, was not a fluke. It was the predicted shape.'
-    },
+    { type: 'p', text: 'When the answer sits in the first passage or the last passage, models tend to find it. When the same answer sits in passage 9 or 10, out in the middle of the pile, accuracy sags. Researchers measured this and found a U-shaped curve: strong at the edges, weak in the belly.' },
+      { type: 'p', text: 'The finding held even for models built and marketed for long contexts. So the failure your bot showed, ignoring document 11, was not a fluke. It was the predicted shape.' },
     {
       type: 'diagram',
       rows: [
@@ -88,10 +78,8 @@ export const POST = {
       type: 'p',
       text: 'Lost in the middle is about position. Distraction is about noise. When the team went from 4 chunks to 20, most of those extra 16 chunks were not the answer. They were plausible-looking neighbors: a similar policy from a different region, an older version of the same rule, a ticket that used the same words but described a different problem.'
     },
-    {
-      type: 'p',
-      text: 'Irrelevant text that looks relevant is worse than useless. The model has to decide what to trust, and every extra passage that resembles the target raises the odds it anchors on the wrong one. This is how you get a confident answer that stitches two documents together. Retrieval precision fell as recall rose, and the model paid for it. Adding chunks 5 through 20 did not add much signal. It added a lot of competing signal.'
-    },
+    { type: 'p', text: 'Irrelevant text that looks relevant is worse than useless. The model has to decide what to trust, and every extra passage that resembles the target raises the odds it anchors on the wrong one.' },
+      { type: 'p', text: 'This is how you get a confident answer that stitches two documents together. Retrieval precision fell as recall rose, and the model paid for it. Adding chunks 5 through 20 did not add much signal. It added a lot of competing signal.' },
     {
       type: 'callout',
       title: 'The counterintuitive part',
@@ -169,10 +157,8 @@ for depth, found in run_sweep(FILLER, ask_model).items():
 # In a real model the dip deepens as the context grows, which is why "just
 # paste everything in" stops working exactly when you need it most.
 ` },
-    {
-      type: 'p',
-      text: 'Run this at a few context lengths too, say 8k, 32k, and 100k tokens of filler. Two patterns usually appear. Recall dips in the middle depths, and it also erodes as total length grows. Once you can see your own curve, tuning stops being folklore. You keep the chunk count and ordering that your eval rewards, and you stop trusting the raw feeling that more is safer. Run the sweep again every time you change the retriever, the reranker, or the prompt template, because each of those can move the curve in ways you will not notice from spot checks alone.'
-    },
+    { type: 'p', text: 'Run this at a few context lengths too, say 8k, 32k, and 100k tokens of filler. Two patterns usually appear. Recall dips in the middle depths, and it also erodes as total length grows.' },
+      { type: 'p', text: 'Once you can see your own curve, tuning stops being folklore. You keep the chunk count and ordering that your eval rewards, and you stop trusting the raw feeling that more is safer. Run the sweep again every time you change the retriever, the reranker, or the prompt template, because each of those can move the curve in ways you will not notice from spot checks alone.' },
     {
       type: 'h2',
       text: 'Common mistakes that keep the rot alive'
@@ -190,10 +176,8 @@ for depth, found in run_sweep(FILLER, ask_model).items():
       type: 'h2',
       text: 'The takeaway'
     },
-    {
-      type: 'p',
-      text: 'Context rot is real, it is measurable, and it runs against the grain of how most people think about long windows. Models read the edges better than the middle, they get distracted by lookalike passages, and they degrade as the window fills. So the fix is not more room. It is fewer and cleaner chunks, the important ones parked at the edges, and a needle-in-a-haystack eval that tells you the truth instead of your gut. When the support team went back to 5 tightly ranked chunks and put the top result last, their accuracy climbed past where it started. They did not buy a bigger window. They spent the one they had more carefully.'
-    },
+    { type: 'p', text: 'Context rot is real, it is measurable, and it runs against the grain of how most people think about long windows. Models read the edges better than the middle, they get distracted by lookalike passages, and they degrade as the window fills.' },
+      { type: 'p', text: 'So the fix is not more room. It is fewer and cleaner chunks, the important ones parked at the edges, and a needle-in-a-haystack eval that tells you the truth instead of your gut. When the support team went back to 5 tightly ranked chunks and put the top result last, their accuracy climbed past where it started. They did not buy a bigger window. They spent the one they had more carefully.' },
     {
       type: 'sources',
       items: [

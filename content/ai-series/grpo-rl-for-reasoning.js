@@ -5,22 +5,17 @@ export const POST = {
   category: 'AI',
   tags: ['Fine-tuning', 'Reinforcement Learning', 'Reasoning'],
   body: [
-    {
-      type: 'p',
-      text: 'A model is staring at a grade-school word problem. A train leaves a station, another train leaves later, and the question wants to know when they meet. There is one correct number at the end, and a simple script can check it in a millisecond. The model writes out some steps and lands on an answer. It is wrong. Nobody hands it the right solution. Nobody labels which step went sideways. All the model gets back is a single bit: the final number did not match. The interesting question is how you turn that one bit of feedback into a model that, a few thousand attempts later, gets these problems right far more often.'
-    },
-    {
-      type: 'p',
-      text: 'That is the puzzle reinforcement learning solves for reasoning, and **GRPO** is one of the cleaner ways to solve it. GRPO stands for Group Relative Policy Optimization. It came out of the DeepSeekMath work in 2024 and later powered the reasoning behavior in DeepSeek-R1. The short version: for a hard problem where the answer can be checked automatically, you let the model take several swings, score each swing by whether it worked, and then nudge the model toward the swings that beat the group average while pulling it away from the ones that fell below. There is no teacher writing perfect solutions. The model learns from the spread of its own attempts.'
-    },
+    { type: 'p', text: 'A model is staring at a grade-school word problem. A train leaves a station, another train leaves later, and the question wants to know when they meet. There is one correct number at the end, and a simple script can check it in a millisecond.' },
+      { type: 'p', text: 'The model writes out some steps and lands on an answer. It is wrong. Nobody hands it the right solution.' },
+      { type: 'p', text: 'Nobody labels which step went sideways. All the model gets back is a single bit: the final number did not match. The interesting question is how you turn that one bit of feedback into a model that, a few thousand attempts later, gets these problems right far more often.' },
+    { type: 'p', text: 'That is the puzzle reinforcement learning solves for reasoning, and **GRPO** is one of the cleaner ways to solve it. GRPO stands for Group Relative Policy Optimization. It came out of the DeepSeekMath work in 2024 and later powered the reasoning behavior in DeepSeek-R1.' },
+      { type: 'p', text: 'The short version: for a hard problem where the answer can be checked automatically, you let the model take several swings, score each swing by whether it worked, and then nudge the model toward the swings that beat the group average while pulling it away from the ones that fell below. There is no teacher writing perfect solutions. The model learns from the spread of its own attempts.' },
     {
       type: 'h2',
       text: 'Grading on a curve inside a single question'
     },
-    {
-      type: 'p',
-      text: 'Here is an intuition worth holding onto. Imagine a teacher who gives one student the same problem five times and gets five different attempts back. The teacher does not have an answer key with full worked solutions. What the teacher does have is a way to check the final answer, so they can mark each of the five attempts right or wrong. Now the teacher grades on a curve inside that little batch of five. Attempts that did better than the batch average get a thumbs up. Attempts that did worse get a thumbs down. The student is told to write more like the good ones and less like the bad ones.'
-    },
+    { type: 'p', text: 'Here is an intuition worth holding onto. Imagine a teacher who gives one student the same problem five times and gets five different attempts back. The teacher does not have an answer key with full worked solutions. What the teacher does have is a way to check the final answer, so they can mark each of the five attempts right or wrong.' },
+      { type: 'p', text: 'Now the teacher grades on a curve inside that little batch of five. Attempts that did better than the batch average get a thumbs up. Attempts that did worse get a thumbs down. The student is told to write more like the good ones and less like the bad ones.' },
     {
       type: 'p',
       text: 'The clever part is that the batch supplies its own standard. The teacher never needs to know how hard the problem is in absolute terms. If all five attempts are strong, the average is high and only the best stand out. If all five are weak, the average is low and the least-bad ones still get encouraged, which keeps the student improving even on brutal problems. This idea of comparing each attempt to the average of its own group is the heart of GRPO, and it is what lets the whole thing run without a separate machine estimating how good a partial solution is.'
@@ -29,14 +24,11 @@ export const POST = {
       type: 'h2',
       text: 'One math problem, five attempts, step by step'
     },
-    {
-      type: 'p',
-      text: 'Let us walk a concrete round. Take that train problem. The correct answer is 4 hours. We ask the model to produce five separate solutions, sampling with a bit of randomness so they come out different. Call them attempts A through E. A verifier, which here is just a small program, reads the final number in each and marks it. Say A, C, and D reach 4 hours and score 1, while B and E reach the wrong number and score 0.'
-    },
-    {
-      type: 'p',
-      text: 'The average score across the five is 0.6. Now we compute how far each attempt sits from that average. A, C, and D are at 1, so they land 0.4 above the average, giving them a positive signal. B and E are at 0, so they sit 0.6 below, giving them a negative signal. During the update, the model is pushed to make the word choices and reasoning steps inside A, C, and D more likely next time, and the steps inside B and E less likely. Run this loop over thousands of different problems and the model slowly shifts its habits toward the kinds of reasoning that tend to check out. Notice what never happened: nobody wrote a model solution, and nobody scored any individual step. The only ground truth was the final answer.'
-    },
+    { type: 'p', text: 'Let us walk a concrete round. Take that train problem.' },
+      { type: 'p', text: 'The correct answer is 4 hours. We ask the model to produce five separate solutions, sampling with a bit of randomness so they come out different. Call them attempts A through E. A verifier, which here is just a small program, reads the final number in each and marks it. Say A, C, and D reach 4 hours and score 1, while B and E reach the wrong number and score 0.' },
+    { type: 'p', text: 'The average score across the five is 0.6. Now we compute how far each attempt sits from that average. A, C, and D are at 1, so they land 0.4 above the average, giving them a positive signal.' },
+      { type: 'p', text: 'B and E are at 0, so they sit 0.6 below, giving them a negative signal. During the update, the model is pushed to make the word choices and reasoning steps inside A, C, and D more likely next time, and the steps inside B and E less likely. Run this loop over thousands of different problems and the model slowly shifts its habits toward the kinds of reasoning that tend to check out.' },
+      { type: 'p', text: 'Notice what never happened: nobody wrote a model solution, and nobody scored any individual step. The only ground truth was the final answer.' },
     {
       type: 'diagram',
       nodes: [
@@ -75,10 +67,8 @@ export const POST = {
       type: 'p',
       text: 'To see why GRPO is simpler, look at what PPO carries. PPO needs a baseline, a running sense of how much reward to expect, so it can tell whether an outcome was better or worse than normal. Without a baseline the training signal is noisy and pushes on everything. PPO builds that baseline with a second neural network called the critic, roughly the same size as the model itself. The critic has to be trained alongside the policy, which means more memory, more compute, and another moving part that can go wrong.'
     },
-    {
-      type: 'p',
-      text: 'GRPO asks a blunt question: if we are already sampling several answers per problem, why train a whole extra network to guess the baseline when the group of answers can be the baseline? The average reward across the group is a perfectly good stand-in for what to expect on that problem. So GRPO drops the critic entirely. The advantage for each answer becomes its reward minus the group mean, sometimes divided by the group standard deviation to keep the scale steady. That single swap cuts the memory footprint, removes an entire training loop, and takes out a component that was often finicky to get right. You pay for it by needing several samples per problem, but for tasks with cheap automatic checking that trade is usually worth it.'
-    },
+    { type: 'p', text: 'GRPO asks a blunt question: if we are already sampling several answers per problem, why train a whole extra network to guess the baseline when the group of answers can be the baseline? The average reward across the group is a perfectly good stand-in for what to expect on that problem. So GRPO drops the critic entirely.' },
+      { type: 'p', text: 'The advantage for each answer becomes its reward minus the group mean, sometimes divided by the group standard deviation to keep the scale steady. That single swap cuts the memory footprint, removes an entire training loop, and takes out a component that was often finicky to get right. You pay for it by needing several samples per problem, but for tasks with cheap automatic checking that trade is usually worth it.' },
     { type: 'lab', packages: ['numpy'], height: 460,
         title: 'Group-relative advantages, on an easy problem and a hard one',
         caption: 'Being right on the problem most samples already solved teaches less than being right on the hard one. When the whole group agrees, the signal is exactly zero.',

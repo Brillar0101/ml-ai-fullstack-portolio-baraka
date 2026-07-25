@@ -5,38 +5,27 @@ export const POST = {
   category: 'AI',
   tags: ['Agents', 'Deployment', 'Production'],
   body: [
-    {
-      type: 'p',
-      text: 'Picture a team shipping their first real agent on a Thursday. It works all week in testing. It read support tickets, looked up order records, and drafted replies, and every demo run finished in under a minute. They set it to process the overnight queue and went home. By Friday morning the agent had made close to forty thousand tool calls against the same three tickets, and the API bill for that one night was larger than the entire month before it. Nothing had crashed. No error was thrown. The agent had simply decided it was not done yet, over and over, until someone woke up and killed the process.'
-    },
-    {
-      type: 'p',
-      text: 'That gap between "works in the demo" and "safe to leave running" is the whole story of putting an agent into production. A chatbot is a much simpler thing to deploy. You send it a message, it sends text back, and it forgets everything. If it says something wrong, the damage is a bad sentence on a screen. An agent is a different animal, because it does not just talk. It acts, it keeps state across many steps, it runs for minutes or hours instead of seconds, and it can loop. Every one of those properties is useful, and every one of them is a new way to get hurt.'
-    },
+    { type: 'p', text: 'Picture a team shipping their first real agent on a Thursday. It works all week in testing. It read support tickets, looked up order records, and drafted replies, and every demo run finished in under a minute.' },
+      { type: 'p', text: 'They set it to process the overnight queue and went home. By Friday morning the agent had made close to forty thousand tool calls against the same three tickets, and the API bill for that one night was larger than the entire month before it. Nothing had crashed. No error was thrown. The agent had simply decided it was not done yet, over and over, until someone woke up and killed the process.' },
+    { type: 'p', text: 'That gap between "works in the demo" and "safe to leave running" is the whole story of putting an agent into production. A chatbot is a much simpler thing to deploy. You send it a message, it sends text back, and it forgets everything.' },
+      { type: 'p', text: 'If it says something wrong, the damage is a bad sentence on a screen. An agent is a different animal, because it does not just talk. It acts, it keeps state across many steps, it runs for minutes or hours instead of seconds, and it can loop. Every one of those properties is useful, and every one of them is a new way to get hurt.' },
     {
       type: 'h2',
       text: 'Why an agent that acts breaks the chatbot playbook'
     },
-    {
-      type: 'p',
-      text: 'Think about the difference in plain terms. A chatbot is a vending machine. One request in, one snack out, transaction closed. An agent is more like a temp worker you hand a task to and leave alone. It reads the task, decides on a first move, does it, looks at the result, decides on a second move, and repeats until it thinks the job is finished. That loop is what makes agents powerful. It is also what makes them unpredictable, because you are no longer approving each action. You approved a goal, and the agent is choosing the steps.'
-    },
-    {
-      type: 'p',
-      text: 'Once you accept that an agent chooses its own steps, the production worries almost write themselves. What happens if the process restarts halfway through a long task? What happens when a step is risky, like sending a refund or deleting a record? What stops the agent from looping forever, as it did that Thursday night? Who pays when it calls a paid tool ten thousand times? What is the blast radius if a tool it runs does something dangerous? And when it does misbehave, can you even see what it did, step by step? Each question maps to a guardrail. Let us walk through the incident and add them one at a time.'
-    },
+    { type: 'p', text: 'Think about the difference in plain terms. A chatbot is a vending machine. One request in, one snack out, transaction closed.' },
+      { type: 'p', text: 'An agent is more like a temp worker you hand a task to and leave alone. It reads the task, decides on a first move, does it, looks at the result, decides on a second move, and repeats until it thinks the job is finished. That loop is what makes agents powerful. It is also what makes them unpredictable, because you are no longer approving each action. You approved a goal, and the agent is choosing the steps.' },
+    { type: 'p', text: 'Once you accept that an agent chooses its own steps, the production worries almost write themselves. What happens if the process restarts halfway through a long task? What happens when a step is risky, like sending a refund or deleting a record?' },
+      { type: 'p', text: 'What stops the agent from looping forever, as it did that Thursday night? Who pays when it calls a paid tool ten thousand times? What is the blast radius if a tool it runs does something dangerous?' },
+      { type: 'p', text: 'And when it does misbehave, can you even see what it did, step by step? Each question maps to a guardrail. Let us walk through the incident and add them one at a time.' },
     {
       type: 'h2',
       text: 'Walking the overnight run in slow motion'
     },
-    {
-      type: 'p',
-      text: 'The overnight agent had a goal that read something like "resolve every open ticket in the queue." For most tickets it worked fine. It hit trouble on a ticket where the customer record could not be found. The agent called the lookup tool, got back an empty result, reasoned that maybe it used the wrong ID, and called the lookup tool again with a slightly different guess. That failed too. So it tried again. There was no rule telling it when to stop trying, and no memory that it had already asked this exact question forty times. Each attempt looked, to the agent, like a fresh reasonable idea. The loop had no floor.'
-    },
-    {
-      type: 'p',
-      text: 'Notice what was missing. There was no cap on how many steps a single task could take. There was no ceiling on spend. There was no human standing between the agent and the paid tool. And because the team had no per-step logging, the first sign of trouble was the billing dashboard, not an alert. The agent was not broken. It was doing exactly what an unbounded loop does. The fix is not a smarter model. The fix is a set of limits that live outside the model, in the runtime around it.'
-    },
+    { type: 'p', text: 'The overnight agent had a goal that read something like "resolve every open ticket in the queue." For most tickets it worked fine. It hit trouble on a ticket where the customer record could not be found. The agent called the lookup tool, got back an empty result, reasoned that maybe it used the wrong ID, and called the lookup tool again with a slightly different guess. That failed too.' },
+      { type: 'p', text: 'So it tried again. There was no rule telling it when to stop trying, and no memory that it had already asked this exact question forty times. Each attempt looked, to the agent, like a fresh reasonable idea. The loop had no floor.' },
+    { type: 'p', text: 'Notice what was missing. There was no cap on how many steps a single task could take. There was no ceiling on spend. There was no human standing between the agent and the paid tool.' },
+      { type: 'p', text: 'And because the team had no per-step logging, the first sign of trouble was the billing dashboard, not an alert. The agent was not broken. It was doing exactly what an unbounded loop does. The fix is not a smarter model. The fix is a set of limits that live outside the model, in the runtime around it.' },
     {
       type: 'terms',
       items: [
@@ -50,10 +39,8 @@ export const POST = {
       type: 'h2',
       text: 'The runtime that should have been around the agent'
     },
-    {
-      type: 'p',
-      text: 'The right picture for a production agent is not a model calling tools directly. It is a runtime with defenses at each stage. Work arrives on a queue instead of running inline, so a flood of tasks lines up rather than piling onto one overloaded process. A worker pulls one task and runs the agent loop with a step limit wrapped around it. Before any action tagged as risky, the worker stops and asks a human. Tools run inside a sandbox with tight permissions. And after every step, the worker writes the state to a store, so a restart picks up where it left off instead of losing the thread.'
-    },
+    { type: 'p', text: 'The right picture for a production agent is not a model calling tools directly. It is a runtime with defenses at each stage. Work arrives on a queue instead of running inline, so a flood of tasks lines up rather than piling onto one overloaded process.' },
+      { type: 'p', text: 'A worker pulls one task and runs the agent loop with a step limit wrapped around it. Before any action tagged as risky, the worker stops and asks a human. Tools run inside a sandbox with tight permissions. And after every step, the worker writes the state to a store, so a restart picks up where it left off instead of losing the thread.' },
     {
       type: 'diagram',
       title: 'A production agent runtime',
@@ -147,14 +134,10 @@ for label, approve in [("a human approves the refund", lambda a: True),
       type: 'h2',
       text: 'Long tasks, crashes, and asking a person at the right moment'
     },
-    {
-      type: 'p',
-      text: 'Durable execution deserves a closer look, because long-running is where agents differ most from chatbots. A task that takes an hour will, eventually, be interrupted. A deploy restarts the worker, a machine reboots, a network blip kills a connection. If your agent keeps its progress only in memory, that interruption throws away everything and either loses the work or starts it over from scratch, which for an agent that already sent three emails means sending them again. Durable execution fixes this by treating each completed step as a saved fact. On restart, the runtime replays what already happened and continues from the first unfinished step. Tools like Temporal and stateful agent frameworks such as LangGraph exist mostly to give you this property without hand-rolling it.'
-    },
-    {
-      type: 'p',
-      text: 'Human-in-the-loop is the other half of running long. Because an agent acts without asking, you want it to ask exactly when the cost of being wrong is high. Reading a record is cheap to get wrong. Issuing a refund is not. The pattern is to tag a small set of actions as risky and pause on them, turning the agent from something that acts alone into something that drafts and waits. In an async setup the agent does not block a thread while it waits. It saves its state, releases the worker, and a notification goes to a person. When they approve, the task is pulled back off the store and resumes. The agent can sleep for an hour between steps and cost you nothing while it waits.'
-    },
+    { type: 'p', text: 'Durable execution deserves a closer look, because long-running is where agents differ most from chatbots. A task that takes an hour will, eventually, be interrupted. A deploy restarts the worker, a machine reboots, a network blip kills a connection.' },
+      { type: 'p', text: 'If your agent keeps its progress only in memory, that interruption throws away everything and either loses the work or starts it over from scratch, which for an agent that already sent three emails means sending them again. Durable execution fixes this by treating each completed step as a saved fact. On restart, the runtime replays what already happened and continues from the first unfinished step. Tools like Temporal and stateful agent frameworks such as LangGraph exist mostly to give you this property without hand-rolling it.' },
+    { type: 'p', text: 'Human-in-the-loop is the other half of running long. Because an agent acts without asking, you want it to ask exactly when the cost of being wrong is high. Reading a record is cheap to get wrong. Issuing a refund is not.' },
+      { type: 'p', text: 'The pattern is to tag a small set of actions as risky and pause on them, turning the agent from something that acts alone into something that drafts and waits. In an async setup the agent does not block a thread while it waits. It saves its state, releases the worker, and a notification goes to a person. When they approve, the task is pulled back off the store and resumes. The agent can sleep for an hour between steps and cost you nothing while it waits.' },
     {
       type: 'h2',
       text: 'The mistakes teams make on the way to safe'
@@ -181,10 +164,8 @@ for label, approve in [("a human approves the refund", lambda a: True),
       type: 'h2',
       text: 'What to carry away from this'
     },
-    {
-      type: 'p',
-      text: 'The thing that makes an agent worth deploying, that it acts on its own across many steps, is the same thing that makes it dangerous to deploy carelessly. A chatbot fails by saying something wrong. An agent fails by doing something wrong, many times, while you sleep. So the work of shipping one is mostly the work of building the runtime around it: a queue to absorb load, a step and spend cap so no single task can run away, durable state so a crash resumes instead of restarts, a human checkpoint in front of the risky actions, sandboxed tools with narrow permissions, and a log of every step so you can see what happened. Give the agent its goal and its freedom to choose steps, then wrap that freedom in limits the model cannot override. The overnight team learned this the expensive way. You can add the seatbelt first.'
-    },
+    { type: 'p', text: 'The thing that makes an agent worth deploying, that it acts on its own across many steps, is the same thing that makes it dangerous to deploy carelessly. A chatbot fails by saying something wrong. An agent fails by doing something wrong, many times, while you sleep.' },
+      { type: 'p', text: 'So the work of shipping one is mostly the work of building the runtime around it: a queue to absorb load, a step and spend cap so no single task can run away, durable state so a crash resumes instead of restarts, a human checkpoint in front of the risky actions, sandboxed tools with narrow permissions, and a log of every step so you can see what happened. Give the agent its goal and its freedom to choose steps, then wrap that freedom in limits the model cannot override. The overnight team learned this the expensive way. You can add the seatbelt first.' },
     {
       type: 'sources',
       items: [

@@ -9,22 +9,16 @@ export const POST = {
       type: 'p',
       text: 'Picture two teams setting out to fine-tune the same open base model for the same job: a support assistant that answers product questions in a calm, on-brand voice. The first team moved fast. They scraped fifty thousand question-and-answer pairs from old chat logs, forums, and a pile of internal docs, poured it all into the trainer, and waited. The result answered in three different tones depending on the question, repeated itself, and sometimes leaked half of a support macro into the reply. It scored worse on their own test set than the untouched base model did.'
     },
-    {
-      type: 'p',
-      text: 'The second team was slower and, on paper, looked lazy. They wrote and curated two thousand examples by hand, checked each one, and threw away anything that felt off. Their model came out steady, consistent, and clearly better than the base. Same architecture, same trainer, same number of training epochs. The only thing that changed was the data going in. This post is about how the second team built their dataset, because that dataset is the real product, and the model is just what falls out of it.'
-    },
+    { type: 'p', text: 'The second team was slower and, on paper, looked lazy. They wrote and curated two thousand examples by hand, checked each one, and threw away anything that felt off.' },
+      { type: 'p', text: 'Their model came out steady, consistent, and clearly better than the base. Same architecture, same trainer, same number of training epochs. The only thing that changed was the data going in. This post is about how the second team built their dataset, because that dataset is the real product, and the model is just what falls out of it.' },
     {
       type: 'h2',
       text: 'The model copies your data, flaws and all'
     },
-    {
-      type: 'p',
-      text: 'Here is the intuition that makes everything else click. Fine-tuning does not teach a model new facts so much as it teaches a **behavior**: given this kind of request, respond in this kind of way. The model learns that behavior by imitating the examples you show it. If half your examples are curt and half are chatty, the model learns to be randomly curt or chatty. If a tenth of your examples contain a formatting glitch, the model learns that the glitch is sometimes correct. It has no way to know which examples were good and which slipped through. Every row you include is a small vote for how the model should act.'
-    },
-    {
-      type: 'p',
-      text: 'That is why volume alone can hurt you. Fifty thousand rows scraped without inspection carry fifty thousand votes, and a large share of them vote for the wrong thing. Two thousand clean rows carry two thousand votes that all point the same direction. The famous LIMA result put a number on this idea: a strong base model fine-tuned on roughly a thousand carefully written examples produced answers people preferred over models trained on far more. The lesson was that most of what a model needs to sound helpful is already inside the base model, and a small, clean dataset mostly wakes it up. Your job is to make sure every vote counts.'
-    },
+    { type: 'p', text: 'Here is the intuition that makes everything else click. Fine-tuning does not teach a model new facts so much as it teaches a **behavior**: given this kind of request, respond in this kind of way. The model learns that behavior by imitating the examples you show it.' },
+      { type: 'p', text: 'If half your examples are curt and half are chatty, the model learns to be randomly curt or chatty. If a tenth of your examples contain a formatting glitch, the model learns that the glitch is sometimes correct. It has no way to know which examples were good and which slipped through. Every row you include is a small vote for how the model should act.' },
+    { type: 'p', text: 'That is why volume alone can hurt you. Fifty thousand rows scraped without inspection carry fifty thousand votes, and a large share of them vote for the wrong thing. Two thousand clean rows carry two thousand votes that all point the same direction.' },
+      { type: 'p', text: 'The famous LIMA result put a number on this idea: a strong base model fine-tuned on roughly a thousand carefully written examples produced answers people preferred over models trained on far more. The lesson was that most of what a model needs to sound helpful is already inside the base model, and a small, clean dataset mostly wakes it up. Your job is to make sure every vote counts.' },
     {
       type: 'h2',
       text: 'What one example actually looks like'
@@ -157,10 +151,8 @@ print("learns to give that answer too often.")
       type: 'p',
       text: 'After cleaning, look at what tasks are actually in your set. Scraped data is almost always lopsided: maybe seventy percent of your examples are one common question type and the tasks you care about most are barely present. If you train on that as-is, the model gets great at the common case and stays weak everywhere else. Balancing means capping the over-represented tasks and adding examples, often synthetic ones, for the under-represented ones, so the mix roughly matches how you want the model to spend its attention.'
     },
-    {
-      type: 'p',
-      text: 'The last step is the one people skip and later regret. Before training, pull out a **validation split**, say five to ten percent of your examples, and never train on them. This held-out slice is how you find out whether the model learned the behavior or just memorized rows. There is one rule that cannot bend: an example that appears in training must never also appear in validation. If it does, the model has effectively seen the answer key, your validation score looks great, and the real-world performance quietly disappoints. Deduplicate across the split boundary, not just within training, or the leak sneaks back in.'
-    },
+    { type: 'p', text: 'The last step is the one people skip and later regret. Before training, pull out a **validation split**, say five to ten percent of your examples, and never train on them. This held-out slice is how you find out whether the model learned the behavior or just memorized rows.' },
+      { type: 'p', text: 'There is one rule that cannot bend: an example that appears in training must never also appear in validation. If it does, the model has effectively seen the answer key, your validation score looks great, and the real-world performance quietly disappoints. Deduplicate across the split boundary, not just within training, or the leak sneaks back in.' },
     {
       type: 'callout',
       title: 'The mistakes that quietly wreck a run',
@@ -170,10 +162,8 @@ print("learns to give that answer too often.")
       type: 'h2',
       text: 'What to hold onto'
     },
-    {
-      type: 'p',
-      text: 'The story of the two teams is not really about size. The scraped fifty thousand lost because most of those rows voted for behavior nobody wanted, and the two thousand won because every row was a clear vote for the same clean behavior. So treat your dataset as the thing you are actually building. Write down one prompt template and use it everywhere. Clean, deduplicate, and balance before you ever launch a training run. Hold out a validation split and guard it from leaks. If you get the data right, a modest model will surprise you, and if you get it wrong, no amount of compute will save you.'
-    },
+    { type: 'p', text: 'The story of the two teams is not really about size. The scraped fifty thousand lost because most of those rows voted for behavior nobody wanted, and the two thousand won because every row was a clear vote for the same clean behavior.' },
+      { type: 'p', text: 'So treat your dataset as the thing you are actually building. Write down one prompt template and use it everywhere. Clean, deduplicate, and balance before you ever launch a training run. Hold out a validation split and guard it from leaks. If you get the data right, a modest model will surprise you, and if you get it wrong, no amount of compute will save you.' },
     {
       type: 'sources',
       items: [

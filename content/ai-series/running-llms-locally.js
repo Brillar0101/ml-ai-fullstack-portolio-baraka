@@ -5,10 +5,8 @@ export const POST = {
   category: 'AI',
   tags: ['LLMs', 'Local', 'Quantization'],
   body: [
-    {
-      type: 'p',
-      text: 'Picture a developer on a long flight with no wifi, and she wants a coding assistant that can explain a stack trace and draft a function. She also works on a codebase her employer will not let leave the building, so sending snippets to a cloud API is off the table. For years the answer to both problems was the same shrug: you need a server, a GPU, and a network connection, so wait until you land. That answer is now out of date. The model she wants runs on the laptop already in her bag, offline, with nothing leaving the machine. This post is about how that became possible, and how you set it up yourself.'
-    },
+    { type: 'p', text: 'Picture a developer on a long flight with no wifi, and she wants a coding assistant that can explain a stack trace and draft a function. She also works on a codebase her employer will not let leave the building, so sending snippets to a cloud API is off the table. For years the answer to both problems was the same shrug: you need a server, a GPU, and a network connection, so wait until you land.' },
+      { type: 'p', text: 'That answer is now out of date. The model she wants runs on the laptop already in her bag, offline, with nothing leaving the machine. This post is about how that became possible, and how you set it up yourself.' },
     {
       type: 'p',
       text: 'The reason people assume you cannot run a real model locally is a memory scare. A model with billions of parameters sounds like it needs a data center, and in its raw form it nearly does. The trick that changed everything is that you do not have to store the model in its raw form. You can shrink each number inside it, keep most of the quality, and suddenly a capable model fits in the RAM of a normal laptop. Once you see that one idea, the tools built on top of it stop looking like magic and start looking like plumbing.'
@@ -17,14 +15,10 @@ export const POST = {
       type: 'h2',
       text: 'Why a big model does not need a big machine anymore'
     },
-    {
-      type: 'p',
-      text: 'Start with the intuition, because the math follows from it. A model is a giant pile of numbers called weights, and every weight takes up space in memory. If you store each weight in high precision, meaning many bits per number, the pile is large. But those numbers do not all need to be exact. The model still gives good answers if you round each weight to a coarser value, the way a photo still looks fine when you save it as a smaller JPEG instead of a raw camera file. Rounding the weights to fewer bits is called **quantization**, and it is the single move that puts a serious model inside a laptop.'
-    },
-    {
-      type: 'p',
-      text: 'Now walk a concrete example so the size becomes real. Take a model with 8 billion parameters, which is a common and genuinely useful size. In full 16-bit precision each weight eats 2 bytes, so the whole thing needs roughly 8 billion times 2, about 16 gigabytes, just to load. That is already a stretch for many laptops. Quantize the same model down to 4 bits per weight and each weight now costs half a byte. The arithmetic becomes 8 billion times 0.5, which lands near 4 to 5 gigabytes once you add the small amount of bookkeeping the format needs. A machine with 16 gigabytes of memory holds that comfortably and still has room to run your editor. Nothing about the model changed except how finely each number is written down, and that one adjustment is what turns an impossible download into a routine one.'
-    },
+    { type: 'p', text: 'Start with the intuition, because the math follows from it. A model is a giant pile of numbers called weights, and every weight takes up space in memory. If you store each weight in high precision, meaning many bits per number, the pile is large.' },
+      { type: 'p', text: 'But those numbers do not all need to be exact. The model still gives good answers if you round each weight to a coarser value, the way a photo still looks fine when you save it as a smaller JPEG instead of a raw camera file. Rounding the weights to fewer bits is called **quantization**, and it is the single move that puts a serious model inside a laptop.' },
+    { type: 'p', text: 'Now walk a concrete example so the size becomes real. Take a model with 8 billion parameters, which is a common and genuinely useful size. In full 16-bit precision each weight eats 2 bytes, so the whole thing needs roughly 8 billion times 2, about 16 gigabytes, just to load.' },
+      { type: 'p', text: 'That is already a stretch for many laptops. Quantize the same model down to 4 bits per weight and each weight now costs half a byte. The arithmetic becomes 8 billion times 0.5, which lands near 4 to 5 gigabytes once you add the small amount of bookkeeping the format needs. A machine with 16 gigabytes of memory holds that comfortably and still has room to run your editor. Nothing about the model changed except how finely each number is written down, and that one adjustment is what turns an impossible download into a routine one.' },
     {
       type: 'diagram',
       nodes: [
@@ -119,10 +113,8 @@ ollama pull qwen2.5-coder:7b            # a coding-tuned model, still a few GB`
       title: 'When local is the right call, and when it is not',
       text: 'Run local when privacy, offline access, per-request cost, or tinkering matter more than peak quality: your code never leaves the machine, it works on a plane, and it costs nothing per token. Reach for a cloud API instead when you need frontier-level reasoning, very high throughput across many users, or a model far larger than your RAM. The two are not rivals; many developers use a local model for private and quick work and a hosted one for the hardest questions.'
     },
-    {
-      type: 'p',
-      text: 'So the developer on the plane ends up in a good place. She picked an 8-billion-parameter coding model, chose a 4-bit quantization that fits her MacBook with room to spare, and pulled it with one Ollama command before takeoff. In the air, with the network off, the model explains her stack traces and drafts functions, and not a single line of her employer\'s code leaves the laptop. It is not the smartest model in the world, and for a gnarly architecture question she will still want a frontier API when she lands. But for private, offline, everyday help, the machine already in her bag is enough. The whole trick was learning that a big model does not need a big machine, only smaller numbers.'
-    },
+    { type: 'p', text: 'So the developer on the plane ends up in a good place. She picked an 8-billion-parameter coding model, chose a 4-bit quantization that fits her MacBook with room to spare, and pulled it with one Ollama command before takeoff.' },
+      { type: 'p', text: 'In the air, with the network off, the model explains her stack traces and drafts functions, and not a single line of her employer\'s code leaves the laptop. It is not the smartest model in the world, and for a gnarly architecture question she will still want a frontier API when she lands. But for private, offline, everyday help, the machine already in her bag is enough. The whole trick was learning that a big model does not need a big machine, only smaller numbers.' },
     {
       type: 'sources',
       items: [

@@ -5,10 +5,8 @@ export const POST = {
   category: 'AI',
   tags: ['Deployment', 'Autoscaling', 'GPU'],
   body: [
-    {
-      type: 'p',
-      text: 'Picture a team putting their first large language model behind an HTTP endpoint, wired to the same autoscaler that ran their web tier. The rule was the one everybody copies: watch CPU, add a replica when average CPU crosses seventy percent, remove one when it drops. It looked fine in staging. Then a product launch sent a burst of real traffic, and the endpoint started returning timeouts. The dashboard showed the autoscaler doing its job, asking for more replicas, yet requests kept failing for a solid four or five minutes into every spike. By the time the new GPU nodes were actually answering, the burst had passed and the autoscaler was already scaling back down. The service was always late, and it was always late by the same few minutes.'
-    },
+    { type: 'p', text: 'Picture a team putting their first large language model behind an HTTP endpoint, wired to the same autoscaler that ran their web tier. The rule was the one everybody copies: watch CPU, add a replica when average CPU crosses seventy percent, remove one when it drops. It looked fine in staging.' },
+      { type: 'p', text: 'Then a product launch sent a burst of real traffic, and the endpoint started returning timeouts. The dashboard showed the autoscaler doing its job, asking for more replicas, yet requests kept failing for a solid four or five minutes into every spike. By the time the new GPU nodes were actually answering, the burst had passed and the autoscaler was already scaling back down. The service was always late, and it was always late by the same few minutes.' },
     {
       type: 'p',
       text: 'That delay has a name, and it is the whole reason serving a model is harder than serving a web app. It is the cold start. Understanding why it is so long, and why CPU was the wrong thing to watch, is what separates an endpoint that survives a spike from one that folds every time attention arrives.'
@@ -17,26 +15,18 @@ export const POST = {
       type: 'h2',
       text: 'A web replica starts in seconds, a model replica starts in minutes'
     },
-    {
-      type: 'p',
-      text: 'Start with the intuition, because the gap is bigger than most people guess. When your web autoscaler adds a replica, the new container pulls a small image, starts a process, and is ready to take traffic almost immediately. The whole thing might take a few seconds. Autoscaling works well there precisely because the reaction is fast enough to catch a rising curve while it is still rising. You see load climbing, you add capacity, the capacity shows up before the load peaks. The feedback loop is tight.'
-    },
-    {
-      type: 'p',
-      text: 'A model replica breaks that assumption in several places at once. To bring one online you first have to get a GPU node, and GPU nodes are scarcer and slower to provision than ordinary compute, so you may wait just for the hardware. Then the container has to fetch the model weights, and for a modern model that is many gigabytes moving across the network onto the box. Then those weights have to be loaded off disk and into the GPU memory, the VRAM, which is its own slow copy. And even after all that, the first few requests run slower than normal while caches fill and the runtime settles, a period usually called warmup. Add those up and you are looking at minutes, not seconds. The autoscaler is still reacting at web speed, but the thing it is trying to summon moves at a completely different pace.'
-    },
+    { type: 'p', text: 'Start with the intuition, because the gap is bigger than most people guess. When your web autoscaler adds a replica, the new container pulls a small image, starts a process, and is ready to take traffic almost immediately.' },
+      { type: 'p', text: 'The whole thing might take a few seconds. Autoscaling works well there precisely because the reaction is fast enough to catch a rising curve while it is still rising. You see load climbing, you add capacity, the capacity shows up before the load peaks. The feedback loop is tight.' },
+    { type: 'p', text: 'A model replica breaks that assumption in several places at once. To bring one online you first have to get a GPU node, and GPU nodes are scarcer and slower to provision than ordinary compute, so you may wait just for the hardware. Then the container has to fetch the model weights, and for a modern model that is many gigabytes moving across the network onto the box.' },
+      { type: 'p', text: 'Then those weights have to be loaded off disk and into the GPU memory, the VRAM, which is its own slow copy. And even after all that, the first few requests run slower than normal while caches fill and the runtime settles, a period usually called warmup. Add those up and you are looking at minutes, not seconds. The autoscaler is still reacting at web speed, but the thing it is trying to summon moves at a completely different pace.' },
     {
       type: 'h2',
       text: 'Walking the timeout, second by second'
     },
-    {
-      type: 'p',
-      text: 'Replay the incident slowly and the failure becomes obvious. Traffic starts climbing at, say, ten in the morning. For the first stretch the two running replicas keep up, so CPU on the boxes barely moves, because generating tokens is work the GPU does, not the CPU. That is the first trap. The signal the autoscaler watched stayed calm while the thing that actually mattered, the number of requests waiting for a free GPU, was already piling up. The autoscaler saw no reason to act yet.'
-    },
-    {
-      type: 'p',
-      text: 'A bit later enough requests stack up that some CPU-side work finally nudges the average over the threshold, and the autoscaler asks for a third replica. Now the clock starts on the cold start. The scheduler finds a GPU node, the node pulls several gigabytes of weights, the weights load into VRAM, the runtime warms up. Four minutes pass. During those four minutes the two original replicas are drowning, queues overflow, and clients that set a thirty second timeout give up and see errors. When the third replica finally reports ready, the burst is fading. Load drops, CPU drops, and the autoscaler, seeing calm, removes the replica it just paid minutes to create. The next spike repeats the entire story from scratch.'
-    },
+    { type: 'p', text: 'Replay the incident slowly and the failure becomes obvious. Traffic starts climbing at, say, ten in the morning. For the first stretch the two running replicas keep up, so CPU on the boxes barely moves, because generating tokens is work the GPU does, not the CPU.' },
+      { type: 'p', text: 'That is the first trap. The signal the autoscaler watched stayed calm while the thing that actually mattered, the number of requests waiting for a free GPU, was already piling up. The autoscaler saw no reason to act yet.' },
+    { type: 'p', text: 'A bit later enough requests stack up that some CPU-side work finally nudges the average over the threshold, and the autoscaler asks for a third replica. Now the clock starts on the cold start. The scheduler finds a GPU node, the node pulls several gigabytes of weights, the weights load into VRAM, the runtime warms up. Four minutes pass. During those four minutes the two original replicas are drowning, queues overflow, and clients that set a thirty second timeout give up and see errors.' },
+      { type: 'p', text: 'When the third replica finally reports ready, the burst is fading. Load drops, CPU drops, and the autoscaler, seeing calm, removes the replica it just paid minutes to create. The next spike repeats the entire story from scratch.' },
     {
       type: 'p',
       text: 'Two separate mistakes stacked here. The scaler was watching a signal that does not reflect model load, and it had nothing warm and ready to absorb the gap while a real replica booted. Fix either one and the pain drops. Fix both and the spike stops being an incident.'
@@ -138,14 +128,10 @@ print("a cold start the next time traffic moves.")
       type: 'p',
       text: 'A warm floor is not free, and pretending otherwise is how the next mistake sneaks in. An idle GPU still costs the same per hour as a busy one, so a warm pool of two replicas means paying for two GPUs around the clock even at three in the morning when nobody is calling. For a service with steady daytime traffic that is money well spent, because the alternative is timeouts during every busy hour. But for an internal tool that gets a handful of requests a day, keeping GPUs warm all night to serve almost nothing is waste.'
     },
-    {
-      type: 'p',
-      text: 'That is where scale-to-zero earns its place. If your traffic is spiky and low, you let the service drop to zero replicas when idle and pay nothing, accepting that the first request after a quiet stretch will wait through a full cold start. A user who fires an occasional query can tolerate a slow first response. A checkout flow serving thousands of people cannot. So the choice is really a question about who is waiting and what they will forgive. Steady or latency-sensitive traffic wants a warm floor. Rare, patient, cost-sensitive traffic can live with scale-to-zero. Many teams split the difference by keeping a warm floor during business hours and allowing zero overnight.'
-    },
-    {
-      type: 'p',
-      text: 'The other lever is the cold start itself. It is not a fixed cost of nature, and shrinking it makes every other decision easier. Caching the model weights on the node, or on fast local storage near it, removes the multi-gigabyte download from the critical path so a new replica loads from disk instead of across the network. Faster weight-loading formats and streaming loaders cut the copy into VRAM. Some platforms go further and snapshot a fully warmed process, memory and all, so a new replica restores from that snapshot in seconds rather than booting from cold. Every second you shave off the cold start is a second the warm pool does not have to cover, which means you can run a thinner floor or lean harder on scale-to-zero without punishing users.'
-    },
+    { type: 'p', text: 'That is where scale-to-zero earns its place. If your traffic is spiky and low, you let the service drop to zero replicas when idle and pay nothing, accepting that the first request after a quiet stretch will wait through a full cold start. A user who fires an occasional query can tolerate a slow first response. A checkout flow serving thousands of people cannot.' },
+      { type: 'p', text: 'So the choice is really a question about who is waiting and what they will forgive. Steady or latency-sensitive traffic wants a warm floor. Rare, patient, cost-sensitive traffic can live with scale-to-zero. Many teams split the difference by keeping a warm floor during business hours and allowing zero overnight.' },
+    { type: 'p', text: 'The other lever is the cold start itself. It is not a fixed cost of nature, and shrinking it makes every other decision easier. Caching the model weights on the node, or on fast local storage near it, removes the multi-gigabyte download from the critical path so a new replica loads from disk instead of across the network. Faster weight-loading formats and streaming loaders cut the copy into VRAM.' },
+      { type: 'p', text: 'Some platforms go further and snapshot a fully warmed process, memory and all, so a new replica restores from that snapshot in seconds rather than booting from cold. Every second you shave off the cold start is a second the warm pool does not have to cover, which means you can run a thinner floor or lean harder on scale-to-zero without punishing users.' },
     {
       type: 'h2',
       text: 'The mistakes that put teams in this hole'
@@ -172,10 +158,8 @@ print("a cold start the next time traffic moves.")
       type: 'h2',
       text: 'What to carry away'
     },
-    {
-      type: 'p',
-      text: 'A model endpoint fails during spikes for a reason that is almost mechanical once you see it. The autoscaler reacts in seconds, but a fresh GPU replica needs minutes to provision a node, pull gigabytes of weights, load them into VRAM, and warm up, so any capacity you request arrives after the moment that needed it. You fix this on two fronts. Point the scaler at a signal that reflects real model load, the depth of the request queue or the time to first token, so it moves before users feel the backlog. And keep a warm floor of loaded replicas so the minutes a cold one takes to boot are spent in the background instead of in front of a waiting customer. Then decide honestly whether idle GPUs are worth their cost: steady or latency-sensitive traffic wants that warm floor, while rare and patient traffic can scale to zero and eat the cold start. And whatever you choose, shrink the cold start with weight caching, faster loading, and snapshots, because a shorter cold start makes every other decision cheaper. The team from the story stopped watching CPU, put two replicas on a warm floor, and scaled on queue depth. The next launch did not time out.'
-    },
+    { type: 'p', text: 'A model endpoint fails during spikes for a reason that is almost mechanical once you see it. The autoscaler reacts in seconds, but a fresh GPU replica needs minutes to provision a node, pull gigabytes of weights, load them into VRAM, and warm up, so any capacity you request arrives after the moment that needed it. You fix this on two fronts. Point the scaler at a signal that reflects real model load, the depth of the request queue or the time to first token, so it moves before users feel the backlog.' },
+      { type: 'p', text: 'And keep a warm floor of loaded replicas so the minutes a cold one takes to boot are spent in the background instead of in front of a waiting customer. Then decide honestly whether idle GPUs are worth their cost: steady or latency-sensitive traffic wants that warm floor, while rare and patient traffic can scale to zero and eat the cold start. And whatever you choose, shrink the cold start with weight caching, faster loading, and snapshots, because a shorter cold start makes every other decision cheaper. The team from the story stopped watching CPU, put two replicas on a warm floor, and scaled on queue depth. The next launch did not time out.' },
     {
       type: 'sources',
       items: [

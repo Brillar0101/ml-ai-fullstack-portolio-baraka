@@ -5,10 +5,8 @@ export const POST = {
   category: 'AI',
   tags: ['Observability', 'Monitoring', 'Production'],
   body: [
-    {
-      type: 'p',
-      text: 'Picture a support chatbot shipped in front of a help center. It ran on a boring, well-monitored stack: load balancer, a couple of API servers, the usual alerts on CPU, memory, error rates, and uptime. For the first month it worked. Then someone changed the retrieval index the bot used to ground its answers, and a config typo quietly pointed it at a stale copy of the docs. The bot kept answering. It kept returning HTTP 200. Every server stayed healthy, latency looked normal, and the uptime alert stayed green the entire time. Four days later a manager noticed the support queue had swelled with angry follow-ups, all variations of the bot told me the wrong thing. The feature had been failing since Tuesday, and nothing in the monitoring stack had said a word.'
-    },
+    { type: 'p', text: 'Picture a support chatbot shipped in front of a help center. It ran on a boring, well-monitored stack: load balancer, a couple of API servers, the usual alerts on CPU, memory, error rates, and uptime. For the first month it worked. Then someone changed the retrieval index the bot used to ground its answers, and a config typo quietly pointed it at a stale copy of the docs.' },
+      { type: 'p', text: 'The bot kept answering. It kept returning HTTP 200. Every server stayed healthy, latency looked normal, and the uptime alert stayed green the entire time. Four days later a manager noticed the support queue had swelled with angry follow-ups, all variations of the bot told me the wrong thing. The feature had been failing since Tuesday, and nothing in the monitoring stack had said a word.' },
     {
       type: 'p',
       text: 'That gap is the whole point of this post. Standard application monitoring watches whether the software is running. It says almost nothing about whether the answers are any good. An LLM feature has a second, quieter way to fail: it stays up, stays fast, returns valid responses, and the content inside those responses is wrong, unsafe, or useless. If you only wire up the alerts you would use for a normal web service, you are blind to exactly the failures that make AI features different.'
@@ -21,18 +19,14 @@ export const POST = {
       type: 'p',
       text: 'Start with the intuition. In a normal web app, a broken feature usually announces itself. A bad deploy throws exceptions, a slow query spikes latency, a dead dependency returns 500s. Your alerts fire because failure and error are close to the same thing. The output of most endpoints is either right or it visibly breaks.'
     },
-    {
-      type: 'p',
-      text: 'A language model does not offer you that courtesy. Feed it a stale document, a confusing prompt, or an input it has never seen, and it will still produce a fluent, confident, perfectly well-formed answer. The HTTP layer sees success. The model, meanwhile, is hallucinating a refund policy that does not exist. Nothing in the request or response shape reveals the problem, because the problem lives in the meaning of the text, and your web monitoring cannot read. So you have to capture different signals: numbers that stand in for quality, safety, cost, and change, measured on the content itself rather than on the plumbing around it.'
-    },
+    { type: 'p', text: 'A language model does not offer you that courtesy. Feed it a stale document, a confusing prompt, or an input it has never seen, and it will still produce a fluent, confident, perfectly well-formed answer. The HTTP layer sees success.' },
+      { type: 'p', text: 'The model, meanwhile, is hallucinating a refund policy that does not exist. Nothing in the request or response shape reveals the problem, because the problem lives in the meaning of the text, and your web monitoring cannot read. So you have to capture different signals: numbers that stand in for quality, safety, cost, and change, measured on the content itself rather than on the plumbing around it.' },
     {
       type: 'h2',
       text: 'Four families of signals worth capturing'
     },
-    {
-      type: 'p',
-      text: 'It helps to sort the signals into four groups, because each group answers a different question and each earns a different response from you. The first group is **quality proxies**: numbers that correlate with whether users are getting good answers, even though you cannot measure good directly at scale. The clearest one is the thumbs-down rate, the fraction of responses users explicitly mark as unhelpful. Close behind are the regeneration or retry rate, how often a user asks the same thing again because the first answer missed, the escalation rate, how often a chat gets handed off to a human, and the refusal rate, how often the model declines to answer at all. When the stale index broke the support bot, the thumbs-down rate roughly tripled within hours. That signal existed. Nobody was watching it.'
-    },
+    { type: 'p', text: 'It helps to sort the signals into four groups, because each group answers a different question and each earns a different response from you. The first group is **quality proxies**: numbers that correlate with whether users are getting good answers, even though you cannot measure good directly at scale.' },
+      { type: 'p', text: 'The clearest one is the thumbs-down rate, the fraction of responses users explicitly mark as unhelpful. Close behind are the regeneration or retry rate, how often a user asks the same thing again because the first answer missed, the escalation rate, how often a chat gets handed off to a human, and the refusal rate, how often the model declines to answer at all. When the stale index broke the support bot, the thumbs-down rate roughly tripled within hours. That signal existed. Nobody was watching it.' },
     {
       type: 'p',
       text: 'The second group is **safety flags**. These catch the responses that are not merely unhelpful but harmful or risky: outputs a toxicity classifier scores as abusive, inputs that look like jailbreak attempts trying to override the system prompt, and cases where the model echoes back personal data, a PII leak. These are low-frequency and high-consequence, which shapes how you alert on them later.'
@@ -169,10 +163,8 @@ print("conversation, not a page at three in the morning.")
       type: 'h2',
       text: 'Decide what pages a human and what just sits on a dashboard'
     },
-    {
-      type: 'p',
-      text: 'Capturing every signal does not mean alerting on every signal. The hard part is deciding which ones deserve to wake someone at two in the morning and which ones belong on a dashboard you review each morning with coffee. The rule of thumb: page a human only when the signal is both urgent and actionable right now. Safety events usually clear that bar. A spike in jailbreak attempts or a confirmed PII leak is happening now and someone must act, so it pages. A gradual rise in tokens per request costs money but can wait until morning, so it lives on a dashboard with a weekly review.'
-    },
+    { type: 'p', text: 'Capturing every signal does not mean alerting on every signal. The hard part is deciding which ones deserve to wake someone at two in the morning and which ones belong on a dashboard you review each morning with coffee.' },
+      { type: 'p', text: 'The rule of thumb: page a human only when the signal is both urgent and actionable right now. Safety events usually clear that bar. A spike in jailbreak attempts or a confirmed PII leak is happening now and someone must act, so it pages. A gradual rise in tokens per request costs money but can wait until morning, so it lives on a dashboard with a weekly review.' },
     {
       type: 'p',
       text: 'Quality proxies sit in the interesting middle. A thumbs-down rate that jumps from three percent to nine percent and stays there is worth a page, because it is the exact signal that would have caught the stale-index bug on Tuesday afternoon instead of the following Saturday. But you do not page on a single thumbs-down, or even a handful. You page on a rate that crosses a threshold and holds. Here is the decision spine drawn out.'
@@ -212,10 +204,8 @@ print("conversation, not a page at three in the morning.")
       type: 'p',
       text: 'The fastest way to ruin your own monitoring is alert fatigue, and LLM signals are especially good at causing it because they are noisy by nature. Any single response can be bad. A user thumbs-downs a perfect answer because they were in a bad mood, a toxicity classifier trips on a quoted swear word, one request refuses because the phrasing was odd. If each of those pages someone, your team learns within a week to swipe the alerts away without reading them, and then the real one gets swiped away too. The alert becomes noise, and noise is worse than silence because it costs attention and gives nothing back.'
     },
-    {
-      type: 'p',
-      text: 'The fix is to alert on rates and trends rather than events. A single thumbs-down means nothing. A thumbs-down rate above six percent sustained over an hour, measured across enough requests to be real, means something specific and worth waking up for. This does three useful things at once. It smooths out individual noise, it forces you to state a threshold, which forces you to define what good looks like, and it ties the alert to your SLO, the quality line you promised to hold. Define the objective first, then let the alert defend it. An alert without an SLO behind it is just a guess about when to panic.'
-    },
+    { type: 'p', text: 'The fix is to alert on rates and trends rather than events. A single thumbs-down means nothing. A thumbs-down rate above six percent sustained over an hour, measured across enough requests to be real, means something specific and worth waking up for.' },
+      { type: 'p', text: 'This does three useful things at once. It smooths out individual noise, it forces you to state a threshold, which forces you to define what good looks like, and it ties the alert to your SLO, the quality line you promised to hold. Define the objective first, then let the alert defend it. An alert without an SLO behind it is just a guess about when to panic.' },
     {
       type: 'callout',
       title: 'The one alert that would have caught it',
@@ -243,10 +233,8 @@ print("conversation, not a page at three in the morning.")
       type: 'h2',
       text: 'What to carry away'
     },
-    {
-      type: 'p',
-      text: 'An LLM feature can fail while every server is healthy, so the monitoring you copied from your web tier will miss the failures that matter most. Capture four families of signal on the content itself: quality proxies like thumbs-down and regeneration and escalation and refusal rates, safety flags like toxicity and jailbreak attempts and PII leaks, operational numbers like time-to-first-token and tokens and cost and tool errors, and drift like rising fallback and shifting inputs. Emit them as one structured event per request so any of them is a query away. Then split the response by urgency: page immediately on live safety events, page on-call when a quality rate crosses your SLO and holds, and leave slow cost and drift trends on a dashboard you actually read. Above all, alert on rates and trends, never on single events, so you never train your team to ignore the pager. The support team from the story added exactly one rate alert on thumbs-down. The next time an index went stale, they knew within the hour, while the dashboard was still green.'
-    },
+    { type: 'p', text: 'An LLM feature can fail while every server is healthy, so the monitoring you copied from your web tier will miss the failures that matter most. Capture four families of signal on the content itself: quality proxies like thumbs-down and regeneration and escalation and refusal rates, safety flags like toxicity and jailbreak attempts and PII leaks, operational numbers like time-to-first-token and tokens and cost and tool errors, and drift like rising fallback and shifting inputs. Emit them as one structured event per request so any of them is a query away.' },
+      { type: 'p', text: 'Then split the response by urgency: page immediately on live safety events, page on-call when a quality rate crosses your SLO and holds, and leave slow cost and drift trends on a dashboard you actually read. Above all, alert on rates and trends, never on single events, so you never train your team to ignore the pager. The support team from the story added exactly one rate alert on thumbs-down. The next time an index went stale, they knew within the hour, while the dashboard was still green.' },
     {
       type: 'sources',
       items: [

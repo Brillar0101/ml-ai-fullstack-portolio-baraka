@@ -5,10 +5,8 @@ export const POST = {
   category: 'AI',
   tags: ['Deployment', 'Serving', 'Infrastructure'],
   body: [
-    {
-      type: 'p',
-      text: 'Picture a four-person startup with a model they are proud of. They fine-tuned an open-weights LLM on their own support transcripts, and in the notebook it answers customer questions better than anything off the shelf. Now they have a week to put it behind their product. The engineer who drew the short straw opens a browser and finds a wall of options. vLLM, TGI, LitServe, and a dozen hosted APIs all promise to serve the model. Every one of them has a landing page that says it is fast and easy. None of them says which one is right for a team of four with a spiky traffic pattern and no dedicated ops person. That last question is the one that matters, and it is the one this post is about.'
-    },
+    { type: 'p', text: 'Picture a four-person startup with a model they are proud of. They fine-tuned an open-weights LLM on their own support transcripts, and in the notebook it answers customer questions better than anything off the shelf. Now they have a week to put it behind their product.' },
+      { type: 'p', text: 'The engineer who drew the short straw opens a browser and finds a wall of options. vLLM, TGI, LitServe, and a dozen hosted APIs all promise to serve the model. Every one of them has a landing page that says it is fast and easy. None of them says which one is right for a team of four with a spiky traffic pattern and no dedicated ops person. That last question is the one that matters, and it is the one this post is about.' },
     {
       type: 'p',
       text: 'The trap here is treating this as a benchmark contest, where you pick whichever tool posts the biggest tokens-per-second number. Raw speed is real, but for most teams it is not the deciding factor. The decision turns on how much control you need, how your traffic behaves, and how many people you have to keep a server alive at 2am. Get those three right and the tool almost picks itself.'
@@ -17,14 +15,10 @@ export const POST = {
       type: 'h2',
       text: 'Think of it like running a kitchen versus ordering delivery'
     },
-    {
-      type: 'p',
-      text: 'Serving a model is a lot like feeding people. You can run your own kitchen: buy the equipment, hire cooks, and control every ingredient. You get exactly the food you want and, once the kitchen is busy, each plate is cheap. But you also own the gas bill, the broken oven, and the night the head cook calls in sick. The other option is ordering delivery. You pay more per plate and you eat what the restaurant makes, but you never touch a stove, and if nobody orders tonight you pay nothing.'
-    },
-    {
-      type: 'p',
-      text: 'Self-hosting a model is running the kitchen. A hosted inference API is ordering delivery. Neither is smarter than the other. A restaurant that serves a thousand covers a night should own its kitchen. A pop-up that sells lunch twice a week should not. Your model deployment sits somewhere on that same line, and the frameworks below are the equipment you would buy if you decide to cook.'
-    },
+    { type: 'p', text: 'Serving a model is a lot like feeding people. You can run your own kitchen: buy the equipment, hire cooks, and control every ingredient. You get exactly the food you want and, once the kitchen is busy, each plate is cheap.' },
+      { type: 'p', text: 'But you also own the gas bill, the broken oven, and the night the head cook calls in sick. The other option is ordering delivery. You pay more per plate and you eat what the restaurant makes, but you never touch a stove, and if nobody orders tonight you pay nothing.' },
+    { type: 'p', text: 'Self-hosting a model is running the kitchen. A hosted inference API is ordering delivery. Neither is smarter than the other.' },
+      { type: 'p', text: 'A restaurant that serves a thousand covers a night should own its kitchen. A pop-up that sells lunch twice a week should not. Your model deployment sits somewhere on that same line, and the frameworks below are the equipment you would buy if you decide to cook.' },
     {
       type: 'terms',
       items: [

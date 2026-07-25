@@ -17,10 +17,8 @@ export const POST = {
       type: 'h2',
       text: 'The context window is a small desk, and someone has to decide what sits on it'
     },
-    {
-      type: 'p',
-      text: 'Think of the model as a person working at a small desk. The desk is the context window: the text the model can see while it produces an answer. It is not huge, and even when it is large, cramming it full costs money and can bury the useful lines under noise. Every design that connects a model to a knowledge base is, underneath, a policy for what to put on that desk each turn. The interesting question is who writes that policy. In one design a fixed program decides. In the other the model decides for itself.'
-    },
+    { type: 'p', text: 'Think of the model as a person working at a small desk. The desk is the context window: the text the model can see while it produces an answer. It is not huge, and even when it is large, cramming it full costs money and can bury the useful lines under noise.' },
+      { type: 'p', text: 'Every design that connects a model to a knowledge base is, underneath, a policy for what to put on that desk each turn. The interesting question is who writes that policy. In one design a fixed program decides. In the other the model decides for itself.' },
     {
       type: 'p',
       text: 'Hold onto the desk image, because the whole contrast comes down to this. A manual pipeline is like an assistant who drops the same stack of ten folders on your desk before every conversation, no matter what you asked. An agentic setup is like giving you the key to the filing cabinet and letting you walk over and grab a folder only when you actually need one.'
@@ -29,10 +27,8 @@ export const POST = {
       type: 'h2',
       text: 'How a manual RAG pipeline fills the window without asking'
     },
-    {
-      type: 'p',
-      text: 'The classic retrieval-augmented generation pipeline is a straight line. A message comes in. The system turns it into a vector, searches a database for the closest chunks, takes the top handful, pastes them above the question, and sends the whole thing to the model. The model answers. Same steps, same order, every turn. Nothing in that flow ever checks whether the documents were needed.'
-    },
+    { type: 'p', text: 'The classic retrieval-augmented generation pipeline is a straight line. A message comes in. The system turns it into a vector, searches a database for the closest chunks, takes the top handful, pastes them above the question, and sends the whole thing to the model.' },
+      { type: 'p', text: 'The model answers. Same steps, same order, every turn. Nothing in that flow ever checks whether the documents were needed.' },
     {
       type: 'diagram',
       title: 'Manual RAG: a fixed line',
@@ -55,10 +51,8 @@ export const POST = {
       type: 'p',
       text: 'This is exactly what the documentation bot was doing. When a user asked \'how do I paginate the results endpoint,\' the pipeline shone. It found the pagination page, dropped it in, and the model wrote a clean answer grounded in the real docs. When the user replied \'thanks,\' the same machinery fired. It searched, it found the ten chunks that were vaguely closest to the word thanks, and it stuffed them in front of a model that only needed to say \'you are welcome.\''
     },
-    {
-      type: 'p',
-      text: 'The strength here is that the behavior is boring in the good sense. You can predict the cost of every turn to the token. You can cache. You can trace a bad answer back to the chunks that caused it. The weakness is that the pipeline has no judgment. It cannot tell a real question from a pleasantry, and it cannot decide to fetch a second, different document when the first batch turned out to be off topic.'
-    },
+    { type: 'p', text: 'The strength here is that the behavior is boring in the good sense. You can predict the cost of every turn to the token. You can cache. You can trace a bad answer back to the chunks that caused it.' },
+      { type: 'p', text: 'The weakness is that the pipeline has no judgment. It cannot tell a real question from a pleasantry, and it cannot decide to fetch a second, different document when the first batch turned out to be off topic.' },
     {
       type: 'h2',
       text: 'Agentic context engineering: the model treats retrieval as an action'
@@ -176,18 +170,14 @@ print("and a large paste, on every turn that never needed them.")
       type: 'p',
       text: 'When the docs team switched their assistant to something like this, the \'thanks\' problem disappeared on its own. The model saw a message with no real question in it and chose to answer directly, skipping the vector store entirely. Retrieval fired on the turns that earned it. The token bill for the trivial traffic dropped close to zero because those turns stopped carrying ten unnecessary chunks.'
     },
-    {
-      type: 'p',
-      text: 'The gain went beyond cost. Because the model now controlled retrieval, it could handle a follow-up that the fixed pipeline always fumbled. A user asks about pagination, gets an answer, then asks \'what about sorting.\' In the manual pipeline that second turn re-runs the same search against the word sorting and hopes the sort docs rank high enough to make the top ten. In the agentic version the model already knows it is mid-conversation about the results endpoint, so it phrases a sharper query, pulls the sorting section, and connects it to what it just told the user. The context window ended up holding fewer chunks and more of the right ones. That is the quiet win: control over retrieval is also control over relevance.'
-    },
+    { type: 'p', text: 'The gain went beyond cost. Because the model now controlled retrieval, it could handle a follow-up that the fixed pipeline always fumbled. A user asks about pagination, gets an answer, then asks \'what about sorting.\' In the manual pipeline that second turn re-runs the same search against the word sorting and hopes the sort docs rank high enough to make the top ten.' },
+      { type: 'p', text: 'In the agentic version the model already knows it is mid-conversation about the results endpoint, so it phrases a sharper query, pulls the sorting section, and connects it to what it just told the user. The context window ended up holding fewer chunks and more of the right ones. That is the quiet win: control over retrieval is also control over relevance.' },
     {
       type: 'h2',
       text: 'The tradeoff you are actually choosing between'
     },
-    {
-      type: 'p',
-      text: 'Adaptivity is not free. The moment the model is deciding whether to retrieve, it can decide wrong. It can skip retrieval on a question that genuinely needed the docs and answer from memory, which is where confident, wrong answers come from. It can loop too many times and run up latency. Its choices are harder to predict, so your cost per turn now varies with the model\'s judgment instead of sitting at a fixed number. The manual pipeline never makes those mistakes because it never makes a choice.'
-    },
+    { type: 'p', text: 'Adaptivity is not free. The moment the model is deciding whether to retrieve, it can decide wrong. It can skip retrieval on a question that genuinely needed the docs and answer from memory, which is where confident, wrong answers come from.' },
+      { type: 'p', text: 'It can loop too many times and run up latency. Its choices are harder to predict, so your cost per turn now varies with the model\'s judgment instead of sitting at a fixed number. The manual pipeline never makes those mistakes because it never makes a choice.' },
     {
       type: 'ul',
       items: [
@@ -209,10 +199,8 @@ print("and a large paste, on every turn that never needed them.")
       type: 'h2',
       text: 'What to carry away'
     },
-    {
-      type: 'p',
-      text: 'Manual RAG and agentic context are not competing products. They are two answers to one question: who decides what goes on the desk. In a manual pipeline the code decides, and it decides the same way every time, which gives you predictable cost and no judgment. In an agentic setup the model decides, which gives you judgment and the failure modes that come with it. The documentation bot did not need a smarter retriever to stop wasting money on \'thanks.\' It needed to move the decision from the pipeline to the model, so that a turn with no real question could take no real action. When you design your next system, ask which turns actually need documents before you wire retrieval to run on all of them. Start with the cheapest design that fits your traffic, measure where the tokens really go, and add model-driven control only where the fixed line is clearly wasting them. The goal is never agentic for its own sake. It is putting the right small stack of pages on the desk, and giving that decision to whichever party can make it best.'
-    },
+    { type: 'p', text: 'Manual RAG and agentic context are not competing products. They are two answers to one question: who decides what goes on the desk. In a manual pipeline the code decides, and it decides the same way every time, which gives you predictable cost and no judgment. In an agentic setup the model decides, which gives you judgment and the failure modes that come with it.' },
+      { type: 'p', text: 'The documentation bot did not need a smarter retriever to stop wasting money on \'thanks.\' It needed to move the decision from the pipeline to the model, so that a turn with no real question could take no real action. When you design your next system, ask which turns actually need documents before you wire retrieval to run on all of them. Start with the cheapest design that fits your traffic, measure where the tokens really go, and add model-driven control only where the fixed line is clearly wasting them. The goal is never agentic for its own sake. It is putting the right small stack of pages on the desk, and giving that decision to whichever party can make it best.' },
     {
       type: 'sources',
       items: [

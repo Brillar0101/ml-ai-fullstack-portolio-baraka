@@ -9,10 +9,8 @@ export const POST = {
       type: 'p',
       text: 'Picture a working agent. It can read tickets, post to Slack, and query one database. Three tools, maybe four, and it picks the right one almost every time. Then someone has a good idea: connect more MCP servers so the agent can do more. In a single afternoon eight of them get wired in. GitHub, Jira, Google Drive, a calendar server, a payments server, a logs server, a search server, and an internal wiki. Each one shows up green in the client. On paper the agent has gotten much more capable.',
     },
-    {
-      type: 'p',
-      text: 'What actually happened is that it got worse. The agent started calling the wiki search when the user asked about a pull request. It tried to create a calendar event when someone wanted a Jira ticket. On a few runs it froze for a long beat before doing anything at all, like it was reading a menu that was too long. Nobody had touched the model or the prompt. The only thing that changed was the number of tools sitting in front of it.'
-    },
+    { type: 'p', text: 'What actually happened is that it got worse. The agent started calling the wiki search when the user asked about a pull request. It tried to create a calendar event when someone wanted a Jira ticket.' },
+      { type: 'p', text: 'On a few runs it froze for a long beat before doing anything at all, like it was reading a menu that was too long. Nobody had touched the model or the prompt. The only thing that changed was the number of tools sitting in front of it.' },
     {
       type: 'p',
       text: 'This surprises people because adding a tool feels free. You flip a server on and walk away. But every tool you connect has a cost that you do not see in the client UI, and that cost is paid on every single turn the agent takes. Once you understand where the cost lives, the fix is straightforward and the eight servers can stay.'
@@ -25,27 +23,21 @@ export const POST = {
       type: 'p',
       text: 'When an agent connects to an MCP server, the server hands over a list of the tools it offers. Each tool comes with a **tool schema**: a name, a description of what it does, and a full spec of the arguments it takes, with types and notes on each one. All of that is text. Before the model can pick a tool, that text gets placed into the context window alongside your system prompt and the conversation. The model reads the whole menu on every turn.'
     },
-    {
-      type: 'p',
-      text: 'A single tool schema is small on its own, but it is rarely just a few words. A well documented tool with five arguments and clear descriptions can run a few hundred tokens once you count the argument specs. Now multiply. The GitHub server alone might expose thirty tools. The calendar server another ten. Across eight servers you can easily land at a hundred or more tools. If each averages two hundred tokens of schema, that is twenty thousand tokens spent describing tools before the user has said a word. That is real space taken from a fixed window, and it is money spent on every request.'
-    },
+    { type: 'p', text: 'A single tool schema is small on its own, but it is rarely just a few words. A well documented tool with five arguments and clear descriptions can run a few hundred tokens once you count the argument specs. Now multiply. The GitHub server alone might expose thirty tools.' },
+      { type: 'p', text: 'The calendar server another ten. Across eight servers you can easily land at a hundred or more tools. If each averages two hundred tokens of schema, that is twenty thousand tokens spent describing tools before the user has said a word. That is real space taken from a fixed window, and it is money spent on every request.' },
     {
       type: 'callout',
       title: 'The hidden line item',
       text: 'Connecting a server does not just add capability. It adds a fixed block of schema text that rides along in the context on every turn, whether or not the agent ever uses that server. Ninety unused tools still get read ninety times over.'
     },
-    {
-      type: 'p',
-      text: 'Tokens are only half the problem. The other half is that picking the right tool is a decision, and decisions get harder as the list of options grows. Ask a person to choose from four labeled buttons and they will be fast and accurate. Ask them to choose from a hundred and twenty buttons, many with similar names like `search_wiki`, `search_issues`, `search_drive`, and `search_logs`, and they slow down and start making mistakes. Models behave the same way. As the tool count climbs, selection accuracy tends to fall, because more options means more chances for two of them to look like a fit for the same request.'
-    },
+    { type: 'p', text: 'Tokens are only half the problem. The other half is that picking the right tool is a decision, and decisions get harder as the list of options grows. Ask a person to choose from four labeled buttons and they will be fast and accurate.' },
+      { type: 'p', text: 'Ask them to choose from a hundred and twenty buttons, many with similar names like `search_wiki`, `search_issues`, `search_drive`, and `search_logs`, and they slow down and start making mistakes. Models behave the same way. As the tool count climbs, selection accuracy tends to fall, because more options means more chances for two of them to look like a fit for the same request.' },
     {
       type: 'h2',
       text: 'Watch one confused turn in slow motion'
     },
-    {
-      type: 'p',
-      text: 'Take the moment the agent tried to create a calendar event when the user asked for a Jira ticket. The user typed "open a ticket for the login bug." In front of the model sat a hundred plus schemas. Three of them mentioned creating something: `calendar_create_event`, `jira_create_issue`, and `drive_create_file`. Each description started with the word "Create." The model had to disambiguate "ticket" against all three descriptions at once, plus resist the ninety other tools also competing for attention. It landed on the calendar tool. Not because it is a bad model, but because the right answer was buried in a crowd of near neighbors, and reading that whole crowd is what it had to do first.'
-    },
+    { type: 'p', text: 'Take the moment the agent tried to create a calendar event when the user asked for a Jira ticket. The user typed "open a ticket for the login bug." In front of the model sat a hundred plus schemas. Three of them mentioned creating something: `calendar_create_event`, `jira_create_issue`, and `drive_create_file`.' },
+      { type: 'p', text: 'Each description started with the word "Create." The model had to disambiguate "ticket" against all three descriptions at once, plus resist the ninety other tools also competing for attention. It landed on the calendar tool. Not because it is a bad model, but because the right answer was buried in a crowd of near neighbors, and reading that whole crowd is what it had to do first.' },
     {
       type: 'p',
       text: 'Now imagine the same request when the agent only had three or four tools in view, and all of them were plausibly related to issue tracking. The decision is nearly trivial. Same model, same prompt, same user. The only thing that changed is how many wrong doors were standing open at the same time. That gap is the whole problem, and it points straight at the fix.'
@@ -177,10 +169,8 @@ for req in REQUESTS:
       type: 'h2',
       text: 'What to carry away from this'
     },
-    {
-      type: 'p',
-      text: 'More tools is not more capability past a point. Every connected tool spends context tokens on every turn and adds one more option the model has to rule out, and both of those costs push the agent toward slower, wronger choices. The eight servers were not the mistake. Pouring all of their tools into the window at once was. Put a manager in the middle that routes each task to a small, relevant handful, re-route as the conversation moves, and keep an eye on the hit rate. You get the reach of many servers without making the model read the whole menu every time it wants to order one thing.'
-    },
+    { type: 'p', text: 'More tools is not more capability past a point. Every connected tool spends context tokens on every turn and adds one more option the model has to rule out, and both of those costs push the agent toward slower, wronger choices.' },
+      { type: 'p', text: 'The eight servers were not the mistake. Pouring all of their tools into the window at once was. Put a manager in the middle that routes each task to a small, relevant handful, re-route as the conversation moves, and keep an eye on the hit rate. You get the reach of many servers without making the model read the whole menu every time it wants to order one thing.' },
     {
       type: 'sources',
       items: [

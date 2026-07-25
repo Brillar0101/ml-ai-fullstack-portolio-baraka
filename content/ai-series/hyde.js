@@ -13,18 +13,14 @@ export const POST = {
       type: 'p',
       text: 'Nothing is broken in the usual sense. The embedding model works, the vector index works, the similarity search works. The failure is quieter than that. The question and its own answer barely share any words, and that mismatch is enough to sink the search.'
     },
-    {
-      type: 'p',
-      text: 'I want to sit with this failure for a moment because it is easy to blame the wrong thing. When retrieval misses, the reflex is to swap embedding models, re-chunk the documents, or bolt on a reranker. Those steps sometimes help. But if the root cause is that your query and your answer are shaped differently, none of them touch it directly. You can buy a better map of the city and still be standing in the wrong neighborhood. HyDE is one of the cleaner ways to walk to a better starting point before you even open the map.'
-    },
+    { type: 'p', text: 'I want to sit with this failure for a moment because it is easy to blame the wrong thing. When retrieval misses, the reflex is to swap embedding models, re-chunk the documents, or bolt on a reranker. Those steps sometimes help.' },
+      { type: 'p', text: 'But if the root cause is that your query and your answer are shaped differently, none of them touch it directly. You can buy a better map of the city and still be standing in the wrong neighborhood. HyDE is one of the cleaner ways to walk to a better starting point before you even open the map.' },
     {
       type: 'h2',
       text: 'Why a good question can point at the wrong passage'
     },
-    {
-      type: 'p',
-      text: 'Standard retrieval-augmented generation embeds the user question into a vector, then looks for stored document chunks whose vectors sit nearby. The quiet assumption is that a question lands close to its answer in that space. Often it does. But questions and answers are different kinds of text. A question is short, uses casual verbs, and names the goal. An answer passage is longer, uses precise nouns, and describes a procedure. "How do I rotate my API keys" and "Credential lifecycle management: generating a replacement secret and revoking the prior value" are talking about the same thing, yet they look almost nothing alike on the surface.'
-    },
+    { type: 'p', text: 'Standard retrieval-augmented generation embeds the user question into a vector, then looks for stored document chunks whose vectors sit nearby. The quiet assumption is that a question lands close to its answer in that space. Often it does.' },
+      { type: 'p', text: 'But questions and answers are different kinds of text. A question is short, uses casual verbs, and names the goal. An answer passage is longer, uses precise nouns, and describes a procedure. "How do I rotate my API keys" and "Credential lifecycle management: generating a replacement secret and revoking the prior value" are talking about the same thing, yet they look almost nothing alike on the surface.' },
     {
       type: 'p',
       text: 'Embedding models pick up on that surface difference. The question drifts toward other short, casual, question-shaped text. The answer sits with other formal, procedural text. Even a strong model leaves a real gap between the two. When you search using only the raw question vector, you are searching from the wrong neighborhood, and the passage you need is a street over.'
@@ -57,10 +53,8 @@ export const POST = {
       type: 'p',
       text: 'What matters is the shape. This drafted paragraph is long, procedural, and full of the same nouns your real documentation uses: generate, revoke, credentials, services, overlap window. It reads like an answer because it is trying to be one. So when you embed this draft instead of the bare question, its vector lands in the answer neighborhood, right next to your genuine "Credential lifecycle management" page. You search from there and finally pull back the real passage.'
     },
-    {
-      type: 'p',
-      text: 'Notice the sleight of hand. The language model does not need to know your specific product to be useful here. It has read enough documentation in its training to know roughly how a key-rotation answer is worded, even if it has never seen yours. That general sense of "what an answer looks like" is exactly what you borrow. You are not asking the model to be correct. You are asking it to be shaped like the target, and models are good at that even when they are shaky on the facts.'
-    },
+    { type: 'p', text: 'Notice the sleight of hand. The language model does not need to know your specific product to be useful here. It has read enough documentation in its training to know roughly how a key-rotation answer is worded, even if it has never seen yours.' },
+      { type: 'p', text: 'That general sense of "what an answer looks like" is exactly what you borrow. You are not asking the model to be correct. You are asking it to be shaped like the target, and models are good at that even when they are shaky on the facts.' },
     {
       type: 'diagram',
       nodes: [
@@ -177,10 +171,8 @@ print("show the user is grounded in kb-1, a real document, never in the draft.")
       type: 'h2',
       text: 'Where teams trip over their own HyDE'
     },
-    {
-      type: 'p',
-      text: 'The mistake I see most is treating the draft as the answer. Someone reads the hypothetical passage, notices it looks fluent, and pipes it straight to the user. Now you are shipping a hallucination. The draft exists to move the search, nothing more. The user should only ever see text written from retrieved documents. A useful habit is to log the draft separately from the final answer during development so you never confuse the two, then drop it from the response payload entirely once you ship.'
-    },
+    { type: 'p', text: 'The mistake I see most is treating the draft as the answer. Someone reads the hypothetical passage, notices it looks fluent, and pipes it straight to the user. Now you are shipping a hallucination.' },
+      { type: 'p', text: 'The draft exists to move the search, nothing more. The user should only ever see text written from retrieved documents. A useful habit is to log the draft separately from the final answer during development so you never confuse the two, then drop it from the response payload entirely once you ship.' },
     {
       type: 'ul',
       items: [
@@ -195,10 +187,8 @@ print("show the user is grounded in kb-1, a real document, never in the draft.")
       title: 'A quick gut check',
       text: 'Before adding HyDE, look at your failing queries. If they are short and phrased nothing like the documents that answer them, HyDE will likely help. If they already share vocabulary with your docs, plain retrieval is cheaper and just as good.'
     },
-    {
-      type: 'p',
-      text: 'The reason HyDE works is worth holding onto even if you never ship it. Retrieval quality depends on the two things you compare living in the same kind of space. When your probe and your target are different kinds of text, you can transform the probe until it resembles the target. HyDE does that by borrowing the language model to imagine what an answer looks like, then searching with that imagination instead of the raw question. The facts come later, from real sources. The draft just gets you into the right room.'
-    },
+    { type: 'p', text: 'The reason HyDE works is worth holding onto even if you never ship it. Retrieval quality depends on the two things you compare living in the same kind of space.' },
+      { type: 'p', text: 'When your probe and your target are different kinds of text, you can transform the probe until it resembles the target. HyDE does that by borrowing the language model to imagine what an answer looks like, then searching with that imagination instead of the raw question. The facts come later, from real sources. The draft just gets you into the right room.' },
     {
       type: 'sources',
       items: [

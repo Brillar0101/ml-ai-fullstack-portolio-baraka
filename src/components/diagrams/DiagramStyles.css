@@ -1279,3 +1279,45 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   }
 }
+
+/* ---- Phone ----
+   These diagrams are SVG with a viewBox, so they scale down cleanly. The
+   problem on a phone is not overflow, it is legibility: a 720px-wide diagram
+   squeezed into 340px renders its labels at around 5px.
+
+   So below the fold-out width, stop shrinking and start scrolling. The diagram
+   keeps a legible minimum size and the reader pans it, which beats a picture
+   nobody can read. The scroll lives inside the figure, so the page body itself
+   never scrolls sideways. */
+@media (max-width: 720px) {
+  .flow-diagram,
+  .arch-diagram,
+  .sketch-diagram,
+  .bar-chart,
+  .line-chart,
+  .schematic {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+
+  .arch-diagram svg,
+  .sketch-diagram svg,
+  .bar-chart svg,
+  .line-chart svg,
+  .schematic svg {
+    min-width: 520px;
+  }
+
+  /* A quiet hint that there is more to the right. */
+  .arch-diagram,
+  .sketch-diagram,
+  .bar-chart,
+  .line-chart,
+  .schematic {
+    background-image: linear-gradient(to left, rgba(0, 0, 0, 0.06), transparent 24px);
+    background-repeat: no-repeat;
+    background-position: right center;
+    background-size: 24px 100%;
+  }
+}

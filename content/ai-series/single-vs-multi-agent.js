@@ -9,22 +9,16 @@ export const POST = {
       type: 'p',
       text: 'Picture a research assistant that works well. You give it a question, it searches a few sources, reads what it finds, and writes up an answer with citations. One model, a handful of tools, one loop. Not fancy, but steady, and people trust it. Then someone reads a post about multi-agent systems and decides the single agent is doing too much. It gets split into five: a planner, two searchers, a reader, and a writer. Each one has its own prompt and its own narrow job. On the whiteboard it looks clean.',
     },
-    {
-      type: 'p',
-      text: 'In practice it fell apart. The whole thing got slower, because every question now bounced through five handoffs instead of running in one loop. It also got less reliable in a way that was hard to pin down. The planner would tell a searcher to look up one thing, the searcher would find something slightly different, and the reader downstream never learned what the planner had actually wanted. Answers came back confident and subtly wrong. After a few weeks of patching, the team folded the five agents back into one and the assistant got good again. The lesson stuck with them, and it is worth unpacking, because splitting an agent feels like progress and often is not.'
-    },
+    { type: 'p', text: 'In practice it fell apart. The whole thing got slower, because every question now bounced through five handoffs instead of running in one loop. It also got less reliable in a way that was hard to pin down.' },
+      { type: 'p', text: 'The planner would tell a searcher to look up one thing, the searcher would find something slightly different, and the reader downstream never learned what the planner had actually wanted. Answers came back confident and subtly wrong. After a few weeks of patching, the team folded the five agents back into one and the assistant got good again. The lesson stuck with them, and it is worth unpacking, because splitting an agent feels like progress and often is not.' },
     {
       type: 'h2',
       text: 'Splitting adds a tax that runs on every request'
     },
-    {
-      type: 'p',
-      text: 'Here is the intuition to hold onto. When you split one agent into several, you are not just dividing up the work. You are adding a new kind of work that did not exist before: the work of coordinating. The agents have to pass information between each other, agree on what to do, and hand results back and forth. None of that helped the user directly. It is pure overhead, and unlike a one-time setup cost, you pay it on every single request.'
-    },
-    {
-      type: 'p',
-      text: 'Think about how a small, tight team of people works versus a large one. Two people who sit together barely need meetings. They just talk. Grow that to ten people spread across roles and suddenly half the day is status updates, handoffs, and clarifying who owns what. The work itself did not get harder. The coordination did. Agents hit the same wall, except they coordinate through text messages they pass to each other, and text is a lossy way to move intent around.'
-    },
+    { type: 'p', text: 'Here is the intuition to hold onto. When you split one agent into several, you are not just dividing up the work. You are adding a new kind of work that did not exist before: the work of coordinating.' },
+      { type: 'p', text: 'The agents have to pass information between each other, agree on what to do, and hand results back and forth. None of that helped the user directly. It is pure overhead, and unlike a one-time setup cost, you pay it on every single request.' },
+    { type: 'p', text: 'Think about how a small, tight team of people works versus a large one. Two people who sit together barely need meetings.' },
+      { type: 'p', text: 'They just talk. Grow that to ten people spread across roles and suddenly half the day is status updates, handoffs, and clarifying who owns what. The work itself did not get harder. The coordination did. Agents hit the same wall, except they coordinate through text messages they pass to each other, and text is a lossy way to move intent around.' },
     {
       type: 'p',
       text: 'The research team felt all three of the classic costs at once. Latency went up because five sequential steps take longer than one. Failures got stranger because a mistake early in the chain quietly poisoned everything after it. And the agents talked past each other, since the planner\'s full understanding of the task never traveled intact to the reader three steps down the line. That last one is the sneakiest, so it is worth naming clearly before we go further.'
@@ -46,18 +40,14 @@ export const POST = {
         { term: 'Handoff', def: 'The moment one agent passes control and information to another. Everything the receiving agent knows about the task arrives through this message, so whatever the handoff leaves out is simply lost.' }
       ]
     },
-    {
-      type: 'p',
-      text: 'That last definition is the crux. In a single agent, context is shared for free because there is only one context. Every tool result, every earlier decision, every nuance of the request sits in the same window the model reads on every turn. The moment you split, that shared memory breaks into pieces. Each agent sees only what it was handed. If the planner understood that the user wanted recent sources but phrased the handoff as "search for X," the searcher has no idea recency mattered. The information did not travel because nobody put it in the message.'
-    },
+    { type: 'p', text: 'That last definition is the crux. In a single agent, context is shared for free because there is only one context. Every tool result, every earlier decision, every nuance of the request sits in the same window the model reads on every turn.' },
+      { type: 'p', text: 'The moment you split, that shared memory breaks into pieces. Each agent sees only what it was handed. If the planner understood that the user wanted recent sources but phrased the handoff as "search for X," the searcher has no idea recency mattered. The information did not travel because nobody put it in the message.' },
     {
       type: 'h2',
       text: 'The default is one agent with good tools'
     },
-    {
-      type: 'p',
-      text: 'So here is the position to start from. Reach for a single agent with a solid set of tools first, every time, and make the multi-agent design prove it is worth the tax. Most tasks that look like they need a team of specialists actually just need one capable agent that can call a search tool, a read tool, and a write tool in whatever order the work requires. The research assistant was already that. The split did not give it new abilities. It gave it new seams to fail along.'
-    },
+    { type: 'p', text: 'So here is the position to start from. Reach for a single agent with a solid set of tools first, every time, and make the multi-agent design prove it is worth the tax. Most tasks that look like they need a team of specialists actually just need one capable agent that can call a search tool, a read tool, and a write tool in whatever order the work requires.' },
+      { type: 'p', text: 'The research assistant was already that. The split did not give it new abilities. It gave it new seams to fail along.' },
     {
       type: 'p',
       text: 'This runs against a common instinct. We organize human companies into specialized roles, so it feels natural to organize agents the same way. But a person in a role carries years of shared context and can walk over and ask a colleague a question. An agent handoff is a single text message with no follow-up. Splitting by role gives you the org chart without the hallway conversations that make an org chart work.'
@@ -109,14 +99,10 @@ export const POST = {
       },
       caption: 'Work down the branches. You only split when a task clearly hits one of the first three cases. If it does not, the single agent wins by default.'
     },
-    {
-      type: 'p',
-      text: 'The first case is genuine parallelism. If a task has parts that do not depend on each other, running them at the same time on separate agents can cut wall-clock time. Reviewing forty documents against a checklist is a good fit, because document twelve does not care what document thirty said. The parts are truly independent, so the coordination cost buys you real speed. Notice this only works when the parts do not need to talk to each other while they run. The research assistant failed this test: its steps were a chain, where each one depended on the last, so there was nothing to run in parallel.'
-    },
-    {
-      type: 'p',
-      text: 'The second case is separation of concerns that needs different tools or prompts. Sometimes two jobs are so unlike that jamming them into one agent makes it worse at both. A coding agent that also has to send customer emails wants two different personalities, two different tool sets, and two different sets of guardrails. Here a split can sharpen each agent rather than blur one. The bar is high, though. "The steps feel different" is not enough. The tools and the required behavior have to genuinely diverge.'
-    },
+    { type: 'p', text: 'The first case is genuine parallelism. If a task has parts that do not depend on each other, running them at the same time on separate agents can cut wall-clock time. Reviewing forty documents against a checklist is a good fit, because document twelve does not care what document thirty said.' },
+      { type: 'p', text: 'The parts are truly independent, so the coordination cost buys you real speed. Notice this only works when the parts do not need to talk to each other while they run. The research assistant failed this test: its steps were a chain, where each one depended on the last, so there was nothing to run in parallel.' },
+    { type: 'p', text: 'The second case is separation of concerns that needs different tools or prompts. Sometimes two jobs are so unlike that jamming them into one agent makes it worse at both. A coding agent that also has to send customer emails wants two different personalities, two different tool sets, and two different sets of guardrails.' },
+      { type: 'p', text: 'Here a split can sharpen each agent rather than blur one. The bar is high, though. "The steps feel different" is not enough. The tools and the required behavior have to genuinely diverge.' },
     {
       type: 'p',
       text: 'The third case is context-window pressure. If a single task drags in more material than one context window can hold, or so much that the model loses focus, you can split so each agent handles a slice and only reports a short summary back. This is the case the research team thought they were solving, but they were not close to the limit. Their queries fit in one window with room to spare. They paid for a fix to a problem they did not have.'
