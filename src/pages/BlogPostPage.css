@@ -92,7 +92,10 @@
 /* ---- Layout: Content + Sidebar ---- */
 .blog-post-layout {
   display: grid;
-  grid-template-columns: 1fr 320px;
+  /* minmax(0, ...) rather than 1fr: a bare 1fr takes its minimum from the
+     item's min-content, so a single wide descendant pushes the column past
+     the viewport and the whole page scrolls sideways. */
+  grid-template-columns: minmax(0, 1fr) 320px;
   gap: var(--space-3xl);
   align-items: start;
 }
@@ -875,7 +878,7 @@
 /* ---- Responsive ---- */
 @media (max-width: 1023px) {
   .blog-post-layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .blog-post-sidebar {
@@ -945,12 +948,14 @@
 .series-toc ol {
   margin: 0;
   padding-left: 20px;
-  display: grid;
-  gap: 6px;
+}
+.series-toc li + li {
+  margin-top: 6px;
 }
 .series-toc li {
   font-size: 15px;
   line-height: 1.4;
+  overflow-wrap: break-word;
 }
 .series-toc a {
   color: var(--primary);
@@ -1036,4 +1041,10 @@
 /* Nothing on the page may cause a sideways scroll of the document itself. */
 .blog-post-content {
   overflow-wrap: break-word;
+}
+
+/* Belt and braces: nothing inside an article may widen the article. */
+.blog-post-content,
+.blog-post-content > * {
+  max-width: 100%;
 }

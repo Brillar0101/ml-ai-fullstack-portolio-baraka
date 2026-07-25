@@ -8,6 +8,7 @@ import ContactPage from './pages/ContactPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import { usePageTracking } from './hooks/useAnalytics';
 import { CONFIG } from './config';
+import { BLOG_POSTS } from './data/blog';
 import './styles/global.css';
 
 // Lazy-load heavy project pages
@@ -64,6 +65,24 @@ function LoadingFallback() {
   );
 }
 
+// Resolve a document title for any route, including the dynamic ones.
+// A plain lookup on the exact path sent every blog post and every unlisted
+// project to "Home", which is wrong in the browser tab, wrong in a bookmark,
+// and wrong in the preview card when someone shares the link.
+function titleFor(pathname) {
+  const exact = pageTitles[pathname];
+  if (exact) return exact;
+
+  const post = BLOG_POSTS.find((p) => p.route === pathname);
+  if (post) return post.title;
+
+  // Unknown child route: name its section rather than claiming it is the
+  // home page. Better a slightly generic title than a false one.
+  const section = pathname.split('/').filter(Boolean)[0];
+  if (section) return pageTitles[`/${section}`] || 'Home';
+  return 'Home';
+}
+
 export default function App() {
   const location = useLocation();
 
@@ -72,8 +91,7 @@ export default function App() {
 
   // Update document title based on route
   useEffect(() => {
-    const pageTitle = pageTitles[location.pathname] || 'Home';
-    document.title = `${pageTitle} | ${CONFIG.name}, Computer Engineer`;
+    document.title = `${titleFor(location.pathname)} | ${CONFIG.name}, Computer Engineer`;
   }, [location.pathname]);
 
   const isHomePage = location.pathname === '/';

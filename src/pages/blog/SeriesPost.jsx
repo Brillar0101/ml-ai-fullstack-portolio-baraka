@@ -6,6 +6,10 @@ import ArchDiagram from '../../components/diagrams/ArchDiagram';
 import BarChart from '../../components/diagrams/BarChart';
 import LineChart from '../../components/diagrams/LineChart';
 import Schematic from '../../components/diagrams/Schematic';
+// Shared rules across every diagram renderer, including how they behave on a
+// phone. Imported here because this is the one component that renders all of
+// them; the file was previously imported nowhere and its rules never applied.
+import '../../components/diagrams/DiagramStyles.css';
 
 /**
  * Generic renderer for data-driven series blog posts. A post's `body` is an
