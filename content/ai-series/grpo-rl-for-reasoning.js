@@ -71,43 +71,77 @@ export const POST = {
       { type: 'p', text: 'The advantage for each answer becomes its reward minus the group mean, sometimes divided by the group standard deviation to keep the scale steady. That single swap cuts the memory footprint, removes an entire training loop, and takes out a component that was often finicky to get right. You pay for it by needing several samples per problem, but for tasks with cheap automatic checking that trade is usually worth it.' },
     { type: 'lab', packages: ['numpy'], height: 460,
         title: 'Group-relative advantages, on an easy problem and a hard one',
-        caption: 'Being right on the problem most samples already solved teaches less than being right on the hard one. When the whole group agrees, the signal is exactly zero.',
+        caption: 'Four problems of different difficulty. Being right on the hard one, which a single sample solved, earns a far bigger push than being right on the easy one. When every sample agrees, the signal is exactly zero.',
         code: `import numpy as np
 
-# GRPO's core move: instead of training a separate value network to say how
-# good an answer "should" be, compare each sampled answer against the other
-# samples for the SAME problem. The group is the baseline.
+# GRPO's core move: instead of a separate value network
+# saying how good an answer "should" be, compare each
+# sample against the others for the SAME problem.
+# The group is the baseline.
 
 def group_advantages(rewards, group_size, eps=1e-4):
-    groups = rewards.reshape(-1, group_size)          # [n_problems, group_size]
-    mean = groups.mean(axis=1, keepdims=True)         # baseline per problem
-    std = groups.std(axis=1, keepdims=True)           # spread per problem
+    groups = rewards.reshape(-1, group_size)
+    mean = groups.mean(axis=1, keepdims=True)  # per-problem
+    std = groups.std(axis=1, keepdims=True)    # spread
     return ((groups - mean) / (std + eps)).reshape(-1)
 
-# Two problems, four sampled answers each. 1.0 = the answer checked out.
-rewards = np.array([1.0, 0.0, 1.0, 0.0,      # problem A: 2 of 4 correct
-                    1.0, 1.0, 1.0, 0.0])     # problem B: 3 of 4 correct
+# Four problems of different difficulty.
+# 1.0 = the answer checked out against a verifier.
+PROBLEMS = [
+    ("A  hard",  [1.0, 0.0, 0.0, 0.0]),
+    ("B  medium", [1.0, 0.0, 1.0, 0.0]),
+    ("C  easy",   [1.0, 1.0, 1.0, 0.0]),
+    ("D  solved", [1.0, 1.0, 1.0, 1.0]),
+]
+
+rewards = np.array([r for _, rs in PROBLEMS for r in rs])
 adv = group_advantages(rewards, group_size=4)
 
-print("problem  sample  reward  advantage")
-for i, (r, a) in enumerate(zip(rewards, adv)):
-    print("   %s        %d      %.1f     %+.3f" % ("AB"[i // 4], i % 4, r, a))
+# ---- Report ---------------------------------------------
+# Colour is the direction of the update: green pushes the
+# model toward an answer, red away, grey means no signal.
+E = chr(27)
+DIM, OFF, BOLD = E + "[2m", E + "[0m", E + "[1m"
+OK, BAD, MUTE = E + "[32m", E + "[31m", E + "[90m"
+note = lambda s: print(DIM + s + OFF)
+
+def arrow(a):
+    if abs(a) < 1e-6:
+        return MUTE, "  no signal"
+    if a > 0:
+        return OK, "  push toward"
+    return BAD, "  push away"
+
+print(BOLD + "GRPO" + OFF + "  4 problems x 4 samples")
+note("-" * 54)
+note("%-11s %7s %5s %9s %s"
+     % ("PROBLEM", "SOLVED", "REWARD", "ADVANTAGE", "UPDATE"))
+
+for i, (name, rs) in enumerate(PROBLEMS):
+    block = adv[i * 4:(i + 1) * 4]
+    solved = "%d/4" % int(sum(rs))
+    for k, (r, a) in enumerate(zip(rs, block)):
+        colour, label = arrow(a)
+        head = name if k == 0 else ""
+        cell = solved if k == 0 else ""
+        print("%-11s %7s %5.0f %s%9.3f%s%s%s%s"
+              % (head, cell, r, colour, a, OFF,
+                 colour, label, OFF))
+    note("")
+
+note("-" * 54)
+print(BOLD + "READ IT" + OFF + "  a correct answer is worth more")
+print("         where fewer samples got it right")
 
 print()
-print("Notice the correct answers to problem B get a SMALLER push (%+.3f) than"
-      % adv[4])
-print("the correct answers to problem A (%+.3f)." % adv[0])
-print("Three of four samples already solved B, so being right there is less")
-print("informative. Problem A was harder, so getting it right teaches more.")
+note("Being right on A, which one sample solved, earns")
+note("a bigger push than being right on C, which most")
+note("already solved. D gives nothing at all: when the")
+note("whole group agrees, there is nothing to learn.")
+note("That is why training data must mix difficulties.")
 
-hard = np.array([1.0, 1.0, 1.0, 1.0])
-print()
-print("Edge case, every sample correct:", np.round(group_advantages(hard, 4), 3))
-print("Zero signal in every direction. If the whole group agrees there is")
-print("nothing to learn from it, which is why problem difficulty has to be")
-print("mixed for this to train anything.")
-
-# Try it: make one group all zeros and confirm you get the same flat result.
+# Try it: make problem A all zeros. It goes flat too,
+# for the same reason. Signal lives in disagreement.
 ` },
     {
       type: 'p',
