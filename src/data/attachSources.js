@@ -10,6 +10,7 @@
 // publish gate in ../lib/publishGate.js decides whether that is enough to ship.
 import { SOURCES } from './sources-map';
 import { TERM_LINKS } from './termLinks';
+import { DIAGRAMS } from './postDiagrams';
 import { gate } from '../lib/publishGate';
 
 // Give a defined term its reference link, unless the post already set one.
@@ -26,9 +27,25 @@ function linkTerms(block) {
   return changed ? { ...block, items } : block;
 }
 
+// Drop a post's diagram in at its declared position. Placement is by heading
+// text rather than index, so inserting or splitting a paragraph elsewhere in
+// the post cannot silently move the diagram somewhere it makes no sense.
+function insertDiagram(body, postId) {
+  const entry = DIAGRAMS.find((d) => d.post === postId);
+  if (!entry) return body;
+  if (body.some((b) => b.type === 'diagram')) return body;   // already has one
+
+  const at = entry.before.h2
+    ? body.findIndex((b) => b.type === 'h2' && b.text === entry.before.h2)
+    : body.findIndex((b) => b.type === entry.before.type);
+
+  if (at === -1) return [...body, entry.diagram];            // anchor moved: append
+  return [...body.slice(0, at), entry.diagram, ...body.slice(at)];
+}
+
 /**
- * Return a copy of `post` with its verified sources block at the end and its
- * defined terms linked to authoritative references. Any sources block already
+ * Return a copy of `post` with its verified sources block at the end, its
+ * defined terms linked to authoritative references, and its diagram in place. Any sources block already
  * in the body is replaced, so the map is the single source of truth and stale
  * inline lists cannot drift.
  */
@@ -36,9 +53,10 @@ export function attachSources(post) {
   if (!Array.isArray(post.body)) return post;
   const items = SOURCES[post.id];
 
-  const body = post.body
-    .filter((b) => b.type !== 'sources')
-    .map(linkTerms);
+  const body = insertDiagram(
+    post.body.filter((b) => b.type !== 'sources').map(linkTerms),
+    post.id,
+  );
 
   if (items) body.push({ type: 'sources', items });
   else {

@@ -163,18 +163,54 @@ export default function ArchDiagram({ title, caption, nodes = [], edges = [], gr
             </g>
           );
         })}
-        {edges.map((e, i) => {
-          const geo = edgeGeometry(e, pos);
-          if (!geo) return null;
-          return (
-            <g key={i}>
-              <path d={geo.path} fill="none" stroke="currentColor" strokeWidth="1.6" markerEnd="url(#arch-arrow)" />
-              {e.label ? (
-                <text className="arch-edge-label" x={geo.lx} y={geo.ly} textAnchor={geo.anchor}>{e.label}</text>
-              ) : null}
-            </g>
-          );
-        })}
+        {(() => {
+          // Each label is placed at the midpoint of its own edge, so any edges
+          // that share geometry also share a label position and the texts
+          // render stacked on top of each other, unreadable. This happens for
+          // a request-and-response pair between two nodes, and for a fan-out
+          // where several edges leave the same node.
+          //
+          // Rather than special-case those shapes, bucket the labels by the
+          // point they would land on and fan out anything that collides.
+          const geos = edges.map((e) => edgeGeometry(e, pos));
+          const buckets = new Map();
+          geos.forEach((geo, i) => {
+            if (!geo || !edges[i].label) return;
+            const key = `${Math.round(geo.lx)},${Math.round(geo.ly)}`;
+            if (!buckets.has(key)) buckets.set(key, []);
+            buckets.get(key).push(i);
+          });
+
+          const offset = new Map();
+          const LINE = 15;
+          for (const group of buckets.values()) {
+            if (group.length < 2) continue;
+            // Centre the stack on the original point so the set stays visually
+            // attached to the edges it describes.
+            const start = -((group.length - 1) / 2) * LINE;
+            group.forEach((i, n) => offset.set(i, start + n * LINE));
+          }
+
+          return edges.map((e, i) => {
+            const geo = geos[i];
+            if (!geo) return null;
+            return (
+              <g key={i}>
+                <path d={geo.path} fill="none" stroke="currentColor" strokeWidth="1.6" markerEnd="url(#arch-arrow)" />
+                {e.label ? (
+                  <text
+                    className="arch-edge-label"
+                    x={geo.lx}
+                    y={geo.ly + (offset.get(i) || 0)}
+                    textAnchor={geo.anchor}
+                  >
+                    {e.label}
+                  </text>
+                ) : null}
+              </g>
+            );
+          });
+        })()}
         {nodes.map((n) => {
           const p = pos[n.id];
           const lines = wrap(n.label);
