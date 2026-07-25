@@ -149,6 +149,27 @@
 }
 .blog-post-content .series-code pre { margin-bottom: 0; }
 
+/* Runnable lab block: same filename tab as a static code block, sitting
+   directly on top of the editor so the two read as one unit. */
+.blog-post-content .series-lab figcaption + .lab {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+.blog-post-content .series-lab figcaption + .lab .lab-bar {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+.blog-post-content .series-lab .series-lab-caption {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.55;
+  background: none;
+  border: none;
+  border-radius: 0;
+  padding: 10px 2px 0;
+  text-align: left;
+}
+
 /* Image block (real document screenshots, annotated figures) */
 .blog-post-content .series-image {
   margin: 24px 0 28px;
@@ -942,4 +963,15 @@
 /* Anchor targets clear the sticky nav when jumped to from the TOC */
 .blog-post-content h2[id] {
   scroll-margin-top: 96px;
+}
+
+/* Inline reference links in body prose. These sit inside justified paragraphs,
+   so they carry a faint underline at rest rather than a colour change alone,
+   and firm up on hover. Several in one paragraph still read as prose. */
+.blog-post-content .series-inline-link {
+  color: var(--primary);
+  border-bottom: 1px solid color-mix(in srgb, var(--primary) 30%, transparent);
+}
+.blog-post-content .series-inline-link:hover {
+  border-bottom-color: var(--primary);
 }

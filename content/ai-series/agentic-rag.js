@@ -4,11 +4,10 @@ export const POST = {
   excerpt: 'Classic RAG always grabs the top-k chunks and answers. Agentic RAG lets the model decide whether to search, how to reword the query, and whether the context is good enough before it commits to an answer.',
   category: 'AI',
   tags: ['RAG', 'Agents', 'Retrieval'],
-  readTime: '8 min read',
   body: [
     {
       type: 'p',
-      text: 'A support team shipped a help-desk bot backed by a vector database. It worked well for a week, then a customer sent this: "My export keeps failing and I also want to move my billing to the yearly plan, and does the yearly plan even support exports over 2GB?" The bot pulled the five closest chunks, wrote a confident paragraph about fixing failed exports, and never touched billing or the file-size limit. The customer got a third of an answer and opened a ticket anyway.'
+      text: 'Picture a help-desk bot backed by a vector database. It works well for a week, then a customer sent this: "My export keeps failing and I also want to move my billing to the yearly plan, and does the yearly plan even support exports over 2GB?" The bot pulled the five closest chunks, wrote a confident paragraph about fixing failed exports, and never touched billing or the file-size limit. The customer got a third of an answer and opened a ticket anyway.'
     },
     {
       type: 'p',
@@ -101,31 +100,71 @@ export const POST = {
       type: 'p',
       text: 'In code the loop stays small. You retrieve, ask the model to grade the result, and either accept it or rewrite and try once more, with a hard cap on attempts so it can never spin forever. The sketch below shows the core of one sub-question passing through that cycle.'
     },
-    {
-      type: 'code',
-      lang: 'python',
-      title: 'A retrieve, grade, answer loop',
-      code: `def answer_subquestion(question, retriever, llm, max_tries=3):
+    { type: 'lab', height: 460,
+        title: 'A retrieve, grade, answer loop',
+        caption: 'The first question takes two passes: the initial search is on topic but does not answer it, so the grader says weak and the query gets rewritten. Plain RAG would have answered from that first, wrong context.',
+        code: `# Plain RAG retrieves once and answers with whatever came back. Agentic RAG
+# grades what came back and searches again when it is not good enough. The
+# grader and the retriever are stand-ins so you can watch the loop turn.
+
+DOCS = {
+    "sso": "Single sign-on is configured under Settings, Security, Identity Provider.",
+    "saml": "SAML metadata must be uploaded before SSO can be enabled.",
+    "pricing": "SSO is available on the Enterprise plan only.",
+}
+
+def retriever_search(query, k=2):
+    q = query.lower()
+    # A plain vector search matches on topic. "SSO" dominates the question, so
+    # the SSO and pricing pages come back and the SAML prerequisite does not.
+    if "sso" in q or "sign-on" in q or "sign on" in q:
+        return [DOCS["sso"], DOCS["pricing"]]
+    if "metadata" in q or "saml" in q:
+        return [DOCS["saml"], DOCS["sso"]]
+    return []
+
+def llm_grade(question, context):
+    # Returns "good", "weak" or "missing". A real grader is a model call.
+    if not context:
+        return "missing"
+    if "metadata" in question.lower() and not any("metadata" in c.lower() for c in context):
+        return "weak"     # on topic, but does not answer what was asked
+    return "good"
+
+def llm_rewrite_query(question, previous):
+    return "SAML metadata upload requirement"   # a real model rewrites here
+
+def llm_answer(question, chunks, caveat=None):
+    text = " ".join(chunks)
+    return ("[%s] " % caveat if caveat else "") + text
+
+def answer_subquestion(question, max_tries=3):
     query = question
-    for attempt in range(max_tries):
-        chunks = retriever.search(query, k=4)
-        grade = llm.grade(
-            question=question,
-            context=chunks,
-        )  # returns "good", "weak", or "missing"
-
+    for attempt in range(1, max_tries + 1):
+        chunks = retriever_search(query, k=2)
+        grade = llm_grade(question, chunks)
+        print("   try %d  query=%-38r grade=%s" % (attempt, query[:36], grade))
         if grade == "good":
-            return llm.answer(question, chunks)
-
+            return llm_answer(question, chunks)
         if grade == "missing":
             return "The docs do not cover this. Please confirm with support."
+        query = llm_rewrite_query(question, previous=query)
+    return llm_answer(question, chunks, caveat="low confidence")
 
-        # grade == "weak": reword and search again
-        query = llm.rewrite_query(question, previous=query)
+for q in ["What do I need before enabling SSO metadata?",
+          "How do I enable SSO?",
+          "What is your parental leave policy?"]:
+    print("question:", q)
+    print("   ANSWER:", answer_subquestion(q))
+    print()
 
-    # ran out of tries without solid context
-    return llm.answer(question, chunks, caveat="low confidence")`
-    },
+print("The first question needed two passes: the first search was on topic but")
+print("did not answer it, so the grader said weak and the query got rewritten.")
+print("Plain RAG would have answered confidently from that first, wrong context.")
+
+# Try it: make llm_grade always return "good" and watch question one answer
+# from the wrong passage without a word of warning.
+` },
     {
       type: 'h2',
       text: 'Where teams get burned'

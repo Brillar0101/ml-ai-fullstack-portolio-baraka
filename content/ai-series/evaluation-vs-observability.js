@@ -4,11 +4,10 @@ export const POST = {
   excerpt: 'A team scored high on every offline test, shipped with confidence, and a week later could not explain a wave of angry tickets. Nothing about the live traffic had been recorded. This is the gap between checking a version and watching a running system.',
   category: 'AI',
   tags: ['Observability', 'Evaluation', 'Production'],
-  readTime: '8 min read',
   body: [
     {
       type: 'p',
-      text: 'A team I spoke with built a support assistant on top of a language model. Before launch they did the responsible thing. They collected two hundred real customer questions, wrote out the ideal answer for each one, and ran their candidate version against that set. The scores came back strong. Faithfulness looked good, the answers matched the reference material, and a second model acting as a judge rated most responses highly. They shipped on a Thursday feeling safe.'
+      text: 'Picture a support assistant built on a language model. Before launch the team does the responsible thing. They collect two hundred real customer questions, write out the ideal answer for each one, and run their candidate version against that set. The scores come back strong. Faithfulness looks good, the answers match the reference material, and a second model acting as a judge rates most responses highly. They ship on a Thursday feeling safe.',
     },
     {
       type: 'p',
@@ -78,11 +77,33 @@ export const POST = {
       type: 'p',
       text: 'The mechanism that makes the loop possible is structured logging. When a production call finishes, you write down one record that captures the inputs, the output, and the numbers around them: how long the call took, how many tokens it burned, and any feedback the user gave. Structured means the record is a set of named fields, not a line of free text, so you can later search for every call slower than three seconds or every call that got a thumbs down. Without that structure your logs are a haystack. With it, mining failures is a query.'
     },
-    {
-      type: 'code',
-      lang: 'python',
-      title: 'Logging one structured record for a production LLM call',
-      code: `import time, json, uuid
+    { type: 'lab', height: 460,
+        title: 'One structured record per call, then the questions it answers',
+        caption: 'The same chunk appears in the happy answers and the unhappy ones, so it is not obviously the culprit. That is a question you can only ask if the retrieved ids are on the record next to the outcome.',
+        code: `import json, time, uuid
+from collections import Counter
+
+# Offline evaluation tells you a change is safe to try. Observability tells you
+# what actually happened once real people used it. This is the second one: one
+# structured record per call, and the aggregation that makes it worth logging.
+
+class FakeResult:
+    def __init__(self, text, pt, ot):
+        self.text, self.prompt_tokens, self.output_tokens = text, pt, ot
+
+class FakeModel:
+    """Stand-in. Returns a canned answer so the record shape is the point."""
+    def answer(self, question, context):
+        time.sleep(0.005)
+        return FakeResult("Refunds take 5 business days.", 800 + 40 * len(context), 24)
+
+SINK = []
+def write(line):
+    SINK.append(json.loads(line))
+
+class Sink:
+    def write(self, line):
+        write(line)
 
 def call_and_log(model, question, retrieved, sink):
     start = time.time()
@@ -95,16 +116,49 @@ def call_and_log(model, question, retrieved, sink):
         "latency_ms": round((time.time() - start) * 1000),
         "prompt_tokens": result.prompt_tokens,
         "output_tokens": result.output_tokens,
-        "feedback": None,      # filled in later: "up", "down", "escalated"
+        "feedback": None,        # filled in later: "up", "down", "escalated"
         "ts": time.time(),
     }
     sink.write(json.dumps(record) + "\\n")
     return record
 
-# when the user reacts, attach the signal to the same trace
-def attach_feedback(trace_id, signal, store):
-    store.update(trace_id, {"feedback": signal})`
-    },
+def attach_feedback(trace_id, signal):
+    for r in SINK:
+        if r["trace_id"] == trace_id:
+            r["feedback"] = signal
+
+model, sink = FakeModel(), Sink()
+TRAFFIC = [
+    ("how long do refunds take?",       [{"id": "billing-2"}],                    "up"),
+    ("how long do refunds take?",       [{"id": "billing-2"}],                    "up"),
+    ("can I get a refund after 60 days?", [{"id": "billing-2"}, {"id": "policy-9"}], "down"),
+    ("why was I charged twice?",        [{"id": "billing-2"}, {"id": "billing-7"}], "escalated"),
+    ("where is my order?",              [{"id": "ship-1"}],                       None),
+]
+
+for question, retrieved, signal in TRAFFIC:
+    rec = call_and_log(model, question, retrieved, sink)
+    if signal:
+        attach_feedback(rec["trace_id"], signal)
+
+print("logged %d calls" % len(SINK))
+print()
+print("what the aggregate says:")
+print("   median latency   %d ms" % sorted(r["latency_ms"] for r in SINK)[len(SINK) // 2])
+print("   total tokens in  %d" % sum(r["prompt_tokens"] for r in SINK))
+print("   feedback         %s" % dict(Counter(r["feedback"] for r in SINK)))
+print()
+bad = [r for r in SINK if r["feedback"] in ("down", "escalated")]
+print("the %d unhappy calls, and what they retrieved:" % len(bad))
+for r in bad:
+    print("   %-34s %-11s %s" % (r["question"], r["feedback"], r["retrieved_ids"]))
+print()
+print("billing-2 is in both unhappy answers and both happy ones, so the chunk")
+print("is not obviously the problem. That is the kind of question you can only")
+print("ask once the retrieved ids are on the record next to the outcome.")
+
+# Try it: log only latency and tokens, then try to answer the same question.
+` },
     {
       type: 'p',
       text: 'Notice that the feedback field starts empty and gets filled in when the user reacts. The answer and the reaction arrive at different moments, so they are joined by the trace id. That single identifier is what lets you connect a slow, wrong answer to the thumbs down that followed it, and then to the human ticket after that.'

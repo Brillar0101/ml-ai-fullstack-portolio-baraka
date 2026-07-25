@@ -4,11 +4,10 @@ export const POST = {
   excerpt: 'Your right answer keeps landing at rank 8, never in the top 3 you send the model. A reranker reads the query and each chunk together and pulls the good ones up.',
   category: 'AI',
   tags: ['RAG', 'Reranking', 'Retrieval'],
-  readTime: '8 min read',
   body: [
     {
       type: 'p',
-      text: 'A support team shipped a RAG assistant that answered questions about their product docs. It worked, mostly. Then a specific complaint kept coming back: for a whole class of questions about billing edge cases, the assistant gave vague or wrong answers even though the correct paragraph was sitting right there in the knowledge base. Someone finally logged the raw retrieval output instead of just the final answer. The correct passage was being retrieved every single time. It was landing at rank 8. The system only fed the top 3 chunks to the model, so the one paragraph that actually held the answer never made it into the prompt.'
+      text: 'Picture a RAG assistant answering questions about a product doc set. It works, mostly. Then a specific complaint kept coming back: for a whole class of questions about billing edge cases, the assistant gave vague or wrong answers even though the correct paragraph was sitting right there in the knowledge base. Someone finally logged the raw retrieval output instead of just the final answer. The correct passage was being retrieved every single time. It was landing at rank 8. The system only fed the top 3 chunks to the model, so the one paragraph that actually held the answer never made it into the prompt.'
     },
     {
       type: 'p',
@@ -90,30 +89,78 @@ export const POST = {
       type: 'p',
       text: 'In code this is smaller than people expect. You already have your shortlist from the vector search. You pair the query with each candidate, hand every pair to the cross-encoder, and sort by the scores it returns.'
     },
-    {
-      type: 'code',
-      lang: 'python',
-      title: 'Rerank a shortlist with a cross-encoder',
-      code: `from sentence_transformers import CrossEncoder
+    { type: 'lab', height: 460,
+        title: 'A shortlist, before and after reranking',
+        caption: 'The passage that answers the question shares almost no words with it, so topic matching ranked it last. Reading the pair together pulls it to first.',
+        code: `# Why a reranker earns its place. A bi-encoder embeds the query and each
+# passage SEPARATELY, so it can only ask "are these about the same topic?".
+# A cross-encoder reads the pair together and can ask the better question:
+# "does this passage actually answer this query?" Both are stand-ins here.
 
-# a small, fast cross-encoder trained for relevance scoring
-reranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
+QUERY = "Why was I charged twice on my annual plan?"
 
-query = "Why was I charged twice on an annual plan?"
+CANDIDATES = [
+    "Annual plans are billed once every 12 months on your renewal date.",
+    "Your annual plan can be upgraded or downgraded at any time.",
+    "If the same amount appears more than once, we return the extra within 5 business days.",
+    "Annual plan pricing is listed on the pricing page.",
+    "Monthly plans are charged on the same day each month.",
+]
 
-# candidates came from your fast vector search (the top 50)
-candidates = retrieve_top_k(query, k=50)  # list of passage strings
+def stem(w):
+    w = w.strip("?.,!").lower()
+    for suf in ("ed", "es", "s"):
+        if len(w) > 4 and w.endswith(suf):
+            return w[: -len(suf)]
+    return w
 
-# score the query against each candidate, read jointly
-pairs = [(query, passage) for passage in candidates]
-scores = reranker.predict(pairs)
+def bi_encoder_score(query, passage):
+    # Topic overlap. This is roughly what an embedding captures: shared
+    # subject matter. It has no idea what the user's actual problem is.
+    q = {stem(w) for w in query.split()}
+    p = {stem(w) for w in passage.split()}
+    return len(q & p) / (len(q) ** 0.5 * len(p) ** 0.5)
 
-# sort candidates by the cross-encoder score, best first
-ranked = sorted(zip(scores, candidates), reverse=True)
+def cross_encoder_score(query, passage):
+    # Reads query and passage jointly, so it can notice that "the same amount
+    # appears more than once" is the thing the user is complaining about, even
+    # though the passage shares almost no words with the question.
+    p = passage.lower()
+    asks_about_duplicate = "twice" in query.lower() or "charged twice" in query.lower()
+    answers_duplicate = "more than once" in p or "duplicate" in p
+    score = bi_encoder_score(query, passage) * 0.4
+    if asks_about_duplicate and answers_duplicate:
+        score += 0.9        # this passage resolves the actual complaint
+    if "monthly" in p and "annual" in query.lower():
+        score -= 0.2        # wrong plan type
+    return score
 
-# keep only the few you will actually send to the LLM
-top_passages = [passage for _, passage in ranked[:5]]`
-    },
+ranked1 = sorted(CANDIDATES, key=lambda c: bi_encoder_score(QUERY, c), reverse=True)
+print("stage 1, bi-encoder, which is what a plain vector search gives you:")
+for i, c in enumerate(ranked1, 1):
+    print("   %d. %.2f  %s" % (i, bi_encoder_score(QUERY, c), c))
+
+# Stage 1 casts a wide net on purpose. Its only job is to not miss the answer,
+# so it hands everything it found to stage 2 rather than deciding early.
+SHORTLIST = 5      # in production this is more like the top 50
+KEEP = 2           # what actually gets sent to the model
+
+shortlist = ranked1[:SHORTLIST]
+ranked2 = sorted(shortlist, key=lambda c: cross_encoder_score(QUERY, c), reverse=True)
+print()
+print("stage 2, cross-encoder rerank of the top %d:" % SHORTLIST)
+for i, c in enumerate(ranked2, 1):
+    mark = "  <- sent to the model" if i <= KEEP else ""
+    print("   %d. %+.2f  %s%s" % (i, cross_encoder_score(QUERY, c), c, mark))
+
+print()
+print("The passage that answers the question shares almost no words with it, so")
+print("topic matching ranked it dead last. Reading the pair together pulled it")
+print("to first. Retrieve generously, then sort carefully.")
+
+# Try it: set SHORTLIST = 3. The right passage never reaches the reranker, and
+# no amount of careful sorting can promote something that was already cut.
+` },
     {
       type: 'p',
       text: 'The shape stays the same whether you run a local model like this one or call a hosted rerank endpoint. You send a query and a list of candidates, you get back scores or an ordering, you slice off the top few. The cost is one model pass per candidate, so 50 passes per query, which lands in the tens of milliseconds for a small reranker and stays invisible next to the language model call that follows.'

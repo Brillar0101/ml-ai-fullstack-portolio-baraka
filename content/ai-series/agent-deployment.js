@@ -4,11 +4,10 @@ export const POST = {
   excerpt: 'A chatbot answers and stops. An agent keeps going, calls tools, and can loop forever. Here is what breaks when you push one to production, told through an agent that ran up a bill overnight.',
   category: 'AI',
   tags: ['Agents', 'Deployment', 'Production'],
-  readTime: '8 min read',
   body: [
     {
       type: 'p',
-      text: 'A team shipped their first real agent on a Thursday. It worked all week in testing. It read support tickets, looked up order records, and drafted replies, and every demo run finished in under a minute. They set it to process the overnight queue and went home. By Friday morning the agent had made close to forty thousand tool calls against the same three tickets, and the API bill for that one night was larger than the entire month before it. Nothing had crashed. No error was thrown. The agent had simply decided it was not done yet, over and over, until someone woke up and killed the process.'
+      text: 'Picture a team shipping their first real agent on a Thursday. It works all week in testing. It read support tickets, looked up order records, and drafted replies, and every demo run finished in under a minute. They set it to process the overnight queue and went home. By Friday morning the agent had made close to forty thousand tool calls against the same three tickets, and the API bill for that one night was larger than the entire month before it. Nothing had crashed. No error was thrown. The agent had simply decided it was not done yet, over and over, until someone woke up and killed the process.'
     },
     {
       type: 'p',
@@ -78,31 +77,68 @@ export const POST = {
       type: 'p',
       text: 'Two of those defenses would have stopped the overnight bill on their own. A step limit would have halted the task at, say, twenty five actions instead of forty thousand. A spend ceiling would have tripped long before morning. Let us make the step cap and the approval checkpoint concrete, because they are the two you should add first, and they are small.'
     },
-    {
-      type: 'code',
-      lang: 'python',
-      title: 'An agent loop with a step cap and an approval checkpoint',
-      code: `RISKY = {"delete_record", "issue_refund", "send_email"}
+    { type: 'lab', height: 460,
+        title: 'An agent loop with a step cap and an approval checkpoint',
+        caption: 'Run it both ways. A rejected action is a normal outcome that the loop absorbs, not a crash, which is the property that makes checkpoints usable in production.',
+        code: `class StepLimitReached(Exception):
+    pass
+
+RISKY = {"delete_record", "issue_refund", "send_email"}
+
+# ---- Stand-ins ------------------------------------------------------------
+# A scripted agent so the run is deterministic, and an approval function you
+# can flip to see both paths.
+PLAN = [
+    {"name": "get_order",    "args": {"order_id": "4417"}},
+    {"name": "issue_refund", "args": {"order_id": "4417", "amount": 42.00}},
+    {"name": "finish",       "args": {}, "result": "Refund handled."},
+]
+
+class ScriptedAgent:
+    def next_action(self, state):
+        return PLAN[len(state["history"])] if len(state["history"]) < len(PLAN) else PLAN[-1]
+
+TOOLS = {
+    "get_order":    lambda order_id: {"id": order_id, "status": "delayed"},
+    "issue_refund": lambda order_id, amount: "refunded %.2f on %s" % (amount, order_id),
+}
+
+def save(state):
+    pass          # durable persistence goes here: every step, not just the end
 
 def run_agent(task, agent, tools, approve, max_steps=25):
     state = {"task": task, "history": []}
     for step in range(max_steps):
-        action = agent.next_action(state)   # model picks the next move
-        if action.name == "finish":
-            return action.result
+        action = agent.next_action(state)      # model picks the next move
+        if action["name"] == "finish":
+            return action["result"], state
 
         # Pause before anything destructive and wait for a person.
-        if action.name in RISKY and not approve(action):
-            state["history"].append(("rejected", action.name))
+        if action["name"] in RISKY and not approve(action):
+            state["history"].append(("rejected", action["name"]))
             continue
 
-        result = tools[action.name](**action.args)  # runs sandboxed
-        state["history"].append((action.name, result))
-        save(state)                          # durable: persist every step
+        result = tools[action["name"]](**action["args"])   # runs sandboxed
+        state["history"].append((action["name"], result))
+        save(state)                            # durable: persist every step
+    raise StepLimitReached("task stopped after %d steps" % max_steps)
 
-    # Loop hit the ceiling. Stop instead of running all night.
-    raise StepLimitReached(f"task stopped after {max_steps} steps")`
-    },
+for label, approve in [("a human approves the refund", lambda a: True),
+                       ("a human rejects the refund",  lambda a: False)]:
+    print("---", label, "---")
+    try:
+        result, state = run_agent("refund order 4417", ScriptedAgent(), TOOLS, approve, max_steps=6)
+        print("   result:", result)
+        for entry in state["history"]:
+            print("   step:", entry)
+    except StepLimitReached as e:
+        print("   stopped:", e)
+    print()
+
+# The rejected run still finishes cleanly. That is the point of a checkpoint:
+# refusing an action is a normal outcome, not a crash.
+# Try it: set max_steps=1 and watch StepLimitReached do its job.
+` },
     {
       type: 'p',
       text: 'Read the loop and you can see each guardrail. The `for step in range(max_steps)` line is the step limit, and it is why this agent physically cannot run forty thousand times. The `RISKY` check is the human-in-the-loop gate, pausing before a refund or a delete until `approve` returns true. The `save(state)` call is the durable part, writing progress after each step so a crash resumes rather than restarts. And the tools are invoked through a table you control, which is where sandboxing lives, since you decide what each tool is allowed to touch.'

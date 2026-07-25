@@ -4,7 +4,6 @@ export const POST = {
   excerpt: 'A dense model runs every parameter for every token. Mixture of Experts keeps a huge pile of parameters around but wakes up only a couple of them per word. Here is how that trick works and where it bites.',
   category: 'AI',
   tags: ['LLMs', 'Mixture of Experts', 'Architecture'],
-  readTime: '8 min read',
   body: [
     {
       type: 'p',
@@ -40,7 +39,7 @@ export const POST = {
     },
     {
       type: 'p',
-      text: "Now the arithmetic. Mixtral holds around 47 billion parameters in total across all eight experts and the shared layers. But any one token only ever visits two experts per layer, so the compute for a single token lands near 13 billion parameters. You store a 47 billion parameter model. You pay compute closer to a 13 billion parameter model. The bank’s bot can be large in knowledge yet cheap in the moment it answers."
+      text: "Now the arithmetic. Mixtral holds around 47 billion parameters in total across all eight experts and the shared layers. But any one token only ever visits two experts per layer, so the compute for a single token lands near 13 billion parameters. You store a 47 billion parameter model. You pay compute closer to a 13 billion parameter model. The bank's bot can be large in knowledge yet cheap in the moment it answers."
     },
     {
       type: 'diagram',
@@ -89,26 +88,57 @@ export const POST = {
     },
     {
       type: 'p',
-      text: "The router is small and it does very little. It takes the token’s hidden vector, multiplies it by one weight matrix, and produces one score per expert. Those scores go through a softmax so they read as weights that sum to one. Then it keeps the top two, renormalizes just those two so they again sum to one, and uses them to blend the two expert outputs. Here is the core of it in a few lines."
+      text: "The router is small and it does very little. It takes the token's hidden vector, multiplies it by one weight matrix, and produces one score per expert. Those scores go through a softmax so they read as weights that sum to one. Then it keeps the top two, renormalizes just those two so they again sum to one, and uses them to blend the two expert outputs. Here is the core of it in a few lines."
     },
-    {
-      type: 'code',
-      lang: 'python',
-      title: 'A top-2 router weighting two expert outputs',
-      code: `import torch
-import torch.nn.functional as F
+    { type: 'lab', packages: ['numpy'], height: 460,
+        title: 'A top-2 router in front of four experts',
+        caption: 'Four experts defined, two run per token. Parameters scale with the number of experts, compute scales with k, and k stays small. That gap is the entire point of the architecture.',
+        code: `import numpy as np
 
-def moe_layer(x, gate_w, experts, k=2):
-    # x: one token vector, shape [d]
-    scores = x @ gate_w          # raw score per expert, shape [num_experts]
-    top_val, top_idx = scores.topk(k)   # keep the k best experts
-    weights = F.softmax(top_val, dim=-1)  # renormalize only the winners
+# A top-2 router in front of four experts. Written with numpy so you can watch
+# the routing happen. The "experts" are trivial linear maps, not trained ones.
+rng = np.random.default_rng(0)
+D, N_EXPERTS, K = 6, 4, 2
 
-    out = torch.zeros_like(x)
+gate_w = rng.normal(size=(D, N_EXPERTS))                     # the router
+expert_w = [rng.normal(size=(D, D)) * 0.3 for _ in range(N_EXPERTS)]
+experts = [(lambda x, W=W: x @ W) for W in expert_w]
+
+def softmax(v):
+    e = np.exp(v - v.max())
+    return e / e.sum()
+
+def moe_layer(x, gate_w, experts, k=K):
+    scores = x @ gate_w                       # one score per expert
+    top_idx = np.argsort(scores)[-k:][::-1]   # keep the k best
+    weights = softmax(scores[top_idx])        # renormalize only the winners
+    out = np.zeros_like(x)
     for w, i in zip(weights, top_idx):
-        out = out + w * experts[i](x)   # run ONLY the chosen experts
-    return out                          # weighted blend of k expert outputs`
-    },
+        out = out + w * experts[i](x)         # run ONLY the chosen experts
+    return out, top_idx, weights, scores
+
+tokens = {"billing": rng.normal(size=D), "login": rng.normal(size=D),
+          "shipping": rng.normal(size=D), "refund": rng.normal(size=D)}
+
+print("token      router scores                     picked   weights")
+used = set()
+for name, x in tokens.items():
+    out, idx, w, scores = moe_layer(x, gate_w, experts)
+    used.update(idx.tolist())
+    print("%-10s %-33s %-8s %s"
+          % (name, np.array2string(scores, precision=2, suppress_small=True),
+             str(idx.tolist()), np.array2string(w, precision=2)))
+
+print()
+print("Experts defined: %d.  Experts actually run per token: %d." % (N_EXPERTS, K))
+print("That is the whole trick. Parameters scale with the number of experts,")
+print("but compute per token scales with k, and k stays small.")
+print("Across these %d tokens the router used experts %s."
+      % (len(tokens), sorted(used)))
+
+# Try it: set K = 4 so every expert runs on every token. The model is now
+# dense, the compute per token doubles, and the router stops mattering.
+` },
     {
       type: 'p',
       text: "The line that matters is the loop. It runs only the chosen experts. The other six never get called, so their weights never touch the math for this token. That single choice is where the compute savings come from. Everything else in the layer, the attention and the normalization, stays exactly as it is in a dense Transformer."

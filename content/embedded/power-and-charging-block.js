@@ -7,7 +7,6 @@ export const POST = {
   excerpt: 'A gadget that runs fine on the bench browns out the moment you plug it in to charge. The fix is designing the power-and-charging block for the scenario you actually have.',
   category: 'Hardware',
   tags: ['Embedded', 'Power', 'Battery charging', 'Li-ion'],
-  readTime: '13 min read',
   publishAt: '2026-07-05T12:00:00Z',
   body: [
     { type: 'p', text: 'You build a small USB gadget with a rechargeable battery. On the bench it runs for hours, and the battery charges when you plug it in. Then someone uses it for real: they run it until the battery is nearly flat, plug in the USB cable to charge, and the device browns out and reboots in a loop. The charger is fighting the load for the same trickle of current, and neither one wins. Nothing in your firmware is wrong. The mistake is in the **power and charging block**, the handful of parts between the USB connector, the battery, and the rest of the board, and it was designed for a scenario that is not the one your users actually create.' },

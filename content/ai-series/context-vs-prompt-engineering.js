@@ -4,11 +4,10 @@ export const POST = {
   excerpt: 'A support agent that shined in the demo started giving worse answers in production, and nobody had touched the prompt. The window had quietly filled with junk. This is the difference between wording one instruction and managing everything the model reads.',
   category: 'AI',
   tags: ['Context Engineering', 'Prompting', 'Agents'],
-  readTime: '8 min read',
   body: [
     {
       type: 'p',
-      text: 'A small team ships a customer support agent. In the demo it looks great. You ask it about a refund policy, it pulls the right help doc, checks the order status through a tool, and answers in two clean sentences. Everyone in the room nods. Two weeks later the same agent is live, and the complaints start. It gives a partial answer, then a wrong one, then it confidently quotes a policy that was retired last year. The strange part is that nobody edited the prompt. The instructions the team wrote are byte for byte identical to the demo. So what broke?',
+      text: 'Picture a small team shipping a customer support agent. In the demo it looks great. You ask it about a refund policy, it pulls the right help doc, checks the order status through a tool, and answers in two clean sentences. Everyone in the room nods. Two weeks later the same agent is live, and the complaints start. It gives a partial answer, then a wrong one, then it confidently quotes a policy that was retired last year. The strange part is that nobody edited the prompt. The instructions the team wrote are byte for byte identical to the demo. So what broke?',
     },
     {
       type: 'p',

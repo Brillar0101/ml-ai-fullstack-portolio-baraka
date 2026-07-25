@@ -7,7 +7,6 @@ export const POST = {
   excerpt: 'An MCP server can expose three kinds of thing, and the difference that matters is not what they do but who is allowed to pull the trigger. Here is that boundary, built around one small notes app.',
   category: 'AI',
   tags: ['MCP', 'Tools', 'Resources'],
-  readTime: '8 min read',
   publishAt: '2026-07-12T12:00:00Z',
   body: [
     { type: 'p', text: 'Say you keep all your notes as plain text files in one folder, and you want your AI assistant to help with them. You want three things. You want to ask it to find every note that mentions a client. You want it to read the full text of a specific note when you point at one. And you want a one-click "summarize my week" routine that pulls the last seven days and writes you a recap. Those three wishes look similar from the outside. They all touch your notes. But when you sit down to build the connector that exposes your notes to the assistant, you find they are not the same shape at all, and the thing that separates them is a question of control: who decides when each one runs.' },

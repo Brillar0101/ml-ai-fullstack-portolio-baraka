@@ -4,11 +4,10 @@ export const POST = {
   excerpt: 'A developer asks whether to reach for MCP or function calling. The honest answer is that they sit at different layers and usually work together. Here is how to tell them apart.',
   category: 'AI',
   tags: ['MCP', 'Function Calling', 'Tools'],
-  readTime: '8 min read',
   body: [
     {
       type: 'p',
-      text: 'A backend engineer I know spent an afternoon stuck on a single question before writing any code. She wanted her assistant to look up an order status from the company database. Every tutorial she opened seemed to answer a different question. One showed a JSON schema passed to a model. Another told her to stand up an **MCP server**. A third said to just call the REST endpoint she already had. She came away thinking these were three competing ways to do the same job, and that picking the wrong one meant rework later.'
+      text: 'Picture a backend engineer stuck on a single question before writing any code. She wants her assistant to look up an order status from the company database. Every tutorial she opens seems to answer a different question. One shows a JSON schema passed to a model. Another tells her to stand up an **MCP server**. A third says to just call the REST endpoint she already has. It is easy to come away thinking these are three competing ways to do the same job, and that picking the wrong one means rework later.',
     },
     {
       type: 'p',

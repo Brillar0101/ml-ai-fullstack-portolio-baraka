@@ -4,7 +4,6 @@ export const POST = {
   excerpt: 'Your travel agent needs to book a flight, but the airline runs its own agent built by a different company. A2A is the handshake that lets the two work together without either team hardcoding the other.',
   category: 'AI',
   tags: ['Agents', 'A2A', 'Protocols'],
-  readTime: '8 min read',
   body: [
     {
       type: 'p',

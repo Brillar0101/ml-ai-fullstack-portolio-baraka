@@ -4,11 +4,10 @@ export const POST = {
   excerpt: 'A RAG agent answered fine most of the time, then sometimes took nine seconds. The final text told us nothing. The trace showed one tool call timing out and being retried three times. Here is how to read that tree.',
   category: 'AI',
   tags: ['Observability', 'Tracing', 'Agents'],
-  readTime: '8 min read',
   body: [
     {
       type: 'p',
-      text: 'A support team shipped a RAG agent that answered product questions. Most of the time it felt quick, a second or two, and people liked it. Then the complaints started. Every so often the same kind of question took eight or nine seconds, and nobody could say why. The answer text looked normal when it finally arrived. The logs showed the request came in and a response went out, with a long quiet gap in the middle that no single log line explained. The team was staring at the last thing the system produced and trying to reason backward about everything that happened before it.'
+      text: 'Picture a RAG agent answering product questions. Most of the time it felt quick, a second or two, and people liked it. Then the complaints started. Every so often the same kind of question took eight or nine seconds, and nobody could say why. The answer text looked normal when it finally arrived. The logs showed the request came in and a response went out, with a long quiet gap in the middle that no single log line explained. The team was staring at the last thing the system produced and trying to reason backward about everything that happened before it.'
     },
     {
       type: 'p',

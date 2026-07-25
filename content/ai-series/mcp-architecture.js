@@ -4,7 +4,6 @@ export const POST = {
   excerpt: 'Your IDE assistant reads a file and opens a pull request without you leaving the editor. Behind that one smooth moment sits a three role protocol worth understanding.',
   category: 'AI',
   tags: ['MCP', 'Architecture', 'Protocols'],
-  readTime: '8 min read',
   body: [
     {
       type: 'p',

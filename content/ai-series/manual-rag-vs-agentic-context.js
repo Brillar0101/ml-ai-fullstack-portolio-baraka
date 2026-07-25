@@ -4,11 +4,10 @@ export const POST = {
   excerpt: 'A docs bot that runs a full retrieval on every "thanks" is burning money. The fix is not a bigger pipeline. It is letting the model decide when to fetch.',
   category: 'AI',
   tags: ['Context Engineering', 'RAG', 'Agents'],
-  readTime: '8 min read',
   body: [
     {
       type: 'p',
-      text: 'A support team I worked with shipped a documentation assistant for their developer portal. It answered questions about their API well enough. Then someone looked at the token bill. The bot was running a full vector search and pulling ten document chunks into the prompt on **every single message**, including the ones that were just a user typing \'thanks, that worked\' or \'ok\'. Roughly a third of the traffic needed no documents at all, and the system was paying retrieval and prompt costs on all of it.'
+      text: 'Picture a documentation assistant for a developer portal. It answers questions about the API well enough. Then someone looks at the token bill. The bot is running a full vector search and pulling ten document chunks into the prompt on **every single message**, including the ones that are just a user typing "thanks, that worked" or "ok". When a large share of the traffic needs no documents at all, the system is paying retrieval and prompt costs on all of it anyway.',
     },
     {
       type: 'p',
@@ -104,32 +103,75 @@ export const POST = {
       type: 'p',
       text: 'Here is a small version of the decision the model makes before it commits to retrieving. In the manual design this branch does not exist. In the agentic design it is the whole point.'
     },
-    {
-      type: 'code',
-      lang: 'python',
-      title: 'An agent loop that decides whether to retrieve',
-      code: `def handle_turn(message, model, retriever):
-    # Ask the model what to do before touching the vector store.
-    plan = model.decide(
-        message,
-        tools=["retrieve_docs", "answer_directly"],
-    )
+    { type: 'lab', height: 460,
+        title: 'Retrieving every turn against deciding first',
+        caption: 'Half of a real conversation is pleasantries that need no documents. Deciding first is a cheap call that skips an expensive search and a large paste.',
+        code: `# Retrieve-every-turn against let-the-model-decide. The "model" here is a
+# stand-in that routes on the shape of the message, which is enough to show
+# what the two designs cost.
 
-    if plan.action == "answer_directly":
-        # Pleasantries, follow-ups, thanks: no docs needed.
-        return model.answer(message, context=[])
+class StandInModel:
+    def decide(self, message):
+        m = message.lower().strip(" .!?")
+        if m in {"thanks", "thanks, that worked", "ok", "great", "perfect"}:
+            return "answer_directly"
+        return "retrieve_docs"
 
-    if plan.action == "retrieve_docs":
-        chunks = retriever.search(plan.query, k=5)
-        answer = model.answer(message, context=chunks)
-        # The model can loop again if the chunks missed.
-        if answer.needs_more:
-            extra = retriever.search(answer.follow_up_query, k=3)
-            return model.answer(message, context=chunks + extra)
-        return answer
+    def answer(self, message, context):
+        if not context:
+            return "You're welcome."
+        return "Per the docs: " + context[0]
 
-    return model.answer(message, context=[])`
-    },
+class StandInRetriever:
+    CALLS = 0
+    DOCS = ["Rate limits are 100 requests per minute.",
+            "API keys are rotated from Settings.",
+            "Webhooks retry three times."]
+
+    def search(self, query, k=5):
+        StandInRetriever.CALLS += 1
+        return self.DOCS[:k]
+
+CONVERSATION = [
+    "what are the rate limits?",
+    "thanks, that worked",
+    "how do I rotate my API key?",
+    "ok",
+    "do webhooks retry?",
+    "perfect",
+]
+
+CHUNK_TOKENS = 120     # rough cost of pasting one retrieved chunk
+
+def run(strategy, model, retriever):
+    StandInRetriever.CALLS = 0
+    tokens = 0
+    for message in CONVERSATION:
+        if strategy == "always":
+            chunks = retriever.search(message, k=5)
+        else:
+            plan = model.decide(message)
+            chunks = retriever.search(message, k=5) if plan == "retrieve_docs" else []
+        tokens += len(chunks) * CHUNK_TOKENS
+        model.answer(message, chunks)
+    return StandInRetriever.CALLS, tokens
+
+model, retriever = StandInModel(), StandInRetriever()
+for label, strategy in [("retrieve every turn", "always"),
+                        ("let the model decide", "agentic")]:
+    calls, tokens = run(strategy, model, retriever)
+    print("%-22s %d searches over %d turns, ~%d context tokens"
+          % (label, calls, len(CONVERSATION), tokens))
+
+print()
+print("Half these messages are pleasantries that need no documents at all.")
+print("Deciding first is a cheap model call that skips an expensive search")
+print("and a large paste, on every turn that never needed them.")
+
+# Try it: add more "thanks" turns, which is what real conversations look like,
+# and watch the gap widen. Then consider what happens if decide() gets it
+# wrong: answering "what are the rate limits?" with no documents at all.
+` },
     {
       type: 'p',
       text: 'When the docs team switched their assistant to something like this, the \'thanks\' problem disappeared on its own. The model saw a message with no real question in it and chose to answer directly, skipping the vector store entirely. Retrieval fired on the turns that earned it. The token bill for the trivial traffic dropped close to zero because those turns stopped carrying ten unnecessary chunks.'

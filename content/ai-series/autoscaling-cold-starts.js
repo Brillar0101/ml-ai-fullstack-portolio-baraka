@@ -4,11 +4,10 @@ export const POST = {
   excerpt: 'Scaling a web app is easy. Scaling a model that lives in VRAM is not, because a new node takes minutes to warm up and the spike is already gone by then. Here is how cold starts wreck autoscaling, told through an endpoint that scaled on the wrong signal.',
   category: 'AI',
   tags: ['Deployment', 'Autoscaling', 'GPU'],
-  readTime: '8 min read',
   body: [
     {
       type: 'p',
-      text: 'A team put their first large language model behind an HTTP endpoint and wired it to the same autoscaler that ran their web tier. The rule was the one everybody copies: watch CPU, add a replica when average CPU crosses seventy percent, remove one when it drops. It looked fine in staging. Then a product launch sent a burst of real traffic, and the endpoint started returning timeouts. The dashboard showed the autoscaler doing its job, asking for more replicas, yet requests kept failing for a solid four or five minutes into every spike. By the time the new GPU nodes were actually answering, the burst had passed and the autoscaler was already scaling back down. The service was always late, and it was always late by the same few minutes.'
+      text: 'Picture a team putting their first large language model behind an HTTP endpoint, wired to the same autoscaler that ran their web tier. The rule was the one everybody copies: watch CPU, add a replica when average CPU crosses seventy percent, remove one when it drops. It looked fine in staging. Then a product launch sent a burst of real traffic, and the endpoint started returning timeouts. The dashboard showed the autoscaler doing its job, asking for more replicas, yet requests kept failing for a solid four or five minutes into every spike. By the time the new GPU nodes were actually answering, the burst had passed and the autoscaler was already scaling back down. The service was always late, and it was always late by the same few minutes.'
     },
     {
       type: 'p',
@@ -81,30 +80,52 @@ export const POST = {
       type: 'p',
       text: 'The queue is what makes this honest. Depth is a direct readout of demand versus capacity: if requests are waiting, you are short on replicas right now, whether or not any CPU is busy. And because the warm floor is always ready, the minutes a cold replica needs to boot are spent while paying customers are still being served by the warm ones. The cold node is catching up, not standing between the user and an answer. Here is the scaling rule written out, small enough to read in one pass.'
     },
-    {
-      type: 'code',
-      lang: 'python',
-      title: 'Queue-depth scaling with a warm floor',
-      code: `MIN_REPLICAS = 2      # warm pool: never drop below this
+    { type: 'lab', height: 460,
+        title: 'Queue-depth scaling across a morning ramp',
+        caption: 'Up is a jump, down is one replica at a time. That asymmetry is deliberate: scaling down early costs you a cold start the next time traffic moves.',
+        code: `MIN_REPLICAS = 2        # warm pool: never drop below this
 MAX_REPLICAS = 12
 TARGET_PER_REPLICA = 4  # desired queued requests per replica
 
 def desired_replicas(queue_depth, current):
     # How many replicas would keep the backlog at target?
-    needed = -(-queue_depth // TARGET_PER_REPLICA)  # ceil division
+    needed = -(-queue_depth // TARGET_PER_REPLICA)     # ceiling division
 
     # Never go below the warm floor or above the ceiling.
     needed = max(needed, MIN_REPLICAS)
     needed = min(needed, MAX_REPLICAS)
 
-    # Scale up fast, scale down slow, so one quiet moment
-    # does not throw away a replica we paid minutes to boot.
+    # Scale up fast, scale down slow, so one quiet moment does not throw away
+    # a replica you paid minutes of cold start to boot.
     if needed > current:
         return needed
     if needed < current:
-        return current - 1   # shed one at a time
-    return current`
-    },
+        return current - 1                             # shed one at a time
+    return current
+
+# A morning ramp, a spike, and a quiet afternoon.
+QUEUE = [0, 2, 6, 14, 30, 60, 48, 30, 18, 9, 4, 1, 0, 0, 0, 0]
+
+current = MIN_REPLICAS
+print("minute  queue  replicas  action")
+for minute, depth in enumerate(QUEUE):
+    nxt = desired_replicas(depth, current)
+    action = "hold"
+    if nxt > current:
+        action = "scale up  +%d" % (nxt - current)
+    elif nxt < current:
+        action = "shed      -1"
+    print("  %2d     %3d      %2d      %s" % (minute, depth, nxt, action))
+    current = nxt
+
+print()
+print("Up is a jump, down is one at a time. That asymmetry is deliberate:")
+print("adding a replica late costs you a queue, removing one early costs you")
+print("a cold start the next time traffic moves.")
+
+# Try it: make the descent symmetric by returning \`needed\` in both branches,
+# then watch the replica count chase the queue down and back up again.
+` },
     {
       type: 'p',
       text: 'Read the rule and the two lessons from the incident are baked in. The scaler acts on `queue_depth`, so it reacts to real model backlog instead of idle CPU. The `MIN_REPLICAS` floor is the warm pool, guaranteeing there is always a loaded replica to take the first hit. And the up-fast, down-slow asymmetry matters more than it looks: since a cold start is so expensive, you want to grab capacity quickly and give it back reluctantly, so a brief lull does not delete a replica you will need again in thirty seconds.'

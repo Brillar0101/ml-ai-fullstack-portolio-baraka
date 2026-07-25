@@ -4,11 +4,10 @@ export const POST = {
   excerpt: 'A developer wants a coding assistant that works on a plane with no wifi and never ships their code to a server. Here is how a 7B model fits in a few gigabytes and answers from a MacBook.',
   category: 'AI',
   tags: ['LLMs', 'Local', 'Quantization'],
-  readTime: '8 min read',
   body: [
     {
       type: 'p',
-      text: 'A developer is on a long flight with no wifi, and she wants a coding assistant that can explain a stack trace and draft a function. She also works on a codebase her employer will not let leave the building, so sending snippets to a cloud API is off the table. For years the answer to both problems was the same shrug: you need a server, a GPU, and a network connection, so wait until you land. That answer is now out of date. The model she wants runs on the laptop already in her bag, offline, with nothing leaving the machine. This post is about how that became possible, and how you set it up yourself.'
+      text: 'Picture a developer on a long flight with no wifi, and she wants a coding assistant that can explain a stack trace and draft a function. She also works on a codebase her employer will not let leave the building, so sending snippets to a cloud API is off the table. For years the answer to both problems was the same shrug: you need a server, a GPU, and a network connection, so wait until you land. That answer is now out of date. The model she wants runs on the laptop already in her bag, offline, with nothing leaving the machine. This post is about how that became possible, and how you set it up yourself.'
     },
     {
       type: 'p',

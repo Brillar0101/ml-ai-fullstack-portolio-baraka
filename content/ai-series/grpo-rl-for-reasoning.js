@@ -4,7 +4,6 @@ export const POST = {
   excerpt: 'Give a model a math problem with a checkable answer, let it try several times, then push it toward the tries that beat its own average. That simple loop, called GRPO, is a big part of how reasoning models got good.',
   category: 'AI',
   tags: ['Fine-tuning', 'Reinforcement Learning', 'Reasoning'],
-  readTime: '9 min read',
   body: [
     {
       type: 'p',
@@ -80,27 +79,46 @@ export const POST = {
       type: 'p',
       text: 'GRPO asks a blunt question: if we are already sampling several answers per problem, why train a whole extra network to guess the baseline when the group of answers can be the baseline? The average reward across the group is a perfectly good stand-in for what to expect on that problem. So GRPO drops the critic entirely. The advantage for each answer becomes its reward minus the group mean, sometimes divided by the group standard deviation to keep the scale steady. That single swap cuts the memory footprint, removes an entire training loop, and takes out a component that was often finicky to get right. You pay for it by needing several samples per problem, but for tasks with cheap automatic checking that trade is usually worth it.'
     },
-    {
-      type: 'code',
-      lang: 'python',
-      title: 'Group-relative advantages from a batch of rewards',
-      code: `import torch
+    { type: 'lab', packages: ['numpy'], height: 460,
+        title: 'Group-relative advantages, on an easy problem and a hard one',
+        caption: 'Being right on the problem most samples already solved teaches less than being right on the hard one. When the whole group agrees, the signal is exactly zero.',
+        code: `import numpy as np
+
+# GRPO's core move: instead of training a separate value network to say how
+# good an answer "should" be, compare each sampled answer against the other
+# samples for the SAME problem. The group is the baseline.
 
 def group_advantages(rewards, group_size, eps=1e-4):
-    # rewards: 1D tensor, laid out as groups of \`group_size\`
-    # e.g. 2 problems x 4 samples each -> length 8
-    groups = rewards.view(-1, group_size)          # shape: [n_problems, group_size]
-    mean = groups.mean(dim=1, keepdim=True)         # baseline per problem
-    std = groups.std(dim=1, keepdim=True)           # spread per problem
-    advantages = (groups - mean) / (std + eps)      # center, then scale
-    return advantages.view(-1)                      # back to flat, aligned with rewards
+    groups = rewards.reshape(-1, group_size)          # [n_problems, group_size]
+    mean = groups.mean(axis=1, keepdims=True)         # baseline per problem
+    std = groups.std(axis=1, keepdims=True)           # spread per problem
+    return ((groups - mean) / (std + eps)).reshape(-1)
 
-# One problem, four sampled answers, two of them correct
-rewards = torch.tensor([1.0, 0.0, 1.0, 0.0])
-print(group_advantages(rewards, group_size=4))
-# tensor([ 0.9998, -0.9998,  0.9998, -0.9998])
-# correct answers get a positive push, wrong ones a negative push`
-    },
+# Two problems, four sampled answers each. 1.0 = the answer checked out.
+rewards = np.array([1.0, 0.0, 1.0, 0.0,      # problem A: 2 of 4 correct
+                    1.0, 1.0, 1.0, 0.0])     # problem B: 3 of 4 correct
+adv = group_advantages(rewards, group_size=4)
+
+print("problem  sample  reward  advantage")
+for i, (r, a) in enumerate(zip(rewards, adv)):
+    print("   %s        %d      %.1f     %+.3f" % ("AB"[i // 4], i % 4, r, a))
+
+print()
+print("Notice the correct answers to problem B get a SMALLER push (%+.3f) than"
+      % adv[4])
+print("the correct answers to problem A (%+.3f)." % adv[0])
+print("Three of four samples already solved B, so being right there is less")
+print("informative. Problem A was harder, so getting it right teaches more.")
+
+hard = np.array([1.0, 1.0, 1.0, 1.0])
+print()
+print("Edge case, every sample correct:", np.round(group_advantages(hard, 4), 3))
+print("Zero signal in every direction. If the whole group agrees there is")
+print("nothing to learn from it, which is why problem difficulty has to be")
+print("mixed for this to train anything.")
+
+# Try it: make one group all zeros and confirm you get the same flat result.
+` },
     {
       type: 'p',
       text: 'That function is the whole idea in a few lines. Reshape the flat list of rewards so each row is one problem\'s group of samples, subtract the row mean to center them, divide by the row spread to normalize, and flatten back out. The real training code multiplies these advantages against the change in each token\'s probability and adds a term that keeps the updated model from drifting too far from where it started, but the advantage computation you see here is the piece that replaces PPO\'s critic.'

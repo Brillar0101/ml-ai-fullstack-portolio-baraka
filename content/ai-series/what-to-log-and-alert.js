@@ -4,11 +4,10 @@ export const POST = {
   excerpt: 'Uptime said everything was fine for four days while a support chatbot slowly turned useless. Standard app monitoring watches for crashes and slow responses, but an LLM feature can fail while every server stays healthy. Here is what to actually capture and what deserves to wake someone up.',
   category: 'AI',
   tags: ['Observability', 'Monitoring', 'Production'],
-  readTime: '8 min read',
   body: [
     {
       type: 'p',
-      text: 'A company shipped a support chatbot in front of their help center. It ran on a boring, well-monitored stack: load balancer, a couple of API servers, the usual alerts on CPU, memory, error rates, and uptime. For the first month it worked. Then someone changed the retrieval index the bot used to ground its answers, and a config typo quietly pointed it at a stale copy of the docs. The bot kept answering. It kept returning HTTP 200. Every server stayed healthy, latency looked normal, and the uptime alert stayed green the entire time. Four days later a manager noticed the support queue had swelled with angry follow-ups, all variations of the bot told me the wrong thing. The feature had been failing since Tuesday, and nothing in the monitoring stack had said a word.'
+      text: 'Picture a support chatbot shipped in front of a help center. It ran on a boring, well-monitored stack: load balancer, a couple of API servers, the usual alerts on CPU, memory, error rates, and uptime. For the first month it worked. Then someone changed the retrieval index the bot used to ground its answers, and a config typo quietly pointed it at a stale copy of the docs. The bot kept answering. It kept returning HTTP 200. Every server stayed healthy, latency looked normal, and the uptime alert stayed green the entire time. Four days later a manager noticed the support queue had swelled with angry follow-ups, all variations of the bot told me the wrong thing. The feature had been failing since Tuesday, and nothing in the monitoring stack had said a word.'
     },
     {
       type: 'p',
@@ -82,38 +81,86 @@ export const POST = {
       type: 'p',
       text: 'None of these signals exist unless you capture them, and the cleanest way to capture them is to emit one structured event for every request. Not a free-text log line, but a machine-readable record with named fields, so you can later count, average, group, and alert without parsing prose. The event ties together the operational numbers, the safety scores, and a place to attach feedback when it arrives. Here is a compact version of what that emitter can look like.'
     },
-    {
-      type: 'code',
-      lang: 'python',
-      title: 'A structured metrics event per LLM request',
-      code: `import json, time
+    { type: 'lab', height: 460,
+        title: 'A structured event, and the four questions it answers',
+        caption: 'Alert on speed, health and safety. Put cost on a dashboard: spend creeping up is a conversation, not a page at three in the morning.',
+        code: `import json, time
+from collections import Counter
+
+# One structured event per request, then the four questions you can only ask
+# because the event was structured.
+
+def estimate_cost(usage, model):
+    rates = {"big-model": (0.003, 0.015), "small-model": (0.0005, 0.0015)}
+    cin, cout = rates[model]
+    return usage["input"] / 1000 * cin + usage["output"] / 1000 * cout
 
 def emit_llm_event(req, resp, timings, safety):
-    event = {
-        "ts": time.time(),
-        "request_id": req.id,
-        "user_id": req.user_id,
+    return {
+        "ts": req["ts"],
+        "request_id": req["id"],
+        "user_id": req["user_id"],
         # operational
-        "model": resp.model,
-        "time_to_first_token_ms": timings.first_token_ms,
-        "total_ms": timings.total_ms,
-        "input_tokens": resp.usage.input_tokens,
-        "output_tokens": resp.usage.output_tokens,
-        "cost_usd": estimate_cost(resp.usage, resp.model),
-        "tool_calls": resp.tool_call_count,
-        "tool_errors": resp.tool_error_count,
-        # quality and behavior
-        "refused": resp.refused,
-        "used_fallback": resp.used_fallback,
-        # safety (scores from classifiers, 0..1)
-        "toxicity": safety.toxicity,
-        "jailbreak_score": safety.jailbreak,
-        "pii_in_output": safety.pii_detected,
-        # feedback is filled in later, keyed by request_id
+        "model": resp["model"],
+        "time_to_first_token_ms": timings["first_token_ms"],
+        "total_ms": timings["total_ms"],
+        "input_tokens": resp["usage"]["input"],
+        "output_tokens": resp["usage"]["output"],
+        "cost_usd": round(estimate_cost(resp["usage"], resp["model"]), 6),
+        "tool_calls": resp["tool_calls"],
+        "tool_errors": resp["tool_errors"],
+        # quality and behaviour
+        "refused": resp["refused"],
+        "used_fallback": resp["used_fallback"],
+        # safety scores from classifiers, 0..1
+        "jailbreak_score": safety["jailbreak"],
+        "pii_in_output": safety["pii"],
+        # feedback arrives later, keyed by request_id
         "thumbs": None,
     }
-    print(json.dumps(event))  # ship to your log pipeline`
-    },
+
+def ev(i, model, ttft, total, tin, tout, calls, errs, refused, fb, jb=0.02, pii=False):
+    return emit_llm_event(
+        {"ts": 1750000000 + i, "id": "r%d" % i, "user_id": "u%d" % (i % 3)},
+        {"model": model, "usage": {"input": tin, "output": tout}, "tool_calls": calls,
+         "tool_errors": errs, "refused": refused, "used_fallback": errs > 0},
+        {"first_token_ms": ttft, "total_ms": total},
+        {"jailbreak": jb, "pii": pii})
+
+EVENTS = [
+    ev(1, "small-model", 210, 900, 800, 120, 1, 0, False, "up"),
+    ev(2, "small-model", 240, 950, 820, 140, 1, 0, False, "up"),
+    ev(3, "big-model", 1900, 8200, 14000, 300, 3, 1, False, "down"),
+    ev(4, "small-model", 260, 1000, 810, 130, 1, 0, True, "down", jb=0.81),
+    ev(5, "big-model", 2100, 9000, 15000, 280, 3, 1, False, None),
+    ev(6, "small-model", 230, 940, 790, 125, 1, 0, False, "up"),
+]
+for e, fb in zip(EVENTS, ["up", "up", "down", "down", None, "up"]):
+    e["thumbs"] = fb
+
+print("one event looks like this:")
+print(json.dumps(EVENTS[0], indent=2)[:340] + "\\n  ...")
+print()
+
+ttfts = sorted(e["time_to_first_token_ms"] for e in EVENTS)
+p95 = ttfts[int(0.95 * (len(ttfts) - 1))]
+print("1. is it fast?        p95 time-to-first-token %d ms" % p95)
+print("2. what does it cost? $%.4f over %d calls, %.0f%% of it on big-model"
+      % (sum(e["cost_usd"] for e in EVENTS), len(EVENTS),
+         100 * sum(e["cost_usd"] for e in EVENTS if e["model"] == "big-model")
+         / sum(e["cost_usd"] for e in EVENTS)))
+print("3. is it working?     thumbs %s, refusals %d, tool errors %d"
+      % (dict(Counter(e["thumbs"] for e in EVENTS)),
+         sum(e["refused"] for e in EVENTS), sum(e["tool_errors"] for e in EVENTS)))
+flagged = [e for e in EVENTS if e["jailbreak_score"] > 0.5 or e["pii_in_output"]]
+print("4. is it safe?        %d request(s) flagged: %s"
+      % (len(flagged), [e["request_id"] for e in flagged]))
+print()
+print("Alert on 1, 3 and 4. Review 2 on a dashboard: cost creeping up is a")
+print("conversation, not a page at three in the morning.")
+
+# Try it: drop "model" from the event and try to answer question 2 again.
+` },
     {
       type: 'p',
       text: 'Two details make this work in practice. First, thumbs is left empty at request time and filled in later when the user clicks, joined back by request_id, so a single record can carry both what happened and how the user felt about it. Second, every value is a field with a name, which means your thumbs-down rate is a query over these events rather than a special pipeline you had to build. Capture once, ask many questions later.'

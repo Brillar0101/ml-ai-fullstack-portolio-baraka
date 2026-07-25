@@ -4,11 +4,10 @@ export const POST = {
   excerpt: 'A support team kept handing their bot more freedom until it started making refund promises nobody could trace. Here is the ladder they climbed, one rung at a time, and the exact rung where they should have stopped.',
   category: 'AI',
   tags: ['Agents', 'Autonomy', 'Design'],
-  readTime: '8 min read',
   body: [
     {
       type: 'p',
-      text: 'A small team at a company I will call Maple ran a support bot named Otto. In its first week Otto did one thing. A customer typed a question, Otto sent the whole thing to a language model with a friendly system prompt, and the model wrote back an answer. That was the entire product. It worked, people liked it, and the numbers were boring in the good way. Six months later Otto could look up your order, decide whether to open a refund, message the warehouse, and hand tricky cases to a second bot that specialized in shipping disputes. It was far more capable. It was also far harder to trust, because when Otto promised a customer a refund that never arrived, nobody on the team could say exactly why it had made that promise.'
+      text: 'Picture a support bot called Otto. In its first week Otto does one thing. A customer types a question, Otto sends the whole thing to a language model with a friendly system prompt, and the model writes back an answer. That is the entire product. It works, people like it, and the numbers are boring in the good way. Six months later Otto can look up your order, decide whether to open a refund, message the warehouse, and hand tricky cases to a second bot that specializes in shipping disputes. It is far more capable. It is also far harder to trust, because when Otto promises a customer a refund that never arrives, nobody on the team can say exactly why it made that promise.',
     },
     {
       type: 'p',
@@ -53,26 +52,66 @@ export const POST = {
       type: 'p',
       text: '**Level two** is a fixed chain, and it is where most useful software actually lives. You, the developer, wire a sequence of steps. Otto first calls the model to pull the order number out of the message, then runs a database lookup, then calls the model again to write a reply using what it found. The model is doing real work, but it never chooses the shape of the flow. The steps run in the same order every time. When something breaks you can point at the exact step, because there are only three of them and you wrote all three. Below is roughly what that chain looks like.'
     },
-    {
-      type: 'code',
-      lang: 'python',
-      title: 'Level 2: a fixed chain the developer wired',
-      code: `def handle_ticket(message):
-    # Step 1: model pulls structured data out of free text
-    order_id = model_extract(message, field="order_id")
+    { type: 'lab', height: 460,
+        title: 'The same task at level 2 and level 4',
+        caption: 'Both designs return the same answer. What differs is how many decisions the model made, and whether you could have predicted the path before it ran.',
+        code: `# One task, two designs. Level 2 is a chain the developer wired by hand.
+# Level 4 lets the model choose its own steps. Watch how the number of
+# decisions the model gets to make changes what can go wrong.
 
-    # Step 2: a plain function does the lookup, no model involved
-    order = db.get_order(order_id)
+ORDERS = {"4417": {"id": "4417", "status": "delayed", "days_late": 6}}
 
-    # Step 3: model writes a reply using the facts we fetched
-    reply = model_reply(
-        question=message,
-        facts=order,
-    )
-    return reply
+def model_extract(message, field):        # stand-in: pulls an id out of text
+    digits = "".join(c for c in message if c.isdigit())
+    return digits or None
 
-# The path is fixed. Same three steps, same order, every time.`
-    },
+def model_reply(question, facts):         # stand-in: writes the customer reply
+    if not facts:
+        return "I could not find that order."
+    return "Order %s is %s, %d days behind schedule." % (
+        facts["id"], facts["status"], facts["days_late"])
+
+# ---- Level 2: a fixed chain -----------------------------------------------
+def handle_ticket(message):
+    order_id = model_extract(message, field="order_id")   # model step
+    order = ORDERS.get(order_id)                          # plain code, no model
+    return model_reply(question=message, facts=order)     # model step
+
+# ---- Level 4: the agent picks its own steps -------------------------------
+def model_decide(history, tools, step):
+    # A scripted planner standing in for a model choosing its next move.
+    if step == 0:
+        return {"type": "tool", "name": "get_order", "args": {"order_id": "4417"}}
+    return {"type": "final", "answer": "Order 4417 is delayed by 6 days."}
+
+def agent_loop(message, tools, max_steps=8):
+    history = [message]
+    for step in range(max_steps):
+        decision = model_decide(history, tools, step)
+        if decision["type"] == "final":
+            return decision["answer"], step + 1
+        result = tools[decision["name"]](**decision["args"])
+        history.append(result)
+    return "Escalating to a human.", max_steps      # we never promised it finishes
+
+TOOLS = {"get_order": lambda order_id: ORDERS.get(order_id)}
+
+msg = "where is my order 4417?"
+print("Level 2 (fixed chain)")
+print("   reply:", handle_ticket(msg))
+print("   model decisions: 2, both of them constrained to one field each")
+print()
+answer, steps = agent_loop(msg, TOOLS)
+print("Level 4 (agent loop)")
+print("   reply:", answer)
+print("   model decisions: %d, and it chose the tool AND the arguments" % (steps + 1))
+print()
+print("Same answer. The difference is how many chances there were to be wrong,")
+print("and whether a human could predict the path before it ran.")
+
+# Try it: make model_decide never return "final" and watch max_steps become
+# the only thing standing between you and an agent that runs all night.
+` },
     {
       type: 'p',
       text: 'Notice what you can promise about this code. It always does the lookup. It never messages the warehouse, because there is no line that does. If it misbehaves, the bug is in one of three named places. That predictability is not a limitation you tolerate; it is the feature you are paying for.'

@@ -4,7 +4,6 @@ export const POST = {
   excerpt: 'A small HR policy bot kept answering with half the story because retrieval fetched the wrong paragraph. The fix was not a better retriever. It was skipping retrieval and loading every policy into the model at once.',
   category: 'AI',
   tags: ['RAG', 'CAG', 'KV Cache'],
-  readTime: '8 min read',
   body: [
     {
       type: 'p',
@@ -63,24 +62,62 @@ export const POST = {
       type: 'p',
       text: 'So the cost of reading the whole binder is paid a single time, up front, not once per query. This is the same KV cache idea that makes long chat sessions feel responsive, applied on purpose to a fixed body of reference text. You pay a one-time preload, then answers come back without a retrieval round trip and without reprocessing the corpus. The latency you would have spent searching an index on every question is gone, because there is no search.'
     },
-    {
-      type: 'code',
-      lang: 'python',
-      title: 'The two request shapes, side by side',
-      code: `# RAG: search first, then answer against a slice
-def answer_rag(question, index, model):
-    chunks = index.search(question, top_k=3)   # retrieval step
-    context = "\\n".join(chunks)                 # only the top matches
-    return model.generate(context, question)
+    { type: 'lab', height: 460,
+        title: 'The two request shapes, answering the same question',
+        caption: 'The question has two parts. RAG top-3 retrieved the wrong three and dropped half the answer. Nothing was wrong with the model.',
+        code: `# RAG and CAG answering the same question, side by side, so you can see what
+# each one drops. The "model" here is a stand-in that can only answer from
+# whatever context it was handed, which is exactly the property that matters.
 
-# CAG: preload everything once, answer against all of it
-POLICIES = load_all_policies()                 # the full binder
-KV = model.preload(POLICIES)                    # KV cache, built one time
+POLICIES = [
+    "Paternity leave is 15 working days.",
+    "Paternity leave must be taken within 6 months of the birth.",
+    "Paternity leave can be split into a maximum of 3 blocks.",
+    "Annual leave is 25 days per year.",
+    "Sick leave requires a note after 3 consecutive days.",
+    "Expenses must be filed within 30 days of the spend.",
+]
 
-def answer_cag(question, model, kv=KV):
-    # no search, no top_k, nothing dropped
-    return model.generate_with_cache(kv, question)`
-    },
+def index_search(question, top_k=3):
+    # Keyword retrieval, deliberately blunt, the way a real top-k often is.
+    words = set(question.lower().replace("?", "").split())
+    scored = sorted(POLICIES, key=lambda p: len(words & set(p.lower().split())), reverse=True)
+    return scored[:top_k]
+
+def model_generate(context, question):
+    # Answers only from the context it was given. No memory, no guessing.
+    facts = [c for c in context if "paternity" in c.lower()]
+    return " ".join(facts) if facts else "Not covered by the provided text."
+
+# ---- RAG: search first, answer against a slice ----------------------------
+def answer_rag(question, top_k=3):
+    chunks = index_search(question, top_k=top_k)
+    return model_generate(chunks, question), chunks
+
+# ---- CAG: preload everything once, answer against all of it ---------------
+KV = POLICIES              # the whole binder, cached once, nothing dropped
+def answer_cag(question):
+    return model_generate(KV, question), KV
+
+question = "How many days of paternity leave do I get, and does it have to be taken at once?"
+
+rag_answer, rag_ctx = answer_rag(question)
+cag_answer, cag_ctx = answer_cag(question)
+
+print("RAG saw %d of %d policies:" % (len(rag_ctx), len(POLICIES)))
+for c in rag_ctx:
+    print("   -", c)
+print("   answer:", rag_answer)
+print()
+print("CAG saw all %d policies." % len(cag_ctx))
+print("   answer:", cag_answer)
+print()
+print("The question has two parts. Check whether each answer covers both.")
+
+# Try it: raise top_k to 4 and RAG catches up. The lesson is not that top_k=3
+# is wrong, it is that the right k depends on the question, and CAG sidesteps
+# the choice entirely by never dropping anything.
+` },
     {
       type: 'p',
       text: 'The difference is small in code and large in behavior. The RAG function has a decision baked into it, top_k=3, and that number is exactly where the HR bot lost the tenure clause. The CAG function has no such knob because it never chooses. Notice too that the preload happens outside the request path, so the per-question path is shorter.'

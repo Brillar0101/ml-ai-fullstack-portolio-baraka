@@ -4,11 +4,10 @@ export const POST = {
   excerpt: 'A docs search that answered in a blink at ten thousand pages ground to a halt at two million. The fix was not a bigger server. It was giving up on comparing the query to every chunk.',
   category: 'AI',
   tags: ['RAG', 'Vector Databases', 'Embeddings'],
-  readTime: '8 min read',
   body: [
     {
       type: 'p',
-      text: 'A support team built a docs search that everyone loved. You typed a question, it found the three or four help articles that actually answered it, and it fed those to a model that wrote a tidy reply. At launch the knowledge base held about ten thousand chunks of text, and answers came back before you finished reading the loading spinner. Then the company grew. Two years of new products, migrated forums, and old ticket transcripts pushed the corpus to roughly two million chunks. The same search that once felt instant now took eight to twelve seconds per query, and under load it fell over completely. Nobody had changed the search code. They had only added text.'
+      text: 'Picture a docs search that everyone loves. You typed a question, it found the three or four help articles that actually answered it, and it fed those to a model that wrote a tidy reply. At launch the knowledge base held about ten thousand chunks of text, and answers came back before you finished reading the loading spinner. Then the company grew. Two years of new products, migrated forums, and old ticket transcripts pushed the corpus to roughly two million chunks. The same search that once felt instant now took eight to twelve seconds per query, and under load it fell over completely. Nobody had changed the search code. They had only added text.'
     },
     {
       type: 'p',
@@ -92,36 +91,59 @@ export const POST = {
       type: 'p',
       text: 'Similarity metric matters here too. Most text embeddings are compared with **cosine similarity**, which looks at the angle between two vectors rather than their raw distance. Two chunks that point the same direction score as similar even if one vector happens to be longer. You pick the metric when you build the index, and it should match how your embedding model was trained. Mixing a model that expects cosine with an index configured for plain Euclidean distance is a quiet way to get worse results.'
     },
-    {
-      type: 'code',
-      lang: 'python',
-      title: 'Embed a question and pull the nearest chunks',
-      code: `from openai import OpenAI
-import chromadb
+    { type: 'lab', height: 460,
+        title: 'A vector store in thirty lines',
+        caption: 'The filtered search still returns its best match, and that match is bad. A vector store always hands back a nearest neighbour, even when nothing is genuinely near.',
+        code: `import math
 
-client = OpenAI()
-store = chromadb.PersistentClient(path="./kb")
-docs = store.get_collection("help_center")
+# A vector database in thirty lines, so you can see what the real ones do
+# underneath the API. Embeddings here are hand-written over five made-up
+# traits rather than produced by a model, so the numbers stay readable.
+#                 [ billing, login, shipping, refund, account ]
+DOCS = [
+    ("billing-1",  "Your plan renews on the first of each month.",
+                   [0.9, 0.0, 0.0, 0.2, 0.4]),
+    ("billing-2",  "Charged twice? Duplicate charges are refunded in 5 days.",
+                   [0.8, 0.0, 0.0, 0.9, 0.1]),
+    ("login-1",    "Reset your password from the sign-in page.",
+                   [0.0, 0.9, 0.0, 0.0, 0.6]),
+    ("login-2",    "Locked out after too many attempts? Wait 15 minutes.",
+                   [0.0, 0.95, 0.0, 0.0, 0.5]),
+    ("shipping-1", "Orders ship within two business days.",
+                   [0.0, 0.0, 0.9, 0.1, 0.0]),
+]
 
-question = "I got logged out and can't sign back in"
+def cosine(a, b):
+    dot = sum(x * y for x, y in zip(a, b))
+    na = math.sqrt(sum(x * x for x in a))
+    nb = math.sqrt(sum(y * y for y in b))
+    return dot / (na * nb + 1e-9)
 
-# Turn the question into a vector, same model used to index the docs
-resp = client.embeddings.create(
-    model="text-embedding-3-small",
-    input=question,
-)
-query_vec = resp.data[0].embedding
+def search(query_vec, docs, k=3, where=None):
+    scored = []
+    for doc_id, text, vec in docs:
+        if where and not doc_id.startswith(where):
+            continue                      # metadata filter, same idea as a real store
+        scored.append((cosine(query_vec, vec), doc_id, text))
+    scored.sort(reverse=True)
+    return scored[:k]
 
-# Ask the vector DB for the 5 nearest chunks, filtered to English billing docs
-hits = docs.query(
-    query_embeddings=[query_vec],
-    n_results=5,
-    where={"product": "account", "language": "en"},
-)
+# "I got logged out and cannot sign back in" lands on the login traits.
+query = [0.0, 0.9, 0.0, 0.0, 0.4]
 
-for text in hits["documents"][0]:
-    print(text[:120])`
-    },
+print('query: "I got logged out and cannot sign back in"')
+for score, doc_id, text in search(query, DOCS, k=3):
+    print("   %.3f  %-11s %s" % (score, doc_id, text))
+
+print()
+print("same query, filtered to billing docs only:")
+for score, doc_id, text in search(query, DOCS, k=3, where="billing"):
+    print("   %.3f  %-11s %s" % (score, doc_id, text))
+
+# The filtered search still returns its best match, and that match is bad.
+# A vector store always hands back a nearest neighbour, even when nothing is
+# genuinely close, which is why a similarity floor matters in production.
+` },
     {
       type: 'h2',
       text: 'Mistakes that quietly wreck retrieval'

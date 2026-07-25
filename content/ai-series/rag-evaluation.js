@@ -4,11 +4,10 @@ export const POST = {
   excerpt: 'A team watched their answer quality drop and spent a week rewriting prompts. The prompts were fine. Their retriever had stopped finding the right pages, and a single end-to-end score could never have told them.',
   category: 'AI',
   tags: ['RAG', 'Evaluation', 'Metrics'],
-  readTime: '8 min read',
   body: [
     {
       type: 'p',
-      text: 'A team I talked to ran an internal question-answering system over their company handbook. One week their users started complaining that answers had gone vague and sometimes plain wrong. The team looked at their dashboard, which showed a single number: an overall answer-quality score judged by another model. That number had dropped from the high eighties into the sixties. So they did what the number seemed to suggest. They rewrote the system prompt, added instructions to be more careful, tried a few phrasings, ran the whole thing again. The score barely moved. They lost most of a week this way.'
+      text: 'Picture an internal question-answering system over a company handbook. One week users start complaining that answers have gone vague and sometimes plain wrong. The team looks at their dashboard, which shows a single number: an overall answer-quality score judged by another model. That number has dropped sharply. So they do what the number seems to suggest. They rewrite the system prompt, add instructions to be more careful, try a few phrasings, run the whole thing again. The score barely moves, and most of a week is gone.',
     },
     {
       type: 'p',
@@ -116,30 +115,67 @@ export const POST = {
       type: 'p',
       text: 'None of this works without something to judge against. You need a small labeled evaluation set, and building it is the part teams most often skip. Each item needs three things: the question, the ideal context (which passages should be retrieved), and a reference answer. The ideal context lets you score retrieval. The reference answer anchors relevance. The question drives the whole pipeline. Fifty to a couple hundred carefully chosen items usually beats a vague set of thousands, because a judge is only as good as the ground truth behind it.'
     },
-    {
-      type: 'code',
-      lang: 'python',
-      title: 'Context recall from labels, plus a faithfulness judge call',
-      code: `def context_recall(needed_facts, retrieved_passages):
-    # needed_facts: atomic facts the reference answer requires
-    # retrieved_passages: text the retriever returned this turn
+    { type: 'lab', height: 460,
+        title: 'Context recall and faithfulness, on three broken systems',
+        caption: 'One end-to-end score shows all three of these as simply worse. Two stage-level scores tell you which half to go and fix.',
+        code: `# Two numbers that tell you WHICH half of a RAG system broke. An end-to-end
+# score drops and leaves you guessing; these two point at the culprit.
+
+def context_recall(needed_facts, retrieved_passages):
+    # Did retrieval bring back the facts a correct answer requires?
     context = " ".join(retrieved_passages).lower()
     found = [f for f in needed_facts if f.lower() in context]
-    return len(found) / len(needed_facts)  # 1.0 = all needed facts present
+    return len(found) / len(needed_facts), found
 
-def faithfulness(answer, retrieved_passages, judge):
-    claims = judge.extract_claims(answer)  # split answer into atomic claims
-    supported = 0
-    for claim in claims:
-        verdict = judge.ask(
-            f"Context:\\n{retrieved_passages}\\n\\n"
-            f"Claim: {claim}\\n"
-            "Is this claim supported by the context? Answer yes or no."
-        )
-        if verdict.strip().lower().startswith("yes"):
-            supported += 1
-    return supported / max(len(claims), 1)  # fraction of grounded claims`
+def faithfulness(claims, retrieved_passages, judge):
+    # Of the claims the answer made, how many does the context support?
+    supported = [c for c in claims if judge(c, retrieved_passages)]
+    return len(supported) / max(len(claims), 1), supported
+
+def judge(claim, passages):
+    # Stand-in for a judge model: a claim counts as supported when its text
+    # appears in the retrieved context. A real judge reads for meaning.
+    return claim.lower() in " ".join(passages).lower()
+
+NEEDED = ["15 working days", "within 6 months"]
+
+CASES = {
+    "retrieval broke": {
+        "passages": ["Paternity leave must be taken within 6 months of the birth."],
+        "claims": ["within 6 months", "15 working days"],
     },
+    "generation broke": {
+        "passages": ["Paternity leave is 15 working days.",
+                     "Paternity leave must be taken within 6 months of the birth."],
+        "claims": ["15 working days", "within 6 months", "and it can be carried over to next year"],
+    },
+    "both healthy": {
+        "passages": ["Paternity leave is 15 working days.",
+                     "Paternity leave must be taken within 6 months of the birth."],
+        "claims": ["15 working days", "within 6 months"],
+    },
+}
+
+print("%-18s %-16s %-14s %s" % ("case", "context recall", "faithfulness", "diagnosis"))
+for name, case in CASES.items():
+    recall, _ = context_recall(NEEDED, case["passages"])
+    faith, _ = faithfulness(case["claims"], case["passages"], judge)
+    if recall < 1.0:
+        diagnosis = "fix the retriever, the fact never arrived"
+    elif faith < 1.0:
+        diagnosis = "fix the prompt, the model went beyond its context"
+    else:
+        diagnosis = "healthy"
+    print("%-18s %-16.2f %-14.2f %s" % (name, recall, faith, diagnosis))
+
+print()
+print("A single end-to-end score would show all three of these as 'worse' and")
+print("tell you nothing about where to look. Scoring the stages separately")
+print("turns a bad week into a specific bug.")
+
+# Try it: add a needed fact nobody retrieved and watch recall, not
+# faithfulness, be the number that moves.
+` },
     {
       type: 'p',
       text: 'The recall function here uses simple substring matching to stay readable; in practice you would match facts semantically rather than by exact text. The shape is what matters. Retrieval scoring compares against known labels, while faithfulness scoring hands the reading work to a judge model and counts how many claims survive.'

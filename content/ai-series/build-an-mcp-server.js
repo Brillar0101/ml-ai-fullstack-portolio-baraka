@@ -4,7 +4,6 @@ export const POST = {
   excerpt: 'Your AI assistant cannot read the notes folder on your laptop, and it never will unless you hand it a door. An MCP server is that door. Here is the smallest one that actually works.',
   category: 'AI',
   tags: ['MCP', 'Hands-on', 'Python'],
-  readTime: '9 min read',
   body: [
     {
       type: 'p',

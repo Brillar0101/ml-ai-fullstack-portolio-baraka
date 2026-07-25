@@ -4,11 +4,10 @@ export const POST = {
   excerpt: 'A team broke their research assistant into five specialized agents and it got slower and less reliable. Here is why splitting usually costs more than it pays, and the three cases where it actually earns its keep.',
   category: 'AI',
   tags: ['Agents', 'Multi-Agent', 'Architecture'],
-  readTime: '8 min read',
   body: [
     {
       type: 'p',
-      text: 'A team I talked to built a research assistant that worked well. You gave it a question, it searched a few sources, read what it found, and wrote up an answer with citations. One model, a handful of tools, one loop. It was not fancy, but it was steady and people trusted it. Then someone read a post about multi-agent systems and the team decided their single agent was doing too much. They split it into five: a planner, two searchers, a reader, and a writer. Each one had its own prompt and its own narrow job. On the whiteboard it looked clean.'
+      text: 'Picture a research assistant that works well. You give it a question, it searches a few sources, reads what it finds, and writes up an answer with citations. One model, a handful of tools, one loop. Not fancy, but steady, and people trust it. Then someone reads a post about multi-agent systems and decides the single agent is doing too much. It gets split into five: a planner, two searchers, a reader, and a writer. Each one has its own prompt and its own narrow job. On the whiteboard it looks clean.',
     },
     {
       type: 'p',
@@ -130,29 +129,63 @@ export const POST = {
       type: 'p',
       text: 'When you do have a real case, usually parallelism, the shape to reach for is a supervisor delegating to sub-agents. The supervisor owns the full task and the full context. It fans out independent pieces, waits for the results, and stitches them together. The key is that the supervisor writes each handoff carefully, because whatever it leaves out never reaches the sub-agent. Here is the bare skeleton.'
     },
-    {
-      type: 'code',
-      lang: 'python',
-      title: 'A supervisor delegating two independent lookups',
-      code: `def supervisor(question):
-    # The supervisor holds the whole task and its context.
-    subtasks = plan(question)  # e.g. ["pricing docs", "changelog"]
+    { type: 'lab', height: 460,
+        title: 'A supervisor delegating, with the handoffs printed',
+        caption: 'Watch the briefs, not the answer. Anything left out of a handoff is invisible to the sub-agent, and a single agent would simply still have had it.',
+        code: `# A supervisor delegating to sub-agents. The thing to watch is not the answer,
+# it is what each handoff carries and what it silently drops.
 
+QUESTION = "Did the pricing change in v3 break the annual discount?"
+
+KB = {
+    "pricing docs": "v3 pricing moved annual plans to a flat 20 percent discount.",
+    "changelog":    "v3 removed the legacy discount code path on 2026-01-14.",
+    "support tickets": "Three customers reported a missing annual discount after v3.",
+}
+
+HANDOFFS = []
+
+def plan(question):
+    return ["pricing docs", "changelog"]        # the supervisor picks the subtasks
+
+def sub_agent(brief, topic):
+    # A focused loop with its own narrow tools. It returns a short summary,
+    # not its whole transcript, so the supervisor's context stays clean.
+    HANDOFFS.append(brief)
+    return KB[topic]
+
+def synthesize(question, results):
+    return "Based on %d findings: %s" % (len(results), " ".join(results))
+
+def supervisor(question, carry_context):
+    subtasks = plan(question)
     results = []
     for task in subtasks:
-        # Each handoff must carry everything the sub-agent needs.
-        # Anything left out of this message is lost to it.
-        brief = f"Find facts about: {task}. Question context: {question}"
-        results.append(sub_agent(brief))
-
-    # The supervisor recombines, keeping the full picture.
+        # Anything left out of this brief is invisible to the sub-agent.
+        brief = ("Find facts about: %s. Question context: %s" % (task, question)
+                 if carry_context else "Find facts about: %s" % task)
+        results.append(sub_agent(brief, task))
     return synthesize(question, results)
 
-def sub_agent(brief):
-    # A focused loop with its own narrow tools. Returns a short summary,
-    # not its entire transcript, to keep the supervisor's context clean.
-    return run_agent(brief, tools=["search", "read"])`
-    },
+for label, carry in [("brief carries the question", True),
+                     ("brief omits the question", False)]:
+    HANDOFFS.clear()
+    answer = supervisor(QUESTION, carry)
+    print("---", label, "---")
+    for h in HANDOFFS:
+        print("   handoff:", h)
+    print("   answer:", answer)
+    print()
+
+print("Both runs return the same text here, because the stand-in sub-agent")
+print("looks up a fixed topic. A real one reads its brief. The second brief")
+print("never mentions the annual discount, so a real sub-agent would not know")
+print("what it was looking for. Every handoff is a chance to lose context that")
+print("a single agent would simply still have had.")
+
+# Try it: add "support tickets" to plan() and watch a third handoff appear.
+# Each one is another message to get right, another place to drop a detail.
+` },
     {
       type: 'p',
       text: 'Two things in that sketch do the heavy lifting. The handoff brief includes the original question, not just the narrow subtask, so the sub-agent inherits the intent behind its assignment. And the sub-agent returns a summary rather than its full transcript, so the supervisor does not drown in detail. Get those two right and you avoid the failure that sank the research team, where intent evaporated at each handoff and the downstream agents were working blind.'

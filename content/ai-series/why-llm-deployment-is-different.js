@@ -4,15 +4,14 @@ export const POST = {
   excerpt: 'A CRUD API answers in milliseconds and costs almost nothing per call. An LLM behind the same autoscaling setup can burn money and still feel slow. Here is what actually changes.',
   category: 'AI',
   tags: ['Deployment', 'Inference', 'Production'],
-  readTime: '8 min read',
   body: [
     {
       type: 'p',
-      text: 'A small team I worked with shipped their first chat feature on a Friday. They already ran a solid backend: a Python API, a load balancer, autoscaling that added replicas when CPU climbed. They wrapped an open-weight language model in the same pattern, gave each container one GPU, and set the autoscaler to spin up more containers when traffic rose. It passed the demo. Then real users showed up.'
+      text: 'Picture a team shipping their first chat feature on a Friday. They already run a solid backend: a Python API, a load balancer, autoscaling that adds replicas when CPU climbs. They wrap an open-weight language model in the same pattern, give each container one GPU, and set the autoscaler to spin up more containers when traffic rises. It passes the demo. Then real users show up.',
     },
     {
       type: 'p',
-      text: 'By Monday two numbers looked wrong. The GPU bill was several times higher than their estimate, and the median reply took eight seconds even though each machine sat mostly idle. Their dashboards said GPU utilization was around 12 percent. So they were paying for expensive hardware that was barely working, and users were still waiting. Nothing in their web-service instincts explained it. That gap is the whole point of this post.'
+      text: 'By Monday two numbers look wrong. The GPU bill is several times higher than the estimate, and replies are slow even though each machine sits mostly idle. Utilization on a setup like this typically lands somewhere in the low tens of percent, and that is the tell: expensive hardware barely working while users still wait. Nothing in ordinary web-service instincts explains it. That gap is the whole point of this post.'
     },
     {
       type: 'h2',
@@ -67,7 +66,7 @@ export const POST = {
     },
     {
       type: 'p',
-      text: 'Now the mechanism behind the 12 percent utilization. A GPU is thousands of small arithmetic units built to do enormous amounts of math in parallel. To do that math it first has to load the model weights from memory. Generating the next token for a single request needs a small amount of actual computation but still forces the GPU to pull those billions of weights across the memory bus. So the expensive units sit around waiting on memory while doing very little math. This is what memory-bound means in practice. You paid for a wide compute engine and then fed it one thin request at a time.'
+      text: 'Now the mechanism behind that idle-but-expensive hardware. A GPU is thousands of small arithmetic units built to do enormous amounts of math in parallel. To do that math it first has to load the model weights from memory. Generating the next token for a single request needs a small amount of actual computation but still forces the GPU to pull those billions of weights across the memory bus. So the expensive units sit around waiting on memory while doing very little math. This is what memory-bound means in practice. You paid for a wide compute engine and then fed it one thin request at a time.'
     },
     {
       type: 'p',
@@ -100,29 +99,69 @@ export const POST = {
       type: 'p',
       text: 'The code difference is smaller than the mental shift, but it is real. A normal handler computes a result and returns it in one shot. A generation handler yields tokens over time, which is why LLM APIs expose streaming responses.'
     },
-    {
-      type: 'code',
-      lang: 'python',
-      title: 'Blocking response vs streamed generation',
-      code: `# Normal web handler: compute once, return once.
-def get_user(user_id):
-    row = db.fetch(user_id)      # a few milliseconds
-    return {"name": row.name}    # whole answer at once
+    { type: 'lab', height: 460,
+        title: 'A web handler and a generation loop, counted',
+        caption: 'The web handler touches its data once. Generation re-reads the entire model for every token it produces, which is the whole reason this workload needs different infrastructure.',
+        code: `# A normal web handler computes once and returns once. Token generation loops,
+# and every pass through the loop re-reads the whole model. That single
+# difference is why LLM serving needs different infrastructure.
 
-# LLM handler: one model pass per token, streamed out.
+class TinyModel:
+    """A stand-in. It has no weights worth the name, but it counts the passes
+    so the shape of the cost is visible."""
+    eos = "<end>"
+    def __init__(self):
+        self.forward_passes = 0
+        self.weight_reads = 0
+    def encode(self, prompt):
+        return prompt.split()
+    def forward(self, tokens):
+        self.forward_passes += 1
+        self.weight_reads += 1        # the whole model, pulled across memory
+        script = ["Refunds", "take", "five", "business", "days", self.eos]
+        return script[min(len(tokens) - self.prompt_len, len(script) - 1)]
+    def decode(self, token):
+        return token
+
+# ---- Normal web handler: one step, done -----------------------------------
+DB = {"u1": {"name": "Ada"}}
+def get_user(user_id):
+    row = DB[user_id]                 # a few milliseconds
+    return {"name": row["name"]}      # the whole answer at once
+
+# ---- LLM handler: one pass per token, streamed out ------------------------
 def generate(prompt, model, max_tokens=64):
     tokens = model.encode(prompt)
+    model.prompt_len = len(tokens)
     for _ in range(max_tokens):
-        logits = model.forward(tokens)   # full pass over the weights
-        next_id = logits[-1].argmax()    # pick the next token
-        if next_id == model.eos:
+        nxt = model.forward(tokens)   # a full pass over the weights
+        if nxt == model.eos:
             break
-        tokens.append(next_id)
-        yield model.decode(next_id)      # send this piece now
+        tokens.append(nxt)
+        yield model.decode(nxt)       # send this piece now
 
-# The web handler ends in one step.
-# generate() loops, and total time grows with the token count.`
-    },
+print("web handler:")
+print("   result:", get_user("u1"))
+print("   passes over the data: 1")
+print()
+
+model = TinyModel()
+pieces = list(generate("how long do refunds take", model))
+print("llm handler:")
+print("   result:", " ".join(pieces))
+print("   forward passes: %d" % model.forward_passes)
+print("   full reads of the model weights: %d" % model.weight_reads)
+print()
+print("Five words out cost six whole reads of the model, one per token plus")
+print("the pass that produced the end marker. The arithmetic per")
+print("read is tiny, so the hardware spends its time waiting on memory rather")
+print("than computing. That is what 'memory-bound' means, and it is why")
+print("batching many requests into one pass is the lever that matters: the")
+print("weights get read once and serve everyone in the batch.")
+
+# Try it: make the answer twice as long and watch weight_reads double. Then
+# imagine 32 users, each doing this alone, on one GPU.
+` },
     {
       type: 'h2',
       text: 'The mistakes that cost this team money'
@@ -139,7 +178,7 @@ def generate(prompt, model, max_tokens=64):
     },
     {
       type: 'p',
-      text: 'The fix was not a bigger GPU. They put a real inference server in front of the model, one that batches incoming requests, streams tokens, and manages the KV cache carefully. Utilization went up, the per-answer cost dropped by most of its value, and time to first token fell because users no longer waited on a full response. The hardware was the same. The serving strategy was the whole difference. What surprised them most was that the change felt less like an infrastructure upgrade and more like admitting the workload was a different kind of thing. Once they stopped picturing tiny stateless requests and started picturing a GPU that wants to stay full, every other decision fell into place.'
+      text: 'The fix is not a bigger GPU. It is putting a real inference server in front of the model, one that batches incoming requests, streams tokens, and manages the KV cache carefully. Utilization goes up, cost per answer comes down, and time to first token falls because users no longer wait on a full response. The hardware is identical. The serving strategy is the whole difference. The useful shift is less an infrastructure upgrade than admitting the workload is a different kind of thing: stop picturing tiny stateless requests, start picturing a GPU that wants to stay full, and every other decision falls into place.'
     },
     {
       type: 'h2',

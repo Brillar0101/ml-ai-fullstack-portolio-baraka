@@ -4,11 +4,10 @@ export const POST = {
   excerpt: 'A four-person startup has a fine-tuned model and one week to ship. Do they stand up a GPU box or just call a hosted endpoint? This walks the axes that actually decide it.',
   category: 'AI',
   tags: ['Deployment', 'Serving', 'Infrastructure'],
-  readTime: '8 min read',
   body: [
     {
       type: 'p',
-      text: 'A four-person startup has a model they are proud of. They fine-tuned an open-weights LLM on their own support transcripts, and in the notebook it answers customer questions better than anything off the shelf. Now they have a week to put it behind their product. The engineer who drew the short straw opens a browser and finds a wall of options. vLLM, TGI, LitServe, and a dozen hosted APIs all promise to serve the model. Every one of them has a landing page that says it is fast and easy. None of them says which one is right for a team of four with a spiky traffic pattern and no dedicated ops person. That last question is the one that matters, and it is the one this post is about.'
+      text: 'Picture a four-person startup with a model they are proud of. They fine-tuned an open-weights LLM on their own support transcripts, and in the notebook it answers customer questions better than anything off the shelf. Now they have a week to put it behind their product. The engineer who drew the short straw opens a browser and finds a wall of options. vLLM, TGI, LitServe, and a dozen hosted APIs all promise to serve the model. Every one of them has a landing page that says it is fast and easy. None of them says which one is right for a team of four with a spiky traffic pattern and no dedicated ops person. That last question is the one that matters, and it is the one this post is about.'
     },
     {
       type: 'p',

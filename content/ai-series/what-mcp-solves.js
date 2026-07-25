@@ -7,7 +7,6 @@ export const POST = {
   excerpt: 'A small team wired their AI assistant to five tools by hand, and all five kept breaking. Here is the math behind why that happened, and how one shared standard makes the mess collapse.',
   category: 'AI',
   tags: ['MCP', 'Tools', 'Integration'],
-  readTime: '8 min read',
   publishAt: '2026-07-12T12:00:00Z',
   body: [
     { type: 'p', text: 'A four-person team builds an internal AI assistant. The goal is simple to say out loud. They want to ask it a question in plain English and have it check the right systems. "What did the customer in ticket 4821 last message us about, and is their invoice paid?" To answer that, the assistant has to reach into five places: Slack, GitHub, a Postgres database, Google Drive, and the ticketing system. So the team writes five connectors. Each one is a small pile of code that knows how to log in, ask the right questions, and hand the answers back in a shape the assistant can read.' },

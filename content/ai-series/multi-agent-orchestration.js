@@ -4,11 +4,10 @@ export const POST = {
   excerpt: 'A stack of scanned invoices needs reading, checking, and reformatting. One agent choking on all three is why you split the work. The shape you pick for that split decides what breaks.',
   category: 'AI',
   tags: ['Agents', 'Multi-Agent', 'Orchestration'],
-  readTime: '8 min read',
   body: [
     {
       type: 'p',
-      text: 'A finance team drops a folder of 400 scanned documents on you every morning. Some are invoices, some are contracts, a few are handwritten receipts. The job is to pull the numbers out, flag anything that looks wrong, and hand back a clean spreadsheet. You build a single agent with a giant prompt that tries to read, analyze, and format all at once. It works on the easy files and falls apart on the messy ones. The prompt is so crowded that the model forgets to check totals when the layout is unusual, and it invents a currency when the receipt is blurry. You are not going to fix this by writing a bigger prompt. You fix it by splitting the work across several agents and deciding how they talk to each other.'
+      text: 'Imagine a finance team dropping a folder of 400 scanned documents on you every morning. Some are invoices, some are contracts, a few are handwritten receipts. The job is to pull the numbers out, flag anything that looks wrong, and hand back a clean spreadsheet. You build a single agent with a giant prompt that tries to read, analyze, and format all at once. It works on the easy files and falls apart on the messy ones. The prompt is so crowded that the model forgets to check totals when the layout is unusual, and it invents a currency when the receipt is blurry. You are not going to fix this by writing a bigger prompt. You fix it by splitting the work across several agents and deciding how they talk to each other.'
     },
     {
       type: 'p',

@@ -4,15 +4,14 @@ export const POST = {
   excerpt: 'A bigger context window feels like a free upgrade. In practice, stuffing it full is one of the fastest ways to quietly degrade your RAG app. Here is why, and what to do instead.',
   category: 'AI',
   tags: ['Context Engineering', 'Long Context', 'Evaluation'],
-  readTime: '8 min read',
   body: [
     {
       type: 'p',
-      text: 'A team I talked to had a support bot backed by retrieval. It worked well. Then someone noticed the model occasionally missed an answer that clearly lived in the docs, so they made what felt like an obvious fix. They bumped the number of retrieved documents from 4 to 20. More context, more chances to include the right passage, better answers. That was the theory.'
+      text: 'Picture a support bot backed by retrieval, working well enough that nobody is worried about it. Then someone notices the model occasionally misses an answer that clearly lives in the docs, and makes what feels like an obvious fix. They bump the number of retrieved documents from 4 to 20. More context, more chances to include the right passage, better answers. That is the theory.',
     },
     {
       type: 'p',
-      text: 'The opposite happened. Accuracy on their eval set dropped by several points. The bot started citing the wrong policy, blending two unrelated tickets into one confident paragraph, and sometimes ignoring a fact that was sitting right there in document number 11. Nothing about the model changed. The prompt template was identical. The only thing that moved was how much text they poured into the window.'
+      text: 'The opposite is the documented result. Answers get worse, not better. A bot in this state starts citing the wrong policy, blending two unrelated tickets into one confident paragraph, and sometimes ignoring a fact sitting right there in document number 11. Nothing about the model changed. The prompt template is identical. The only thing that moved is how much text got poured into the window.'
     },
     {
       type: 'p',
@@ -130,17 +129,27 @@ export const POST = {
       type: 'p',
       text: 'You should not guess about any of this. You can measure it directly. Take a fact the model has no way of knowing on its own, hide it inside a large block of filler text, and vary where you place it. Then ask a question only that fact can answer and check whether the model recalls it. Sweep the depth from top to bottom and you will draw your own U-curve.'
     },
-    {
-      type: 'code',
-      lang: 'python',
-      title: 'needle_in_haystack.py',
-      code: `NEEDLE = "The launch code for project Falcon is 7Q-ARROW-92."
+    { type: 'lab', height: 460,
+        title: 'needle_in_haystack.py, sweeping the needle through the window',
+        caption: 'The stand-in reader has an explicit attention profile: sharp at both edges, weak in the deep middle. That is the shape the real studies measure.',
+        code: `# A stand-in reader with a deliberately shaped weakness. This is NOT a model.
+# It is a few lines that reproduce the pattern the [lost-in-the-middle](https://arxiv.org/abs/2307.03172) studies
+# report, so you can watch the sweep without an API key. The shape of the
+# curve is the point here, not any particular number.
+def ask_model(context, question):
+    lines = context.split("\\n")
+    pos = next(i for i, l in enumerate(lines) if "7Q-ARROW-92" in l)
+    depth = pos / max(len(lines) - 1, 1)
+    attention = 1.0 - 2.6 * depth * (1.0 - depth)   # strong at both edges
+    return "7Q-ARROW-92" if attention > 0.45 else "I could not find it."
+
+NEEDLE = "The launch code for project Falcon is 7Q-ARROW-92."
 QUESTION = "What is the launch code for project Falcon?"
 
 def build_context(filler, needle, depth_ratio):
-    # depth_ratio 0.0 = top, 0.5 = middle, 1.0 = bottom
+    # depth_ratio 0.0 = top of the window, 0.5 = middle, 1.0 = bottom
     cut = int(len(filler) * depth_ratio)
-    return filler[:cut] + "\\n" + needle + "\\n" + filler[cut:]
+    return "\\n".join(filler[:cut] + [needle] + filler[cut:])
 
 def run_sweep(filler, ask_model):
     results = {}
@@ -148,8 +157,18 @@ def run_sweep(filler, ask_model):
         ctx = build_context(filler, NEEDLE, depth)
         answer = ask_model(ctx, QUESTION)
         results[depth] = "7Q-ARROW-92" in answer
-    return results  # e.g. {0.0: True, 0.5: False, 1.0: True}`
-    },
+    return results
+
+FILLER = ["Routine log line %d: nothing important happened." % i for i in range(40)]
+
+print("needle depth   found?")
+for depth, found in run_sweep(FILLER, ask_model).items():
+    print("   %-11.2f %s" % (depth, "yes" if found else "NO   <- lost in the middle"))
+
+# Try it: put the needle at 0.4 or 0.6 and find where the cliff actually is.
+# In a real model the dip deepens as the context grows, which is why "just
+# paste everything in" stops working exactly when you need it most.
+` },
     {
       type: 'p',
       text: 'Run this at a few context lengths too, say 8k, 32k, and 100k tokens of filler. Two patterns usually appear. Recall dips in the middle depths, and it also erodes as total length grows. Once you can see your own curve, tuning stops being folklore. You keep the chunk count and ordering that your eval rewards, and you stop trusting the raw feeling that more is safer. Run the sweep again every time you change the retriever, the reranker, or the prompt template, because each of those can move the curve in ways you will not notice from spot checks alone.'

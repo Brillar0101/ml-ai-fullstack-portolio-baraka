@@ -4,11 +4,10 @@ export const POST = {
   excerpt: 'A team wired in eight MCP servers in one afternoon and the agent started picking the wrong tool. Here is why a big pile of tools hurts, and the server-manager pattern that pulls it back.',
   category: 'AI',
   tags: ['MCP', 'Agents', 'Tools'],
-  readTime: '8 min read',
   body: [
     {
       type: 'p',
-      text: 'A team I know had a working agent. It could read tickets, post to Slack, and query one database. Three tools, maybe four, and it picked the right one almost every time. Then someone had a good idea: connect more MCP servers so the agent can do more. In a single afternoon they wired in eight of them. GitHub, Jira, Google Drive, a calendar server, a payments server, a logs server, a search server, and an internal wiki. Each one showed up green in the client. On paper the agent had gotten much more capable.'
+      text: 'Picture a working agent. It can read tickets, post to Slack, and query one database. Three tools, maybe four, and it picks the right one almost every time. Then someone has a good idea: connect more MCP servers so the agent can do more. In a single afternoon eight of them get wired in. GitHub, Jira, Google Drive, a calendar server, a payments server, a logs server, a search server, and an internal wiki. Each one shows up green in the client. On paper the agent has gotten much more capable.',
     },
     {
       type: 'p',
@@ -92,27 +91,63 @@ export const POST = {
       type: 'p',
       text: 'Here is a small router that captures the core idea. It scores each tool against the request with a plain keyword overlap, then returns only the top few. In production you would swap the scoring for real embeddings, but the shape is the same: rank, then trim.'
     },
-    {
-      type: 'code',
-      lang: 'python',
-      title: 'A minimal tool router',
-      code: `def route_tools(request, tools, top_k=5):
+    { type: 'lab', height: 460,
+        title: 'A tool router, cutting twelve tools down to a handful',
+        caption: 'The agent only ever sees what the router picked. Note the caveat at the bottom: matching on words inherits every weakness of keyword search.',
+        code: `# A pool of tools, the kind you end up with after wiring in a few MCP servers.
+ALL_TOOLS = [
+    {"name": "create_ticket",   "description": "open a new support ticket for a bug or request"},
+    {"name": "search_tickets",  "description": "search existing tickets by text"},
+    {"name": "post_slack",      "description": "post a message to a slack channel"},
+    {"name": "query_database",  "description": "run a read only sql query"},
+    {"name": "list_files",      "description": "list files in google drive"},
+    {"name": "create_event",    "description": "add an event to the calendar"},
+    {"name": "issue_refund",    "description": "issue a payment refund to a customer"},
+    {"name": "read_logs",       "description": "read application logs for errors"},
+    {"name": "search_wiki",     "description": "search the internal wiki for a page"},
+    {"name": "web_search",      "description": "search the public web"},
+    {"name": "send_email",      "description": "send an email to a customer"},
+    {"name": "get_order",       "description": "look up a customer order by id"},
+]
+
+STOPWORDS = {"a", "an", "the", "for", "to", "of", "on", "in", "i", "my",
+             "do", "what", "say", "about", "need", "is", "and"}
+
+def route_tools(request, tools, top_k=5):
     """Return only the tools most relevant to the request."""
-    words = set(request.lower().split())
+    words = set(request.lower().split()) - STOPWORDS
 
     def score(tool):
         text = (tool["name"] + " " + tool["description"]).lower()
-        return len(words & set(text.split()))
+        return len(words & (set(text.replace("_", " ").split()) - STOPWORDS))
 
     ranked = sorted(tools, key=score, reverse=True)
     picked = [t for t in ranked if score(t) > 0][:top_k]
 
-    # Fall back to a safe default set if nothing matched.
+    # Fall back to a safe default set if nothing matched at all.
     return picked or tools[:top_k]
 
-# The agent only ever sees 'visible', not the full pool.
-visible = route_tools("open a ticket for the login bug", ALL_TOOLS)`
-    },
+REQUESTS = [
+    "open a ticket for the login bug",
+    "refund the customer for order 4417",
+    "what do the logs say about the timeout",
+]
+
+for req in REQUESTS:
+    visible = route_tools(req, ALL_TOOLS)
+    print('request: "%s"' % req)
+    print("   agent sees %d of %d tools: %s"
+          % (len(visible), len(ALL_TOOLS), ", ".join(t["name"] for t in visible)))
+    print()
+
+# Twelve tools become one to three. The second request surfaces issue_refund
+# and get_order together, which is the right pair for that job.
+#
+# Now the caveat: this router matches words, so it inherits every weakness of
+# keyword search. Try "cancel my subscription" and watch it find nothing useful,
+# because no tool description happens to use those words. A real router embeds
+# the request and the tool descriptions and compares meaning instead.
+` },
     {
       type: 'p',
       text: 'With this in place, the eight servers stay connected and the agent keeps every ability it had. The difference is that on the "open a ticket" turn, the router surfaces the Jira tools and leaves the calendar and drive tools out of view. The model no longer has to tell three "Create" tools apart. It sees the one that fits.'

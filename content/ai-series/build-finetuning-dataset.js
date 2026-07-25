@@ -4,11 +4,10 @@ export const POST = {
   excerpt: 'A team fine-tuned on fifty thousand scraped examples and shipped a model that was worse than the base. A rival team used two thousand they wrote by hand and won. The gap was never the model. It was the data.',
   category: 'AI',
   tags: ['Fine-tuning', 'Data', 'Instruction Tuning'],
-  readTime: '8 min read',
   body: [
     {
       type: 'p',
-      text: 'Two teams set out to fine-tune the same open base model for the same job: a support assistant that answers product questions in a calm, on-brand voice. The first team moved fast. They scraped fifty thousand question-and-answer pairs from old chat logs, forums, and a pile of internal docs, poured it all into the trainer, and waited. The result answered in three different tones depending on the question, repeated itself, and sometimes leaked half of a support macro into the reply. It scored worse on their own test set than the untouched base model did.'
+      text: 'Picture two teams setting out to fine-tune the same open base model for the same job: a support assistant that answers product questions in a calm, on-brand voice. The first team moved fast. They scraped fifty thousand question-and-answer pairs from old chat logs, forums, and a pile of internal docs, poured it all into the trainer, and waited. The result answered in three different tones depending on the question, repeated itself, and sometimes leaked half of a support macro into the reply. It scored worse on their own test set than the untouched base model did.'
     },
     {
       type: 'p',
@@ -80,40 +79,72 @@ export const POST = {
       type: 'p',
       text: 'Once you have raw pairs, the middle of the pipeline is where a bad dataset becomes a good one. First you normalize every example into the same instruction shape so the trainer sees one consistent structure. Then you filter: drop rows with an empty answer, answers that are one word when the task needs a paragraph, or answers that are suspiciously long and rambling. Then you deduplicate, because scraped data is full of the same question asked ten times, and ten copies of one row teach the model that this one row is ten times as important as it should be. The code below shows the core of that pass on a small batch of raw pairs.'
     },
-    {
-      type: 'code',
-      lang: 'python',
-      title: 'Format raw pairs and drop bad or duplicate rows',
-      code: `import re
+    { type: 'lab', height: 460,
+        title: 'Filtering raw pairs into a dataset worth training on',
+        caption: 'Five of eight rows get thrown away. What you discard shapes the model more than what you keep, and three copies of one answer is how a model learns to give it too often.',
+        code: `import re
+
+# Turning raw support transcripts into a finetuning set. The filtering is the
+# whole job: what you throw away shapes the model more than what you keep.
+
+RAW_PAIRS = [
+    {"question": "  How do I reset my password?  ", "answer": "Open Settings, choose Security, then Reset password."},
+    {"question": "how do I reset my password",      "answer": "Open Settings, choose Security, then Reset password."},
+    {"question": "Where is my invoice?",            "answer": "ok"},
+    {"question": "Do you support SSO?",             "answer": "Yes, on the Enterprise plan. Upload your SAML metadata first."},
+    {"question": "",                                "answer": "Contact support."},
+    {"question": "Can I export my data?",           "answer": "Yes. " + "Go to Settings and click Export. " * 90},
+    {"question": "What are the rate limits?",       "answer": "One hundred requests per minute per API key."},
+    {"question": "HOW DO I RESET MY PASSWORD?!",    "answer": "Open Settings, choose Security, then Reset password."},
+]
 
 def to_example(pair):
-    instruction = pair["question"].strip()
-    output = pair["answer"].strip()
-    return {"instruction": instruction, "input": "", "output": output}
+    return {"instruction": pair["question"].strip(), "input": "",
+            "output": pair["answer"].strip()}
 
 def is_good(ex):
     if not ex["instruction"] or not ex["output"]:
-        return False
-    if len(ex["output"].split()) < 3:      # too short to be a real answer
-        return False
-    if len(ex["output"].split()) > 400:    # likely a leaked macro or dump
-        return False
-    return True
+        return False, "empty field"
+    if len(ex["output"].split()) < 3:
+        return False, "answer too short to teach anything"
+    if len(ex["output"].split()) > 400:
+        return False, "probably a pasted macro or a transcript dump"
+    return True, None
 
 def norm(text):
-    return re.sub(r"\\s+", " ", text.lower()).strip()
+    return re.sub(r"[^a-z0-9 ]", "", re.sub(r"\\s+", " ", text.lower())).strip()
 
-clean, seen = [], set()
-for pair in raw_pairs:
+clean, seen, dropped = [], set(), []
+for pair in RAW_PAIRS:
     ex = to_example(pair)
-    if not is_good(ex):
+    ok, why = is_good(ex)
+    if not ok:
+        dropped.append((ex["instruction"][:34] or "(empty)", why))
         continue
     key = norm(ex["instruction"]) + "|" + norm(ex["output"])
-    if key in seen:                        # exact-ish duplicate, skip it
+    if key in seen:
+        dropped.append((ex["instruction"][:34], "duplicate of an earlier row"))
         continue
     seen.add(key)
-    clean.append(ex)`
-    },
+    clean.append(ex)
+
+print("kept %d of %d rows\\n" % (len(clean), len(RAW_PAIRS)))
+for ex in clean:
+    print("   keep  %s" % ex["instruction"][:60])
+print()
+for what, why in dropped:
+    print("   drop  %-36s %s" % (what, why))
+
+print()
+print("Note which rows the duplicate check caught. Three people asked the same")
+print("password question with different spacing, capitalisation and")
+print("punctuation. Normalising before comparing is what makes them one row")
+print("instead of three, and three copies of one answer is exactly how a model")
+print("learns to give that answer too often.")
+
+# Try it: delete the norm() call from the key and watch the shouty duplicate
+# survive. Then imagine that at the scale of a real support archive.
+` },
     {
       type: 'p',
       text: 'This is deliberately simple, and simple is the right starting point. The exact-match dedup key catches obvious repeats. For near-duplicates that differ by a word or two, teams reach for fuzzy methods like comparing text embeddings and dropping pairs that sit above a similarity threshold, but do not add that until you have measured that plain dedup is not enough. Getting the boring filters right first removes most of the damage.'

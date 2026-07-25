@@ -4,11 +4,10 @@ export const POST = {
   excerpt: 'A coding agent kept botching the same class of task in production. The team stopped guessing at prompt tweaks and mined their trace logs instead. Here is the loop that turned those failures into a fix that stuck.',
   category: 'AI',
   tags: ['Agents', 'Evaluation', 'Observability'],
-  readTime: '8 min read',
   body: [
     {
       type: 'p',
-      text: 'A team I worked alongside shipped a coding agent that opened pull requests from plain-English tickets. For simple tasks it was great. Rename a variable, add a field, write a small test, and it did the job. But there was one kind of ticket it kept getting wrong: anything that touched two files at once. Ask it to add a database column and update the API that reads it, and roughly one run in three would edit the migration, forget the API layer, and open a half-finished pull request that a human had to clean up.'
+      text: 'Picture a coding agent that opens pull requests from plain-English tickets. For simple tasks it is great. Rename a variable, add a field, write a small test, and it does the job. But suppose there is one kind of ticket it keeps getting wrong: anything that touches two files at once. Ask it to add a database column and update the API that reads it, and it edits the migration, forgets the API layer, and opens a half-finished pull request that a human has to clean up.',
     },
     {
       type: 'p',
@@ -88,44 +87,81 @@ export const POST = {
       type: 'p',
       text: 'This next sketch is the plumbing that makes the flywheel turn. It reads a trace log, flags the runs that failed, and appends them to an eval dataset. It is deliberately small, because the value is in doing this at all, not in doing it fancily.'
     },
-    {
-      type: 'code',
-      lang: 'python',
-      title: 'mine_traces.py',
-      code: `import json
+    { type: 'lab', height: 460,
+        title: 'Mining traces into eval cases, then measuring the fix',
+        caption: 'Note that the tool timeout is separated from the quality failures. Letting infrastructure errors into a quality eval set is how teams spend a day debugging a prompt that was never the problem.',
+        code: `import json, io
 
-def flag_failures(trace_path):
-    """Read a trace log and yield runs that ended badly."""
-    with open(trace_path) as f:
-        for line in f:
-            trace = json.loads(line)
-            reverted = trace["outcome"] == "reverted"
-            errored = any(s.get("error") for s in trace["spans"])
-            if reverted or errored:
-                yield {
-                    "input": trace["request"],
-                    "trace_id": trace["id"],
-                    "expected": "",  # a human fills this in
-                    "note": "reverted" if reverted else "tool error",
-                }
+# The flywheel: production traces become eval cases, eval cases become fixes,
+# and the fixed behaviour is locked in by the case that caught it.
 
-def append_to_eval_set(cases, eval_path):
-    with open(eval_path, "a") as out:
-        for case in cases:
-            out.write(json.dumps(case) + "\\n")
+TRACES = [
+    {"id": "t1", "request": "add a created_at column to orders",
+     "outcome": "reverted", "spans": [{"tool": "edit_file"}]},
+    {"id": "t2", "request": "rename userId to user_id",
+     "outcome": "merged", "spans": [{"tool": "edit_file"}]},
+    {"id": "t3", "request": "add a status column and update the read API",
+     "outcome": "reverted", "spans": [{"tool": "edit_file"}]},
+    {"id": "t4", "request": "bump the lint rule",
+     "outcome": "merged", "spans": [{"tool": "edit_file"}]},
+    {"id": "t5", "request": "add is_archived and expose it in the response",
+     "outcome": "merged", "spans": [{"tool": "edit_file", "error": "timeout"}]},
+]
 
-if __name__ == "__main__":
-    failures = list(flag_failures("prod_traces.jsonl"))
-    append_to_eval_set(failures, "eval_set.jsonl")
-    print(f"Added {len(failures)} cases for review")`
-    },
+def flag_failures(traces):
+    """Yield runs that ended badly, whatever the reason."""
+    for trace in traces:
+        reverted = trace["outcome"] == "reverted"
+        errored = any(s.get("error") for s in trace["spans"])
+        if reverted or errored:
+            yield {
+                "input": trace["request"],
+                "trace_id": trace["id"],
+                "expected": "",                     # a human fills this in
+                "note": "reverted" if reverted else "tool error",
+            }
+
+eval_set = io.StringIO()
+cases = list(flag_failures(TRACES))
+for case in cases:
+    eval_set.write(json.dumps(case) + "\\n")
+
+print("mined %d failing runs out of %d traces:" % (len(cases), len(TRACES)))
+for c in cases:
+    print("   %-4s %-46s %s" % (c["trace_id"], c["input"][:44], c["note"]))
+
+print()
+print("two of the three touch a migration AND an API in one request, which is")
+print("the pattern worth naming. The third is an infrastructure timeout and")
+print("belongs in a different bucket, not in a quality eval set.")
+print()
+
+# Once the cases exist, a fix is measurable rather than hopeful.
+def agent(request, has_multifile_rule):
+    touches_two = (("column" in request or "migration" in request)
+                   and ("api" in request.lower() or "response" in request))
+    return "complete" if (has_multifile_rule or not touches_two) else "half-finished"
+
+quality_cases = [c for c in cases if c["note"] == "reverted"]
+for label, rule in [("before the fix", False), ("after adding the rule", True)]:
+    passed = sum(agent(c["input"], rule) == "complete" for c in quality_cases)
+    print("%-22s %d/%d cases pass" % (label, passed, len(quality_cases)))
+
+print()
+print("The number is small and that is fine. The point is that the fix is now")
+print("attached to the cases that motivated it, so a later change that breaks")
+print("it again fails loudly instead of quietly shipping.")
+
+# Try it: add a trace with a new kind of failure and watch it flow into the
+# eval set. That is the flywheel: every incident earns a permanent test.
+` },
     {
       type: 'p',
       text: 'Notice the empty `expected` field. The script does not decide what a correct answer looks like. It collects candidates and hands them to a human, who confirms the failure is real and writes down what should have happened. That review step matters. If you connect a judge to your eval set, you want its labels checked against human judgment, because an automatic grader that nobody audits will happily approve the wrong behavior. This connects to the eval pipeline idea from earlier in the series: the trace miner is the front door that keeps feeding that pipeline fresh, real cases instead of ones you made up at your desk.'
     },
     {
       type: 'p',
-      text: 'With the twelve cases in place, they added the search tool and the prompt rule, then re-ran the whole eval set. Ten of the twelve now passed. Two still failed for a different reason, which was fine, because now those two were named and tracked too. Nothing that used to pass had broken. They deployed, and the two-file failure rate dropped from roughly a third to under one in twenty. The next week of traces surfaced a new, smaller problem, and the loop went around again.'
+      text: 'With the twelve cases in place, add the search tool and the prompt rule, then re-run the whole eval set. Most of the twelve now pass. The ones that still fail do so for a different reason, which is fine, because now those are named and tracked too. Crucially, you can also see that nothing which used to pass has broken. Ship it, and the next week of traces surfaces a new, smaller problem, and the loop goes around again. The point is not the score. It is that every step is now a measurement instead of a guess.'
     },
     {
       type: 'h2',

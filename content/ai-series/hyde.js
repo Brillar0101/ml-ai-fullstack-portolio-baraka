@@ -4,7 +4,6 @@ export const POST = {
   excerpt: 'Short questions and long answer passages live in different neighborhoods of embedding space. HyDE closes that gap by drafting a fake answer first, then searching with it.',
   category: 'AI',
   tags: ['RAG', 'Retrieval', 'Embeddings'],
-  readTime: '7 min read',
   body: [
     {
       type: 'p',
@@ -93,30 +92,79 @@ export const POST = {
       type: 'p',
       text: 'Mechanically, HyDE adds one model call in front of your normal retrieval loop. You generate a draft, embed the draft, and feed that vector to the same vector search you already run. Everything downstream stays the same.'
     },
-    {
-      type: 'code',
-      lang: 'python',
-      title: 'HyDE retrieval in front of an existing vector store',
-      code: `def hyde_retrieve(question, llm, embed, store, k=5):
-    # 1. Ask the LLM for a plausible answer passage.
-    prompt = (
-        "Write a short factual passage that answers "
-        f"this question, as if from documentation:\\n{question}"
-    )
-    draft = llm.generate(prompt)
+    { type: 'lab', height: 460,
+        title: 'HyDE, and the ranking it flips',
+        caption: 'Embedding the question ranks the wrong page first. Embedding a hypothetical answer pulls in the word the real document uses, and the right page moves to the top.',
+        code: `import math
 
-    # 2. Embed the draft, not the question.
-    query_vector = embed(draft)
+# HyDE in miniature. The move is to embed a hypothetical ANSWER instead of the
+# question, because answers use the vocabulary documents use, and questions
+# often do not. Vectors here are hand-written over four traits so you can read
+# the arithmetic instead of trusting a black box.
+#                   [ keys, rotation, security, billing ]
+STORE = [
+    ("kb-1", "To rotate an API key, open Settings, choose Keys, then Regenerate.",
+             [0.9, 0.9, 0.4, 0.0]),
+    ("kb-2", "API keys are secrets. Never commit them to a repository.",
+             [0.9, 0.1, 0.9, 0.0]),
+    ("kb-3", "Billing questions are handled from the Plans page.",
+             [0.0, 0.0, 0.0, 0.9]),
+]
 
-    # 3. Search the real store with that vector.
-    docs = store.nearest(query_vector, k=k)
-    return docs
+KEYS     = {"key", "keys", "credential", "credentials", "token"}
+ROTATION = {"rotate", "regenerate", "settings", "renew", "replace"}
+SECURITY = {"safe", "safely", "secret", "secrets", "secure", "leak", "commit"}
+BILLING  = {"billing", "plan", "plans", "invoice"}
 
-# The draft is a probe. The final answer is grounded
-# only in the real docs we just retrieved.
-docs = hyde_retrieve("how do I rotate my API keys", llm, embed, store)
-answer = llm.generate(build_prompt(question, docs))`
-    },
+def embed(text):
+    # A stand-in embedder: it fires a trait when the text uses that trait's
+    # vocabulary. Crude, but it has the property that matters here, which is
+    # that wording drives the vector.
+    w = set(text.lower().replace(",", " ").replace(".", " ").replace("?", " ").split())
+    return [1.0 if w & KEYS else 0.0, 1.0 if w & ROTATION else 0.0,
+            1.0 if w & SECURITY else 0.0, 1.0 if w & BILLING else 0.0]
+
+def cosine(a, b):
+    dot = sum(x * y for x, y in zip(a, b))
+    na = math.sqrt(sum(x * x for x in a)); nb = math.sqrt(sum(y * y for y in b))
+    return dot / (na * nb + 1e-9)
+
+def nearest(vec, k=2):
+    return sorted(((cosine(vec, v), i, t) for i, t, v in STORE), reverse=True)[:k]
+
+def llm_generate(question):
+    # Stand-in for the model drafting a plausible answer passage. The valuable
+    # part is that it reaches for words a real document would use, such as
+    # "rotate" and "Settings", which the user's question never contained.
+    return "You should rotate your API key regularly. Open Settings and choose Regenerate."
+
+question = "is it safe to keep using the same API key forever?"
+
+print('question: "%s"' % question)
+print("   its vector:", embed(question), " (keys and security fire, rotation does not)")
+print()
+print("plain retrieval, embedding the QUESTION:")
+for score, doc_id, text in nearest(embed(question)):
+    print("   %.3f  %-5s %s" % (score, doc_id, text))
+
+draft = llm_generate(question)
+print()
+print("HyDE, embedding a hypothetical ANSWER first:")
+print('   draft: "%s"' % draft)
+print("   its vector:", embed(draft), " (now rotation fires too)")
+for score, doc_id, text in nearest(embed(draft)):
+    print("   %.3f  %-5s %s" % (score, doc_id, text))
+
+print()
+print("Plain retrieval ranked the 'do not commit secrets' page first, because")
+print("the question was phrased in the language of safety. The draft pulled in")
+print("the word 'rotate', and that flipped the top hit to the page that")
+print("actually answers the question. The draft is only a probe: the answer you")
+print("show the user is grounded in kb-1, a real document, never in the draft.")
+
+# Try it: change the draft so it talks about secrets instead of rotation, and
+# watch the ranking swing back. HyDE is only ever as good as the draft.
+` },
     {
       type: 'p',
       text: 'The original HyDE paper pushed this further and averaged the vectors of several drafts to smooth out any single bad generation. In practice a single draft already helps a lot, and you can add more drafts later if one weird generation ever throws off a search.'

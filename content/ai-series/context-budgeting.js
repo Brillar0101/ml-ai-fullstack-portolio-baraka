@@ -4,7 +4,6 @@ export const POST = {
   excerpt: 'A support chat runs long and suddenly the model forgets the order number. Here is how to treat the context window as a fixed budget and spend it well.',
   category: 'AI',
   tags: ['Context Engineering', 'Tokens', 'Cost'],
-  readTime: '8 min read',
   body: [
     {
       type: 'p',
@@ -154,15 +153,25 @@ export const POST = {
       type: 'p',
       text: 'Here is the shape of a function that keeps the packet under a token limit. It always keeps the system message, always keeps the most recent turns in full, and when there is still too much it folds the middle into a single summary. The token counter is a stand in for whatever your provider gives you.'
     },
-    {
-      type: 'code',
-      lang: 'python',
-      title: 'fit_to_budget.py',
-      code: `def fit_to_budget(system, history, budget, count, summarize):
-    # system message is non-negotiable, reserve its cost first
+    { type: 'lab', height: 460,
+        title: 'fit_to_budget.py, at three different budgets',
+        caption: 'Newest turns survive whole, the older ones collapse into one recap, and the system message is never at risk. Watch the boundary move as the budget shrinks.',
+        code: `# A token counter and a summarizer stand in for the real ones. Counting words
+# instead of tokens keeps the arithmetic readable. The shape is identical.
+def count(text):
+    return len(text.split())
+
+def summarize(messages):
+    # A real summarizer is a model call. This stand-in records what it
+    # swallowed, so you can see exactly which turns got collapsed.
+    return ("[recap of %d earlier turns: " % len(messages)
+            + "; ".join(m.split(":")[0] for m in messages) + "]")
+
+def fit_to_budget(system, history, budget, count, summarize):
+    # the system message is non-negotiable, so reserve its cost first
     remaining = budget - count(system)
 
-    # walk newest to oldest, keeping full turns while they fit
+    # walk newest to oldest, keeping whole turns while they fit
     kept = []
     idx = len(history) - 1
     while idx >= 0 and count(history[idx]) <= remaining:
@@ -178,8 +187,29 @@ export const POST = {
         if count(recap) <= remaining:
             kept = [recap] + kept
 
-    return [system] + kept`
-    },
+    return [system] + kept
+
+SYSTEM = "You are a support assistant. Be brief and cite the policy you used."
+HISTORY = [
+    "turn1: customer asks where their order is",
+    "turn2: agent looks up order 4417 and finds it delayed in transit",
+    "turn3: customer asks whether they can cancel it now",
+    "turn4: agent explains the cancellation window has passed",
+    "turn5: customer asks for a partial refund instead",
+    "turn6: agent checks the refund policy for delayed shipments",
+]
+
+for budget in (70, 56, 30):
+    packed = fit_to_budget(SYSTEM, HISTORY, budget, count, summarize)
+    used = sum(count(m) for m in packed)
+    print("budget %3d words -> used %3d" % (budget, used))
+    for m in packed:
+        print("    ", m[:74])
+    print()
+
+# Try it: drop the budget to 18 and watch even the recap get squeezed out.
+# That is the failure mode worth designing for, not the happy path.
+` },
     {
       type: 'p',
       text: 'The logic is deliberately plain. Reserve the system message, fill from the newest end while turns fit, and compress whatever is left over. You can make it smarter later, and most teams do, adding pinned facts or smarter ranking. But even this basic version stops the silent overflow that lost our order number in the first place.'

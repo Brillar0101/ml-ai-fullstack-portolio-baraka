@@ -24,10 +24,34 @@ import Schematic from '../../components/diagrams/Schematic';
  *   { type: 'sources', items: [{ title, url?, note? }] }  references at post end
  *   { type: 'lab', code, packages?, height? }        runnable in-browser Python
  */
-// Render inline **bold** markers as <strong> so important terms stand out.
+// Render inline markup in body text: **bold** for key terms, and
+// [label](url) so prose can point at the paper or spec behind a claim
+// without breaking the reading line.
+const LINK = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
+
+function bold(text, keyPrefix) {
+  return text.split('**').map((part, i) => (
+    i % 2 === 1 ? <strong key={`${keyPrefix}b${i}`}>{part}</strong> : part
+  ));
+}
+
 function rich(text) {
   if (typeof text !== 'string') return text;
-  return text.split('**').map((part, i) => (i % 2 === 1 ? <strong key={i}>{part}</strong> : part));
+  const out = [];
+  let last = 0;
+  let m;
+  LINK.lastIndex = 0;
+  while ((m = LINK.exec(text))) {
+    if (m.index > last) out.push(...bold(text.slice(last, m.index), `t${last}`));
+    out.push(
+      <a key={`l${m.index}`} href={m[2]} target="_blank" rel="noopener noreferrer" className="series-inline-link">
+        {bold(m[1], `a${m.index}`)}
+      </a>,
+    );
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) out.push(...bold(text.slice(last), `t${last}`));
+  return out;
 }
 
 // Stable anchor ids for h2 headings, used by the in-post table of contents.
@@ -146,7 +170,15 @@ function Block({ block }) {
         </section>
       );
     case 'lab':
-      return <PythonLab code={block.code} packages={block.packages || []} height={block.height || 300} />;
+      // A lab is a code walkthrough the reader can actually run and edit, so
+      // it carries the same optional filename label a static code block does.
+      return (
+        <figure className="series-code series-lab">
+          {block.title ? <figcaption>{block.title}</figcaption> : null}
+          <PythonLab code={block.code} packages={block.packages || []} height={block.height || 300} />
+          {block.caption ? <figcaption className="series-lab-caption">{rich(block.caption)}</figcaption> : null}
+        </figure>
+      );
     default:
       return null;
   }

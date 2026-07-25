@@ -4,11 +4,10 @@ export const POST = {
   excerpt: 'A self-hosted 13B model on one GPU could barely serve a handful of people before it choked. The model never changed. Two scheduling and memory ideas did, and the same card started serving several times as many users.',
   category: 'AI',
   tags: ['Deployment', 'vLLM', 'Batching'],
-  readTime: '8 min read',
   body: [
     {
       type: 'p',
-      text: 'A team ships an internal assistant on a 13B model they host themselves. One A100, one process, a plain generation server in front of it. During the demo it feels quick. Then twenty people open the tool at once and it falls apart. Requests sit in a queue for seconds before the first token appears, the GPU utilization graph reads a sad 30 percent, and someone asks the obvious question: we paid for a whole GPU, why does it act like it can only talk to five people at a time? Nothing is broken. The model is fine. The problem is how requests are packed onto the card, and how the memory for each request is reserved. Fix those two things and the same hardware serves several times the traffic.'
+      text: 'Picture an internal assistant running on a 13B model the team hosts themselves. One A100, one process, a plain generation server in front of it. During the demo it feels quick. Then twenty people open the tool at once and it falls apart. Requests sit in a queue for seconds before the first token appears, the GPU utilization graph reads a sad 30 percent, and someone asks the obvious question: we paid for a whole GPU, why does it act like it can only talk to five people at a time? Nothing is broken. The model is fine. The problem is how requests are packed onto the card, and how the memory for each request is reserved. Fix those two things and the same hardware serves several times the traffic.'
     },
     {
       type: 'p',
@@ -81,36 +80,66 @@ export const POST = {
       ],
       caption: 'Two levers stacked: the scheduler keeps the batch full, paged memory lets far more requests share the card at once.'
     },
-    {
-      type: 'code',
-      lang: 'python',
-      title: 'Serve a model and send a batch of uneven requests',
-      code: `# Start an OpenAI-compatible server, one line:
-#   vllm serve mistralai/Mistral-7B-Instruct-v0.2 --max-model-len 4096
+    { type: 'lab', height: 460,
+        title: 'Static against continuous batching, step by step',
+        caption: 'Watch the short requests. Under static batching the yes/no question waits on a 40-step neighbour. Under continuous batching it leaves at step 2 and its slot is reused immediately.',
+        code: `# Static batching against continuous batching, simulated one step at a time.
+# No GPU involved: this is a scheduler you can read. Each request needs a
+# different number of decode steps, which is the whole source of the problem.
 
-from openai import OpenAI
+REQUESTS = [("yes/no question", 2), ("capital of France", 3),
+            ("explain attention", 40), ("400-word overview", 60)]
+SLOTS = 2      # how many requests the GPU can hold at once
 
-client = OpenAI(base_url="http://localhost:8000/v1", api_key="local")
+def static_batching(requests, slots):
+    """Fill the bus, run until the LAST rider is done, only then reload."""
+    step = 0
+    waiting = list(requests)
+    finished = {}
+    while waiting:
+        batch = waiting[:slots]
+        waiting = waiting[slots:]
+        longest = max(n for _, n in batch)
+        for name, n in batch:
+            # everyone in the batch is held until the slowest one finishes
+            finished[name] = step + longest
+        step += longest
+    return step, finished
 
-# Uneven prompts: some want one word, some want an essay.
-prompts = [
-    "Reply with only 'yes' or 'no': is water wet?",
-    "Explain how a transformer attention head works, in detail.",
-    "Name the capital of France.",
-    "Write a 400-word overview of continuous batching.",
-]
+def continuous_batching(requests, slots):
+    """Evict finished requests every step and admit the next one waiting."""
+    step = 0
+    waiting = list(requests)
+    running = []          # [name, steps_left]
+    finished = {}
+    while waiting or running:
+        while waiting and len(running) < slots:      # admit without pausing
+            name, n = waiting.pop(0)
+            running.append([name, n])
+        step += 1
+        for slot in running:
+            slot[1] -= 1
+        for slot in list(running):
+            if slot[1] == 0:
+                finished[slot[0]] = step             # leaves the moment it is done
+                running.remove(slot)
+    return step, finished
 
-# Fire them together. vLLM slots each into the running batch,
-# evicts the short ones the moment they finish, and admits the
-# next waiting prompt without pausing the long ones.
-for p in prompts:
-    resp = client.completions.create(
-        model="mistralai/Mistral-7B-Instruct-v0.2",
-        prompt=p,
-        max_tokens=512,
-    )
-    print(resp.choices[0].text.strip()[:80])`
-    },
+for label, fn in [("static batching", static_batching),
+                  ("continuous batching", continuous_batching)]:
+    total, finished = fn(REQUESTS, SLOTS)
+    print("%s: all done at step %d" % (label, total))
+    for name, _ in REQUESTS:
+        print("      %-20s finished at step %d" % (name, finished[name]))
+    print()
+
+print("Watch the short requests. Under static batching the yes/no question")
+print("waits for a 40-step neighbour before it can leave. Under continuous")
+print("batching it leaves at step 2 and its slot goes to the next request.")
+
+# Try it: set SLOTS = 4 so everything fits at once. Static batching still
+# makes the fast requests wait for the slowest one, because that is the rule.
+` },
     {
       type: 'h2',
       text: 'How the two ideas multiply each other'
