@@ -87,9 +87,10 @@ export const POST = {
     { type: 'lab', height: 460,
         title: 'A retrieve, grade, answer loop',
         caption: 'The first question takes two passes: the initial search is on topic but does not answer it, so the grader says weak and the query gets rewritten. Plain RAG would have answered from that first, wrong context.',
-        code: `# Plain RAG retrieves once and answers with whatever came back. Agentic RAG
-# grades what came back and searches again when it is not good enough. The
-# grader and the retriever are stand-ins so you can watch the loop turn.
+        code: `# Plain RAG retrieves once and answers with whatever came
+# back. Agentic RAG grades what came back and searches again
+# when it is not good enough. The grader and the retriever
+# are stand-ins so you can watch the loop turn.
 
 DOCS = {
     "sso": "Single sign-on is configured under Settings, Security, Identity Provider.",
@@ -99,8 +100,9 @@ DOCS = {
 
 def retriever_search(query, k=2):
     q = query.lower()
-    # A plain vector search matches on topic. "SSO" dominates the question, so
-    # the SSO and pricing pages come back and the SAML prerequisite does not.
+    # A plain vector search matches on topic. "SSO"
+    # dominates the question, so the SSO and pricing pages
+    # come back and the SAML prerequisite does not.
     if "sso" in q or "sign-on" in q or "sign on" in q:
         return [DOCS["sso"], DOCS["pricing"]]
     if "metadata" in q or "saml" in q:
@@ -108,7 +110,8 @@ def retriever_search(query, k=2):
     return []
 
 def llm_grade(question, context):
-    # Returns "good", "weak" or "missing". A real grader is a model call.
+    # Returns "good", "weak" or "missing". A real grader is
+    # a model call.
     if not context:
         return "missing"
     if "metadata" in question.lower() and not any("metadata" in c.lower() for c in context):
@@ -146,8 +149,9 @@ print("The first question needed two passes: the first search was on topic but")
 print("did not answer it, so the grader said weak and the query got rewritten.")
 print("Plain RAG would have answered confidently from that first, wrong context.")
 
-# Try it: make llm_grade always return "good" and watch question one answer
-# from the wrong passage without a word of warning.
+# Try it: make llm_grade always return "good" and watch
+# question one answer from the wrong passage without a word
+# of warning.
 ` },
     {
       type: 'h2',

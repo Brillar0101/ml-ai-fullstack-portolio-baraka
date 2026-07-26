@@ -53,9 +53,10 @@ export const POST = {
     { type: 'lab', height: 460,
         title: 'The two request shapes, answering the same question',
         caption: 'The question has two parts. RAG top-3 retrieved the wrong three and dropped half the answer. Nothing was wrong with the model.',
-        code: `# RAG and CAG answering the same question, side by side, so you can see what
-# each one drops. The "model" here is a stand-in that can only answer from
-# whatever context it was handed, which is exactly the property that matters.
+        code: `# RAG and CAG answering the same question, side by side, so
+# you can see what each one drops. The "model" here is a
+# stand-in that can only answer from whatever context it was
+# handed, which is exactly the property that matters.
 
 POLICIES = [
     "Paternity leave is 15 working days.",
@@ -67,22 +68,26 @@ POLICIES = [
 ]
 
 def index_search(question, top_k=3):
-    # Keyword retrieval, deliberately blunt, the way a real top-k often is.
+    # Keyword retrieval, deliberately blunt, the way a real
+    # top-k often is.
     words = set(question.lower().replace("?", "").split())
     scored = sorted(POLICIES, key=lambda p: len(words & set(p.lower().split())), reverse=True)
     return scored[:top_k]
 
 def model_generate(context, question):
-    # Answers only from the context it was given. No memory, no guessing.
+    # Answers only from the context it was given. No memory,
+    # no guessing.
     facts = [c for c in context if "paternity" in c.lower()]
     return " ".join(facts) if facts else "Not covered by the provided text."
 
-# ---- RAG: search first, answer against a slice ----------------------------
+# ---- RAG: search first, answer against a slice
+# ----------------------------
 def answer_rag(question, top_k=3):
     chunks = index_search(question, top_k=top_k)
     return model_generate(chunks, question), chunks
 
-# ---- CAG: preload everything once, answer against all of it ---------------
+# ---- CAG: preload everything once, answer against all of
+# it ---------------
 KV = POLICIES              # the whole binder, cached once, nothing dropped
 def answer_cag(question):
     return model_generate(KV, question), KV
@@ -102,9 +107,10 @@ print("   answer:", cag_answer)
 print()
 print("The question has two parts. Check whether each answer covers both.")
 
-# Try it: raise top_k to 4 and RAG catches up. The lesson is not that top_k=3
-# is wrong, it is that the right k depends on the question, and CAG sidesteps
-# the choice entirely by never dropping anything.
+# Try it: raise top_k to 4 and RAG catches up. The lesson is
+# not that top_k=3 is wrong, it is that the right k depends
+# on the question, and CAG sidesteps the choice entirely by
+# never dropping anything.
 ` },
     {
       type: 'p',

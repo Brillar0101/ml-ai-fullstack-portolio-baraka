@@ -151,22 +151,26 @@ export const POST = {
     { type: 'lab', height: 460,
         title: 'fit_to_budget.py, at three different budgets',
         caption: 'Newest turns survive whole, the older ones collapse into one recap, and the system message is never at risk. Watch the boundary move as the budget shrinks.',
-        code: `# A token counter and a summarizer stand in for the real ones. Counting words
-# instead of tokens keeps the arithmetic readable. The shape is identical.
+        code: `# A token counter and a summarizer stand in for the real
+# ones. Counting words instead of tokens keeps the
+# arithmetic readable. The shape is identical.
 def count(text):
     return len(text.split())
 
 def summarize(messages):
-    # A real summarizer is a model call. This stand-in records what it
-    # swallowed, so you can see exactly which turns got collapsed.
+    # A real summarizer is a model call. This stand-in
+    # records what it swallowed, so you can see exactly
+    # which turns got collapsed.
     return ("[recap of %d earlier turns: " % len(messages)
             + "; ".join(m.split(":")[0] for m in messages) + "]")
 
 def fit_to_budget(system, history, budget, count, summarize):
-    # the system message is non-negotiable, so reserve its cost first
+    # the system message is non-negotiable, so reserve its
+    # cost first
     remaining = budget - count(system)
 
-    # walk newest to oldest, keeping whole turns while they fit
+    # walk newest to oldest, keeping whole turns while they
+    # fit
     kept = []
     idx = len(history) - 1
     while idx >= 0 and count(history[idx]) <= remaining:
@@ -175,7 +179,8 @@ def fit_to_budget(system, history, budget, count, summarize):
         idx -= 1
     kept.reverse()
 
-    # anything older than what we kept becomes one short recap
+    # anything older than what we kept becomes one short
+    # recap
     middle = history[: idx + 1]
     if middle:
         recap = summarize(middle)          # your model call goes here
@@ -202,8 +207,9 @@ for budget in (70, 56, 30):
         print("    ", m[:74])
     print()
 
-# Try it: drop the budget to 18 and watch even the recap get squeezed out.
-# That is the failure mode worth designing for, not the happy path.
+# Try it: drop the budget to 18 and watch even the recap get
+# squeezed out. That is the failure mode worth designing
+# for, not the happy path.
 ` },
     {
       type: 'p',

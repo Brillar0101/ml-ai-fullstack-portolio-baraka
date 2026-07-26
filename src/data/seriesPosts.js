@@ -366,8 +366,9 @@ const RAW_SERIES_POSTS = [
       { type: 'lab', height: 460,
         title: 'The memory arithmetic, and the rounding error underneath it',
         caption: 'At 8 bits the error sits in the fourth decimal place. At 2 bits the steps get so coarse that different weights collapse onto the same value, which is where quality starts to go.',
-        code: `# What rounding a model's numbers actually costs. No model here, just the
-# arithmetic that decides whether a 7B model fits on your laptop.
+        code: `# What rounding a model's numbers actually costs. No model
+# here, just the arithmetic that decides whether a 7B model
+# fits on your laptop.
 
 def memory_gb(params_billion, bits):
     return params_billion * 1e9 * (bits / 8) / 1e9
@@ -402,8 +403,9 @@ print("the same value, and distinctions the model was relying on disappear.")
 print("The craft is finding how coarse you can go before that starts to show,")
 print("which is a question only your own evaluation can answer.")
 
-# Try it: add a weight very close to another one, say 0.7341 and 0.7350, then
-# quantize to 2 bits and check whether they are still different numbers.
+# Try it: add a weight very close to another one, say 0.7341
+# and 0.7350, then quantize to 2 bits and check whether they
+# are still different numbers.
 ` },
       { type: 'h2', text: 'The trade you are making' },
       { type: 'p', text: 'Quantization buys you smaller and faster for a small, usually acceptable quality cost. The more aggressively you quantize, the more memory you save and the more rounding error you accept, so the job is to find the lowest precision your task can tolerate. For many uses, **8-bit** is nearly free quality-wise and **4-bit** is a strong default that most people cannot tell apart from full precision in normal use. Go lower than that and the losses usually start to show. It is one of the highest-leverage moves in all of inference optimization, which is why it is everywhere.' },
@@ -780,8 +782,9 @@ print("which is a question only your own evaluation can answer.")
         caption: 'Being confidently wrong is punished hardest, and deliberately so. Training is the act of pushing this number down on real text, over and over.',
         code: `import math
 
-# Surprise, measured. Entropy is how surprising an outcome is on average.
-# Cross-entropy is how surprised one particular model was by the truth.
+# Surprise, measured. Entropy is how surprising an outcome
+# is on average. Cross-entropy is how surprised one
+# particular model was by the truth.
 
 def entropy(dist):
     return -sum(p * math.log2(p) for p in dist.values() if p > 0)
@@ -818,9 +821,10 @@ print("Training pushes this number down, over and over, on real text. A model")
 print("that stops being surprised by real language has, in the only sense that")
 print("matters here, learned it.")
 
-# Try it: set CONFIDENT_WRONG's coffee probability to 0.001 and watch the
-# penalty climb. That steepness is why models learn to hedge rather than
-# commit hard to a guess they cannot support.
+# Try it: set CONFIDENT_WRONG's coffee probability to 0.001
+# and watch the penalty climb. That steepness is why models
+# learn to hedge rather than commit hard to a guess they
+# cannot support.
 ` },
       { type: 'h2', text: 'Why it is measured in bits' },
       { type: 'p', text: 'You will sometimes see surprise measured in bits, and the unit is more intuitive than it looks. One bit is the surprise of one fair yes-or-no answer, a single coin flip. Two bits covers four equally likely options, three bits covers eight, and so on.' },
@@ -862,10 +866,11 @@ print("matters here, learned it.")
         caption: 'The top match shares no important word with the query. That is the whole difference between matching letters and matching meaning, and you can watch it happen here.',
         code: `import math
 
-# Meaning as a place. Each phrase gets coordinates over five made-up traits,
-# written by hand so you can read them. A real embedding model learns hundreds
-# or thousands of these, but the geometry underneath is exactly this.
-#            [ ending, money, account, urgency, greeting ]
+# Meaning as a place. Each phrase gets coordinates over five
+# made-up traits, written by hand so you can read them. A
+# real embedding model learns hundreds or thousands of
+# these, but the geometry underneath is exactly this. [
+# ending, money, account, urgency, greeting ]
 SPACE = {
     "how do I cancel":            [0.9, 0.2, 0.6, 0.4, 0.0],
     "ending your subscription":   [0.95, 0.3, 0.6, 0.2, 0.0],
@@ -899,9 +904,11 @@ print("'carpet cleaning tips' and 'hello there' sit at zero, because nothing")
 print("about them points the same direction. That gap between matching letters")
 print("and matching meaning is the whole reason embeddings exist.")
 
-# Try it: add a phrase of your own with coordinates you choose, and see where
-# it lands. Then try giving two unrelated phrases similar coordinates and watch
-# the score lie to you. The vectors are only as good as the model that made them.
+# Try it: add a phrase of your own with coordinates you
+# choose, and see where it lands. Then try giving two
+# unrelated phrases similar coordinates and watch the score
+# lie to you. The vectors are only as good as the model that
+# made them.
 ` },
       { type: 'h2', text: 'What it powers' },
       { type: 'p', text: 'Once text is a vector, a surprising amount falls out for free, all of it the same operation in disguise. Semantic search is "find the nearest vectors to my query." Retrieval for RAG is exactly that step, feeding the nearest chunks to a model. Recommendations work by finding items whose vectors sit near things you liked. Clustering and deduplication group texts whose vectors huddle together.' },
@@ -1100,10 +1107,11 @@ print("and matching meaning is the whole reason embeddings exist.")
         caption: 'Embedding search picks the wrong document for the error code, because a bare product code carries no topic to match on. Keyword search rescues it. On the plain-English question the roles reverse.',
         code: `import math
 
-# Keyword search and embedding search, each failing on exactly the query the
-# other one handles, and a hybrid that covers both. The embeddings are written
-# by hand over three traits so you can see why each method lands where it does.
-#                                                    [ billing, auth, crashes ]
+# Keyword search and embedding search, each failing on
+# exactly the query the other one handles, and a hybrid that
+# covers both. The embeddings are written by hand over three
+# traits so you can see why each method lands where it does.
+# [ billing, auth, crashes ]
 DOCS = [
     ("d1", "Error ERR_4011 means the session token expired. Sign in again.",
            [0.1, 0.9, 0.2]),
@@ -1113,9 +1121,10 @@ DOCS = [
            [0.9, 0.1, 0.0]),
 ]
 
-# An embedding model given the bare string "ERR_4011" has nothing to work with:
-# it is not a word, it carries no topic, so the vector comes out vague. That
-# vagueness is the failure this lab is about.
+# An embedding model given the bare string "ERR_4011" has
+# nothing to work with: it is not a word, it carries no
+# topic, so the vector comes out vague. That vagueness is
+# the failure this lab is about.
 QUERIES = {
     "ERR_4011":                         [0.6, 0.3, 0.5],
     "my app keeps crashing on startup": [0.1, 0.2, 0.95],
@@ -1162,9 +1171,10 @@ print("On the plain-English question, keyword search only limps to the answer")
 print("through the words 'app', 'on' and 'startup', while embedding is certain.")
 print("Weighted together, both queries land on the right document.")
 
-# Try it: set KEYWORD_WEIGHT to 0.2 and the error code query breaks again.
-# There is no universally correct weight, which is why this is a thing you
-# tune against your own traffic rather than copy from a tutorial.
+# Try it: set KEYWORD_WEIGHT to 0.2 and the error code query
+# breaks again. There is no universally correct weight,
+# which is why this is a thing you tune against your own
+# traffic rather than copy from a tutorial.
 ` },
       { type: 'h2', text: 'One more step: re-ranking' },
       { type: 'p', text: 'There is a useful refinement worth knowing once hybrid is in place, called re-ranking. The idea is to retrieve generously and then sort carefully. First you let keyword and embedding search pull a wider net of candidate passages, say the top twenty, optimizing to not miss the right one.' },
@@ -1237,9 +1247,10 @@ print("Weighted together, both queries land on the right document.")
         caption: 'Same seed, same probabilities, one setting changed. At zero the model stops rolling dice entirely. The tester found a default, not a bug.',
         code: `import random
 
-# Why the same prompt gives different answers. The model does not hold one
-# answer, it holds a distribution and draws from it. Temperature decides how
-# adventurous the draw is.
+# Why the same prompt gives different answers. The model
+# does not hold one answer, it holds a distribution and
+# draws from it. Temperature decides how adventurous the
+# draw is.
 
 NEXT_WORD = {"Daily": 0.30, "Bean": 0.25, "Morning": 0.20,
              "Roast": 0.15, "Ember": 0.07, "Zenith": 0.03}
@@ -1277,8 +1288,9 @@ print("Turn it up and the rare words come into play, which is what you want")
 print("when you are naming a coffee shop and the obvious answer is boring.")
 print("Same model, same prompt, one setting. Not a bug: a dial.")
 
-# Try it: change the seed and run again. At temperature 0 nothing moves. At
-# 1.8 everything does. That difference is the whole post in one experiment.
+# Try it: change the seed and run again. At temperature 0
+# nothing moves. At 1.8 everything does. That difference is
+# the whole post in one experiment.
 ` },
       { type: 'h2', text: 'The honest caveat about "deterministic"' },
       { type: 'p', text: 'There is a wrinkle worth knowing so you do not get burned. Even at temperature zero, you cannot always count on byte-for-byte identical output. The provider may update the model behind the same name, different hardware can produce tiny numerical differences that occasionally flip a close call, and some systems do not expose a true zero. So temperature zero gives you strong, practical consistency, not a mathematical guarantee carved in stone. For most uses that distinction never matters, but if you are building something that depends on exact reproducibility, like caching results by their output, treat near-deterministic as near, not absolute, and design for the rare case where it shifts.' },
@@ -1548,9 +1560,10 @@ print("Same model, same prompt, one setting. Not a bug: a dial.")
         caption: 'The flaky row is the one that matters. It passes some runs and fails others, so a pipeline running each case once reports a confident PASS or FAIL and never tells you it was a coin flip.',
         code: `import json, random
 
-# ---- Stand-ins for the two things you would really call -------------------
-# "system" is your AI feature. "judge" is a model scoring against a rubric.
-# Both are scripted here, so this lab is deterministic and needs no API key.
+# ---- Stand-ins for the two things you would really call
+# ------------------- "system" is your AI feature. "judge"
+# is a model scoring against a rubric. Both are scripted
+# here, so this lab is deterministic and needs no API key.
 random.seed(7)
 
 REPLIES = {
@@ -1561,7 +1574,8 @@ REPLIES = {
 
 def system(case_input):
     if case_input == "flaky":
-        # A genuinely unstable case: right about half the time.
+        # A genuinely unstable case: right about half the
+        # time.
         return ('{"answer": "Annual plans renew. [doc:billing-4]"}'
                 if random.random() < 0.5
                 else '{"answer": "I am not sure about annual plans."}')
@@ -1570,8 +1584,9 @@ def system(case_input):
     return REPLIES[case_input]
 
 def judge(rubric, case_input, out):
-    # A real judge is a model reading a rubric. This one only checks
-    # whether the rubric's required phrase survived into the answer.
+    # A real judge is a model reading a rubric. This one
+    # only checks whether the rubric's required phrase
+    # survived into the answer.
     return 1.0 if rubric.lower() in out.lower() else 0.0
 
 def is_valid_json(out):
@@ -1581,7 +1596,8 @@ def is_valid_json(out):
     except Exception:
         return False
 
-# ---- The pipeline itself ---------------------------------------------------
+# ---- The pipeline itself
+# ---------------------------------------------------
 CHECKS = [
     ("valid_json",   lambda out: is_valid_json(out)),
     ("cites_source", lambda out: "[doc" in out),
@@ -1615,9 +1631,11 @@ CASES = [
     {"id": "outage",      "input": "outage",        "rubric": "30 days"},
 ]
 
-# ---- Report ----------------------------------------------------------------
-# Colour follows status meaning, not decoration: green passes, gold needs a
-# human, red blocks the ship, grey is infrastructure rather than quality.
+# ---- Report
+# ----------------------------------------------------------------
+# Colour follows status meaning, not decoration: green
+# passes, gold needs a human, red blocks the ship, grey is
+# infrastructure rather than quality.
 E = chr(27)
 DIM, OFF = E + "[2m", E + "[0m"
 OK, WARN, BAD, INFO = E + "[32m", E + "[33m", E + "[31m", E + "[90m"
@@ -1667,8 +1685,9 @@ print(DIM + "The flaky case is the one to look at. It passes some runs" + OFF)
 print(DIM + "and fails others, so a pipeline running each case once" + OFF)
 print(DIM + "reports a confident PASS or FAIL and tells you nothing." + OFF)
 
-# Try it: set RUNS = 1 and run again. The flaky row becomes a clean
-# verdict, and nothing on screen warns you it was a coin flip.
+# Try it: set RUNS = 1 and run again. The flaky row becomes
+# a clean verdict, and nothing on screen warns you it was a
+# coin flip.
 ` },
       { type: 'p', text: 'Two details in that snippet do more work than their size suggests. Each case runs five times because a model is not deterministic: a case that passes three runs out of five is not passing, it is a coin flip you have not noticed yet, and the **stability rate** makes that visible. And an exception from the API records an ERROR, never a FAIL, because an infrastructure hiccup is not a quality regression. Letting timeouts bleed into your score is how a team spends a day debugging a prompt that was never the problem.' },
       { type: 'h2', text: 'What actually goes in the dataset' },
@@ -1767,10 +1786,12 @@ print(DIM + "reports a confident PASS or FAIL and tells you nothing." + OFF)
         caption: 'Instruction-following and latency need nothing but plain code and a stopwatch. The verbose model fails every constraint this product actually has.',
         code: `import json, time
 
-# ---- Two stand-in models --------------------------------------------------
-# Scripted, not real. Each is written to have the habit the post describes:
-# the "leaderboard winner" is capable but verbose and chatty, and the plainer
-# model is terse and obeys the format it was given.
+# ---- Two stand-in models
+# --------------------------------------------------
+# Scripted, not real. Each is written to have the habit the
+# post describes: the "leaderboard winner" is capable but
+# verbose and chatty, and the plainer model is terse and
+# obeys the format it was given.
 def leaderboard_winner(prompt):
     time.sleep(0.03)                      # stands in for a slower, larger model
     return ('Sure! Here is a thorough answer to your question. '
@@ -1789,7 +1810,8 @@ def is_valid_json(out):
     except Exception:
         return False
 
-# ---- Your real constraints, written as code -------------------------------
+# ---- Your real constraints, written as code
+# -------------------------------
 LIMIT_WORDS = 30
 
 def check_output(out):
@@ -1825,8 +1847,9 @@ print("Where the leaderboard winner fell down, check by check:")
 for k, v in check_output(leaderboard_winner("x")).items():
     print("   %-18s %s" % (k, v))
 
-# Try it: raise LIMIT_WORDS to 120 and run again. The verbose model still
-# fails on no_preamble, which is the constraint a length limit never catches.
+# Try it: raise LIMIT_WORDS to 120 and run again. The
+# verbose model still fails on no_preamble, which is the
+# constraint a length limit never catches.
 ` },
       { type: 'p', text: 'Checks this simple are not a toy version of the real thing; they are the real thing. Google\'s IFEval benchmark is built entirely from such **verifiable constraints**, twenty-five types of them, word limits, forbidden words, exact formats, across roughly five hundred prompts, precisely because code-checkable rules are objective, reproducible, and free. And its headline result backs the whole argument of this post: under strict scoring, even the strongest model of its day failed to follow all the instructions in about one prompt out of five. Instruction-following is not a solved capability you can assume. It is a spread between models that you have to measure, and a few dozen lines of Python will measure it.' },
       { type: 'diagram', nodes: [
@@ -1901,11 +1924,13 @@ layout OCR   ->  unit prices: 17.99, 2.99, 34.99, 21.23, 8.80, 4.99, 25.00   (co
       { type: 'lab', height: 460,
         title: 'validate_invoice.py, run against both real outputs',
         caption: 'Every number here is from the two runs above. A type check passes the bad record, because invented prices are still perfectly good floats. Checking them against the document is what catches it.',
-        code: `# Every number below is from the two real runs described in this post:
-# llama3.1:8b at temperature 0, once on the scrambled default OCR text and
-# once on the layout-preserving OCR text. Nothing here is made up.
+        code: `# Every number below is from the two real runs described in
+# this post: llama3.1:8b at temperature 0, once on the
+# scrambled default OCR text and once on the
+# layout-preserving OCR text. Nothing here is made up.
 
-# The prices actually printed on the invoice, read off the document itself.
+# The prices actually printed on the invoice, read off the
+# document itself.
 PRINTED_PRICES = [17.99, 2.99, 34.99, 21.23, 8.80, 4.99, 25.00]
 
 from_default_ocr = {
@@ -1952,9 +1977,10 @@ for label, record in [("default OCR", from_default_ocr),
                  record["summary"]["gross_total"]))
     print()
 
-# Notice what a type check alone would have missed. Every unit_price in the bad
-# record is a perfectly good float. It takes checking them against the document,
-# and checking the totals against each other, to catch invented numbers.
+# Notice what a type check alone would have missed. Every
+# unit_price in the bad record is a perfectly good float. It
+# takes checking them against the document, and checking the
+# totals against each other, to catch invented numbers.
 ` },
       { type: 'p', text: 'Run that against the real output above and it comes back with a list of problems: every line is missing its net worth, and the line items do not add up to the stated total. That is the point. The record gets caught and held for review instead of silently saved with invented prices. The prompt made a good answer likely; the validation made the bad answer safe. None of this is hypothetical: it is one real run on one real invoice, reproducible in a minute with the same model and the same prompt, which is the only kind of evidence worth trusting when you are about to ship a feature that reads documents for a living.' },
       { type: 'h2', text: 'The vocabulary, linked to the source' },
@@ -2015,12 +2041,14 @@ for label, record in [("default OCR", from_default_ocr),
       { type: 'p', text: 'The lab below strips the idea down to something you can run right here in the browser. Real grounding models turn an image region and a phrase into vectors and compare their meaning, so here we write those vectors by hand to make the matching visible. Each object gets a short list of numbers standing for its traits, each query gets the same, and a similarity score decides which object a phrase grounds to. A closed-list detector would only ever match objects whose names you fixed in advance, but this open match scores any phrase against every object, which is the whole move shrunk down small enough to read. Change a query, add an object of your own, and watch which one lights up.' },
       { type: 'lab', packages: ['numpy'], height: 480, code: `import numpy as np
 
-# A toy "open vocabulary" matcher. Real models like LocateAnything turn an
-# image region and a text phrase into vectors and compare their meaning. Here
-# we write the vectors by hand so you can watch the idea run with no model.
+# A toy "open vocabulary" matcher. Real models like
+# LocateAnything turn an image region and a text phrase into
+# vectors and compare their meaning. Here we write the
+# vectors by hand so you can watch the idea run with no
+# model.
 
-# Each object gets a "meaning" vector over five made-up traits:
-#                      [ vehicle, lifting, red, wall_mounted, safety ]
+# Each object gets a "meaning" vector over five made-up
+# traits: [ vehicle, lifting, red, wall_mounted, safety ]
 objects = {
     "forklift":          np.array([0.9, 0.9, 0.1, 0.0, 0.2]),
     "delivery truck":    np.array([0.9, 0.1, 0.0, 0.0, 0.1]),
@@ -2028,7 +2056,8 @@ objects = {
     "office chair":      np.array([0.0, 0.0, 0.0, 0.0, 0.0]),
 }
 
-# Free-text queries, turned into vectors over the same five traits.
+# Free-text queries, turned into vectors over the same five
+# traits.
 queries = {
     "the yellow lifting machine":  np.array([0.6, 0.95, 0.0, 0.0, 0.1]),
     "something to put out a fire":  np.array([0.0, 0.0, 0.5, 0.4, 0.95]),
@@ -2044,7 +2073,8 @@ for q, qv in queries.items():
     print(f'query: "{q}"')
     print(f'   grounds to: {best}  (score {scores[best]:.2f})\\n')
 
-# Try it: change a query vector, or add an object above, and press Run.
+# Try it: change a query vector, or add an object above, and
+# press Run.
 ` },
       { type: 'h2', text: 'Where it breaks' },
       { type: 'p', text: 'Open-vocabulary grounding is not a magic eye, and knowing its edges keeps you out of trouble. A vague phrase gets a vague result: ask for "the thing on the left" in a crowded shelf and the model may box confidently around the wrong item, with no hint that it guessed. Descriptions that hinge on fine distinctions, the cracked weld rather than the sound one beside it, are exactly where it can slip. It is also heavier and slower than a small fixed-purpose detector.' },

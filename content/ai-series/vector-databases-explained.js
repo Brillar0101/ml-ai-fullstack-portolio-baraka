@@ -86,10 +86,11 @@ export const POST = {
         caption: 'The filtered search still returns its best match, and that match is bad. A vector store always hands back a nearest neighbour, even when nothing is genuinely near.',
         code: `import math
 
-# A vector database in thirty lines, so you can see what the real ones do
-# underneath the API. Embeddings here are hand-written over five made-up
-# traits rather than produced by a model, so the numbers stay readable.
-#                 [ billing, login, shipping, refund, account ]
+# A vector database in thirty lines, so you can see what the
+# real ones do underneath the API. Embeddings here are
+# hand-written over five made-up traits rather than produced
+# by a model, so the numbers stay readable. [ billing,
+# login, shipping, refund, account ]
 DOCS = [
     ("billing-1",  "Your plan renews on the first of each month.",
                    [0.9, 0.0, 0.0, 0.2, 0.4]),
@@ -118,7 +119,8 @@ def search(query_vec, docs, k=3, where=None):
     scored.sort(reverse=True)
     return scored[:k]
 
-# "I got logged out and cannot sign back in" lands on the login traits.
+# "I got logged out and cannot sign back in" lands on the
+# login traits.
 query = [0.0, 0.9, 0.0, 0.0, 0.4]
 
 print('query: "I got logged out and cannot sign back in"')
@@ -130,9 +132,10 @@ print("same query, filtered to billing docs only:")
 for score, doc_id, text in search(query, DOCS, k=3, where="billing"):
     print("   %.3f  %-11s %s" % (score, doc_id, text))
 
-# The filtered search still returns its best match, and that match is bad.
-# A vector store always hands back a nearest neighbour, even when nothing is
-# genuinely close, which is why a similarity floor matters in production.
+# The filtered search still returns its best match, and that
+# match is bad. A vector store always hands back a nearest
+# neighbour, even when nothing is genuinely close, which is
+# why a similarity floor matters in production.
 ` },
     {
       type: 'h2',

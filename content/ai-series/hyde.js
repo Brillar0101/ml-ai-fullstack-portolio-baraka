@@ -91,11 +91,12 @@ export const POST = {
         caption: 'Embedding the question ranks the wrong page first. Embedding a hypothetical answer pulls in the word the real document uses, and the right page moves to the top.',
         code: `import math
 
-# HyDE in miniature. The move is to embed a hypothetical ANSWER instead of the
-# question, because answers use the vocabulary documents use, and questions
-# often do not. Vectors here are hand-written over four traits so you can read
-# the arithmetic instead of trusting a black box.
-#                   [ keys, rotation, security, billing ]
+# HyDE in miniature. The move is to embed a hypothetical
+# ANSWER instead of the question, because answers use the
+# vocabulary documents use, and questions often do not.
+# Vectors here are hand-written over four traits so you can
+# read the arithmetic instead of trusting a black box. [
+# keys, rotation, security, billing ]
 STORE = [
     ("kb-1", "To rotate an API key, open Settings, choose Keys, then Regenerate.",
              [0.9, 0.9, 0.4, 0.0]),
@@ -111,9 +112,10 @@ SECURITY = {"safe", "safely", "secret", "secrets", "secure", "leak", "commit"}
 BILLING  = {"billing", "plan", "plans", "invoice"}
 
 def embed(text):
-    # A stand-in embedder: it fires a trait when the text uses that trait's
-    # vocabulary. Crude, but it has the property that matters here, which is
-    # that wording drives the vector.
+    # A stand-in embedder: it fires a trait when the text
+    # uses that trait's vocabulary. Crude, but it has the
+    # property that matters here, which is that wording
+    # drives the vector.
     w = set(text.lower().replace(",", " ").replace(".", " ").replace("?", " ").split())
     return [1.0 if w & KEYS else 0.0, 1.0 if w & ROTATION else 0.0,
             1.0 if w & SECURITY else 0.0, 1.0 if w & BILLING else 0.0]
@@ -127,9 +129,10 @@ def nearest(vec, k=2):
     return sorted(((cosine(vec, v), i, t) for i, t, v in STORE), reverse=True)[:k]
 
 def llm_generate(question):
-    # Stand-in for the model drafting a plausible answer passage. The valuable
-    # part is that it reaches for words a real document would use, such as
-    # "rotate" and "Settings", which the user's question never contained.
+    # Stand-in for the model drafting a plausible answer
+    # passage. The valuable part is that it reaches for
+    # words a real document would use, such as "rotate" and
+    # "Settings", which the user's question never contained.
     return "You should rotate your API key regularly. Open Settings and choose Regenerate."
 
 question = "is it safe to keep using the same API key forever?"
@@ -156,8 +159,9 @@ print("the word 'rotate', and that flipped the top hit to the page that")
 print("actually answers the question. The draft is only a probe: the answer you")
 print("show the user is grounded in kb-1, a real document, never in the draft.")
 
-# Try it: change the draft so it talks about secrets instead of rotation, and
-# watch the ranking swing back. HyDE is only ever as good as the draft.
+# Try it: change the draft so it talks about secrets instead
+# of rotation, and watch the ranking swing back. HyDE is
+# only ever as good as the draft.
 ` },
     {
       type: 'p',

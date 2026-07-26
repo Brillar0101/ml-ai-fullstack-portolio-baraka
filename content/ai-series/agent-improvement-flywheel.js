@@ -79,8 +79,9 @@ export const POST = {
         caption: 'Note that the tool timeout is separated from the quality failures. Letting infrastructure errors into a quality eval set is how teams spend a day debugging a prompt that was never the problem.',
         code: `import json, io
 
-# The flywheel: production traces become eval cases, eval cases become fixes,
-# and the fixed behaviour is locked in by the case that caught it.
+# The flywheel: production traces become eval cases, eval
+# cases become fixes, and the fixed behaviour is locked in
+# by the case that caught it.
 
 TRACES = [
     {"id": "t1", "request": "add a created_at column to orders",
@@ -123,7 +124,8 @@ print("the pattern worth naming. The third is an infrastructure timeout and")
 print("belongs in a different bucket, not in a quality eval set.")
 print()
 
-# Once the cases exist, a fix is measurable rather than hopeful.
+# Once the cases exist, a fix is measurable rather than
+# hopeful.
 def agent(request, has_multifile_rule):
     touches_two = (("column" in request or "migration" in request)
                    and ("api" in request.lower() or "response" in request))
@@ -139,8 +141,9 @@ print("The number is small and that is fine. The point is that the fix is now")
 print("attached to the cases that motivated it, so a later change that breaks")
 print("it again fails loudly instead of quietly shipping.")
 
-# Try it: add a trace with a new kind of failure and watch it flow into the
-# eval set. That is the flywheel: every incident earns a permanent test.
+# Try it: add a trace with a new kind of failure and watch
+# it flow into the eval set. That is the flywheel: every
+# incident earns a permanent test.
 ` },
     { type: 'p', text: 'Notice the empty `expected` field. The script does not decide what a correct answer looks like. It collects candidates and hands them to a human, who confirms the failure is real and writes down what should have happened.' },
       { type: 'p', text: 'That review step matters. If you connect a judge to your eval set, you want its labels checked against human judgment, because an automatic grader that nobody audits will happily approve the wrong behavior. This connects to the eval pipeline idea from earlier in the series: the trace miner is the front door that keeps feeding that pipeline fresh, real cases instead of ones you made up at your desk.' },

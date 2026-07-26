@@ -120,10 +120,13 @@ export const POST = {
     { type: 'lab', height: 460,
         title: 'needle_in_haystack.py, sweeping the needle through the window',
         caption: 'The stand-in reader has an explicit attention profile: sharp at both edges, weak in the deep middle. That is the shape the real studies measure.',
-        code: `# A stand-in reader with a deliberately shaped weakness. This is NOT a model.
-# It is a few lines that reproduce the pattern the [lost-in-the-middle](https://arxiv.org/abs/2307.03172) studies
-# report, so you can watch the sweep without an API key. The shape of the
-# curve is the point here, not any particular number.
+        code: `# A stand-in reader with a deliberately shaped weakness.
+# This is NOT a model. It is a few lines that reproduce the
+# pattern the
+# [lost-in-the-middle](https://arxiv.org/abs/2307.03172)
+# studies report, so you can watch the sweep without an API
+# key. The shape of the curve is the point here, not any
+# particular number.
 def ask_model(context, question):
     lines = context.split("\\n")
     pos = next(i for i, l in enumerate(lines) if "7Q-ARROW-92" in l)
@@ -135,7 +138,8 @@ NEEDLE = "The launch code for project Falcon is 7Q-ARROW-92."
 QUESTION = "What is the launch code for project Falcon?"
 
 def build_context(filler, needle, depth_ratio):
-    # depth_ratio 0.0 = top of the window, 0.5 = middle, 1.0 = bottom
+    # depth_ratio 0.0 = top of the window, 0.5 = middle, 1.0
+    # = bottom
     cut = int(len(filler) * depth_ratio)
     return "\\n".join(filler[:cut] + [needle] + filler[cut:])
 
@@ -153,9 +157,10 @@ print("needle depth   found?")
 for depth, found in run_sweep(FILLER, ask_model).items():
     print("   %-11.2f %s" % (depth, "yes" if found else "NO   <- lost in the middle"))
 
-# Try it: put the needle at 0.4 or 0.6 and find where the cliff actually is.
-# In a real model the dip deepens as the context grows, which is why "just
-# paste everything in" stops working exactly when you need it most.
+# Try it: put the needle at 0.4 or 0.6 and find where the
+# cliff actually is. In a real model the dip deepens as the
+# context grows, which is why "just paste everything in"
+# stops working exactly when you need it most.
 ` },
     { type: 'p', text: 'Run this at a few context lengths too, say 8k, 32k, and 100k tokens of filler. Two patterns usually appear. Recall dips in the middle depths, and it also erodes as total length grows.' },
       { type: 'p', text: 'Once you can see your own curve, tuning stops being folklore. You keep the chunk count and ordering that your eval rewards, and you stop trusting the raw feeling that more is safer. Run the sweep again every time you change the retriever, the reranker, or the prompt template, because each of those can move the curve in ways you will not notice from spot checks alone.' },

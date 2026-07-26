@@ -86,7 +86,8 @@ export const POST = {
     { type: 'lab', height: 460,
         title: 'A tool router, cutting twelve tools down to a handful',
         caption: 'The agent only ever sees what the router picked. Note the caveat at the bottom: matching on words inherits every weakness of keyword search.',
-        code: `# A pool of tools, the kind you end up with after wiring in a few MCP servers.
+        code: `# A pool of tools, the kind you end up with after wiring in
+# a few MCP servers.
 ALL_TOOLS = [
     {"name": "create_ticket",   "description": "open a new support ticket for a bug or request"},
     {"name": "search_tickets",  "description": "search existing tickets by text"},
@@ -116,7 +117,8 @@ def route_tools(request, tools, top_k=5):
     ranked = sorted(tools, key=score, reverse=True)
     picked = [t for t in ranked if score(t) > 0][:top_k]
 
-    # Fall back to a safe default set if nothing matched at all.
+    # Fall back to a safe default set if nothing matched at
+    # all.
     return picked or tools[:top_k]
 
 REQUESTS = [
@@ -132,13 +134,16 @@ for req in REQUESTS:
           % (len(visible), len(ALL_TOOLS), ", ".join(t["name"] for t in visible)))
     print()
 
-# Twelve tools become one to three. The second request surfaces issue_refund
-# and get_order together, which is the right pair for that job.
+# Twelve tools become one to three. The second request
+# surfaces issue_refund and get_order together, which is the
+# right pair for that job.
 #
-# Now the caveat: this router matches words, so it inherits every weakness of
-# keyword search. Try "cancel my subscription" and watch it find nothing useful,
-# because no tool description happens to use those words. A real router embeds
-# the request and the tool descriptions and compares meaning instead.
+# Now the caveat: this router matches words, so it inherits
+# every weakness of keyword search. Try "cancel my
+# subscription" and watch it find nothing useful, because no
+# tool description happens to use those words. A real router
+# embeds the request and the tool descriptions and compares
+# meaning instead.
 ` },
     {
       type: 'p',

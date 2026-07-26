@@ -72,9 +72,10 @@ export const POST = {
 
 RISKY = {"delete_record", "issue_refund", "send_email"}
 
-# ---- Stand-ins ------------------------------------------------------------
-# A scripted agent so the run is deterministic, and an approval function you
-# can flip to see both paths.
+# ---- Stand-ins
+# ------------------------------------------------------------
+# A scripted agent so the run is deterministic, and an
+# approval function you can flip to see both paths.
 PLAN = [
     {"name": "get_order",    "args": {"order_id": "4417"}},
     {"name": "issue_refund", "args": {"order_id": "4417", "amount": 42.00}},
@@ -100,7 +101,8 @@ def run_agent(task, agent, tools, approve, max_steps=25):
         if action["name"] == "finish":
             return action["result"], state
 
-        # Pause before anything destructive and wait for a person.
+        # Pause before anything destructive and wait for a
+        # person.
         if action["name"] in RISKY and not approve(action):
             state["history"].append(("rejected", action["name"]))
             continue
@@ -122,9 +124,10 @@ for label, approve in [("a human approves the refund", lambda a: True),
         print("   stopped:", e)
     print()
 
-# The rejected run still finishes cleanly. That is the point of a checkpoint:
-# refusing an action is a normal outcome, not a crash.
-# Try it: set max_steps=1 and watch StepLimitReached do its job.
+# The rejected run still finishes cleanly. That is the point
+# of a checkpoint: refusing an action is a normal outcome,
+# not a crash. Try it: set max_steps=1 and watch
+# StepLimitReached do its job.
 ` },
     {
       type: 'p',

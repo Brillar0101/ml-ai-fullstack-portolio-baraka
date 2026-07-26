@@ -100,9 +100,10 @@ export const POST = {
     { type: 'lab', height: 460,
         title: 'Retrieving every turn against deciding first',
         caption: 'Half of a real conversation is pleasantries that need no documents. Deciding first is a cheap call that skips an expensive search and a large paste.',
-        code: `# Retrieve-every-turn against let-the-model-decide. The "model" here is a
-# stand-in that routes on the shape of the message, which is enough to show
-# what the two designs cost.
+        code: `# Retrieve-every-turn against let-the-model-decide. The
+# "model" here is a stand-in that routes on the shape of the
+# message, which is enough to show what the two designs
+# cost.
 
 class StandInModel:
     def decide(self, message):
@@ -162,9 +163,10 @@ print("Half these messages are pleasantries that need no documents at all.")
 print("Deciding first is a cheap model call that skips an expensive search")
 print("and a large paste, on every turn that never needed them.")
 
-# Try it: add more "thanks" turns, which is what real conversations look like,
-# and watch the gap widen. Then consider what happens if decide() gets it
-# wrong: answering "what are the rate limits?" with no documents at all.
+# Try it: add more "thanks" turns, which is what real
+# conversations look like, and watch the gap widen. Then
+# consider what happens if decide() gets it wrong: answering
+# "what are the rate limits?" with no documents at all.
 ` },
     {
       type: 'p',

@@ -49,9 +49,10 @@ export const POST = {
     { type: 'lab', height: 460,
         title: 'The same task at level 2 and level 4',
         caption: 'Both designs return the same answer. What differs is how many decisions the model made, and whether you could have predicted the path before it ran.',
-        code: `# One task, two designs. Level 2 is a chain the developer wired by hand.
-# Level 4 lets the model choose its own steps. Watch how the number of
-# decisions the model gets to make changes what can go wrong.
+        code: `# One task, two designs. Level 2 is a chain the developer
+# wired by hand. Level 4 lets the model choose its own
+# steps. Watch how the number of decisions the model gets to
+# make changes what can go wrong.
 
 ORDERS = {"4417": {"id": "4417", "status": "delayed", "days_late": 6}}
 
@@ -65,15 +66,18 @@ def model_reply(question, facts):         # stand-in: writes the customer reply
     return "Order %s is %s, %d days behind schedule." % (
         facts["id"], facts["status"], facts["days_late"])
 
-# ---- Level 2: a fixed chain -----------------------------------------------
+# ---- Level 2: a fixed chain
+# -----------------------------------------------
 def handle_ticket(message):
     order_id = model_extract(message, field="order_id")   # model step
     order = ORDERS.get(order_id)                          # plain code, no model
     return model_reply(question=message, facts=order)     # model step
 
-# ---- Level 4: the agent picks its own steps -------------------------------
+# ---- Level 4: the agent picks its own steps
+# -------------------------------
 def model_decide(history, tools, step):
-    # A scripted planner standing in for a model choosing its next move.
+    # A scripted planner standing in for a model choosing
+    # its next move.
     if step == 0:
         return {"type": "tool", "name": "get_order", "args": {"order_id": "4417"}}
     return {"type": "final", "answer": "Order 4417 is delayed by 6 days."}
@@ -103,8 +107,9 @@ print()
 print("Same answer. The difference is how many chances there were to be wrong,")
 print("and whether a human could predict the path before it ran.")
 
-# Try it: make model_decide never return "final" and watch max_steps become
-# the only thing standing between you and an agent that runs all night.
+# Try it: make model_decide never return "final" and watch
+# max_steps become the only thing standing between you and
+# an agent that runs all night.
 ` },
     {
       type: 'p',

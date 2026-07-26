@@ -118,8 +118,9 @@ export const POST = {
     { type: 'lab', height: 460,
         title: 'A supervisor delegating, with the handoffs printed',
         caption: 'Watch the briefs, not the answer. Anything left out of a handoff is invisible to the sub-agent, and a single agent would simply still have had it.',
-        code: `# A supervisor delegating to sub-agents. The thing to watch is not the answer,
-# it is what each handoff carries and what it silently drops.
+        code: `# A supervisor delegating to sub-agents. The thing to watch
+# is not the answer, it is what each handoff carries and
+# what it silently drops.
 
 QUESTION = "Did the pricing change in v3 break the annual discount?"
 
@@ -135,8 +136,9 @@ def plan(question):
     return ["pricing docs", "changelog"]        # the supervisor picks the subtasks
 
 def sub_agent(brief, topic):
-    # A focused loop with its own narrow tools. It returns a short summary,
-    # not its whole transcript, so the supervisor's context stays clean.
+    # A focused loop with its own narrow tools. It returns a
+    # short summary, not its whole transcript, so the
+    # supervisor's context stays clean.
     HANDOFFS.append(brief)
     return KB[topic]
 
@@ -147,7 +149,8 @@ def supervisor(question, carry_context):
     subtasks = plan(question)
     results = []
     for task in subtasks:
-        # Anything left out of this brief is invisible to the sub-agent.
+        # Anything left out of this brief is invisible to
+        # the sub-agent.
         brief = ("Find facts about: %s. Question context: %s" % (task, question)
                  if carry_context else "Find facts about: %s" % task)
         results.append(sub_agent(brief, task))
@@ -169,8 +172,9 @@ print("never mentions the annual discount, so a real sub-agent would not know")
 print("what it was looking for. Every handoff is a chance to lose context that")
 print("a single agent would simply still have had.")
 
-# Try it: add "support tickets" to plan() and watch a third handoff appear.
-# Each one is another message to get right, another place to drop a detail.
+# Try it: add "support tickets" to plan() and watch a third
+# handoff appear. Each one is another message to get right,
+# another place to drop a detail.
 ` },
     {
       type: 'p',
