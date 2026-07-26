@@ -16,9 +16,9 @@ def faithfulness(claims, passages, judge):
     return len(ok) / max(len(claims), 1)
 
 def judge(claim, passages):
-    # Stand-in for a judge model: a claim counts as supported
-    # when its text appears in the context. A real judge
-    # reads for meaning.
+    # Stand-in for a judge model: a claim counts as
+    # supported when its text appears in the context.
+    # A real judge reads for meaning.
     return claim.lower() in " ".join(passages).lower()
 
 NEEDED = ["15 working days", "within 6 months"]
@@ -59,7 +59,7 @@ note("%-17s %5s %6s %6s  %s"
 for name, passages, claims in CASES:
     r = context_recall(NEEDED, passages)
     f = faithfulness(claims, passages, judge)
-    e2e = r * f            # what one blended score would show
+    e2e = r * f      # what one blended score shows
 
     if r < 1.0:
         where, colour = "the retriever", BAD
