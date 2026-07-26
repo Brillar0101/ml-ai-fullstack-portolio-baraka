@@ -52,65 +52,88 @@ export const POST = {
     },
     { type: 'lab', height: 460,
         title: 'The two request shapes, answering the same question',
-        caption: 'The question has two parts. RAG top-3 retrieved the wrong three and dropped half the answer. Nothing was wrong with the model.',
-        code: `# RAG and CAG answering the same question, side by side, so
-# you can see what each one drops. The "model" here is a
-# stand-in that can only answer from whatever context it was
-# handed, which is exactly the property that matters.
+        caption: 'The question needs two facts and top-3 retrieval returns one of them, because the policy stating the entitlement does not share the wording of the question. Nothing was wrong with the model: the fact never reached it, so no prompt could have recovered.',
+        code: `# RAG and CAG answering the same question. The model here
+# is a stand-in that can only answer from the context it
+# was handed, which is the property that matters.
 
 POLICIES = [
-    "Paternity leave is 15 working days.",
-    "Paternity leave must be taken within 6 months of the birth.",
-    "Paternity leave can be split into a maximum of 3 blocks.",
-    "Annual leave is 25 days per year.",
-    "Sick leave requires a note after 3 consecutive days.",
-    "Expenses must be filed within 30 days of the spend.",
+    ("statutory entitlement runs to 15 working days", True),
+    ("paternity leave is taken within 6 months", True),
+    ("paternity leave splits into 3 blocks", False),
+    ("annual leave is 25 days per year", False),
+    ("sick leave needs a note after 3 days", False),
+    ("expenses are filed within 30 days", False),
 ]
 
-def index_search(question, top_k=3):
-    # Keyword retrieval, deliberately blunt, the way a real
-    # top-k often is.
-    words = set(question.lower().replace("?", "").split())
-    scored = sorted(POLICIES, key=lambda p: len(words & set(p.lower().split())), reverse=True)
-    return scored[:top_k]
+QUESTION = ("How many days of paternity leave, and must "
+            "it be taken at once?")
+NEEDED = ["15 working days", "within 6 months"]
 
-def model_generate(context, question):
-    # Answers only from the context it was given. No memory,
-    # no guessing.
-    facts = [c for c in context if "paternity" in c.lower()]
-    return " ".join(facts) if facts else "Not covered by the provided text."
+def tokens(text):
+    out = set()
+    for w in text.lower().split():
+        out.add(w.strip("?.,!"))
+    return out
 
-# ---- RAG: search first, answer against a slice
-# ----------------------------
-def answer_rag(question, top_k=3):
-    chunks = index_search(question, top_k=top_k)
-    return model_generate(chunks, question), chunks
+def index_search(question, top_k):
+    """Keyword retrieval, deliberately blunt, the way a
+    real top-k often is."""
+    q = tokens(question)
+    scored = sorted(POLICIES,
+                    key=lambda p: -len(q & tokens(p[0])))
+    return [p[0] for p in scored[:top_k]]
 
-# ---- CAG: preload everything once, answer against all of
-# it ---------------
-KV = POLICIES              # the whole binder, cached once, nothing dropped
-def answer_cag(question):
-    return model_generate(KV, question), KV
+def covered(context):
+    joined = " ".join(context)
+    hits = [n for n in NEEDED
+            if all(w in joined for w in n.split())]
+    return len(hits), hits
 
-question = "How many days of paternity leave do I get, and does it have to be taken at once?"
+# ---- Report --------------------------------------------
+E = chr(27)
+DIM, OFF, BOLD = E + "[2m", E + "[0m", E + "[1m"
+OK, WARN, BAD = E + "[32m", E + "[33m", E + "[31m"
+note = lambda s: print(DIM + s + OFF)
 
-rag_answer, rag_ctx = answer_rag(question)
-cag_answer, cag_ctx = answer_cag(question)
+TOTAL = len(POLICIES)
+rag_ctx = index_search(QUESTION, 3)
+cag_ctx = [p[0] for p in POLICIES]
 
-print("RAG saw %d of %d policies:" % (len(rag_ctx), len(POLICIES)))
-for c in rag_ctx:
-    print("   -", c)
-print("   answer:", rag_answer)
+hdr = BOLD + "ONE QUESTION" + OFF
+print(hdr + "  needs %d facts" % len(NEEDED))
+note("-" * 54)
+note("%-9s %8s %9s %s"
+     % ("SYSTEM", "SAW", "FACTS", "ANSWER"))
+
+for name, ctx in [("RAG", rag_ctx), ("CAG", cag_ctx)]:
+    n, hits = covered(ctx)
+    colour = OK if n == len(NEEDED) else BAD
+    full = n == len(NEEDED)
+    verdict = "complete" if full else "half an answer"
+    print("%-9s %4d/%-3d %s%6d/%-2d%s %s%s%s"
+          % (name, len(ctx), TOTAL, colour, n, len(NEEDED),
+             OFF, colour, verdict, OFF))
+
+note("-" * 54)
+_, rag_hits = covered(rag_ctx)
+missing = [n for n in NEEDED if n not in rag_hits]
+if missing:
+    print(BOLD + "RAG MISSED" + OFF + "  %s%s%s"
+          % (BAD, missing[0], OFF))
+    print("            it fell outside the top 3")
+else:
+    print(BOLD + "RAG FOUND BOTH" + OFF + "  at this k")
+
 print()
-print("CAG saw all %d policies." % len(cag_ctx))
-print("   answer:", cag_answer)
-print()
-print("The question has two parts. Check whether each answer covers both.")
+note("Nothing was wrong with the model. The fact it needed")
+note("never reached it, so no prompt could have recovered.")
+note("CAG has no top-k to get wrong because it drops")
+note("nothing, and pays for that in context on every call.")
 
-# Try it: raise top_k to 4 and RAG catches up. The lesson is
-# not that top_k=3 is wrong, it is that the right k depends
-# on the question, and CAG sidesteps the choice entirely by
-# never dropping anything.
+# Try it: change top_k to 4. RAG catches up, and the lesson
+# is not that 3 was wrong but that the right k depends on
+# the question, which is the choice CAG sidesteps.
 ` },
     {
       type: 'p',
