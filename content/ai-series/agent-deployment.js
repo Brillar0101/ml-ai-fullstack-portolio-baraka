@@ -66,68 +66,102 @@ export const POST = {
     },
     { type: 'lab', height: 460,
         title: 'An agent loop with a step cap and an approval checkpoint',
-        caption: 'Run it both ways. A rejected action is a normal outcome that the loop absorbs, not a crash, which is the property that makes checkpoints usable in production.',
-        code: `class StepLimitReached(Exception):
+        caption: 'Three days for the same agent. The rejected run finishes cleanly without paying, because refusing an action is a normal outcome the loop absorbs rather than a crash. The runaway run stops itself, and both leave checkpoints you can read afterwards.',
+        code: `# An agent loop with the three guardrails that decide
+# how bad a bad day gets: a step cap, an approval gate
+# on anything destructive, and state saved each step.
+
+class StepLimitReached(Exception):
     pass
 
-RISKY = {"delete_record", "issue_refund", "send_email"}
-
-# ---- Stand-ins
-# ------------------------------------------------------------
-# A scripted agent so the run is deterministic, and an
-# approval function you can flip to see both paths.
-PLAN = [
-    {"name": "get_order",    "args": {"order_id": "4417"}},
-    {"name": "issue_refund", "args": {"order_id": "4417", "amount": 42.00}},
-    {"name": "finish",       "args": {}, "result": "Refund handled."},
-]
-
-class ScriptedAgent:
-    def next_action(self, state):
-        return PLAN[len(state["history"])] if len(state["history"]) < len(PLAN) else PLAN[-1]
+RISKY = {"issue_refund", "send_email", "delete_record"}
 
 TOOLS = {
-    "get_order":    lambda order_id: {"id": order_id, "status": "delayed"},
-    "issue_refund": lambda order_id, amount: "refunded %.2f on %s" % (amount, order_id),
+    "get_order": lambda oid: {"id": oid, "st": "late"},
+    "issue_refund":
+        lambda oid, amount: "refunded %.2f" % amount,
 }
 
-def save(state):
-    pass          # durable persistence goes here: every step, not just the end
+PLANS = {
+    "normal": [
+        ("get_order", {"oid": "4417"}),
+        ("issue_refund", {"oid": "4417", "amount": 42.0}),
+        ("finish", {}),
+    ],
+    "runaway": [("get_order", {"oid": "4417"})] * 12,
+}
 
-def run_agent(task, agent, tools, approve, max_steps=25):
-    state = {"task": task, "history": []}
+SAVED = []   # stands in for durable storage
+
+def run_agent(plan, approve, max_steps=6):
+    history = []
     for step in range(max_steps):
-        action = agent.next_action(state)      # model picks the next move
-        if action["name"] == "finish":
-            return action["result"], state
-
-        # Pause before anything destructive and wait for a
-        # person.
-        if action["name"] in RISKY and not approve(action):
-            state["history"].append(("rejected", action["name"]))
+        if step >= len(plan):
+            break
+        name, args = plan[step]
+        if name == "finish":
+            return "done", history
+        if name in RISKY and not approve(name):
+            history.append(("blocked", name))
+            SAVED.append(list(history))
             continue
+        history.append((name, TOOLS[name](**args)))
+        SAVED.append(list(history))   # persist each step
+    raise StepLimitReached("stopped at %d steps"
+                           % max_steps)
 
-        result = tools[action["name"]](**action["args"])   # runs sandboxed
-        state["history"].append((action["name"], result))
-        save(state)                            # durable: persist every step
-    raise StepLimitReached("task stopped after %d steps" % max_steps)
+# ---- Report --------------------------------------------
+E = chr(27)
+DIM, OFF, BOLD = E + "[2m", E + "[0m", E + "[1m"
+OK, WARN, BAD = E + "[32m", E + "[33m", E + "[31m"
+note = lambda s: print(DIM + s + OFF)
 
-for label, approve in [("a human approves the refund", lambda a: True),
-                       ("a human rejects the refund",  lambda a: False)]:
-    print("---", label, "---")
+CASES = [
+    ("approved", "normal", lambda n: True),
+    ("rejected", "normal", lambda n: False),
+    ("runaway", "runaway", lambda n: True),
+]
+
+hdr = BOLD + "GUARDRAILS" + OFF
+print(hdr + "  same agent, three days")
+note("-" * 54)
+note("%-10s %-18s %s" % ("RUN", "OUTCOME", "REFUNDED"))
+
+for label, plan_name, approve in CASES:
+    SAVED.clear()
     try:
-        result, state = run_agent("refund order 4417", ScriptedAgent(), TOOLS, approve, max_steps=6)
-        print("   result:", result)
-        for entry in state["history"]:
-            print("   step:", entry)
+        plan = PLANS[plan_name]
+        result, history = run_agent(plan, approve)
+        outcome, colour = "finished", OK
     except StepLimitReached as e:
-        print("   stopped:", e)
-    print()
+        history, outcome = [], "hit the step cap"
+        colour = WARN
+    paid = any(n == "issue_refund" for n, _ in history)
+    pc = BAD if paid else OK
+    print("%-10s %s%-18s%s %s%s%s"
+          % (label, colour, outcome, OFF,
+             pc, "yes" if paid else "no", OFF))
 
-# The rejected run still finishes cleanly. That is the point
-# of a checkpoint: refusing an action is a normal outcome,
-# not a crash. Try it: set max_steps=1 and watch
-# StepLimitReached do its job.
+note("-" * 54)
+SAVED.clear()
+try:
+    run_agent(PLANS["runaway"], lambda n: True)
+except StepLimitReached:
+    pass
+ac = BOLD + "AFTER A CRASH" + OFF
+print(ac + "  %d checkpoints saved," % len(SAVED))
+print("               so the work is not lost and the")
+print("               agent does not start over")
+
+print()
+note("The rejected run finishes cleanly without")
+note("paying. Refusing an action is a normal outcome")
+note("the loop absorbs, not a crash. The runaway run")
+note("stops itself instead of looping all night, and")
+note("both leave a trail you can read afterwards.")
+
+# Try it: drop max_steps to 1. The refund never
+# happens: the cap fires before the agent reaches it.
 ` },
     {
       type: 'p',
