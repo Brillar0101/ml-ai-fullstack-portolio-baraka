@@ -103,64 +103,99 @@ export const POST = {
       { type: 'p', text: 'The ideal context lets you score retrieval. The reference answer anchors relevance. The question drives the whole pipeline. Fifty to a couple hundred carefully chosen items usually beats a vague set of thousands, because a judge is only as good as the ground truth behind it.' },
     { type: 'lab', height: 460,
         title: 'Context recall and faithfulness, on three broken systems',
-        caption: 'One end-to-end score shows all three of these as simply worse. Two stage-level scores tell you which half to go and fix.',
-        code: `# Two numbers that tell you WHICH half of a RAG system broke. An end-to-end
-# score drops and leaves you guessing; these two point at the culprit.
+        caption: 'The first two rows both look bad end to end and broke for opposite reasons. Recall under 100 percent means the fact never arrived, so no prompt change helps. Faithfulness under 100 percent means it arrived and the model went past it, so no retriever change helps.',
+        code: `# Two stage-level numbers that say WHICH half of a RAG
+# system broke. An end-to-end score drops and leaves
+# you guessing; these point at the culprit.
 
-def context_recall(needed_facts, retrieved_passages):
-    # Did retrieval bring back the facts a correct answer requires?
-    context = " ".join(retrieved_passages).lower()
-    found = [f for f in needed_facts if f.lower() in context]
-    return len(found) / len(needed_facts), found
+def context_recall(needed, passages):
+    """Did retrieval bring back the facts a correct answer
+    requires?"""
+    ctx = " ".join(passages).lower()
+    found = [f for f in needed if f.lower() in ctx]
+    return len(found) / len(needed)
 
-def faithfulness(claims, retrieved_passages, judge):
-    # Of the claims the answer made, how many does the context support?
-    supported = [c for c in claims if judge(c, retrieved_passages)]
-    return len(supported) / max(len(claims), 1), supported
+def faithfulness(claims, passages, judge):
+    """Of the claims the answer made, how many does the
+    context support?"""
+    ok = [c for c in claims if judge(c, passages)]
+    return len(ok) / max(len(claims), 1)
 
 def judge(claim, passages):
-    # Stand-in for a judge model: a claim counts as supported when its text
-    # appears in the retrieved context. A real judge reads for meaning.
+    # Stand-in for a judge model: a claim counts as supported
+    # when its text appears in the context. A real judge
+    # reads for meaning.
     return claim.lower() in " ".join(passages).lower()
 
 NEEDED = ["15 working days", "within 6 months"]
 
-CASES = {
-    "retrieval broke": {
-        "passages": ["Paternity leave must be taken within 6 months of the birth."],
-        "claims": ["within 6 months", "15 working days"],
-    },
-    "generation broke": {
-        "passages": ["Paternity leave is 15 working days.",
-                     "Paternity leave must be taken within 6 months of the birth."],
-        "claims": ["15 working days", "within 6 months", "and it can be carried over to next year"],
-    },
-    "both healthy": {
-        "passages": ["Paternity leave is 15 working days.",
-                     "Paternity leave must be taken within 6 months of the birth."],
-        "claims": ["15 working days", "within 6 months"],
-    },
-}
+FULL = ["Paternity leave is 15 working days.",
+        "Paternity leave must be taken within 6 months."]
+PARTIAL = ["Paternity leave must be taken within 6 months."]
 
-print("%-18s %-16s %-14s %s" % ("case", "context recall", "faithfulness", "diagnosis"))
-for name, case in CASES.items():
-    recall, _ = context_recall(NEEDED, case["passages"])
-    faith, _ = faithfulness(case["claims"], case["passages"], judge)
-    if recall < 1.0:
-        diagnosis = "fix the retriever, the fact never arrived"
-    elif faith < 1.0:
-        diagnosis = "fix the prompt, the model went beyond its context"
+CASES = [
+    ("retrieval broke", PARTIAL,
+     ["within 6 months", "15 working days"]),
+    ("generation broke", FULL,
+     ["15 working days", "within 6 months",
+      "carries over to next year"]),
+    ("both healthy", FULL,
+     ["15 working days", "within 6 months"]),
+]
+
+# ---- Report --------------------------------------------
+E = chr(27)
+DIM, OFF, BOLD = E + "[2m", E + "[0m", E + "[1m"
+OK, WARN, BAD = E + "[32m", E + "[33m", E + "[31m"
+note = lambda s: print(DIM + s + OFF)
+
+def pct(v):
+    if v >= 0.99:
+        colour = OK
     else:
-        diagnosis = "healthy"
-    print("%-18s %-16.2f %-14.2f %s" % (name, recall, faith, diagnosis))
+        colour = BAD if v < 0.6 else WARN
+    return colour, "%.0f%%" % (v * 100)
+
+hdr = BOLD + "RAG HEALTH" + OFF
+print(hdr + "  three ways a week goes wrong")
+note("-" * 54)
+note("%-17s %5s %6s %6s  %s"
+     % ("CASE", "E2E", "RECALL", "FAITH", "LOOK AT"))
+
+for name, passages, claims in CASES:
+    r = context_recall(NEEDED, passages)
+    f = faithfulness(claims, passages, judge)
+    e2e = r * f            # what one blended score would show
+
+    if r < 1.0:
+        where, colour = "the retriever", BAD
+    elif f < 1.0:
+        where, colour = "the prompt", WARN
+    else:
+        where, colour = "nothing, healthy", OK
+
+    ec, e_s = pct(e2e)
+    rc, r_s = pct(r)
+    fc, f_s = pct(f)
+    print("%-17s %s%5s%s %s%6s%s %s%6s%s  %s%s%s"
+          % (name, ec, e_s, OFF, rc, r_s, OFF,
+             fc, f_s, OFF, colour, where, OFF))
+
+note("-" * 54)
+pt = BOLD + "THE POINT" + OFF
+print(pt + "  the first two both score badly end")
+print("           to end, and that column cannot tell")
+print("           you they broke for opposite reasons")
 
 print()
-print("A single end-to-end score would show all three of these as 'worse' and")
-print("tell you nothing about where to look. Scoring the stages separately")
-print("turns a bad week into a specific bug.")
+note("Recall under 100% means the fact never arrived,")
+note("so no prompt change helps. Faithfulness under")
+note("100% means it arrived and the model went past it,")
+note("so no retriever change helps. One blended number")
+note("hides both, and sends you to the wrong half.")
 
-# Try it: add a needed fact nobody retrieved and watch recall, not
-# faithfulness, be the number that moves.
+# Try it: add a needed fact nobody retrieved, and watch
+# recall move while faithfulness stays exactly put.
 ` },
     {
       type: 'p',
