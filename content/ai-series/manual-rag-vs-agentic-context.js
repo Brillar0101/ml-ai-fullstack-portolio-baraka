@@ -99,74 +99,93 @@ export const POST = {
     },
     { type: 'lab', height: 460,
         title: 'Retrieving every turn against deciding first',
-        caption: 'Half of a real conversation is pleasantries that need no documents. Deciding first is a cheap call that skips an expensive search and a large paste.',
-        code: `# Retrieve-every-turn against let-the-model-decide. The
-# "model" here is a stand-in that routes on the shape of the
-# message, which is enough to show what the two designs
-# cost.
+        caption: 'Deciding first cuts the searches from six to two, and drops one turn that needed documents. The follow-up carries no keywords of its own and only makes sense against the turn before it, so a router reading one message alone calls it small talk.',
+        code: `# Retrieve on every turn, or let the model decide first.
+# The stand-in router matches on shape, which is enough to
+# show both what deciding saves and what it risks.
 
-class StandInModel:
-    def decide(self, message):
-        m = message.lower().strip(" .!?")
-        if m in {"thanks", "thanks, that worked", "ok", "great", "perfect"}:
-            return "answer_directly"
-        return "retrieve_docs"
+CHUNK_TOKENS = 120   # cost of one retrieved chunk
+K = 5
 
-    def answer(self, message, context):
-        if not context:
-            return "You're welcome."
-        return "Per the docs: " + context[0]
+PLEASANTRIES = {"thanks", "thanks that worked", "ok",
+                "great", "perfect"}
 
-class StandInRetriever:
-    CALLS = 0
-    DOCS = ["Rate limits are 100 requests per minute.",
-            "API keys are rotated from Settings.",
-            "Webhooks retry three times."]
-
-    def search(self, query, k=5):
-        StandInRetriever.CALLS += 1
-        return self.DOCS[:k]
-
-CONVERSATION = [
-    "what are the rate limits?",
-    "thanks, that worked",
-    "how do I rotate my API key?",
-    "ok",
-    "do webhooks retry?",
-    "perfect",
+# (message, does it genuinely need documents)
+TURNS = [
+    ("what are the rate limits?", True),
+    ("thanks that worked", False),
+    ("how do I rotate my API key?", True),
+    ("ok", False),
+    ("and the sandbox?", True),   # follow-up, no keywords
+    ("perfect", False),
 ]
 
-CHUNK_TOKENS = 120     # rough cost of pasting one retrieved chunk
+def router(message):
+    """Decides whether to retrieve. It reads the shape of
+    the message, which is cheap and sometimes wrong."""
+    m = message.lower().strip(" .!?")
+    return m not in PLEASANTRIES and len(m.split()) > 3
 
-def run(strategy, model, retriever):
-    StandInRetriever.CALLS = 0
-    tokens = 0
-    for message in CONVERSATION:
-        if strategy == "always":
-            chunks = retriever.search(message, k=5)
-        else:
-            plan = model.decide(message)
-            chunks = retriever.search(message, k=5) if plan == "retrieve_docs" else []
-        tokens += len(chunks) * CHUNK_TOKENS
-        model.answer(message, chunks)
-    return StandInRetriever.CALLS, tokens
+def run(always):
+    searches, tokens, misses = 0, 0, []
+    for message, needs_docs in TURNS:
+        retrieve = True if always else router(message)
+        if retrieve:
+            searches += 1
+            tokens += K * CHUNK_TOKENS
+        elif needs_docs:
+            misses.append(message)   # answered blind
+    return searches, tokens, misses
 
-model, retriever = StandInModel(), StandInRetriever()
-for label, strategy in [("retrieve every turn", "always"),
-                        ("let the model decide", "agentic")]:
-    calls, tokens = run(strategy, model, retriever)
-    print("%-22s %d searches over %d turns, ~%d context tokens"
-          % (label, calls, len(CONVERSATION), tokens))
+# ---- Report --------------------------------------------
+E = chr(27)
+DIM, OFF, BOLD = E + "[2m", E + "[0m", E + "[1m"
+OK, WARN, BAD = E + "[32m", E + "[33m", E + "[31m"
+note = lambda s: print(DIM + s + OFF)
+
+print(BOLD + "PER TURN" + OFF + "  what the router decided")
+note("-" * 54)
+note("%-28s %8s %s" % ("MESSAGE", "NEEDS", "ROUTER"))
+for message, needs in TURNS:
+    got = router(message)
+    if got == needs:
+        colour, verdict = OK, "retrieve" if got else "skip"
+    else:
+        colour, verdict = BAD, "SKIPPED IT"
+    print("%-28s %8s %s%s%s"
+          % (message[:28], "yes" if needs else "no",
+             colour, verdict, OFF))
 
 print()
-print("Half these messages are pleasantries that need no documents at all.")
-print("Deciding first is a cheap model call that skips an expensive search")
-print("and a large paste, on every turn that never needed them.")
+print(BOLD + "OVER 6 TURNS" + OFF)
+note("-" * 54)
+note("%-20s %9s %9s %s"
+     % ("STRATEGY", "SEARCHES", "TOKENS", "MISSED"))
+for label, always in [("retrieve always", True),
+                      ("decide first", False)]:
+    s, t, m = run(always)
+    mc = OK if not m else BAD
+    print("%-20s %9d %9d %s%d%s"
+          % (label, s, t, mc, len(m), OFF))
 
-# Try it: add more "thanks" turns, which is what real
-# conversations look like, and watch the gap widen. Then
-# consider what happens if decide() gets it wrong: answering
-# "what are the rate limits?" with no documents at all.
+note("-" * 54)
+_, _, missed = run(False)
+tr = BOLD + "THE TRADE" + OFF
+print(tr + "  deciding halves the cost and")
+print("           can drop a turn that needed documents")
+for m in missed:
+    print("           missed: %s%s%s" % (BAD, m, OFF))
+
+print()
+note("The follow-up is the hard case. It carries no")
+note("keywords of its own and only makes sense against")
+note("the turn before it, so a router reading one")
+note("message alone calls it small talk and answers")
+note("blind. That is the cost of deciding.")
+
+# Try it: give router() the previous message too. The
+# follow-up survives, and you have rebuilt a small piece of
+# the context the always-retrieve version never lost.
 ` },
     {
       type: 'p',
