@@ -1,0 +1,12 @@
+#!/bin/sh
+# Check only the labs whose content files are staged, so the backlog of
+# not-yet-upgraded labs does not block unrelated commits.
+ids=$(git diff --cached --name-only \
+      | grep '^content/ai-series/.*\.js$' \
+      | xargs -n1 basename 2>/dev/null \
+      | sed 's/\.js$//')
+[ -z "$ids" ] && exit 0
+./scripts/run.sh scripts/check-lab-width.mjs $ids || {
+  echo "pre-commit: fix the widths above, or commit with --no-verify"
+  exit 1
+}

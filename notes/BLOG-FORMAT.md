@@ -42,3 +42,16 @@ posts become drafts rather than shipping thin.
 URL and term link, and reports what is publishing versus held back.
 
 **Better to publish nothing than something that cannot be checked.**
+
+## The lab width hook
+
+`scripts/hooks/pre-commit` blocks a commit whose staged lab lines would wrap on
+a phone. Git does not version hooks, so install it once per clone:
+
+```bash
+cp scripts/hooks/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+```
+
+It checks only the labs you staged, deliberately. An earlier version checked all
+33 and blocked every commit against a backlog of 187 lines, which is a check
+that gets switched off rather than obeyed.
