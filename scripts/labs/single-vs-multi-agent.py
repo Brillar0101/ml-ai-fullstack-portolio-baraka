@@ -65,7 +65,8 @@ for label, carry in [("carries the question", True),
         print("  %sbrief%s %s" % (DIM, OFF, h[:44]))
     for f in found:
         hit = f in on_topic
-        mark = (OK + "  ok " if hit else BAD + " off ") + OFF
+        tag = OK + "  ok " if hit else BAD + " off "
+        mark = tag + OFF
         print(" %s %s" % (mark, f[:44]))
     print("  %s%d of 2 relevant facts%s"
           % (colour, len(on_topic), OFF))
