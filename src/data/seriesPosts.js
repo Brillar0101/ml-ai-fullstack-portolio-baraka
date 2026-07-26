@@ -1244,21 +1244,20 @@ print("Weighted together, both queries land on the right document.")
       { type: 'p', text: 'This is greedy decoding, and it makes generation effectively deterministic: the same prompt now produces the same answer, run after run. So the tester was not wrong that the behavior was undesirable for her case. She was wrong that it was a bug. It was a setting.' },
       { type: 'lab', height: 460,
         title: 'The same distribution, four temperatures',
-        caption: 'Same seed, same probabilities, one setting changed. At zero the model stops rolling dice entirely. The tester found a default, not a bug.',
+        caption: 'Temperature drawn as what it actually is: a distribution being reshaped. At zero it collapses onto one word and the dice stop. Turn it up and the flat tail comes into play. The draws underneath use the same seed, so only the setting is changing.',
         code: `import random
 
-# Why the same prompt gives different answers. The model
-# does not hold one answer, it holds a distribution and
-# draws from it. Temperature decides how adventurous the
-# draw is.
+# Temperature reshapes a distribution before the model
+# draws from it. This is a distribution, so it is drawn
+# as one: a row per word, a bar per probability.
 
 NEXT_WORD = {"Daily": 0.30, "Bean": 0.25, "Morning": 0.20,
              "Roast": 0.15, "Ember": 0.07, "Zenith": 0.03}
 
-def apply_temperature(dist, t):
+def at_temperature(dist, t):
     if t == 0:
-        top = max(dist, key=dist.get)          # greedy: always the top word
-        return {w: (1.0 if w == top else 0.0) for w in dist}
+        top = max(dist, key=dist.get)      # greedy: no dice
+        return {w: float(w == top) for w in dist}
     scaled = {w: p ** (1.0 / t) for w, p in dist.items()}
     total = sum(scaled.values())
     return {w: v / total for w, v in scaled.items()}
@@ -1271,26 +1270,54 @@ def sample(dist, rng):
             return w
     return list(dist)[-1]
 
-print("the model's own probabilities for the next word:")
-print("   " + "  ".join("%s %.2f" % (w, p) for w, p in NEXT_WORD.items()))
-print()
-print("%-14s %-46s %s" % ("temperature", "10 draws", "distinct"))
+# ---- Report --------------------------------------------
+E = chr(27)
+DIM, OFF, BOLD = E + "[2m", E + "[0m", E + "[1m"
+OK, WARN, MUTE = E + "[32m", E + "[33m", E + "[90m"
+note = lambda s: print(DIM + s + OFF)
+
+WIDTH = 26
+
+def histogram(dist, label):
+    print(BOLD + label + OFF)
+    for word, p in dist.items():
+        filled = round(p * WIDTH)
+        if p >= 0.5:
+            colour = OK
+        elif p >= 0.1:
+            colour = WARN
+        else:
+            colour = MUTE
+        bar = "#" * filled + "." * (WIDTH - filled)
+        print("  %-8s %s%s%s %.2f"
+              % (word, colour, bar, OFF, p))
+    print()
+
+for t in (0.0, 1.0, 1.8):
+    histogram(at_temperature(NEXT_WORD, t),
+              "temperature %.1f" % t)
+
+note("-" * 46)
+note("%-14s %s" % ("TEMPERATURE", "10 DRAWS, SAME SEED"))
 for t in (0.0, 0.5, 1.0, 1.8):
-    rng = random.Random(11)                    # same seed, so only t changes
-    shifted = apply_temperature(NEXT_WORD, t)
+    rng = random.Random(11)          # only t changes
+    shifted = at_temperature(NEXT_WORD, t)
     draws = [sample(shifted, rng) for _ in range(10)]
-    print("%-14.1f %-46s %d" % (t, " ".join(draws), len(set(draws))))
+    distinct = len(set(draws))
+    colour = OK if distinct == 1 else WARN
+    print("%-14.1f %s%d distinct%s  %s"
+          % (t, colour, distinct, OFF,
+             " ".join(d[:4] for d in draws)))
 
 print()
-print("At temperature 0 the model stops rolling dice and takes its top word")
-print("every time, which is what you want for pulling a total off an invoice.")
-print("Turn it up and the rare words come into play, which is what you want")
-print("when you are naming a coffee shop and the obvious answer is boring.")
-print("Same model, same prompt, one setting. Not a bug: a dial.")
+note("At zero the distribution collapses onto one word")
+note("and the model stops rolling dice, which is what")
+note("you want for pulling a total off an invoice. Turn")
+note("it up and the flat tail comes into play, which is")
+note("what you want naming a coffee shop. One setting.")
 
-# Try it: change the seed and run again. At temperature 0
-# nothing moves. At 1.8 everything does. That difference is
-# the whole post in one experiment.
+# Try it: change the seed. At temperature 0 nothing moves.
+# At 1.8 everything does. That gap is the whole post.
 ` },
       { type: 'h2', text: 'The honest caveat about "deterministic"' },
       { type: 'p', text: 'There is a wrinkle worth knowing so you do not get burned. Even at temperature zero, you cannot always count on byte-for-byte identical output. The provider may update the model behind the same name, different hardware can produce tiny numerical differences that occasionally flip a close call, and some systems do not expose a true zero. So temperature zero gives you strong, practical consistency, not a mathematical guarantee carved in stone. For most uses that distinction never matters, but if you are building something that depends on exact reproducibility, like caching results by their output, treat near-deterministic as near, not absolute, and design for the rare case where it shifts.' },
