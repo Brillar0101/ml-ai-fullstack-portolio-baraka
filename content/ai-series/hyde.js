@@ -88,80 +88,104 @@ export const POST = {
     },
     { type: 'lab', height: 460,
         title: 'HyDE, and the ranking it flips',
-        caption: 'Embedding the question ranks the wrong page first. Embedding a hypothetical answer pulls in the word the real document uses, and the right page moves to the top.',
+        caption: 'The question is phrased in the language of safety, so plain retrieval puts the do-not-commit page first. The draft supplies the word rotate, which the question never contained, and the top hit flips to the page that actually answers it.',
         code: `import math
 
-# HyDE in miniature. The move is to embed a hypothetical
-# ANSWER instead of the question, because answers use the
-# vocabulary documents use, and questions often do not.
-# Vectors here are hand-written over four traits so you can
-# read the arithmetic instead of trusting a black box. [
-# keys, rotation, security, billing ]
+# HyDE: embed a hypothetical ANSWER instead of the question,
+# because answers use the vocabulary documents use and
+# questions often do not. Vectors are hand-written over four
+# traits so you can read the arithmetic.
+#          [ keys, rotation, security, billing ]
 STORE = [
-    ("kb-1", "To rotate an API key, open Settings, choose Keys, then Regenerate.",
-             [0.9, 0.9, 0.4, 0.0]),
-    ("kb-2", "API keys are secrets. Never commit them to a repository.",
-             [0.9, 0.1, 0.9, 0.0]),
-    ("kb-3", "Billing questions are handled from the Plans page.",
-             [0.0, 0.0, 0.0, 0.9]),
+    ("kb-1", "rotate a key in Settings, then Regenerate",
+     [0.9, 0.9, 0.4, 0.0]),
+    ("kb-2", "API keys are secrets, never commit them",
+     [0.9, 0.1, 0.9, 0.0]),
+    ("kb-3", "billing questions go to the Plans page",
+     [0.0, 0.0, 0.0, 0.9]),
 ]
 
-KEYS     = {"key", "keys", "credential", "credentials", "token"}
-ROTATION = {"rotate", "regenerate", "settings", "renew", "replace"}
-SECURITY = {"safe", "safely", "secret", "secrets", "secure", "leak", "commit"}
-BILLING  = {"billing", "plan", "plans", "invoice"}
+KEYS = {"key", "keys", "credential", "token"}
+ROTATE = {"rotate", "regenerate", "settings", "renew"}
+SAFE = {"safe", "secret", "secrets", "secure", "commit"}
+BILL = {"billing", "plan", "plans", "invoice"}
 
 def embed(text):
-    # A stand-in embedder: it fires a trait when the text
-    # uses that trait's vocabulary. Crude, but it has the
-    # property that matters here, which is that wording
-    # drives the vector.
-    w = set(text.lower().replace(",", " ").replace(".", " ").replace("?", " ").split())
-    return [1.0 if w & KEYS else 0.0, 1.0 if w & ROTATION else 0.0,
-            1.0 if w & SECURITY else 0.0, 1.0 if w & BILLING else 0.0]
+    """Stand-in embedder: a trait fires when the text uses
+    that trait's vocabulary. Crude, but it has the property
+    that matters here, which is that wording drives it."""
+    w = {t.strip("?.,") for t in text.lower().split()}
+    return [1.0 if w & KEYS else 0.0,
+            1.0 if w & ROTATE else 0.0,
+            1.0 if w & SAFE else 0.0,
+            1.0 if w & BILL else 0.0]
 
 def cosine(a, b):
     dot = sum(x * y for x, y in zip(a, b))
-    na = math.sqrt(sum(x * x for x in a)); nb = math.sqrt(sum(y * y for y in b))
+    na = math.sqrt(sum(x * x for x in a))
+    nb = math.sqrt(sum(y * y for y in b))
     return dot / (na * nb + 1e-9)
 
-def nearest(vec, k=2):
-    return sorted(((cosine(vec, v), i, t) for i, t, v in STORE), reverse=True)[:k]
+def rank(vec):
+    scored = ((cosine(vec, v), i, t) for i, t, v in STORE)
+    return sorted(scored, reverse=True)
 
-def llm_generate(question):
-    # Stand-in for the model drafting a plausible answer
-    # passage. The valuable part is that it reaches for
-    # words a real document would use, such as "rotate" and
-    # "Settings", which the user's question never contained.
-    return "You should rotate your API key regularly. Open Settings and choose Regenerate."
+QUESTION = "is it safe to keep using the same API key?"
 
-question = "is it safe to keep using the same API key forever?"
+def draft_answer(question):
+    """Stand-in for the model writing a plausible answer.
+    The valuable part is that it reaches for words a real
+    document uses, like rotate and Settings, which the
+    question never contained."""
+    return "rotate your API key in Settings and Regenerate"
 
-print('question: "%s"' % question)
-print("   its vector:", embed(question), " (keys and security fire, rotation does not)")
+DRAFT = draft_answer(QUESTION)
+plain, hyde = rank(embed(QUESTION)), rank(embed(DRAFT))
+
+# ---- Report --------------------------------------------
+E = chr(27)
+DIM, OFF, BOLD = E + "[2m", E + "[0m", E + "[1m"
+OK, BAD, MUTE = E + "[32m", E + "[31m", E + "[90m"
+note = lambda s: print(DIM + s + OFF)
+
+hdr = BOLD + "HyDE" + OFF
+print(hdr + "  same store, two query vectors")
+note("-" * 54)
+note("%-6s %8s %7s %s"
+     % ("DOC", "QUESTION", "DRAFT", "MOVE"))
+
+for doc, text, _vec in STORE:
+    r1 = [d for _, d, _ in plain].index(doc) + 1
+    r2 = [d for _, d, _ in hyde].index(doc) + 1
+    d = r1 - r2
+    if d > 0:
+        colour, move = OK, "up %d" % d
+    elif d < 0:
+        colour, move = BAD, "down %d" % -d
+    else:
+        colour, move = MUTE, "same"
+    print("%-6s %8d %7d %s%s%s"
+          % (doc, r1, r2, colour, move, OFF))
+
+note("-" * 54)
+print(BOLD + "QUESTION" + OFF + "  %s" % QUESTION)
+print(BOLD + "DRAFT" + OFF + "     %s" % DRAFT)
+print(BOLD + "TOP HIT" + OFF + "   %s%s%s -> %s%s%s"
+      % (BAD, plain[0][1], OFF, OK, hyde[0][1], OFF))
+
 print()
-print("plain retrieval, embedding the QUESTION:")
-for score, doc_id, text in nearest(embed(question)):
-    print("   %.3f  %-5s %s" % (score, doc_id, text))
+note("The question is phrased in the language of")
+note("safety, so plain retrieval put the do-not-commit")
+note("page first. The draft supplies the word rotate,")
+note("which the question never had, and that flips the")
+note("top hit to the page that answers it.")
+note("")
+note("The draft is only a probe. What you show a user")
+note("is grounded in kb-1, never in the draft itself.")
 
-draft = llm_generate(question)
-print()
-print("HyDE, embedding a hypothetical ANSWER first:")
-print('   draft: "%s"' % draft)
-print("   its vector:", embed(draft), " (now rotation fires too)")
-for score, doc_id, text in nearest(embed(draft)):
-    print("   %.3f  %-5s %s" % (score, doc_id, text))
-
-print()
-print("Plain retrieval ranked the 'do not commit secrets' page first, because")
-print("the question was phrased in the language of safety. The draft pulled in")
-print("the word 'rotate', and that flipped the top hit to the page that")
-print("actually answers the question. The draft is only a probe: the answer you")
-print("show the user is grounded in kb-1, a real document, never in the draft.")
-
-# Try it: change the draft so it talks about secrets instead
-# of rotation, and watch the ranking swing back. HyDE is
-# only ever as good as the draft.
+# Try it: make the draft talk about secrets instead of
+# rotation and the ranking swings back. HyDE is only ever
+# as good as the draft it writes.
 ` },
     {
       type: 'p',
