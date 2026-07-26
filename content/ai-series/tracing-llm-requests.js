@@ -4,16 +4,11 @@ export const POST = {
   excerpt: 'A RAG agent answered fine most of the time, then sometimes took nine seconds. The final text told us nothing. The trace showed one tool call timing out and being retried three times. Here is how to read that tree.',
   category: 'AI',
   tags: ['Observability', 'Tracing', 'Agents'],
-  readTime: '8 min read',
   body: [
-    {
-      type: 'p',
-      text: 'A support team shipped a RAG agent that answered product questions. Most of the time it felt quick, a second or two, and people liked it. Then the complaints started. Every so often the same kind of question took eight or nine seconds, and nobody could say why. The answer text looked normal when it finally arrived. The logs showed the request came in and a response went out, with a long quiet gap in the middle that no single log line explained. The team was staring at the last thing the system produced and trying to reason backward about everything that happened before it.'
-    },
-    {
-      type: 'p',
-      text: 'That gap in the middle is the real subject here. A single request to a modern AI feature is rarely one call. It fans out. The agent fetches documents from a retrieval service, calls a model once or maybe several times, invokes a tool or two, and then does some cleanup on the result before replying. When the answer is wrong or slow, the final output cannot tell you which of those steps went sideways. You need a record of the whole sequence, laid out as a tree, so you can see each step and how long it took. That record is called a **trace**, and learning to read one is the difference between guessing and knowing.'
-    },
+    { type: 'p', text: 'Picture a RAG agent answering product questions. Most of the time it felt quick, a second or two, and people liked it. Then the complaints started.' },
+      { type: 'p', text: 'Every so often the same kind of question took eight or nine seconds, and nobody could say why. The answer text looked normal when it finally arrived. The logs showed the request came in and a response went out, with a long quiet gap in the middle that no single log line explained. The team was staring at the last thing the system produced and trying to reason backward about everything that happened before it.' },
+    { type: 'p', text: 'That gap in the middle is the real subject here. A single request to a modern AI feature is rarely one call. It fans out.' },
+      { type: 'p', text: 'The agent fetches documents from a retrieval service, calls a model once or maybe several times, invokes a tool or two, and then does some cleanup on the result before replying. When the answer is wrong or slow, the final output cannot tell you which of those steps went sideways. You need a record of the whole sequence, laid out as a tree, so you can see each step and how long it took. That record is called a **trace**, and learning to read one is the difference between guessing and knowing.' },
     {
       type: 'h2',
       text: 'Think of it like an itemized receipt for one request'
@@ -30,14 +25,11 @@ export const POST = {
       type: 'h2',
       text: 'Walking the RAG agent request one step at a time'
     },
-    {
-      type: 'p',
-      text: 'Let us follow one question through the support agent. The user asks how to export their billing history. The request arrives and a clock starts. First the agent runs retrieval: it turns the question into a vector, searches the document store, and gets back the five most relevant help articles. Then it hands those articles plus the question to the model and asks for an answer. The model decides it needs a live value, the account plan tier, so it calls a tool that hits an internal billing API. When the tool returns, the model writes the final answer, and a last step trims the text and attaches source links before the reply goes back to the user.'
-    },
-    {
-      type: 'p',
-      text: 'Now picture all of that drawn as a tree. At the top sits one box that covers the entire request, from arrival to reply. Underneath it sit four child boxes lined up in time: retrieval, the model call, the tool call, and post-processing. Each box has a width that matches how long it took. On a healthy request the tool box is thin. On the slow requests the team was chasing, that tool box was enormous, and when they looked closer it was actually three boxes stacked back to back, because the billing API had timed out and the agent quietly retried it twice more before giving up on the wait. The final answer never mentioned any of that. The tree made it obvious.'
-    },
+    { type: 'p', text: 'Let us follow one question through the support agent. The user asks how to export their billing history.' },
+      { type: 'p', text: 'The request arrives and a clock starts. First the agent runs retrieval: it turns the question into a vector, searches the document store, and gets back the five most relevant help articles. Then it hands those articles plus the question to the model and asks for an answer. The model decides it needs a live value, the account plan tier, so it calls a tool that hits an internal billing API. When the tool returns, the model writes the final answer, and a last step trims the text and attaches source links before the reply goes back to the user.' },
+    { type: 'p', text: 'Now picture all of that drawn as a tree. At the top sits one box that covers the entire request, from arrival to reply. Underneath it sit four child boxes lined up in time: retrieval, the model call, the tool call, and post-processing.' },
+      { type: 'p', text: 'Each box has a width that matches how long it took. On a healthy request the tool box is thin. On the slow requests the team was chasing, that tool box was enormous, and when they looked closer it was actually three boxes stacked back to back, because the billing API had timed out and the agent quietly retried it twice more before giving up on the wait.' },
+      { type: 'p', text: 'The final answer never mentioned any of that. The tree made it obvious.' },
     {
       type: 'diagram',
       title: 'One request, drawn as a trace tree',
@@ -50,10 +42,8 @@ export const POST = {
       ],
       caption: 'The child spans nest under the request span in time order. The repeated tool span is the slow step the final answer hid.'
     },
-    {
-      type: 'p',
-      text: 'What made this readable was that each box carried its own facts. The retrieval box recorded how many documents came back and how long the search took. The model box recorded the prompt it received, the response it produced, and the token counts. The tool box recorded the arguments it was called with and, on the failed tries, the timeout error. Because every step stored its own inputs and outputs, the team did not have to reconstruct anything. They read it off the tree.'
-    },
+    { type: 'p', text: 'What made this readable was that each box carried its own facts. The retrieval box recorded how many documents came back and how long the search took. The model box recorded the prompt it received, the response it produced, and the token counts.' },
+      { type: 'p', text: 'The tool box recorded the arguments it was called with and, on the failed tries, the timeout error. Because every step stored its own inputs and outputs, the team did not have to reconstruct anything. They read it off the tree.' },
     {
       type: 'h2',
       text: 'The words for the parts you just saw'
@@ -104,10 +94,8 @@ def call_billing_tool(account_id, timeout_s):
             span.record_exception(err)
             raise`
     },
-    {
-      type: 'p',
-      text: 'The important part is what happens when this runs inside another active span. The retrieval and model steps are wrapped the same way, and the whole handler runs inside a request span opened at the top. Because each wrapper starts its span while the request span is still current, the library automatically records the parent link. You do not wire the tree by hand. Each span knows the span that was open when it began, and that single fact is what lets a tool draw the itemized tree later. When the billing call times out and your retry logic runs it two more times, each attempt opens its own span, so the three tries show up as three boxes rather than one confusing blur.'
-    },
+    { type: 'p', text: 'The important part is what happens when this runs inside another active span. The retrieval and model steps are wrapped the same way, and the whole handler runs inside a request span opened at the top. Because each wrapper starts its span while the request span is still current, the library automatically records the parent link.' },
+      { type: 'p', text: 'You do not wire the tree by hand. Each span knows the span that was open when it began, and that single fact is what lets a tool draw the itemized tree later. When the billing call times out and your retry logic runs it two more times, each attempt opens its own span, so the three tries show up as three boxes rather than one confusing blur.' },
     {
       type: 'p',
       text: 'This maps directly onto **OpenTelemetry**, an open standard for exactly this kind of instrumentation. In its vocabulary a trace is a set of spans sharing one trace ID, and every span carries the ID of its parent, which is how any viewer can rebuild the tree. OpenTelemetry also publishes a set of naming conventions for AI systems, so that the token counts, model names, and prompts land in attribute names that tools recognize. Follow those names and a tracing product can show you a model span with its token usage without you teaching it anything about your code.'

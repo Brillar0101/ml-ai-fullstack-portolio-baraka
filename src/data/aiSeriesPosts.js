@@ -39,6 +39,7 @@ import { POST as runningLocally } from '../../content/ai-series/running-llms-loc
 import { POST as finetuningDataset } from '../../content/ai-series/build-finetuning-dataset.js';
 import { POST as grpoReasoning } from '../../content/ai-series/grpo-rl-for-reasoning.js';
 import { POST as trainingFromScratch } from '../../content/ai-series/training-llm-from-scratch.js';
+import { attachSources } from './attachSources';
 
 const SERIES = 'AI Engineering Series';
 
@@ -82,7 +83,7 @@ const SCHEDULE = [
   [trainingFromScratch, '2026-10-06', 75, 'LLM Fundamentals'],
 ];
 
-export const AI_SERIES_POSTS = SCHEDULE.map(([post, publishAt, seriesNum, chapter]) => ({
+export const AI_SERIES_POSTS = SCHEDULE.map(([post, publishAt, seriesNum, chapter]) => attachSources({
   ...post,
   series: SERIES,
   seriesNum,

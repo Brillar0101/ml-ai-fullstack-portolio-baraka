@@ -4,16 +4,12 @@ export const POST = {
   excerpt: 'Your IDE assistant reads a file and opens a pull request without you leaving the editor. Behind that one smooth moment sits a three role protocol worth understanding.',
   category: 'AI',
   tags: ['MCP', 'Architecture', 'Protocols'],
-  readTime: '8 min read',
   body: [
-    {
-      type: 'p',
-      text: 'You are working in an AI powered code editor. You ask it to read a config file, then to open a pull request with a small fix. It does both, and you never leave the editor. It feels like one program that magically knows how to touch your filesystem and your GitHub account at the same time. It is not one program. Under the hood, the editor is talking to two separate helper processes through a shared protocol called MCP, the Model Context Protocol. One helper knows how to read files. The other knows how to talk to GitHub. The editor itself knows neither of those things directly.'
-    },
-    {
-      type: 'p',
-      text: 'That separation is the whole point, and it is worth slowing down to see clearly. Before MCP, every AI app wired up its integrations by hand. If you wanted your assistant to read files, you wrote file reading code inside the app. If you wanted GitHub, you wrote GitHub code inside the app too. Every new tool meant more custom plumbing baked into every app that wanted it. MCP replaces that with a standard way for an AI app to plug into an outside system, so the same GitHub connector can serve any editor that speaks the protocol.'
-    },
+    { type: 'p', text: 'You are working in an AI powered code editor. You ask it to read a config file, then to open a pull request with a small fix. It does both, and you never leave the editor.' },
+      { type: 'p', text: 'It feels like one program that magically knows how to touch your filesystem and your GitHub account at the same time. It is not one program. Under the hood, the editor is talking to two separate helper processes through a shared protocol called MCP, the Model Context Protocol. One helper knows how to read files.' },
+      { type: 'p', text: 'The other knows how to talk to GitHub. The editor itself knows neither of those things directly.' },
+    { type: 'p', text: 'That separation is the whole point, and it is worth slowing down to see clearly. Before MCP, every AI app wired up its integrations by hand. If you wanted your assistant to read files, you wrote file reading code inside the app.' },
+      { type: 'p', text: 'If you wanted GitHub, you wrote GitHub code inside the app too. Every new tool meant more custom plumbing baked into every app that wanted it. MCP replaces that with a standard way for an AI app to plug into an outside system, so the same GitHub connector can serve any editor that speaks the protocol.' },
     {
       type: 'p',
       text: 'The reason this matters to you, even if you never write a line of protocol code, is that it changes how you reason about failures and permissions. When something goes wrong, the question is no longer "why is my app broken." It becomes "which of these three roles dropped the ball." So let us name the three roles, then watch the messages travel between them.'
@@ -22,10 +18,8 @@ export const POST = {
       type: 'h2',
       text: 'Three roles that most people blur into one'
     },
-    {
-      type: 'p',
-      text: 'Think of a restaurant. You sit at a table and speak to one waiter. That waiter walks back to one kitchen station and relays your order. There may be several stations, a grill, a salad bench, a dessert counter, and each has its own waiter carrying orders back and forth. You, the waiters, and the kitchen stations are three different kinds of thing doing three different jobs. MCP works the same way, and it uses three matching words.'
-    },
+    { type: 'p', text: 'Think of a restaurant. You sit at a table and speak to one waiter. That waiter walks back to one kitchen station and relays your order.' },
+      { type: 'p', text: 'There may be several stations, a grill, a salad bench, a dessert counter, and each has its own waiter carrying orders back and forth. You, the waiters, and the kitchen stations are three different kinds of thing doing three different jobs. MCP works the same way, and it uses three matching words.' },
     {
       type: 'terms',
       items: [
@@ -78,14 +72,10 @@ export const POST = {
         { term: 'Transport', def: 'The channel the messages physically travel over. MCP commonly uses stdio for a server running on your own machine, and HTTP with server sent events for a server running remotely.' }
       ]
     },
-    {
-      type: 'p',
-      text: 'Why bother negotiating at all? Because servers differ. The filesystem server might offer tools and resources but no prompts. A newer GitHub server might support a feature an older client has never heard of. If the client assumed every server could do everything, it would break the first time it met one that could not. By trading capability lists up front, each side learns exactly what is on the menu, and neither wastes a round trip asking for a dish the kitchen does not make.'
-    },
-    {
-      type: 'p',
-      text: 'After the handshake, the conversation settles into a simple rhythm. First the client asks the server to list what it offers, using calls like tools/list. The server replies with each tool\'s name, a description, and the shape of the arguments it expects. Only then, when the model decides a tool is needed, does the client send a tools/call request with the actual arguments. The server does the work and returns the result. List first, call second, and the model never has to guess what exists.'
-    },
+    { type: 'p', text: 'Why bother negotiating at all? Because servers differ. The filesystem server might offer tools and resources but no prompts.' },
+      { type: 'p', text: 'A newer GitHub server might support a feature an older client has never heard of. If the client assumed every server could do everything, it would break the first time it met one that could not. By trading capability lists up front, each side learns exactly what is on the menu, and neither wastes a round trip asking for a dish the kitchen does not make.' },
+    { type: 'p', text: 'After the handshake, the conversation settles into a simple rhythm. First the client asks the server to list what it offers, using calls like tools/list.' },
+      { type: 'p', text: 'The server replies with each tool\'s name, a description, and the shape of the arguments it expects. Only then, when the model decides a tool is needed, does the client send a tools/call request with the actual arguments. The server does the work and returns the result. List first, call second, and the model never has to guess what exists.' },
     {
       type: 'diagram',
       title: 'The message flow across one client to server link',

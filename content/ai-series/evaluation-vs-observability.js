@@ -4,16 +4,13 @@ export const POST = {
   excerpt: 'A team scored high on every offline test, shipped with confidence, and a week later could not explain a wave of angry tickets. Nothing about the live traffic had been recorded. This is the gap between checking a version and watching a running system.',
   category: 'AI',
   tags: ['Observability', 'Evaluation', 'Production'],
-  readTime: '8 min read',
   body: [
     {
       type: 'p',
-      text: 'A team I spoke with built a support assistant on top of a language model. Before launch they did the responsible thing. They collected two hundred real customer questions, wrote out the ideal answer for each one, and ran their candidate version against that set. The scores came back strong. Faithfulness looked good, the answers matched the reference material, and a second model acting as a judge rated most responses highly. They shipped on a Thursday feeling safe.'
+      text: 'Picture a support assistant built on a language model. Before launch the team does the responsible thing. They collect two hundred real customer questions, write out the ideal answer for each one, and run their candidate version against that set. The scores come back strong. Faithfulness looks good, the answers match the reference material, and a second model acting as a judge rates most responses highly. They ship on a Thursday feeling safe.',
     },
-    {
-      type: 'p',
-      text: 'By the next Wednesday the support inbox had filled with complaints. Users said the assistant was confidently wrong about refund windows, that it stalled on some questions, and that it gave different answers to what looked like the same request. The team pulled up their evaluation report to see what had changed. Nothing had changed there. The two hundred test cases still passed. The problem was that the assistant was failing on questions the test set had never contained, and the team had no record of any of it. They had not logged the live calls. They could see the score from before launch, and they could see the angry tickets, but they had nothing in between. They could not tell which questions triggered the bad answers, how slow the slow ones really were, or whether the model or their own code was at fault.'
-    },
+    { type: 'p', text: 'By the next Wednesday the support inbox had filled with complaints. Users said the assistant was confidently wrong about refund windows, that it stalled on some questions, and that it gave different answers to what looked like the same request. The team pulled up their evaluation report to see what had changed. Nothing had changed there.' },
+      { type: 'p', text: 'The two hundred test cases still passed. The problem was that the assistant was failing on questions the test set had never contained, and the team had no record of any of it. They had not logged the live calls. They could see the score from before launch, and they could see the angry tickets, but they had nothing in between. They could not tell which questions triggered the bad answers, how slow the slow ones really were, or whether the model or their own code was at fault.' },
     {
       type: 'p',
       text: 'That missing middle is the subject of this post. The score before launch and the health of the running system are two different questions, answered by two different practices. One is **offline evaluation**. The other is **online observability**. You need both, and the team above had built only the first.'
@@ -22,30 +19,20 @@ export const POST = {
       type: 'h2',
       text: 'The two questions: is this change safe to ship, and is the shipped thing working'
     },
-    {
-      type: 'p',
-      text: 'Start with the plain intuition, because the two ideas are easy to blur together. Evaluation asks a question about a version of your system before real users touch it. You take a fixed set of inputs, you know what a good output looks like, and you measure how close your candidate gets. It happens in a controlled room with the doors closed. Observability asks a question about the system that is already running. It does not compare against a known answer, because in production you usually do not have one. Instead it records what actually happened on real traffic so you can look back and see where things went wrong.'
-    },
-    {
-      type: 'p',
-      text: 'Put simply, evaluation is a rehearsal and observability is a security camera. A rehearsal tells you whether the play is ready for an audience. It cannot tell you that on opening night an actor tripped over a cable that was never on the rehearsal stage. For that you need the camera running during the real performance. The support team had rehearsed well. They had no camera.'
-    },
-    {
-      type: 'p',
-      text: 'The reason both are needed comes down to what each one can and cannot see. Evaluation is precise but narrow. It gives you a clean number because it compares against answers you already trust, but it can only judge the inputs you put in front of it. Observability is broad but noisy. It sees everything that really happened, including the questions you never thought of, but it rarely comes with a tidy score, because on live traffic nobody wrote down the right answer in advance. One trades coverage for certainty and the other trades certainty for coverage. Lean on only the first and you are blind to the unexpected. Lean on only the second and you have no safe way to test a change before it reaches users.'
-    },
+    { type: 'p', text: 'Start with the plain intuition, because the two ideas are easy to blur together. Evaluation asks a question about a version of your system before real users touch it. You take a fixed set of inputs, you know what a good output looks like, and you measure how close your candidate gets.' },
+      { type: 'p', text: 'It happens in a controlled room with the doors closed. Observability asks a question about the system that is already running. It does not compare against a known answer, because in production you usually do not have one. Instead it records what actually happened on real traffic so you can look back and see where things went wrong.' },
+    { type: 'p', text: 'Put simply, evaluation is a rehearsal and observability is a security camera. A rehearsal tells you whether the play is ready for an audience. It cannot tell you that on opening night an actor tripped over a cable that was never on the rehearsal stage.' },
+      { type: 'p', text: 'For that you need the camera running during the real performance. The support team had rehearsed well. They had no camera.' },
+    { type: 'p', text: 'The reason both are needed comes down to what each one can and cannot see. Evaluation is precise but narrow. It gives you a clean number because it compares against answers you already trust, but it can only judge the inputs you put in front of it. Observability is broad but noisy.' },
+      { type: 'p', text: 'It sees everything that really happened, including the questions you never thought of, but it rarely comes with a tidy score, because on live traffic nobody wrote down the right answer in advance. One trades coverage for certainty and the other trades certainty for coverage. Lean on only the first and you are blind to the unexpected. Lean on only the second and you have no safe way to test a change before it reaches users.' },
     {
       type: 'h2',
       text: 'Walking through the refund-window failure'
     },
-    {
-      type: 'p',
-      text: 'Here is why a high evaluation score can sit right next to real production failures. The test set had two hundred questions. Every one of them was a question someone on the team had thought of. Real users asked things nobody had imagined. Somebody asked about refund windows for a product bought during a promotion, a case the reference set never included. The retrieval step pulled a policy page for a different product line, and the model answered fluently and wrongly. On the evaluation set this failure was invisible, because that question was not in the set. The score stayed high because the score only measures the cases you already wrote down.'
-    },
-    {
-      type: 'p',
-      text: 'Now imagine the team had been recording live calls. For that bad answer there would be a record showing the exact user question, the passages the retriever fetched, the final answer, how long it took, how many tokens it used, and the fact that the user clicked thumbs down and then opened a human ticket. With that record in hand the diagnosis takes minutes instead of a week. You see the wrong policy page in the retrieved context and you know the failure is in retrieval, not in the prompt. Better still, that exact question becomes a new test case. You add it to the evaluation set so the next version is measured against the thing that actually broke.'
-    },
+    { type: 'p', text: 'Here is why a high evaluation score can sit right next to real production failures. The test set had two hundred questions. Every one of them was a question someone on the team had thought of. Real users asked things nobody had imagined.' },
+      { type: 'p', text: 'Somebody asked about refund windows for a product bought during a promotion, a case the reference set never included. The retrieval step pulled a policy page for a different product line, and the model answered fluently and wrongly. On the evaluation set this failure was invisible, because that question was not in the set. The score stayed high because the score only measures the cases you already wrote down.' },
+    { type: 'p', text: 'Now imagine the team had been recording live calls. For that bad answer there would be a record showing the exact user question, the passages the retriever fetched, the final answer, how long it took, how many tokens it used, and the fact that the user clicked thumbs down and then opened a human ticket. With that record in hand the diagnosis takes minutes instead of a week.' },
+      { type: 'p', text: 'You see the wrong policy page in the retrieved context and you know the failure is in retrieval, not in the prompt. Better still, that exact question becomes a new test case. You add it to the evaluation set so the next version is measured against the thing that actually broke.' },
     {
       type: 'terms',
       items: [
@@ -78,33 +65,95 @@ export const POST = {
       type: 'p',
       text: 'The mechanism that makes the loop possible is structured logging. When a production call finishes, you write down one record that captures the inputs, the output, and the numbers around them: how long the call took, how many tokens it burned, and any feedback the user gave. Structured means the record is a set of named fields, not a line of free text, so you can later search for every call slower than three seconds or every call that got a thumbs down. Without that structure your logs are a haystack. With it, mining failures is a query.'
     },
-    {
-      type: 'code',
-      lang: 'python',
-      title: 'Logging one structured record for a production LLM call',
-      code: `import time, json, uuid
+    { type: 'lab', height: 460,
+        title: 'One structured record per call, then the questions it answers',
+        caption: 'The eval set scored 100 percent and was not wrong. It measured the questions someone thought to write down. Every unhappy request in production is a refund edge case, and not one of them appears in the eval set, which is the gap the two halves exist to close.',
+        code: `from collections import Counter
 
-def call_and_log(model, question, retrieved, sink):
-    start = time.time()
-    result = model.answer(question, context=retrieved)
-    record = {
-        "trace_id": str(uuid.uuid4()),
-        "question": question,
-        "retrieved_ids": [p["id"] for p in retrieved],
-        "answer": result.text,
-        "latency_ms": round((time.time() - start) * 1000),
-        "prompt_tokens": result.prompt_tokens,
-        "output_tokens": result.output_tokens,
-        "feedback": None,      # filled in later: "up", "down", "escalated"
-        "ts": time.time(),
-    }
-    sink.write(json.dumps(record) + "\\n")
-    return record
+# Offline evaluation says a change is safe to try.
+# Online observability says whether it helped the
+# people you built it for. Both run here, same
+# assistant.
 
-# when the user reacts, attach the signal to the same trace
-def attach_feedback(trace_id, signal, store):
-    store.update(trace_id, {"feedback": signal})`
-    },
+# ---- Offline: the eval set, run before shipping ---------
+# Curated questions with a known-good answer.
+EVAL_SET = [
+    ("how long do refunds take?", "5 business days", True),
+    ("how do I cancel?", "from the billing page", True),
+    ("do you support SSO?", "on the enterprise plan", True),
+    ("what are the rate limits?", "100 per minute", True),
+    ("where is my order?", "check the orders page", True),
+]
+
+# ---- Online: what real traffic actually did -------------
+# Same assistant, questions nobody thought to curate.
+TRAFFIC = [
+    ("how long do refunds take?", ["billing-2"], "up"),
+    ("how long do refunds take?", ["billing-2"], "up"),
+    ("refund after 60 days?",
+     ["billing-2", "policy-9"], "down"),
+    ("charged twice?",
+     ["billing-2", "billing-7"], "escalated"),
+    ("refund on a gift order?",
+     ["billing-2"], "down"),
+    ("where is my order?", ["ship-1"], "up"),
+]
+
+# ---- Report --------------------------------------------
+E = chr(27)
+DIM, OFF, BOLD = E + "[2m", E + "[0m", E + "[1m"
+OK, WARN, BAD = E + "[32m", E + "[33m", E + "[31m"
+note = lambda s: print(DIM + s + OFF)
+
+passed = sum(1 for _, _, ok in EVAL_SET if ok)
+score = passed / len(EVAL_SET)
+
+print(BOLD + "OFFLINE" + OFF + "  eval set, before ship")
+note("-" * 52)
+print("  cases          %d" % len(EVAL_SET))
+n = len(EVAL_SET)
+print("  passing        %s%d of %d  (%.0f%%)%s"
+      % (OK, passed, n, score * 100, OFF))
+print("  verdict        %sSAFE TO SHIP%s" % (OK, OFF))
+print()
+
+SAD = ("down", "escalated")
+unhappy = [t for t in TRAFFIC if t[2] in SAD]
+fb = Counter(t[2] for t in TRAFFIC)
+rate = len(unhappy) / len(TRAFFIC)
+
+print(BOLD + "ONLINE" + OFF + "   real traffic, after ship")
+note("-" * 52)
+print("  requests       %d" % len(TRAFFIC))
+m = len(TRAFFIC)
+print("  unhappy        %s%d of %d  (%.0f%%)%s"
+      % (BAD, len(unhappy), m, rate * 100, OFF))
+print("  feedback       %s" % dict(fb))
+print()
+
+note("the unhappy ones, and what they retrieved:")
+for q, chunks, signal in unhappy:
+    colour = BAD if signal == "escalated" else WARN
+    print("  %s%-10s%s %-23s %s"
+          % (colour, signal, OFF, q[:23],
+             ",".join(chunks)))
+
+print()
+note("-" * 52)
+gap = BOLD + "THE GAP" + OFF
+print(gap + "  every unhappy question is")
+print("         a refund edge case, and not one")
+print("         of them is in the eval set above.")
+
+print()
+note("Offline scored 100% and was not wrong. It measured")
+note("the questions someone thought to write down.")
+note("Production is where you meet the ones nobody")
+note("imagined, and each belongs in the eval set tomorrow.")
+
+# Try it: add the 60-day refund case to EVAL_SET with
+# ok=False. Offline drops and predicts the problem.
+` },
     {
       type: 'p',
       text: 'Notice that the feedback field starts empty and gets filled in when the user reacts. The answer and the reaction arrive at different moments, so they are joined by the trace id. That single identifier is what lets you connect a slow, wrong answer to the thumbs down that followed it, and then to the human ticket after that.'
@@ -130,10 +179,8 @@ def attach_feedback(trace_id, signal, store):
       type: 'h2',
       text: 'What to take away'
     },
-    {
-      type: 'p',
-      text: 'Evaluation and observability are not competing ideas and you do not choose between them. Evaluation is a gate you pass before shipping, and it answers whether a specific change is safe to release. Observability is a window you keep open after shipping, and it answers whether the released thing is holding up on traffic you never anticipated. A great score behind the gate says nothing about the questions your users will invent tomorrow. Instrument the running system, record a structured trace for every call, watch the feedback signals, and route the real failures back into the test set. Do that and the two hundred cases you started with grow into a set that reflects the world, one caught failure at a time.'
-    },
+    { type: 'p', text: 'Evaluation and observability are not competing ideas and you do not choose between them. Evaluation is a gate you pass before shipping, and it answers whether a specific change is safe to release. Observability is a window you keep open after shipping, and it answers whether the released thing is holding up on traffic you never anticipated.' },
+      { type: 'p', text: 'A great score behind the gate says nothing about the questions your users will invent tomorrow. Instrument the running system, record a structured trace for every call, watch the feedback signals, and route the real failures back into the test set. Do that and the two hundred cases you started with grow into a set that reflects the world, one caught failure at a time.' },
     {
       type: 'sources',
       items: [

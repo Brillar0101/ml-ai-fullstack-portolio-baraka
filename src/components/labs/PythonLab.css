@@ -107,7 +107,9 @@
   padding: 14px 16px;
   border-top: 1px solid var(--border);
   background: #05060a;
-  color: #c4f0d0;
+  /* Neutral base so a colour carries meaning. When the default text is
+     already green, green cannot signal success. */
+  color: var(--lab-fg, #e6edf3);
   font-family: var(--font-mono);
   font-size: 13px;
   line-height: 1.6;
@@ -119,4 +121,51 @@
 
 .lab-output-error {
   color: #ff9a9a;
+}
+
+/* ---- Phone ----
+   Code must not soft-wrap: a wrapped Python line loses its indentation, which
+   is the one thing you cannot lose in Python. Scroll the editor horizontally
+   instead, and let the whole lab sit flush to the screen edges so the usable
+   width is the full viewport. */
+.lab-code {
+  white-space: pre;
+  overflow-x: auto;
+}
+
+@media (max-width: 640px) {
+  .lab {
+    border-radius: var(--radius-md);
+  }
+  .lab-code {
+    font-size: 12px;
+    padding: 12px;
+    line-height: 1.55;
+  }
+  .lab-output {
+    font-size: 12px;
+  }
+  .lab-bar {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  /* Comfortable thumb targets: 44px is the accessibility floor. */
+  .lab-btn {
+    min-height: 44px;
+    padding-inline: 14px;
+  }
+}
+
+/* Status colours for lab output, following PatternFly's semantics so success,
+   warning and danger read the same here as anywhere else. Values are the
+   PatternFly palette's lighter variants, chosen for contrast on the dark
+   output panel rather than for a white background. PatternFly is MIT. */
+.lab {
+  --lab-fg: #e6edf3;
+  --lab-fg-muted: #8b949e;
+  --lab-success: #7ee787;
+  --lab-warning: #f0c674;
+  --lab-danger: #ff9a9a;
+  --lab-info: #79c0ff;
+  --lab-accent: #d2a8ff;
 }

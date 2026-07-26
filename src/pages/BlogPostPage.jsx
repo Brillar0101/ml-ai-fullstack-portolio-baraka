@@ -5,7 +5,7 @@ import { BLOG_POSTS } from '../data/blog';
 import { SERIES_POSTS } from '../data/seriesPosts';
 import { EMBEDDED_POSTS } from '../data/embeddedPosts';
 import { AI_SERIES_POSTS } from '../data/aiSeriesPosts';
-import { isPublished } from '../lib/publishing';
+import { isPublished, isPreviewing } from '../lib/publishing';
 import SeriesPost from './blog/SeriesPost';
 import { supabase } from '../lib/supabase';
 import './BlogPostPage.css';
@@ -186,7 +186,9 @@ const BlogPostPage = () => {
 
   // A post is either out or it is not. Hide anything not yet published or
   // explicitly marked coming soon.
-  if (!post || !isPublished(post) || post.comingSoon) return <Navigate to="/blog" replace />;
+  if (!post || !isPublished(post) || (post.comingSoon && !isPreviewing())) {
+    return <Navigate to="/blog" replace />;
+  }
 
   const PostContent = postComponents[slug];
   const seriesPost = SERIES_POSTS.find(p => p.id === slug) || EMBEDDED_POSTS.find(p => p.id === slug) || AI_SERIES_POSTS.find(p => p.id === slug);

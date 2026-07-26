@@ -4,12 +4,10 @@ export const POST = {
   excerpt: 'A support chat runs long and suddenly the model forgets the order number. Here is how to treat the context window as a fixed budget and spend it well.',
   category: 'AI',
   tags: ['Context Engineering', 'Tokens', 'Cost'],
-  readTime: '8 min read',
   body: [
-    {
-      type: 'p',
-      text: 'Picture a support agent built on a language model. A customer opens a chat about a delayed order. The conversation goes back and forth for forty minutes. The customer pastes a shipping confirmation, then a screenshot description, then their full address, then three follow up questions. Around the thirtieth message, the bot suddenly asks for the order number again. The customer already gave it, near the top of the chat. Nothing crashed. No error appeared. The bot simply stopped seeing the early part of the conversation.'
-    },
+    { type: 'p', text: 'Picture a support agent built on a language model. A customer opens a chat about a delayed order. The conversation goes back and forth for forty minutes.' },
+      { type: 'p', text: 'The customer pastes a shipping confirmation, then a screenshot description, then their full address, then three follow up questions. Around the thirtieth message, the bot suddenly asks for the order number again. The customer already gave it, near the top of the chat.' },
+      { type: 'p', text: 'Nothing crashed. No error appeared. The bot simply stopped seeing the early part of the conversation.' },
     {
       type: 'p',
       text: 'This is one of the most common failures in production language model apps, and it almost never shows up in a quick demo. It only appears once real users have long sessions. The cause is not a bug in your code. It is that you ran out of room, and the system quietly threw away the part of the conversation that mattered.'
@@ -26,10 +24,8 @@ export const POST = {
       type: 'p',
       text: 'A model reads and writes in **tokens**, which are chunks of text roughly the size of a short word or a piece of one. Every model has a maximum number of tokens it can hold at once. That limit covers everything at the same time: your system instructions, the tools you describe, the retrieved documents, the full chat history, and the reply the model is about to generate. Think of it as a shelf of fixed width. You can put anything on it you like, but the moment you push past the edge, something falls off the other end.'
     },
-    {
-      type: 'p',
-      text: 'In the support chat, the shelf filled up slowly. Each new message added tokens. The system prompt sat at the front the whole time. The tool definitions took a fixed slice. By message thirty, the early messages had been pushed off to make room, and the order number went with them. The model was not being careless. It never received those tokens at all.'
-    },
+    { type: 'p', text: 'In the support chat, the shelf filled up slowly. Each new message added tokens. The system prompt sat at the front the whole time.' },
+      { type: 'p', text: 'The tool definitions took a fixed slice. By message thirty, the early messages had been pushed off to make room, and the order number went with them. The model was not being careless. It never received those tokens at all.' },
     {
       type: 'callout',
       title: 'The mental model that fixes most of this',
@@ -142,10 +138,8 @@ export const POST = {
       },
       caption: 'Start at the top with any oversized component. Content you truly need each turn gets summarized in place. Content you need now and then gets stored outside the window and pulled back when relevant. Content that has served its purpose just goes.'
     },
-    {
-      type: 'p',
-      text: 'Run our support chat through this. The order number is needed on many turns, so it gets pinned to the system prompt or held in external memory rather than left to drift in the history. The forty messages of back and forth are needed in spirit but not word for word, so the older half gets summarized. The customer greeting and the small talk at the start are not needed again, so they get dropped without a second thought. Notice that no single rule handled the whole conversation. Different content took different exits from the same tree, and that is exactly what you want.'
-    },
+    { type: 'p', text: 'Run our support chat through this. The order number is needed on many turns, so it gets pinned to the system prompt or held in external memory rather than left to drift in the history. The forty messages of back and forth are needed in spirit but not word for word, so the older half gets summarized.' },
+      { type: 'p', text: 'The customer greeting and the small talk at the start are not needed again, so they get dropped without a second thought. Notice that no single rule handled the whole conversation. Different content took different exits from the same tree, and that is exactly what you want.' },
     {
       type: 'h2',
       text: 'Trimming a message list to a budget'
@@ -154,15 +148,29 @@ export const POST = {
       type: 'p',
       text: 'Here is the shape of a function that keeps the packet under a token limit. It always keeps the system message, always keeps the most recent turns in full, and when there is still too much it folds the middle into a single summary. The token counter is a stand in for whatever your provider gives you.'
     },
-    {
-      type: 'code',
-      lang: 'python',
-      title: 'fit_to_budget.py',
-      code: `def fit_to_budget(system, history, budget, count, summarize):
-    # system message is non-negotiable, reserve its cost first
+    { type: 'lab', height: 460,
+        title: 'fit_to_budget.py, at three different budgets',
+        caption: 'Newest turns survive whole, the older ones collapse into one recap, and the system message is never at risk. Watch the boundary move as the budget shrinks.',
+        code: `# A token counter and a summarizer stand in for the real
+# ones. Counting words instead of tokens keeps the
+# arithmetic readable. The shape is identical.
+def count(text):
+    return len(text.split())
+
+def summarize(messages):
+    # A real summarizer is a model call. This stand-in
+    # records what it swallowed, so you can see exactly
+    # which turns got collapsed.
+    return ("[recap of %d earlier turns: " % len(messages)
+            + "; ".join(m.split(":")[0] for m in messages) + "]")
+
+def fit_to_budget(system, history, budget, count, summarize):
+    # the system message is non-negotiable, so reserve its
+    # cost first
     remaining = budget - count(system)
 
-    # walk newest to oldest, keeping full turns while they fit
+    # walk newest to oldest, keeping whole turns while they
+    # fit
     kept = []
     idx = len(history) - 1
     while idx >= 0 and count(history[idx]) <= remaining:
@@ -171,15 +179,38 @@ export const POST = {
         idx -= 1
     kept.reverse()
 
-    # anything older than what we kept becomes one short recap
+    # anything older than what we kept becomes one short
+    # recap
     middle = history[: idx + 1]
     if middle:
         recap = summarize(middle)          # your model call goes here
         if count(recap) <= remaining:
             kept = [recap] + kept
 
-    return [system] + kept`
-    },
+    return [system] + kept
+
+SYSTEM = "You are a support assistant. Be brief and cite the policy you used."
+HISTORY = [
+    "turn1: customer asks where their order is",
+    "turn2: agent looks up order 4417 and finds it delayed in transit",
+    "turn3: customer asks whether they can cancel it now",
+    "turn4: agent explains the cancellation window has passed",
+    "turn5: customer asks for a partial refund instead",
+    "turn6: agent checks the refund policy for delayed shipments",
+]
+
+for budget in (70, 56, 30):
+    packed = fit_to_budget(SYSTEM, HISTORY, budget, count, summarize)
+    used = sum(count(m) for m in packed)
+    print("budget %3d words -> used %3d" % (budget, used))
+    for m in packed:
+        print("    ", m[:74])
+    print()
+
+# Try it: drop the budget to 18 and watch even the recap get
+# squeezed out. That is the failure mode worth designing
+# for, not the happy path.
+` },
     {
       type: 'p',
       text: 'The logic is deliberately plain. Reserve the system message, fill from the newest end while turns fit, and compress whatever is left over. You can make it smarter later, and most teams do, adding pinned facts or smarter ranking. But even this basic version stops the silent overflow that lost our order number in the first place.'
@@ -188,10 +219,8 @@ export const POST = {
       type: 'h2',
       text: 'Where teams trip, and one last thing to remember'
     },
-    {
-      type: 'p',
-      text: 'A few mistakes show up again and again. The first is trusting the model to remember instead of assembling the packet yourself. The second is skipping measurement and tuning blind. The third is a subtle one worth naming: even when content fits, models pay less attention to material buried in the middle of a long input than to material at the very start or the very end. Researchers have documented this, and it means a fact placed in the exact center of a huge context can be technically present yet functionally ignored. So do not just fit everything in and relax. Put the things that matter near the edges, and keep the whole packet lean enough that the middle does not swallow them.'
-    },
+    { type: 'p', text: 'A few mistakes show up again and again. The first is trusting the model to remember instead of assembling the packet yourself. The second is skipping measurement and tuning blind.' },
+      { type: 'p', text: 'The third is a subtle one worth naming: even when content fits, models pay less attention to material buried in the middle of a long input than to material at the very start or the very end. Researchers have documented this, and it means a fact placed in the exact center of a huge context can be technically present yet functionally ignored. So do not just fit everything in and relax. Put the things that matter near the edges, and keep the whole packet lean enough that the middle does not swallow them.' },
     {
       type: 'p',
       text: 'Treat the context window as a budget with a hard ceiling. Measure what each part costs, decide on every turn what earns its place, and use trimming, summaries, tighter retrieval, and external memory to stay under the line. Do that, and your support bot will still know the order number at message thirty, because you made sure it was there.'

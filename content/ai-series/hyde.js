@@ -4,7 +4,6 @@ export const POST = {
   excerpt: 'Short questions and long answer passages live in different neighborhoods of embedding space. HyDE closes that gap by drafting a fake answer first, then searching with it.',
   category: 'AI',
   tags: ['RAG', 'Retrieval', 'Embeddings'],
-  readTime: '7 min read',
   body: [
     {
       type: 'p',
@@ -14,18 +13,14 @@ export const POST = {
       type: 'p',
       text: 'Nothing is broken in the usual sense. The embedding model works, the vector index works, the similarity search works. The failure is quieter than that. The question and its own answer barely share any words, and that mismatch is enough to sink the search.'
     },
-    {
-      type: 'p',
-      text: 'I want to sit with this failure for a moment because it is easy to blame the wrong thing. When retrieval misses, the reflex is to swap embedding models, re-chunk the documents, or bolt on a reranker. Those steps sometimes help. But if the root cause is that your query and your answer are shaped differently, none of them touch it directly. You can buy a better map of the city and still be standing in the wrong neighborhood. HyDE is one of the cleaner ways to walk to a better starting point before you even open the map.'
-    },
+    { type: 'p', text: 'I want to sit with this failure for a moment because it is easy to blame the wrong thing. When retrieval misses, the reflex is to swap embedding models, re-chunk the documents, or bolt on a reranker. Those steps sometimes help.' },
+      { type: 'p', text: 'But if the root cause is that your query and your answer are shaped differently, none of them touch it directly. You can buy a better map of the city and still be standing in the wrong neighborhood. HyDE is one of the cleaner ways to walk to a better starting point before you even open the map.' },
     {
       type: 'h2',
       text: 'Why a good question can point at the wrong passage'
     },
-    {
-      type: 'p',
-      text: 'Standard retrieval-augmented generation embeds the user question into a vector, then looks for stored document chunks whose vectors sit nearby. The quiet assumption is that a question lands close to its answer in that space. Often it does. But questions and answers are different kinds of text. A question is short, uses casual verbs, and names the goal. An answer passage is longer, uses precise nouns, and describes a procedure. "How do I rotate my API keys" and "Credential lifecycle management: generating a replacement secret and revoking the prior value" are talking about the same thing, yet they look almost nothing alike on the surface.'
-    },
+    { type: 'p', text: 'Standard retrieval-augmented generation embeds the user question into a vector, then looks for stored document chunks whose vectors sit nearby. The quiet assumption is that a question lands close to its answer in that space. Often it does.' },
+      { type: 'p', text: 'But questions and answers are different kinds of text. A question is short, uses casual verbs, and names the goal. An answer passage is longer, uses precise nouns, and describes a procedure. "How do I rotate my API keys" and "Credential lifecycle management: generating a replacement secret and revoking the prior value" are talking about the same thing, yet they look almost nothing alike on the surface.' },
     {
       type: 'p',
       text: 'Embedding models pick up on that surface difference. The question drifts toward other short, casual, question-shaped text. The answer sits with other formal, procedural text. Even a strong model leaves a real gap between the two. When you search using only the raw question vector, you are searching from the wrong neighborhood, and the passage you need is a street over.'
@@ -58,10 +53,8 @@ export const POST = {
       type: 'p',
       text: 'What matters is the shape. This drafted paragraph is long, procedural, and full of the same nouns your real documentation uses: generate, revoke, credentials, services, overlap window. It reads like an answer because it is trying to be one. So when you embed this draft instead of the bare question, its vector lands in the answer neighborhood, right next to your genuine "Credential lifecycle management" page. You search from there and finally pull back the real passage.'
     },
-    {
-      type: 'p',
-      text: 'Notice the sleight of hand. The language model does not need to know your specific product to be useful here. It has read enough documentation in its training to know roughly how a key-rotation answer is worded, even if it has never seen yours. That general sense of "what an answer looks like" is exactly what you borrow. You are not asking the model to be correct. You are asking it to be shaped like the target, and models are good at that even when they are shaky on the facts.'
-    },
+    { type: 'p', text: 'Notice the sleight of hand. The language model does not need to know your specific product to be useful here. It has read enough documentation in its training to know roughly how a key-rotation answer is worded, even if it has never seen yours.' },
+      { type: 'p', text: 'That general sense of "what an answer looks like" is exactly what you borrow. You are not asking the model to be correct. You are asking it to be shaped like the target, and models are good at that even when they are shaky on the facts.' },
     {
       type: 'diagram',
       nodes: [
@@ -93,30 +86,107 @@ export const POST = {
       type: 'p',
       text: 'Mechanically, HyDE adds one model call in front of your normal retrieval loop. You generate a draft, embed the draft, and feed that vector to the same vector search you already run. Everything downstream stays the same.'
     },
-    {
-      type: 'code',
-      lang: 'python',
-      title: 'HyDE retrieval in front of an existing vector store',
-      code: `def hyde_retrieve(question, llm, embed, store, k=5):
-    # 1. Ask the LLM for a plausible answer passage.
-    prompt = (
-        "Write a short factual passage that answers "
-        f"this question, as if from documentation:\\n{question}"
-    )
-    draft = llm.generate(prompt)
+    { type: 'lab', height: 460,
+        title: 'HyDE, and the ranking it flips',
+        caption: 'The question is phrased in the language of safety, so plain retrieval puts the do-not-commit page first. The draft supplies the word rotate, which the question never contained, and the top hit flips to the page that actually answers it.',
+        code: `import math
 
-    # 2. Embed the draft, not the question.
-    query_vector = embed(draft)
+# HyDE: embed a hypothetical ANSWER instead of the question,
+# because answers use the vocabulary documents use and
+# questions often do not. Vectors are hand-written over four
+# traits so you can read the arithmetic.
+#          [ keys, rotation, security, billing ]
+STORE = [
+    ("kb-1", "rotate a key in Settings, then Regenerate",
+     [0.9, 0.9, 0.4, 0.0]),
+    ("kb-2", "API keys are secrets, never commit them",
+     [0.9, 0.1, 0.9, 0.0]),
+    ("kb-3", "billing questions go to the Plans page",
+     [0.0, 0.0, 0.0, 0.9]),
+]
 
-    # 3. Search the real store with that vector.
-    docs = store.nearest(query_vector, k=k)
-    return docs
+KEYS = {"key", "keys", "credential", "token"}
+ROTATE = {"rotate", "regenerate", "settings", "renew"}
+SAFE = {"safe", "secret", "secrets", "secure", "commit"}
+BILL = {"billing", "plan", "plans", "invoice"}
 
-# The draft is a probe. The final answer is grounded
-# only in the real docs we just retrieved.
-docs = hyde_retrieve("how do I rotate my API keys", llm, embed, store)
-answer = llm.generate(build_prompt(question, docs))`
-    },
+def embed(text):
+    """Stand-in embedder: a trait fires when the text uses
+    that trait's vocabulary. Crude, but it has the property
+    that matters here, which is that wording drives it."""
+    w = {t.strip("?.,") for t in text.lower().split()}
+    return [1.0 if w & KEYS else 0.0,
+            1.0 if w & ROTATE else 0.0,
+            1.0 if w & SAFE else 0.0,
+            1.0 if w & BILL else 0.0]
+
+def cosine(a, b):
+    dot = sum(x * y for x, y in zip(a, b))
+    na = math.sqrt(sum(x * x for x in a))
+    nb = math.sqrt(sum(y * y for y in b))
+    return dot / (na * nb + 1e-9)
+
+def rank(vec):
+    scored = ((cosine(vec, v), i, t) for i, t, v in STORE)
+    return sorted(scored, reverse=True)
+
+QUESTION = "is it safe to keep using the same API key?"
+
+def draft_answer(question):
+    """Stand-in for the model writing a plausible answer.
+    The valuable part is that it reaches for words a real
+    document uses, like rotate and Settings, which the
+    question never contained."""
+    return "rotate your API key in Settings and Regenerate"
+
+DRAFT = draft_answer(QUESTION)
+plain, hyde = rank(embed(QUESTION)), rank(embed(DRAFT))
+
+# ---- Report --------------------------------------------
+E = chr(27)
+DIM, OFF, BOLD = E + "[2m", E + "[0m", E + "[1m"
+OK, BAD, MUTE = E + "[32m", E + "[31m", E + "[90m"
+note = lambda s: print(DIM + s + OFF)
+
+hdr = BOLD + "HyDE" + OFF
+print(hdr + "  same store, two query vectors")
+note("-" * 54)
+note("%-6s %8s %7s %s"
+     % ("DOC", "QUESTION", "DRAFT", "MOVE"))
+
+for doc, text, _vec in STORE:
+    r1 = [d for _, d, _ in plain].index(doc) + 1
+    r2 = [d for _, d, _ in hyde].index(doc) + 1
+    d = r1 - r2
+    if d > 0:
+        colour, move = OK, "up %d" % d
+    elif d < 0:
+        colour, move = BAD, "down %d" % -d
+    else:
+        colour, move = MUTE, "same"
+    print("%-6s %8d %7d %s%s%s"
+          % (doc, r1, r2, colour, move, OFF))
+
+note("-" * 54)
+print(BOLD + "QUESTION" + OFF + "  %s" % QUESTION)
+print(BOLD + "DRAFT" + OFF + "     %s" % DRAFT)
+print(BOLD + "TOP HIT" + OFF + "   %s%s%s -> %s%s%s"
+      % (BAD, plain[0][1], OFF, OK, hyde[0][1], OFF))
+
+print()
+note("The question is phrased in the language of")
+note("safety, so plain retrieval put the do-not-commit")
+note("page first. The draft supplies the word rotate,")
+note("which the question never had, and that flips the")
+note("top hit to the page that answers it.")
+note("")
+note("The draft is only a probe. What you show a user")
+note("is grounded in kb-1, never in the draft itself.")
+
+# Try it: make the draft talk about secrets instead of
+# rotation and the ranking swings back. HyDE is only ever
+# as good as the draft it writes.
+` },
     {
       type: 'p',
       text: 'The original HyDE paper pushed this further and averaged the vectors of several drafts to smooth out any single bad generation. In practice a single draft already helps a lot, and you can add more drafts later if one weird generation ever throws off a search.'
@@ -129,10 +199,8 @@ answer = llm.generate(build_prompt(question, docs))`
       type: 'h2',
       text: 'Where teams trip over their own HyDE'
     },
-    {
-      type: 'p',
-      text: 'The mistake I see most is treating the draft as the answer. Someone reads the hypothetical passage, notices it looks fluent, and pipes it straight to the user. Now you are shipping a hallucination. The draft exists to move the search, nothing more. The user should only ever see text written from retrieved documents. A useful habit is to log the draft separately from the final answer during development so you never confuse the two, then drop it from the response payload entirely once you ship.'
-    },
+    { type: 'p', text: 'The mistake I see most is treating the draft as the answer. Someone reads the hypothetical passage, notices it looks fluent, and pipes it straight to the user. Now you are shipping a hallucination.' },
+      { type: 'p', text: 'The draft exists to move the search, nothing more. The user should only ever see text written from retrieved documents. A useful habit is to log the draft separately from the final answer during development so you never confuse the two, then drop it from the response payload entirely once you ship.' },
     {
       type: 'ul',
       items: [
@@ -147,10 +215,8 @@ answer = llm.generate(build_prompt(question, docs))`
       title: 'A quick gut check',
       text: 'Before adding HyDE, look at your failing queries. If they are short and phrased nothing like the documents that answer them, HyDE will likely help. If they already share vocabulary with your docs, plain retrieval is cheaper and just as good.'
     },
-    {
-      type: 'p',
-      text: 'The reason HyDE works is worth holding onto even if you never ship it. Retrieval quality depends on the two things you compare living in the same kind of space. When your probe and your target are different kinds of text, you can transform the probe until it resembles the target. HyDE does that by borrowing the language model to imagine what an answer looks like, then searching with that imagination instead of the raw question. The facts come later, from real sources. The draft just gets you into the right room.'
-    },
+    { type: 'p', text: 'The reason HyDE works is worth holding onto even if you never ship it. Retrieval quality depends on the two things you compare living in the same kind of space.' },
+      { type: 'p', text: 'When your probe and your target are different kinds of text, you can transform the probe until it resembles the target. HyDE does that by borrowing the language model to imagine what an answer looks like, then searching with that imagination instead of the raw question. The facts come later, from real sources. The draft just gets you into the right room.' },
     {
       type: 'sources',
       items: [

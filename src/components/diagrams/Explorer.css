@@ -1,0 +1,118 @@
+/* Interactive parameter explorer.
+   Status colours follow the same semantics as the labs, so green, gold and
+   red mean the same thing whether a reader is looking at a widget or at
+   printed output. */
+.explorer {
+  margin: 20px 0 28px;
+  padding: 18px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-secondary);
+}
+.explorer-title {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text);
+  margin-bottom: 14px;
+}
+.explorer-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.explorer-value {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  color: var(--primary);
+}
+.explorer-range {
+  width: 100%;
+  accent-color: var(--primary);
+  /* Comfortable to drag with a thumb, not just a mouse. */
+  height: 28px;
+}
+.explorer-ticks {
+  display: flex;
+  justify-content: space-between;
+  margin-top: -2px;
+}
+.explorer-tick {
+  border: 0;
+  background: none;
+  padding: 4px 2px;
+  min-width: 28px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.explorer-tick.is-on { color: var(--primary); font-weight: 700; }
+
+.explorer-bars { list-style: none; padding: 0; margin: 16px 0 0; }
+.explorer-bar-row {
+  display: grid;
+  grid-template-columns: minmax(0, 8.5rem) 1fr 3.5rem;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 7px;
+  font-size: 13px;
+}
+.explorer-bar-label {
+  color: var(--text-secondary);
+  overflow-wrap: break-word;
+}
+.explorer-bar-track {
+  background: var(--bg-tertiary);
+  border-radius: 3px;
+  height: 14px;
+  overflow: hidden;
+}
+.explorer-bar-fill {
+  display: block;
+  height: 100%;
+  background: var(--primary);
+  transition: width 160ms ease-out;
+}
+.explorer-bar-value {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: right;
+}
+.is-good .explorer-bar-fill { background: #2f9e44; }
+.is-warn .explorer-bar-fill { background: #c78a1a; }
+.is-bad  .explorer-bar-fill { background: #c8412f; }
+.is-good .explorer-bar-value { color: #2f9e44; }
+.is-bad  .explorer-bar-value { color: #c8412f; }
+
+.explorer-note {
+  margin: 14px 0 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  text-align: left;
+}
+.explorer-caption {
+  margin-top: 12px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-muted);
+  text-align: left;
+}
+
+/* Phone: the label column would squeeze the bars into nothing. */
+@media (max-width: 560px) {
+  .explorer { padding: 14px; }
+  .explorer-bar-row {
+    grid-template-columns: 1fr 3rem;
+    grid-template-areas: "label value" "track track";
+    row-gap: 3px;
+  }
+  .explorer-bar-label { grid-area: label; }
+  .explorer-bar-value { grid-area: value; }
+  .explorer-bar-track { grid-area: track; }
+  .explorer-tick { display: none; }
+}

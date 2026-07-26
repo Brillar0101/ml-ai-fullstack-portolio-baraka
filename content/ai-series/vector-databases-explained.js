@@ -4,16 +4,11 @@ export const POST = {
   excerpt: 'A docs search that answered in a blink at ten thousand pages ground to a halt at two million. The fix was not a bigger server. It was giving up on comparing the query to every chunk.',
   category: 'AI',
   tags: ['RAG', 'Vector Databases', 'Embeddings'],
-  readTime: '8 min read',
   body: [
-    {
-      type: 'p',
-      text: 'A support team built a docs search that everyone loved. You typed a question, it found the three or four help articles that actually answered it, and it fed those to a model that wrote a tidy reply. At launch the knowledge base held about ten thousand chunks of text, and answers came back before you finished reading the loading spinner. Then the company grew. Two years of new products, migrated forums, and old ticket transcripts pushed the corpus to roughly two million chunks. The same search that once felt instant now took eight to twelve seconds per query, and under load it fell over completely. Nobody had changed the search code. They had only added text.'
-    },
-    {
-      type: 'p',
-      text: 'The reason for the slowdown is the whole point of this post. The original search worked by comparing your question to every single chunk in the corpus, one at a time, and keeping the closest matches. That is fine at ten thousand items. At two million it means two million comparisons for every query, and it scales straight up as the corpus grows. What the team needed was a way to find the nearest matches without looking at everything. That is exactly the job a **vector database** is built for.'
-    },
+    { type: 'p', text: 'Picture a docs search that everyone loves. You typed a question, it found the three or four help articles that actually answered it, and it fed those to a model that wrote a tidy reply. At launch the knowledge base held about ten thousand chunks of text, and answers came back before you finished reading the loading spinner.' },
+      { type: 'p', text: 'Then the company grew. Two years of new products, migrated forums, and old ticket transcripts pushed the corpus to roughly two million chunks. The same search that once felt instant now took eight to twelve seconds per query, and under load it fell over completely. Nobody had changed the search code. They had only added text.' },
+    { type: 'p', text: 'The reason for the slowdown is the whole point of this post. The original search worked by comparing your question to every single chunk in the corpus, one at a time, and keeping the closest matches.' },
+      { type: 'p', text: 'That is fine at ten thousand items. At two million it means two million comparisons for every query, and it scales straight up as the corpus grows. What the team needed was a way to find the nearest matches without looking at everything. That is exactly the job a **vector database** is built for.' },
     {
       type: 'h2',
       text: 'Why finding relevant text turns into finding nearby points'
@@ -34,10 +29,8 @@ export const POST = {
       type: 'p',
       text: 'Say a user types "I got logged out and can\'t sign back in." The system sends that sentence to an embedding model, which returns a vector, maybe 768 numbers long. Now the naive approach kicks in. It takes that query vector and measures the distance to chunk one, then chunk two, then chunk three, all the way to chunk two million. It sorts by distance and keeps the top five. Those five chunks go to the language model as context, and the model writes the answer.'
     },
-    {
-      type: 'p',
-      text: 'The expensive part is the middle. Two million distance calculations, each across hundreds of numbers, happen on every keystroke-driven search. Doubling the corpus doubles the work. This is what people mean by brute-force or exact search: you check everything, so your answer is perfectly correct, but the cost climbs with the size of the collection. The team\'s eight-second delay was not a bug. It was the honest price of comparing against all two million chunks every time.'
-    },
+    { type: 'p', text: 'The expensive part is the middle. Two million distance calculations, each across hundreds of numbers, happen on every keystroke-driven search. Doubling the corpus doubles the work.' },
+      { type: 'p', text: 'This is what people mean by brute-force or exact search: you check everything, so your answer is perfectly correct, but the cost climbs with the size of the collection. The team\'s eight-second delay was not a bug. It was the honest price of comparing against all two million chunks every time.' },
     {
       type: 'diagram',
       nodes: [
@@ -53,10 +46,8 @@ export const POST = {
       type: 'h2',
       text: 'What a vector database actually holds'
     },
-    {
-      type: 'p',
-      text: 'It helps to be concrete about what sits inside one of these systems. For each chunk, the database keeps three things. First is the vector itself, the row of numbers from the embedding model. Second is the original text, or a pointer to it, so you can hand the real words back to the language model once you find a match. Third is metadata: any extra fields you attach, such as the product area, the language, the source URL, or the date the article was written. The vector answers the nearest-neighbor question, the text is the payload you return, and the metadata lets you slice the collection. A search that mixes all three is far more useful than one that only knows about points in space.'
-    },
+    { type: 'p', text: 'It helps to be concrete about what sits inside one of these systems. For each chunk, the database keeps three things. First is the vector itself, the row of numbers from the embedding model. Second is the original text, or a pointer to it, so you can hand the real words back to the language model once you find a match. Third is metadata: any extra fields you attach, such as the product area, the language, the source URL, or the date the article was written.' },
+      { type: 'p', text: 'The vector answers the nearest-neighbor question, the text is the payload you return, and the metadata lets you slice the collection. A search that mixes all three is far more useful than one that only knows about points in space.' },
     {
       type: 'p',
       text: 'The team in our story got a second win once they added that metadata. Many of their two million chunks were old forum posts in languages the current customer did not speak, or notes about products that had been retired. By tagging each chunk and filtering at query time, they shrank the effective search space and stopped surfacing answers that were technically similar but practically useless. The vector database made the search fast. The metadata made the results relevant.'
@@ -84,52 +75,74 @@ export const POST = {
       type: 'p',
       text: 'A vector database does not compare your query to every point. Instead it builds an index ahead of time that lets it navigate toward the answer. HNSW, the most common one, connects vectors into a graph where each point links to a handful of near neighbors. On top of that base graph it stacks sparser layers, like an express lane. A search starts at the top layer, takes big jumps across the space to get roughly close, then drops to denser layers to refine, landing on the true neighbors after visiting only a small fraction of the collection.'
     },
-    {
-      type: 'p',
-      text: 'The payoff is dramatic. Where brute force did two million comparisons, HNSW might do a few thousand and still return the right neighbors almost every time. That "almost" is the trade. ANN indexes are approximate, so once in a while they miss a match that exact search would have caught. For document retrieval that is a fine deal, because the fifth-best chunk being swapped for the sixth-best rarely changes the final answer. When you need every match guaranteed, you use exact search and pay the full cost. Most search-and-answer systems happily take the speed.'
-    },
+    { type: 'p', text: 'The payoff is dramatic. Where brute force did two million comparisons, HNSW might do a few thousand and still return the right neighbors almost every time.' },
+      { type: 'p', text: 'That "almost" is the trade. ANN indexes are approximate, so once in a while they miss a match that exact search would have caught. For document retrieval that is a fine deal, because the fifth-best chunk being swapped for the sixth-best rarely changes the final answer. When you need every match guaranteed, you use exact search and pay the full cost. Most search-and-answer systems happily take the speed.' },
     {
       type: 'p',
       text: 'Similarity metric matters here too. Most text embeddings are compared with **cosine similarity**, which looks at the angle between two vectors rather than their raw distance. Two chunks that point the same direction score as similar even if one vector happens to be longer. You pick the metric when you build the index, and it should match how your embedding model was trained. Mixing a model that expects cosine with an index configured for plain Euclidean distance is a quiet way to get worse results.'
     },
-    {
-      type: 'code',
-      lang: 'python',
-      title: 'Embed a question and pull the nearest chunks',
-      code: `from openai import OpenAI
-import chromadb
+    { type: 'lab', height: 460,
+        title: 'A vector store in thirty lines',
+        caption: 'The filtered search still returns its best match, and that match is bad. A vector store always hands back a nearest neighbour, even when nothing is genuinely near.',
+        code: `import math
 
-client = OpenAI()
-store = chromadb.PersistentClient(path="./kb")
-docs = store.get_collection("help_center")
+# A vector database in thirty lines, so you can see what the
+# real ones do underneath the API. Embeddings here are
+# hand-written over five made-up traits rather than produced
+# by a model, so the numbers stay readable. [ billing,
+# login, shipping, refund, account ]
+DOCS = [
+    ("billing-1",  "Your plan renews on the first of each month.",
+                   [0.9, 0.0, 0.0, 0.2, 0.4]),
+    ("billing-2",  "Charged twice? Duplicate charges are refunded in 5 days.",
+                   [0.8, 0.0, 0.0, 0.9, 0.1]),
+    ("login-1",    "Reset your password from the sign-in page.",
+                   [0.0, 0.9, 0.0, 0.0, 0.6]),
+    ("login-2",    "Locked out after too many attempts? Wait 15 minutes.",
+                   [0.0, 0.95, 0.0, 0.0, 0.5]),
+    ("shipping-1", "Orders ship within two business days.",
+                   [0.0, 0.0, 0.9, 0.1, 0.0]),
+]
 
-question = "I got logged out and can't sign back in"
+def cosine(a, b):
+    dot = sum(x * y for x, y in zip(a, b))
+    na = math.sqrt(sum(x * x for x in a))
+    nb = math.sqrt(sum(y * y for y in b))
+    return dot / (na * nb + 1e-9)
 
-# Turn the question into a vector, same model used to index the docs
-resp = client.embeddings.create(
-    model="text-embedding-3-small",
-    input=question,
-)
-query_vec = resp.data[0].embedding
+def search(query_vec, docs, k=3, where=None):
+    scored = []
+    for doc_id, text, vec in docs:
+        if where and not doc_id.startswith(where):
+            continue                      # metadata filter, same idea as a real store
+        scored.append((cosine(query_vec, vec), doc_id, text))
+    scored.sort(reverse=True)
+    return scored[:k]
 
-# Ask the vector DB for the 5 nearest chunks, filtered to English billing docs
-hits = docs.query(
-    query_embeddings=[query_vec],
-    n_results=5,
-    where={"product": "account", "language": "en"},
-)
+# "I got logged out and cannot sign back in" lands on the
+# login traits.
+query = [0.0, 0.9, 0.0, 0.0, 0.4]
 
-for text in hits["documents"][0]:
-    print(text[:120])`
-    },
+print('query: "I got logged out and cannot sign back in"')
+for score, doc_id, text in search(query, DOCS, k=3):
+    print("   %.3f  %-11s %s" % (score, doc_id, text))
+
+print()
+print("same query, filtered to billing docs only:")
+for score, doc_id, text in search(query, DOCS, k=3, where="billing"):
+    print("   %.3f  %-11s %s" % (score, doc_id, text))
+
+# The filtered search still returns its best match, and that
+# match is bad. A vector store always hands back a nearest
+# neighbour, even when nothing is genuinely close, which is
+# why a similarity floor matters in production.
+` },
     {
       type: 'h2',
       text: 'Mistakes that quietly wreck retrieval'
     },
-    {
-      type: 'p',
-      text: 'The first common trap is embedding your documents with one model and your queries with another. The two sets of vectors end up in different spaces, and the distances become meaningless. Always embed queries and documents with the same model and version. A second trap is skipping **metadata filters**. If a user asks a billing question, there is no reason to search shipping and legal docs at the same time. Storing a product tag or a language field next to each vector lets the database narrow the field before or during the search, which improves both speed and relevance.'
-    },
+    { type: 'p', text: 'The first common trap is embedding your documents with one model and your queries with another. The two sets of vectors end up in different spaces, and the distances become meaningless. Always embed queries and documents with the same model and version.' },
+      { type: 'p', text: 'A second trap is skipping **metadata filters**. If a user asks a billing question, there is no reason to search shipping and legal docs at the same time. Storing a product tag or a language field next to each vector lets the database narrow the field before or during the search, which improves both speed and relevance.' },
     {
       type: 'p',
       text: 'A third mistake is reaching for a heavyweight vector database when you do not have the scale to justify one. If your corpus is a few thousand chunks, brute-force search over an in-memory array finishes in a couple of milliseconds, and adding a separate service just gives you more to run and monitor. The team in our story did not need a vector database at ten thousand chunks. They needed one at two million. The break-even point depends on your hardware and latency budget, but the shape is clear: dedicated ANN infrastructure earns its keep when exact search stops being fast enough.'

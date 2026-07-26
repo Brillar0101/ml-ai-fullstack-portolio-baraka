@@ -2,6 +2,7 @@ import { SERIES_POSTS } from './seriesPosts';
 import { EMBEDDED_POSTS } from './embeddedPosts';
 import { AI_SERIES_POSTS } from './aiSeriesPosts';
 import { BLOG_COVERS } from './blogCovers';
+import { readTimeFor } from '../lib/readTime';
 
 const GRAD = 'linear-gradient(120deg, #0066CC 0%, #004D99 48%, #003366 100%)';
 const EMBEDDED_GRAD = 'linear-gradient(120deg, #004D99 0%, #0066CC 50%, #003366 100%)';
@@ -26,7 +27,7 @@ const seriesMeta = SERIES_POSTS.map((p) => ({
   excerpt: p.excerpt,
   category: p.category || 'AI',
   date: fullDate(p.publishAt),
-  readTime: p.readTime || '5 min read',
+  readTime: readTimeFor(p.body),
   tags: p.tags || [],
   series: 'AI Engineering Series',
   seriesNum: p.seriesNum,
@@ -42,7 +43,7 @@ const embeddedMeta = EMBEDDED_POSTS.map((p) => ({
   excerpt: p.excerpt,
   category: p.category || 'Hardware',
   date: fullDate(p.publishAt),
-  readTime: p.readTime || '5 min read',
+  readTime: readTimeFor(p.body),
   tags: p.tags || [],
   series: p.series || 'Embedded Systems Series',
   seriesNum: p.seriesNum,
@@ -59,7 +60,7 @@ const aiSeriesMeta = AI_SERIES_POSTS.map((p) => ({
   excerpt: p.excerpt,
   category: p.category || 'AI',
   date: fullDate(p.publishAt),
-  readTime: p.readTime || '8 min read',
+  readTime: readTimeFor(p.body),
   tags: p.tags || [],
   series: 'AI Engineering Series',
   seriesNum: p.seriesNum,
@@ -69,6 +70,10 @@ const aiSeriesMeta = AI_SERIES_POSTS.map((p) => ({
   draft: p.draft,
 }));
 
+// These two are written as components rather than block arrays, so their read
+// time cannot be derived from a body. The values below were measured from the
+// rendered prose and code with the same rates as lib/readTime.js (220 wpm,
+// 3s per code line, 12s per figure). Re-measure if the posts change.
 const CORE_POSTS = [
   {
     id: 'your-first-ai-agent',
@@ -76,7 +81,7 @@ const CORE_POSTS = [
     excerpt: 'Build a ReAct agent from scratch using Claude\'s tool use API. No frameworks. No LangChain. Just raw function calling.',
     category: 'AI',
     date: 'Mar 15, 2026',
-    readTime: '5 min read',
+    readTime: '7 min read', // 669 words + 84 lines of code
     tags: ['Claude API', 'Python', 'AI Agents'],
     series: 'AI Engineering Series',
     seriesNum: 1,
@@ -91,7 +96,7 @@ const CORE_POSTS = [
       'Temperature, top-k, and top-p, explained by doing. Includes an interactive lab and runnable NumPy you can edit in the browser.',
     category: 'AI',
     date: 'Jun 25, 2026',
-    readTime: '6 min read',
+    readTime: '4 min read', // 643 words + a 17-line lab and the demo
     tags: ['Sampling', 'Temperature', 'top-p', 'Foundation Models'],
     series: 'AI Engineering Series',
     seriesNum: 3,

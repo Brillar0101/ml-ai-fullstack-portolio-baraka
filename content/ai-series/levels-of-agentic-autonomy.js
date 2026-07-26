@@ -4,11 +4,10 @@ export const POST = {
   excerpt: 'A support team kept handing their bot more freedom until it started making refund promises nobody could trace. Here is the ladder they climbed, one rung at a time, and the exact rung where they should have stopped.',
   category: 'AI',
   tags: ['Agents', 'Autonomy', 'Design'],
-  readTime: '8 min read',
   body: [
     {
       type: 'p',
-      text: 'A small team at a company I will call Maple ran a support bot named Otto. In its first week Otto did one thing. A customer typed a question, Otto sent the whole thing to a language model with a friendly system prompt, and the model wrote back an answer. That was the entire product. It worked, people liked it, and the numbers were boring in the good way. Six months later Otto could look up your order, decide whether to open a refund, message the warehouse, and hand tricky cases to a second bot that specialized in shipping disputes. It was far more capable. It was also far harder to trust, because when Otto promised a customer a refund that never arrived, nobody on the team could say exactly why it had made that promise.'
+      text: 'Picture a support bot called Otto. In its first week Otto does one thing. A customer types a question, Otto sends the whole thing to a language model with a friendly system prompt, and the model writes back an answer. That is the entire product. It works, people like it, and the numbers are boring in the good way. Six months later Otto can look up your order, decide whether to open a refund, message the warehouse, and hand tricky cases to a second bot that specializes in shipping disputes. It is far more capable. It is also far harder to trust, because when Otto promises a customer a refund that never arrives, nobody on the team can say exactly why it made that promise.',
     },
     {
       type: 'p',
@@ -18,10 +17,8 @@ export const POST = {
       type: 'h2',
       text: 'Autonomy is just who decides what happens next'
     },
-    {
-      type: 'p',
-      text: 'Before the ladder, one plain idea. **Autonomy** is the share of decisions the software makes on its own instead of you making them in advance. When you wire up a fixed sequence of steps, you decided the steps; the machine only fills in the blanks. When the machine chooses its own next step at runtime, it decided, and you find out afterward by reading a log. More autonomy means the system can handle cases you never anticipated. It also means the system can fail in ways you never anticipated. Those two sentences are the same sentence wearing different clothes, and holding both in your head at once is the whole game.'
-    },
+    { type: 'p', text: 'Before the ladder, one plain idea. **Autonomy** is the share of decisions the software makes on its own instead of you making them in advance. When you wire up a fixed sequence of steps, you decided the steps; the machine only fills in the blanks.' },
+      { type: 'p', text: 'When the machine chooses its own next step at runtime, it decided, and you find out afterward by reading a log. More autonomy means the system can handle cases you never anticipated. It also means the system can fail in ways you never anticipated. Those two sentences are the same sentence wearing different clothes, and holding both in your head at once is the whole game.' },
     {
       type: 'p',
       text: 'Here is the ladder Otto climbed, drawn as five layers. Read it from the bottom up, from the least freedom to the most.'
@@ -45,34 +42,75 @@ export const POST = {
       type: 'h2',
       text: 'Level 1 and 2: the model as a component you control'
     },
-    {
-      type: 'p',
-      text: 'At **level one**, Otto is a single model call. Question goes in, answer comes out. There are no tools, so Otto cannot look anything up. It can explain your return policy from the prompt, but ask it about your specific order and it will either guess or admit it does not know. The failure mode is confident nonsense, since the model has no way to check itself against real data. What you get in return is total predictability. The same input gives roughly the same output, and there is nothing to debug except the prompt. Stay here when the task is pure text work: summarize this, rephrase that, classify this ticket. Reaching for anything fancier is wasted motion.'
-    },
-    {
-      type: 'p',
-      text: '**Level two** is a fixed chain, and it is where most useful software actually lives. You, the developer, wire a sequence of steps. Otto first calls the model to pull the order number out of the message, then runs a database lookup, then calls the model again to write a reply using what it found. The model is doing real work, but it never chooses the shape of the flow. The steps run in the same order every time. When something breaks you can point at the exact step, because there are only three of them and you wrote all three. Below is roughly what that chain looks like.'
-    },
-    {
-      type: 'code',
-      lang: 'python',
-      title: 'Level 2: a fixed chain the developer wired',
-      code: `def handle_ticket(message):
-    # Step 1: model pulls structured data out of free text
-    order_id = model_extract(message, field="order_id")
+    { type: 'p', text: 'At **level one**, Otto is a single model call. Question goes in, answer comes out. There are no tools, so Otto cannot look anything up. It can explain your return policy from the prompt, but ask it about your specific order and it will either guess or admit it does not know.' },
+      { type: 'p', text: 'The failure mode is confident nonsense, since the model has no way to check itself against real data. What you get in return is total predictability. The same input gives roughly the same output, and there is nothing to debug except the prompt. Stay here when the task is pure text work: summarize this, rephrase that, classify this ticket. Reaching for anything fancier is wasted motion.' },
+    { type: 'p', text: '**Level two** is a fixed chain, and it is where most useful software actually lives. You, the developer, wire a sequence of steps. Otto first calls the model to pull the order number out of the message, then runs a database lookup, then calls the model again to write a reply using what it found.' },
+      { type: 'p', text: 'The model is doing real work, but it never chooses the shape of the flow. The steps run in the same order every time. When something breaks you can point at the exact step, because there are only three of them and you wrote all three. Below is roughly what that chain looks like.' },
+    { type: 'lab', height: 460,
+        title: 'The same task at level 2 and level 4',
+        caption: 'Both designs return the same answer. What differs is how many decisions the model made, and whether you could have predicted the path before it ran.',
+        code: `# One task, two designs. Level 2 is a chain the developer
+# wired by hand. Level 4 lets the model choose its own
+# steps. Watch how the number of decisions the model gets to
+# make changes what can go wrong.
 
-    # Step 2: a plain function does the lookup, no model involved
-    order = db.get_order(order_id)
+ORDERS = {"4417": {"id": "4417", "status": "delayed", "days_late": 6}}
 
-    # Step 3: model writes a reply using the facts we fetched
-    reply = model_reply(
-        question=message,
-        facts=order,
-    )
-    return reply
+def model_extract(message, field):        # stand-in: pulls an id out of text
+    digits = "".join(c for c in message if c.isdigit())
+    return digits or None
 
-# The path is fixed. Same three steps, same order, every time.`
-    },
+def model_reply(question, facts):         # stand-in: writes the customer reply
+    if not facts:
+        return "I could not find that order."
+    return "Order %s is %s, %d days behind schedule." % (
+        facts["id"], facts["status"], facts["days_late"])
+
+# ---- Level 2: a fixed chain
+# -----------------------------------------------
+def handle_ticket(message):
+    order_id = model_extract(message, field="order_id")   # model step
+    order = ORDERS.get(order_id)                          # plain code, no model
+    return model_reply(question=message, facts=order)     # model step
+
+# ---- Level 4: the agent picks its own steps
+# -------------------------------
+def model_decide(history, tools, step):
+    # A scripted planner standing in for a model choosing
+    # its next move.
+    if step == 0:
+        return {"type": "tool", "name": "get_order", "args": {"order_id": "4417"}}
+    return {"type": "final", "answer": "Order 4417 is delayed by 6 days."}
+
+def agent_loop(message, tools, max_steps=8):
+    history = [message]
+    for step in range(max_steps):
+        decision = model_decide(history, tools, step)
+        if decision["type"] == "final":
+            return decision["answer"], step + 1
+        result = tools[decision["name"]](**decision["args"])
+        history.append(result)
+    return "Escalating to a human.", max_steps      # we never promised it finishes
+
+TOOLS = {"get_order": lambda order_id: ORDERS.get(order_id)}
+
+msg = "where is my order 4417?"
+print("Level 2 (fixed chain)")
+print("   reply:", handle_ticket(msg))
+print("   model decisions: 2, both of them constrained to one field each")
+print()
+answer, steps = agent_loop(msg, TOOLS)
+print("Level 4 (agent loop)")
+print("   reply:", answer)
+print("   model decisions: %d, and it chose the tool AND the arguments" % (steps + 1))
+print()
+print("Same answer. The difference is how many chances there were to be wrong,")
+print("and whether a human could predict the path before it ran.")
+
+# Try it: make model_decide never return "final" and watch
+# max_steps become the only thing standing between you and
+# an agent that runs all night.
+` },
     {
       type: 'p',
       text: 'Notice what you can promise about this code. It always does the lookup. It never messages the warehouse, because there is no line that does. If it misbehaves, the bug is in one of three named places. That predictability is not a limitation you tolerate; it is the feature you are paying for.'
@@ -81,22 +119,16 @@ export const POST = {
       type: 'h2',
       text: 'Level 3: letting the model pick a lane'
     },
-    {
-      type: 'p',
-      text: 'Maple soon noticed Otto was answering three very different kinds of message with one stiff flow. Refund questions, shipping delays, and account logins each wanted a different path. So they added a **router**. Now the first model call reads the message and picks a category, and that category selects one of three prewritten flows. Each flow is still a level-two chain that the team built by hand. The only new freedom is the choice of which chain to run.'
-    },
-    {
-      type: 'p',
-      text: 'This is a real jump in autonomy but a small one, and that is what makes it safe. The model decides the branch, yet every branch is a road you already paved. The classic failure here is misrouting. A refund complaint written in polite language gets read as a general question and lands in the wrong flow. You catch that by logging the chosen category and checking how often it is wrong, which is easy because a router only ever picks from a short list you defined. Level three is the right home for problems that split cleanly into a handful of known cases. If you can name the branches, a router will serve you well and stay debuggable.'
-    },
+    { type: 'p', text: 'Maple soon noticed Otto was answering three very different kinds of message with one stiff flow. Refund questions, shipping delays, and account logins each wanted a different path. So they added a **router**.' },
+      { type: 'p', text: 'Now the first model call reads the message and picks a category, and that category selects one of three prewritten flows. Each flow is still a level-two chain that the team built by hand. The only new freedom is the choice of which chain to run.' },
+    { type: 'p', text: 'This is a real jump in autonomy but a small one, and that is what makes it safe. The model decides the branch, yet every branch is a road you already paved. The classic failure here is misrouting.' },
+      { type: 'p', text: 'A refund complaint written in polite language gets read as a general question and lands in the wrong flow. You catch that by logging the chosen category and checking how often it is wrong, which is easy because a router only ever picks from a short list you defined. Level three is the right home for problems that split cleanly into a handful of known cases. If you can name the branches, a router will serve you well and stay debuggable.' },
     {
       type: 'h2',
       text: 'Level 4: the agent loop, where the shape stops being yours'
     },
-    {
-      type: 'p',
-      text: 'Then came the request that pushed Otto up a real rung. Customers asked things that needed several lookups in an order nobody could predict. Check the order, then the shipment, then the carrier, then maybe issue a credit, and the right sequence depends on what each step turns up. You cannot pre-wire that, because the path changes with the data. So Maple gave Otto a set of tools and a loop. Now the model looks at what it knows, decides which tool to call, reads the result, and decides again, over and over, until it thinks the job is done. This is the pattern the ReAct paper described: the model reasons about its situation, takes an action, observes the outcome, and repeats.'
-    },
+    { type: 'p', text: 'Then came the request that pushed Otto up a real rung. Customers asked things that needed several lookups in an order nobody could predict. Check the order, then the shipment, then the carrier, then maybe issue a credit, and the right sequence depends on what each step turns up. You cannot pre-wire that, because the path changes with the data.' },
+      { type: 'p', text: 'So Maple gave Otto a set of tools and a loop. Now the model looks at what it knows, decides which tool to call, reads the result, and decides again, over and over, until it thinks the job is done. This is the pattern the ReAct paper described: the model reasons about its situation, takes an action, observes the outcome, and repeats.' },
     {
       type: 'code',
       lang: 'python',
@@ -117,10 +149,8 @@ export const POST = {
     # We never guaranteed it would finish. So we cap it.
     return "Escalating to a human."`
     },
-    {
-      type: 'p',
-      text: 'Read that loop next to the level-two chain and the difference is stark. In the chain, you wrote the steps. Here you wrote the tools and the model writes the steps, fresh, every single run. That is the power: Otto can now handle a case you never sat down and designed. That is also the danger. You cannot promise the order of operations, you cannot promise it will stop, and you cannot promise it will not call a tool at a strange moment. The `max_steps` cap exists precisely because a loop with no guaranteed exit is a loop that can spin forever or burn through your API budget chasing its own tail.'
-    },
+    { type: 'p', text: 'Read that loop next to the level-two chain and the difference is stark. In the chain, you wrote the steps. Here you wrote the tools and the model writes the steps, fresh, every single run.' },
+      { type: 'p', text: 'That is the power: Otto can now handle a case you never sat down and designed. That is also the danger. You cannot promise the order of operations, you cannot promise it will stop, and you cannot promise it will not call a tool at a strange moment. The `max_steps` cap exists precisely because a loop with no guaranteed exit is a loop that can spin forever or burn through your API budget chasing its own tail.' },
     {
       type: 'callout',
       title: 'The cost of the loop is paid in reliability',
@@ -134,10 +164,8 @@ export const POST = {
       type: 'p',
       text: 'The top rung is a system that plans a task, splits it into pieces, hands each piece to a separate agent, and stitches the results back together, correcting itself when a piece comes back wrong. Maple pictured a manager Otto that would delegate shipping questions to a shipping specialist and billing questions to a billing specialist. This is where the word **orchestration** shows up: the coordination logic that decides which agent handles what, in what order, and how their outputs combine.'
     },
-    {
-      type: 'p',
-      text: 'Level five multiplies both the capability and the confusion. Every agent in the group has its own loop with its own unpredictability, and now they talk to each other, so a wrong turn in one can quietly steer another. Debugging means reconstructing a conversation among several non-deterministic parts, each of which ran a path you never wrote. Most teams that reach for level five discover their real problem fit at level three or four, and the extra machinery just added ways to fail. Genuine multi-agent need is rarer than it looks. It shows up when subtasks are truly independent and each needs its own specialized context, not when a single well-equipped loop would have done the job.'
-    },
+    { type: 'p', text: 'Level five multiplies both the capability and the confusion. Every agent in the group has its own loop with its own unpredictability, and now they talk to each other, so a wrong turn in one can quietly steer another. Debugging means reconstructing a conversation among several non-deterministic parts, each of which ran a path you never wrote.' },
+      { type: 'p', text: 'Most teams that reach for level five discover their real problem fit at level three or four, and the extra machinery just added ways to fail. Genuine multi-agent need is rarer than it looks. It shows up when subtasks are truly independent and each needs its own specialized context, not when a single well-equipped loop would have done the job.' },
     {
       type: 'h2',
       text: 'Agent, workflow, and the line between them'
@@ -167,10 +195,8 @@ export const POST = {
       type: 'p',
       text: 'The third and quietest mistake is never climbing back down. Otto reached level four for one genuinely hard category of question and then, for tidiness, the team ran every question through the same loop, including the simple ones a level-two chain had handled perfectly. They traded predictability they had for flexibility they did not need. When they finally routed easy questions back to fixed chains and reserved the loop for the messy cases, their error rate dropped and their on-call nights got quieter.'
     },
-    {
-      type: 'p',
-      text: 'So the takeaway is a question you ask before you build, not after. What is the lowest rung that solves this task? Start there. Climb only when a real requirement forces you up, and when you do climb, add the logging and the caps on the way. Higher autonomy is a tool with a price, and the price is your ability to know what your system will do. Pay it on purpose, for the tasks that need it, and let everything else sit lower on the ladder where you can still see the whole path.'
-    },
+    { type: 'p', text: 'So the takeaway is a question you ask before you build, not after. What is the lowest rung that solves this task?' },
+      { type: 'p', text: 'Start there. Climb only when a real requirement forces you up, and when you do climb, add the logging and the caps on the way. Higher autonomy is a tool with a price, and the price is your ability to know what your system will do. Pay it on purpose, for the tasks that need it, and let everything else sit lower on the ladder where you can still see the whole path.' },
     {
       type: 'sources',
       items: [

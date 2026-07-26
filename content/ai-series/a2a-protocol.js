@@ -4,12 +4,9 @@ export const POST = {
   excerpt: 'Your travel agent needs to book a flight, but the airline runs its own agent built by a different company. A2A is the handshake that lets the two work together without either team hardcoding the other.',
   category: 'AI',
   tags: ['Agents', 'A2A', 'Protocols'],
-  readTime: '8 min read',
   body: [
-    {
-      type: 'p',
-      text: 'You tell your travel planning assistant to sort out a trip to Lisbon. It picks dates, suggests a hotel, and then reaches the part it cannot finish on its own. To actually book a seat, it needs the airline. The airline runs its own assistant, built by a different company, hosted somewhere you have never seen, with rules your travel app does not know. Your travel agent has never been told this airline agent exists. So how does it find it, ask it to do something, and get a confirmed booking back?'
-    },
+    { type: 'p', text: 'You tell your travel planning assistant to sort out a trip to Lisbon. It picks dates, suggests a hotel, and then reaches the part it cannot finish on its own. To actually book a seat, it needs the airline.' },
+      { type: 'p', text: 'The airline runs its own assistant, built by a different company, hosted somewhere you have never seen, with rules your travel app does not know. Your travel agent has never been told this airline agent exists. So how does it find it, ask it to do something, and get a confirmed booking back?' },
     {
       type: 'p',
       text: 'For a long time the honest answer was that it could not, at least not cleanly. Each company wrapped its agent in a private API, and every integration was a custom project. If your travel app wanted to work with four airlines, someone wrote four separate connectors by hand, and each one broke whenever an airline changed something. **A2A**, short for Agent2Agent, is an open protocol meant to end that. It gives agents a shared way to describe themselves, find each other, and pass work back and forth, even when they were built by teams that never spoke.'
@@ -18,10 +15,8 @@ export const POST = {
       type: 'h2',
       text: 'A hotel concierge who knows other concierges'
     },
-    {
-      type: 'p',
-      text: 'Picture a good hotel concierge. You ask for dinner and a show. The concierge does not cook or perform. What they do is know who to call. They have a rolodex of restaurants and box offices, they know what each one can do, and they know how to place a request in a form the other party will accept. You never talk to the restaurant directly. You state what you want, and the concierge routes it, waits for the answer, and comes back to you with a confirmed table.'
-    },
+    { type: 'p', text: 'Picture a good hotel concierge. You ask for dinner and a show. The concierge does not cook or perform.' },
+      { type: 'p', text: 'What they do is know who to call. They have a rolodex of restaurants and box offices, they know what each one can do, and they know how to place a request in a form the other party will accept. You never talk to the restaurant directly. You state what you want, and the concierge routes it, waits for the answer, and comes back to you with a confirmed table.' },
     {
       type: 'p',
       text: 'A2A treats software agents the same way. An agent that needs something it cannot do itself looks for another agent that advertises the right skill, sends a request in an agreed format, and waits for the result. The value is that the two agents do not need a shared codebase or a prearranged contract written by hand. They need only to speak the same protocol. That is the shift worth holding onto before we get into parts.'
@@ -34,14 +29,10 @@ export const POST = {
       type: 'p',
       text: 'Let us walk the Lisbon booking one step at a time. Your travel agent has settled on a flight it wants: a specific route, date, and passenger. It knows the airline publishes an A2A agent, and it has the address. The first thing it does is fetch that agent\'s public description, a small document that lists what the airline agent can do and how to talk to it. Reading that document, the travel agent confirms the airline offers a "book flight" skill and learns which URL to send requests to.'
     },
-    {
-      type: 'p',
-      text: 'Next the travel agent opens a task. It sends a message that says, in structured terms, "book this passenger on this flight" and includes the details. The airline agent accepts the task and starts working. It might need more from your side, say a frequent flyer number, so it can pause and ask. Your travel agent supplies the answer, the airline agent finishes, and it returns a result: a confirmation code, a seat, a receipt. That returned bundle is the payoff. Your travel agent folds it into the trip summary it shows you, and you never saw the two systems negotiate.'
-    },
-    {
-      type: 'p',
-      text: 'Notice how much of that flow depends on the task being a thing with a name and a state, not a single blocking call. Because the booking might take a while, the travel agent does not freeze waiting for a reply. It holds a task id and checks in on it, or receives updates as the state moves along. When the airline agent flips the task into an input-required state, the travel agent knows to gather one more detail rather than assume the whole thing failed. When the state reaches completed, it knows the artifact is ready to collect. This is the same pattern you would use with a slow human colleague. You give them the job, you get a ticket number, and you follow the ticket instead of standing over their desk.'
-    },
+    { type: 'p', text: 'Next the travel agent opens a task. It sends a message that says, in structured terms, "book this passenger on this flight" and includes the details.' },
+      { type: 'p', text: 'The airline agent accepts the task and starts working. It might need more from your side, say a frequent flyer number, so it can pause and ask. Your travel agent supplies the answer, the airline agent finishes, and it returns a result: a confirmation code, a seat, a receipt. That returned bundle is the payoff. Your travel agent folds it into the trip summary it shows you, and you never saw the two systems negotiate.' },
+    { type: 'p', text: 'Notice how much of that flow depends on the task being a thing with a name and a state, not a single blocking call. Because the booking might take a while, the travel agent does not freeze waiting for a reply. It holds a task id and checks in on it, or receives updates as the state moves along.' },
+      { type: 'p', text: 'When the airline agent flips the task into an input-required state, the travel agent knows to gather one more detail rather than assume the whole thing failed. When the state reaches completed, it knows the artifact is ready to collect. This is the same pattern you would use with a slow human colleague. You give them the job, you get a ticket number, and you follow the ticket instead of standing over their desk.' },
     {
       type: 'diagram',
       title: 'Travel agent discovers and delegates to the airline agent',
@@ -125,10 +116,8 @@ export const POST = {
       type: 'h2',
       text: 'Where A2A stops and MCP begins'
     },
-    {
-      type: 'p',
-      text: 'People mix up A2A with MCP, the Model Context Protocol, because both are protocols for AI systems. They solve different problems and fit together. MCP connects a single agent to its tools and data: a database, a file store, a payments API. The thing on the other end of MCP is a resource that does what it is told and has no goals of its own. A2A connects an agent to another agent: a peer that can reason, ask you questions, and run its own multi step process. The thing on the other end of A2A has its own judgment.'
-    },
+    { type: 'p', text: 'People mix up A2A with MCP, the Model Context Protocol, because both are protocols for AI systems. They solve different problems and fit together. MCP connects a single agent to its tools and data: a database, a file store, a payments API.' },
+      { type: 'p', text: 'The thing on the other end of MCP is a resource that does what it is told and has no goals of its own. A2A connects an agent to another agent: a peer that can reason, ask you questions, and run its own multi step process. The thing on the other end of A2A has its own judgment.' },
     {
       type: 'p',
       text: 'A clean way to hold it: MCP is how your agent picks up a tool, A2A is how your agent calls a colleague. In the Lisbon trip, your travel agent might use MCP to read a weather API and query a hotel database, all tools it drives directly. Then it uses A2A to hand the booking to the airline agent, a peer it delegates to rather than controls. The two protocols stack. One gives an agent hands, the other gives it coworkers.'

@@ -4,7 +4,6 @@ export const POST = {
   excerpt: 'You can rent a foundation model in an afternoon. Building one from raw text takes months and millions. Here is the map of every stage in between.',
   category: 'AI',
   tags: ['LLMs', 'Training', 'Pretraining'],
-  readTime: '9 min read',
   body: [
     {
       type: 'p',
@@ -64,26 +63,94 @@ export const POST = {
       type: 'p',
       text: 'The learning signal itself is simpler than it sounds. You take a chunk of text, shift it by one position so each token becomes the target for the token before it, and measure how surprised the model was by the real next token. That surprise is the loss, and training just means reducing it. Walk through one tiny case. The model reads "the cat sat on the" and has to guess the next token. Early in training it might spread its bet evenly across thousands of possibilities, so it is very surprised when the real answer turns out to be "mat", and the loss is high. After enough passes over similar sentences, it learns to put most of its bet on words that fit, the surprise shrinks, and the loss drops. Multiply that single guess by trillions and you have the entire pretraining run. The snippet below shows the core objective in a few lines.',
     },
-    {
-      type: 'code',
-      lang: 'python',
-      title: 'The next-token objective in miniature',
-      code: `import torch
-import torch.nn.functional as F
+    { type: 'lab', packages: ['numpy'], height: 460,
+        title: 'The next-token objective, untrained against trained',
+        caption: 'Three stages of the same model on "the cat sat on mat". Perplexity reads as how many words it is choosing between at each step, so training is the act of walking that bar down to one.',
+        code: `import numpy as np
 
-# logits: model output, shape (batch, seq_len, vocab)
-# tokens: the input ids, shape (batch, seq_len)
+# The next-token objective, small enough to read.
+# No framework: just the shift, and the cross-entropy
+# every language model is trained to push down.
+
+def softmax(z):
+    e = np.exp(z - z.max(axis=-1, keepdims=True))
+    return e / e.sum(axis=-1, keepdims=True)
+
 def next_token_loss(logits, tokens):
-    # predict token t+1 from everything up to t
-    preds = logits[:, :-1, :]      # drop the last position
-    targets = tokens[:, 1:]        # shift left by one
-    # cross-entropy measures how surprised we were
-    loss = F.cross_entropy(
-        preds.reshape(-1, preds.size(-1)),
-        targets.reshape(-1),
-    )
-    return loss  # lower loss means better predictions`,
-    },
+    preds = logits[:, :-1, :]     # drop the last position
+    targets = tokens[:, 1:]       # shift left by one
+    probs = softmax(preds)
+    B, T, V = probs.shape
+    flat = probs.reshape(B * T, V)
+    picked = flat[np.arange(B * T), targets.reshape(-1)]
+    return float(-np.log(picked + 1e-12).mean())
+
+VOCAB = ["the", "cat", "sat", "on", "mat"]
+tokens = np.array([[0, 1, 2, 3, 4]])   # the cat sat on mat
+
+rng = np.random.default_rng(0)
+untrained = rng.normal(size=(1, 5, len(VOCAB)))
+
+# A model that learned this sentence puts its mass
+# on the token that actually comes next.
+trained = np.full((1, 5, len(VOCAB)), -2.0)
+for pos, nxt in enumerate(tokens[0][1:]):
+    trained[0, pos, nxt] = 6.0
+
+# Half-learned: leaning the right way, not yet certain.
+partly = np.full((1, 5, len(VOCAB)), -2.0)
+for pos, nxt in enumerate(tokens[0][1:]):
+    partly[0, pos, nxt] = 1.0
+
+# ---- Report ----------------------------------------
+# Colour marks direction of travel: red is where
+# training starts, gold is progress, green is a model
+# that has learned the sentence.
+E = chr(27)
+DIM, OFF, BOLD = E + "[2m", E + "[0m", E + "[1m"
+OK, WARN, BAD = E + "[32m", E + "[33m", E + "[31m"
+
+V = len(VOCAB)
+
+def bar(ppl, width=12):
+    # Full bar = as unsure as a uniform guess.
+    frac = min((ppl - 1) / (V - 1), 1.0)
+    filled = round(frac * width)
+    return "#" * filled + "." * (width - filled)
+
+note = lambda s: print(DIM + s + OFF)
+
+print(BOLD + "TRAINING" + OFF + "  vocab=%d" % V)
+note("-" * 50)
+note("%-13s %6s %7s  %s"
+     % ("STAGE", "LOSS", "PPL", "STILL UNSURE"))
+
+STAGES = [
+    ("untrained", untrained, BAD),
+    ("half-learned", partly, WARN),
+    ("trained", trained, OK),
+]
+
+for name, logits, colour in STAGES:
+    loss = next_token_loss(logits, tokens)
+    ppl = float(np.exp(loss))
+    print("%-13s %6.3f %7.2f  %s%s%s"
+          % (name, loss, ppl, colour, bar(ppl), OFF))
+
+note("-" * 50)
+print(BOLD + "PPL READS AS" + OFF
+      + "  words it is choosing between per step")
+
+print()
+note("Perplexity is just exp(loss). The untrained")
+note("model is still choosing between several options.")
+note("The trained one has nearly made up its mind.")
+note("Training moves the first number to the second,")
+note("over and over, on a great deal of text.")
+
+# Try it: lower 6.0 to 1.0 in \`trained\` and watch
+# perplexity climb back toward the vocabulary size.
+` },
     {
       type: 'p',
       text: 'How big should the model be, and how much text does it need? That trade-off has a name in this series already, the scaling laws post, and the short version is that model size and data size have to grow together. A famous result from the Chinchilla work showed that many early models were oversized for the amount of text they saw, and that a smaller model trained on more tokens can beat a larger one trained on less. Your **compute budget**, the total amount of processing you can afford, is the real constraint, and it forces you to balance those two dials.',

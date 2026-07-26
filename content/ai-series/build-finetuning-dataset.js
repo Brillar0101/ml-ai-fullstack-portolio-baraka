@@ -4,28 +4,21 @@ export const POST = {
   excerpt: 'A team fine-tuned on fifty thousand scraped examples and shipped a model that was worse than the base. A rival team used two thousand they wrote by hand and won. The gap was never the model. It was the data.',
   category: 'AI',
   tags: ['Fine-tuning', 'Data', 'Instruction Tuning'],
-  readTime: '8 min read',
   body: [
     {
       type: 'p',
-      text: 'Two teams set out to fine-tune the same open base model for the same job: a support assistant that answers product questions in a calm, on-brand voice. The first team moved fast. They scraped fifty thousand question-and-answer pairs from old chat logs, forums, and a pile of internal docs, poured it all into the trainer, and waited. The result answered in three different tones depending on the question, repeated itself, and sometimes leaked half of a support macro into the reply. It scored worse on their own test set than the untouched base model did.'
+      text: 'Picture two teams setting out to fine-tune the same open base model for the same job: a support assistant that answers product questions in a calm, on-brand voice. The first team moved fast. They scraped fifty thousand question-and-answer pairs from old chat logs, forums, and a pile of internal docs, poured it all into the trainer, and waited. The result answered in three different tones depending on the question, repeated itself, and sometimes leaked half of a support macro into the reply. It scored worse on their own test set than the untouched base model did.'
     },
-    {
-      type: 'p',
-      text: 'The second team was slower and, on paper, looked lazy. They wrote and curated two thousand examples by hand, checked each one, and threw away anything that felt off. Their model came out steady, consistent, and clearly better than the base. Same architecture, same trainer, same number of training epochs. The only thing that changed was the data going in. This post is about how the second team built their dataset, because that dataset is the real product, and the model is just what falls out of it.'
-    },
+    { type: 'p', text: 'The second team was slower and, on paper, looked lazy. They wrote and curated two thousand examples by hand, checked each one, and threw away anything that felt off.' },
+      { type: 'p', text: 'Their model came out steady, consistent, and clearly better than the base. Same architecture, same trainer, same number of training epochs. The only thing that changed was the data going in. This post is about how the second team built their dataset, because that dataset is the real product, and the model is just what falls out of it.' },
     {
       type: 'h2',
       text: 'The model copies your data, flaws and all'
     },
-    {
-      type: 'p',
-      text: 'Here is the intuition that makes everything else click. Fine-tuning does not teach a model new facts so much as it teaches a **behavior**: given this kind of request, respond in this kind of way. The model learns that behavior by imitating the examples you show it. If half your examples are curt and half are chatty, the model learns to be randomly curt or chatty. If a tenth of your examples contain a formatting glitch, the model learns that the glitch is sometimes correct. It has no way to know which examples were good and which slipped through. Every row you include is a small vote for how the model should act.'
-    },
-    {
-      type: 'p',
-      text: 'That is why volume alone can hurt you. Fifty thousand rows scraped without inspection carry fifty thousand votes, and a large share of them vote for the wrong thing. Two thousand clean rows carry two thousand votes that all point the same direction. The famous LIMA result put a number on this idea: a strong base model fine-tuned on roughly a thousand carefully written examples produced answers people preferred over models trained on far more. The lesson was that most of what a model needs to sound helpful is already inside the base model, and a small, clean dataset mostly wakes it up. Your job is to make sure every vote counts.'
-    },
+    { type: 'p', text: 'Here is the intuition that makes everything else click. Fine-tuning does not teach a model new facts so much as it teaches a **behavior**: given this kind of request, respond in this kind of way. The model learns that behavior by imitating the examples you show it.' },
+      { type: 'p', text: 'If half your examples are curt and half are chatty, the model learns to be randomly curt or chatty. If a tenth of your examples contain a formatting glitch, the model learns that the glitch is sometimes correct. It has no way to know which examples were good and which slipped through. Every row you include is a small vote for how the model should act.' },
+    { type: 'p', text: 'That is why volume alone can hurt you. Fifty thousand rows scraped without inspection carry fifty thousand votes, and a large share of them vote for the wrong thing. Two thousand clean rows carry two thousand votes that all point the same direction.' },
+      { type: 'p', text: 'The famous LIMA result put a number on this idea: a strong base model fine-tuned on roughly a thousand carefully written examples produced answers people preferred over models trained on far more. The lesson was that most of what a model needs to sound helpful is already inside the base model, and a small, clean dataset mostly wakes it up. Your job is to make sure every vote counts.' },
     {
       type: 'h2',
       text: 'What one example actually looks like'
@@ -80,40 +73,100 @@ export const POST = {
       type: 'p',
       text: 'Once you have raw pairs, the middle of the pipeline is where a bad dataset becomes a good one. First you normalize every example into the same instruction shape so the trainer sees one consistent structure. Then you filter: drop rows with an empty answer, answers that are one word when the task needs a paragraph, or answers that are suspiciously long and rambling. Then you deduplicate, because scraped data is full of the same question asked ten times, and ten copies of one row teach the model that this one row is ten times as important as it should be. The code below shows the core of that pass on a small batch of raw pairs.'
     },
-    {
-      type: 'code',
-      lang: 'python',
-      title: 'Format raw pairs and drop bad or duplicate rows',
-      code: `import re
+    { type: 'lab', height: 460,
+        title: 'Filtering raw pairs into a dataset worth training on',
+        caption: 'Five of eight rows thrown away. Three people asked the same password question with different spacing and capitals, and normalising before comparing is what collapses them into one row rather than three.',
+        code: `import re
+
+# Turning raw support transcripts into a finetuning set.
+# The filtering is the job: what you throw away shapes
+# the model more than what you keep.
+
+RAW_PAIRS = [
+    {"question": "  How do I reset my password?  ",
+     "answer": "Open Settings, Security, then Reset."},
+    {"question": "how do I reset my password",
+     "answer": "Open Settings, Security, then Reset."},
+    {"question": "HOW DO I RESET MY PASSWORD?!",
+     "answer": "Open Settings, Security, then Reset."},
+    {"question": "Where is my invoice?", "answer": "ok"},
+    {"question": "Do you support SSO?",
+     "answer": "Yes, on Enterprise. Upload SAML first."},
+    {"question": "", "answer": "Contact support."},
+    {"question": "Can I export my data?",
+     "answer": "Yes. " + "Go to Settings, Export. " * 99},
+    {"question": "What are the rate limits?",
+     "answer": "One hundred requests per minute."},
+]
 
 def to_example(pair):
-    instruction = pair["question"].strip()
-    output = pair["answer"].strip()
-    return {"instruction": instruction, "input": "", "output": output}
+    return {"instruction": pair["question"].strip(),
+            "input": "",
+            "output": pair["answer"].strip()}
 
 def is_good(ex):
     if not ex["instruction"] or not ex["output"]:
-        return False
-    if len(ex["output"].split()) < 3:      # too short to be a real answer
-        return False
-    if len(ex["output"].split()) > 400:    # likely a leaked macro or dump
-        return False
-    return True
+        return False, "empty field"
+    n = len(ex["output"].split())
+    if n < 3:
+        return False, "too short to teach anything"
+    if n > 400:
+        return False, "a pasted macro or transcript dump"
+    return True, None
 
 def norm(text):
-    return re.sub(r"\\s+", " ", text.lower()).strip()
+    t = re.sub(r"\\s+", " ", text.lower()).strip()
+    return re.sub(r"[^a-z0-9 ]", "", t)
 
-clean, seen = [], set()
-for pair in raw_pairs:
+# ---- Report --------------------------------------------
+E = chr(27)
+DIM, OFF, BOLD = E + "[2m", E + "[0m", E + "[1m"
+OK, WARN, BAD = E + "[32m", E + "[33m", E + "[31m"
+note = lambda s: print(DIM + s + OFF)
+
+clean, seen, dropped = [], set(), []
+for pair in RAW_PAIRS:
     ex = to_example(pair)
-    if not is_good(ex):
+    ok, why = is_good(ex)
+    label = ex["instruction"][:26] or "(empty)"
+    if not ok:
+        dropped.append((label, why, BAD))
         continue
     key = norm(ex["instruction"]) + "|" + norm(ex["output"])
-    if key in seen:                        # exact-ish duplicate, skip it
+    if key in seen:
+        dropped.append((label, "duplicate row", WARN))
         continue
     seen.add(key)
-    clean.append(ex)`
-    },
+    clean.append((label, ex))
+
+n_raw = len(RAW_PAIRS)
+print(BOLD + "DATASET" + OFF + "  %d raw pairs in" % n_raw)
+note("-" * 54)
+note("%-28s %s" % ("ROW", "VERDICT"))
+
+for label, _ in clean:
+    print("%-28s %sKEEP%s" % (label, OK, OFF))
+for label, why, colour in dropped:
+    print("%-28s %sDROP%s  %s%s%s"
+          % (label, colour, OFF, DIM, why, OFF))
+
+note("-" * 54)
+kept = len(clean)
+pct = 100.0 * kept / n_raw
+bar = "#" * kept + "." * len(dropped)
+print(BOLD + "KEPT" + OFF + "  %s%s%s  %d of %d (%.0f%%)"
+      % (OK, bar, OFF, kept, n_raw, pct))
+
+print()
+note("Three people asked one password question with")
+note("different spacing, capitals and punctuation.")
+note("Normalising before comparing makes them one row,")
+note("not three. Three copies of one answer is how a")
+note("model learns to give that answer too often.")
+
+# Try it: drop norm() from the key and watch the shouty
+# duplicate survive. Now picture that at real scale.
+` },
     {
       type: 'p',
       text: 'This is deliberately simple, and simple is the right starting point. The exact-match dedup key catches obvious repeats. For near-duplicates that differ by a word or two, teams reach for fuzzy methods like comparing text embeddings and dropping pairs that sit above a similarity threshold, but do not add that until you have measured that plain dedup is not enough. Getting the boring filters right first removes most of the damage.'
@@ -126,10 +179,8 @@ for pair in raw_pairs:
       type: 'p',
       text: 'After cleaning, look at what tasks are actually in your set. Scraped data is almost always lopsided: maybe seventy percent of your examples are one common question type and the tasks you care about most are barely present. If you train on that as-is, the model gets great at the common case and stays weak everywhere else. Balancing means capping the over-represented tasks and adding examples, often synthetic ones, for the under-represented ones, so the mix roughly matches how you want the model to spend its attention.'
     },
-    {
-      type: 'p',
-      text: 'The last step is the one people skip and later regret. Before training, pull out a **validation split**, say five to ten percent of your examples, and never train on them. This held-out slice is how you find out whether the model learned the behavior or just memorized rows. There is one rule that cannot bend: an example that appears in training must never also appear in validation. If it does, the model has effectively seen the answer key, your validation score looks great, and the real-world performance quietly disappoints. Deduplicate across the split boundary, not just within training, or the leak sneaks back in.'
-    },
+    { type: 'p', text: 'The last step is the one people skip and later regret. Before training, pull out a **validation split**, say five to ten percent of your examples, and never train on them. This held-out slice is how you find out whether the model learned the behavior or just memorized rows.' },
+      { type: 'p', text: 'There is one rule that cannot bend: an example that appears in training must never also appear in validation. If it does, the model has effectively seen the answer key, your validation score looks great, and the real-world performance quietly disappoints. Deduplicate across the split boundary, not just within training, or the leak sneaks back in.' },
     {
       type: 'callout',
       title: 'The mistakes that quietly wreck a run',
@@ -139,10 +190,8 @@ for pair in raw_pairs:
       type: 'h2',
       text: 'What to hold onto'
     },
-    {
-      type: 'p',
-      text: 'The story of the two teams is not really about size. The scraped fifty thousand lost because most of those rows voted for behavior nobody wanted, and the two thousand won because every row was a clear vote for the same clean behavior. So treat your dataset as the thing you are actually building. Write down one prompt template and use it everywhere. Clean, deduplicate, and balance before you ever launch a training run. Hold out a validation split and guard it from leaks. If you get the data right, a modest model will surprise you, and if you get it wrong, no amount of compute will save you.'
-    },
+    { type: 'p', text: 'The story of the two teams is not really about size. The scraped fifty thousand lost because most of those rows voted for behavior nobody wanted, and the two thousand won because every row was a clear vote for the same clean behavior.' },
+      { type: 'p', text: 'So treat your dataset as the thing you are actually building. Write down one prompt template and use it everywhere. Clean, deduplicate, and balance before you ever launch a training run. Hold out a validation split and guard it from leaks. If you get the data right, a modest model will surprise you, and if you get it wrong, no amount of compute will save you.' },
     {
       type: 'sources',
       items: [

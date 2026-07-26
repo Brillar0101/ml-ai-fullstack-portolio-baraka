@@ -92,7 +92,10 @@
 /* ---- Layout: Content + Sidebar ---- */
 .blog-post-layout {
   display: grid;
-  grid-template-columns: 1fr 320px;
+  /* minmax(0, ...) rather than 1fr: a bare 1fr takes its minimum from the
+     item's min-content, so a single wide descendant pushes the column past
+     the viewport and the whole page scrolls sideways. */
+  grid-template-columns: minmax(0, 1fr) 320px;
   gap: var(--space-3xl);
   align-items: start;
 }
@@ -148,6 +151,27 @@
   border-top-right-radius: 0;
 }
 .blog-post-content .series-code pre { margin-bottom: 0; }
+
+/* Runnable lab block: same filename tab as a static code block, sitting
+   directly on top of the editor so the two read as one unit. */
+.blog-post-content .series-lab figcaption + .lab {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+.blog-post-content .series-lab figcaption + .lab .lab-bar {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+.blog-post-content .series-lab .series-lab-caption {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.55;
+  background: none;
+  border: none;
+  border-radius: 0;
+  padding: 10px 2px 0;
+  text-align: left;
+}
 
 /* Image block (real document screenshots, annotated figures) */
 .blog-post-content .series-image {
@@ -854,7 +878,7 @@
 /* ---- Responsive ---- */
 @media (max-width: 1023px) {
   .blog-post-layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .blog-post-sidebar {
@@ -924,12 +948,14 @@
 .series-toc ol {
   margin: 0;
   padding-left: 20px;
-  display: grid;
-  gap: 6px;
+}
+.series-toc li + li {
+  margin-top: 6px;
 }
 .series-toc li {
   font-size: 15px;
   line-height: 1.4;
+  overflow-wrap: break-word;
 }
 .series-toc a {
   color: var(--primary);
@@ -942,4 +968,93 @@
 /* Anchor targets clear the sticky nav when jumped to from the TOC */
 .blog-post-content h2[id] {
   scroll-margin-top: 96px;
+}
+
+/* Inline reference links in body prose. These sit inside justified paragraphs,
+   so they carry a faint underline at rest rather than a colour change alone,
+   and firm up on hover. Several in one paragraph still read as prose. */
+.blog-post-content .series-inline-link {
+  color: var(--primary);
+  border-bottom: 1px solid color-mix(in srgb, var(--primary) 30%, transparent);
+}
+.blog-post-content .series-inline-link:hover {
+  border-bottom-color: var(--primary);
+}
+
+/* ---- Phone ----
+   Justified text needs a wide measure to look right. In a narrow column the
+   browser stretches word spacing to force flush edges and you get rivers of
+   whitespace running down the paragraph, which is exactly the opposite of what
+   a scanning reader needs. Left-align below tablet width.
+   The justified setting is deliberate on desktop; this only overrides it where
+   the column is too narrow to carry it. */
+@media (max-width: 767px) {
+  .blog-post-content p {
+    text-align: left;
+    hyphens: none;
+    font-size: 16px;
+    line-height: 1.65;
+  }
+
+  /* Long unbroken strings (URLs, ERR_4011, function names) must not push the
+     page sideways. */
+  .blog-post-content p,
+  .blog-post-content li,
+  .blog-post-content .series-terms li {
+    overflow-wrap: break-word;
+  }
+
+  /* Wide content scrolls inside its own box, never the page body. */
+  .blog-post-content pre,
+  .blog-post-content .series-code pre {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .blog-test-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  /* The in-post table of contents becomes a real navigation aid on a phone,
+     where scrolling past 2,000 words is expensive. Give the links room. */
+  .blog-post-content .series-toc li a,
+  .blog-post-content .series-sources li a {
+    display: inline-block;
+    padding: 4px 0;
+    min-height: 32px;
+  }
+
+  .blog-post-content h2 {
+    font-size: 19px;
+    margin: 32px 0 12px;
+  }
+
+  .blog-post-content .series-image,
+  .blog-post-content .series-lab,
+  .blog-post-content .series-code {
+    margin-inline: 0;
+  }
+}
+
+/* Nothing on the page may cause a sideways scroll of the document itself. */
+.blog-post-content {
+  overflow-wrap: break-word;
+}
+
+/* Belt and braces: nothing inside an article may widen the article. */
+.blog-post-content,
+.blog-post-content > * {
+  max-width: 100%;
+}
+
+/* The lab output panel is a terminal and must stay dark in both themes: the
+   status palette it uses (green pass, gold flaky, red fail) is built for a
+   dark ground, and the generic `pre` rule above would otherwise repaint it
+   light and leave the text unreadable. Specificity is deliberate here. */
+.blog-post-content .lab .lab-output {
+  background: #05060a;
+  color: var(--lab-fg);
+  border-radius: 0;
 }

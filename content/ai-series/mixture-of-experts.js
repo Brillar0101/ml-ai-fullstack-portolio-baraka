@@ -4,7 +4,6 @@ export const POST = {
   excerpt: 'A dense model runs every parameter for every token. Mixture of Experts keeps a huge pile of parameters around but wakes up only a couple of them per word. Here is how that trick works and where it bites.',
   category: 'AI',
   tags: ['LLMs', 'Mixture of Experts', 'Architecture'],
-  readTime: '8 min read',
   body: [
     {
       type: 'p',
@@ -40,7 +39,7 @@ export const POST = {
     },
     {
       type: 'p',
-      text: "Now the arithmetic. Mixtral holds around 47 billion parameters in total across all eight experts and the shared layers. But any one token only ever visits two experts per layer, so the compute for a single token lands near 13 billion parameters. You store a 47 billion parameter model. You pay compute closer to a 13 billion parameter model. The bank’s bot can be large in knowledge yet cheap in the moment it answers."
+      text: "Now the arithmetic. Mixtral holds around 47 billion parameters in total across all eight experts and the shared layers. But any one token only ever visits two experts per layer, so the compute for a single token lands near 13 billion parameters. You store a 47 billion parameter model. You pay compute closer to a 13 billion parameter model. The bank's bot can be large in knowledge yet cheap in the moment it answers."
     },
     {
       type: 'diagram',
@@ -89,26 +88,90 @@ export const POST = {
     },
     {
       type: 'p',
-      text: "The router is small and it does very little. It takes the token’s hidden vector, multiplies it by one weight matrix, and produces one score per expert. Those scores go through a softmax so they read as weights that sum to one. Then it keeps the top two, renormalizes just those two so they again sum to one, and uses them to blend the two expert outputs. Here is the core of it in a few lines."
+      text: "The router is small and it does very little. It takes the token's hidden vector, multiplies it by one weight matrix, and produces one score per expert. Those scores go through a softmax so they read as weights that sum to one. Then it keeps the top two, renormalizes just those two so they again sum to one, and uses them to blend the two expert outputs. Here is the core of it in a few lines."
     },
-    {
-      type: 'code',
-      lang: 'python',
-      title: 'A top-2 router weighting two expert outputs',
-      code: `import torch
-import torch.nn.functional as F
+    { type: 'lab', packages: ['numpy'], height: 460,
+        title: 'A top-2 router in front of four experts',
+        caption: 'Eight experts defined, two run per token. The lanes show which woke up for each token, and the params-to-compute gap underneath is the whole architecture: adding experts grows the parameter count without growing the work done per token.',
+        code: `import numpy as np
 
-def moe_layer(x, gate_w, experts, k=2):
-    # x: one token vector, shape [d]
-    scores = x @ gate_w          # raw score per expert, shape [num_experts]
-    top_val, top_idx = scores.topk(k)   # keep the k best experts
-    weights = F.softmax(top_val, dim=-1)  # renormalize only the winners
+# A top-2 router in front of eight experts. The
+# "experts" are trivial linear maps, not trained ones.
+# What matters is the gap between how many exist and
+# how many actually run.
 
-    out = torch.zeros_like(x)
-    for w, i in zip(weights, top_idx):
-        out = out + w * experts[i](x)   # run ONLY the chosen experts
-    return out                          # weighted blend of k expert outputs`
-    },
+rng = np.random.default_rng(0)
+D, N_EXPERTS, K = 6, 8, 2
+
+gate_w = rng.normal(size=(D, N_EXPERTS))   # the router
+expert_w = [rng.normal(size=(D, D)) * 0.3
+            for _ in range(N_EXPERTS)]
+experts = [(lambda x, W=W: x @ W) for W in expert_w]
+
+def softmax(v):
+    e = np.exp(v - v.max())
+    return e / e.sum()
+
+def moe_layer(x, gate_w, experts, k=K):
+    scores = x @ gate_w              # score per expert
+    top = np.argsort(scores)[-k:][::-1]   # k best
+    weights = softmax(scores[top])   # renormalise
+    out = np.zeros_like(x)
+    for w, i in zip(weights, top):
+        out = out + w * experts[i](x)  # ONLY these run
+    return out, top, weights
+
+TOKENS = ["billing", "login", "shipping",
+          "refund", "returns"]
+
+# ---- Report --------------------------------------------
+E = chr(27)
+DIM, OFF, BOLD = E + "[2m", E + "[0m", E + "[1m"
+OK, MUTE, INFO = E + "[32m", E + "[90m", E + "[34m"
+note = lambda s: print(DIM + s + OFF)
+
+def lanes(top, n):
+    # One column per expert: lit if it ran.
+    cells = []
+    for i in range(n):
+        lit = OK + "#" + OFF
+        cells.append(lit if i in top else MUTE + "." + OFF)
+    return "".join(cells)
+
+print(BOLD + "MoE LAYER" + OFF + "  %d experts, top-%d"
+      % (N_EXPERTS, K))
+note("-" * 52)
+note("%-10s %-9s %s" % ("TOKEN", "PICKED", "WHO RAN"))
+
+used = set()
+for name in TOKENS:
+    x = rng.normal(size=D)
+    _, top, w = moe_layer(x, gate_w, experts)
+    used.update(top.tolist())
+    picked = ",".join(str(i) for i in top)
+    print("%-10s %-9s %s"
+          % (name, picked, lanes(top, N_EXPERTS)))
+
+note("-" * 52)
+total = N_EXPERTS * D * D
+active = K * D * D
+print(BOLD + "PARAMS" + OFF + "   %s%d%s in the layer"
+      % (INFO, total, OFF))
+pct = 100.0 * active / total
+print(BOLD + "COMPUTE" + OFF + "  %s%d%s per token %s(%.0f%%)%s"
+      % (OK, active, OFF, DIM, pct, OFF))
+
+print()
+note("That gap is the architecture. Add experts and the")
+note("parameter count grows; compute per token does not,")
+note("because k stays at %d. The router picks who wakes."
+     % K)
+note("Across these tokens it used %d of %d experts."
+     % (len(used), N_EXPERTS))
+
+# Try it: set K = N_EXPERTS. The model is dense again,
+# compute hits 100%, and the router stops mattering.
+` },
     {
       type: 'p',
       text: "The line that matters is the loop. It runs only the chosen experts. The other six never get called, so their weights never touch the math for this token. That single choice is where the compute savings come from. Everything else in the layer, the attention and the normalization, stays exactly as it is in a dense Transformer."

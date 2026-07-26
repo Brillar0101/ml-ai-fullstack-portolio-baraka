@@ -4,20 +4,15 @@ export const POST = {
   excerpt: 'Your right answer keeps landing at rank 8, never in the top 3 you send the model. A reranker reads the query and each chunk together and pulls the good ones up.',
   category: 'AI',
   tags: ['RAG', 'Reranking', 'Retrieval'],
-  readTime: '8 min read',
   body: [
-    {
-      type: 'p',
-      text: 'A support team shipped a RAG assistant that answered questions about their product docs. It worked, mostly. Then a specific complaint kept coming back: for a whole class of questions about billing edge cases, the assistant gave vague or wrong answers even though the correct paragraph was sitting right there in the knowledge base. Someone finally logged the raw retrieval output instead of just the final answer. The correct passage was being retrieved every single time. It was landing at rank 8. The system only fed the top 3 chunks to the model, so the one paragraph that actually held the answer never made it into the prompt.'
-    },
+    { type: 'p', text: 'Picture a RAG assistant answering questions about a product doc set. It works, mostly. Then a specific complaint kept coming back: for a whole class of questions about billing edge cases, the assistant gave vague or wrong answers even though the correct paragraph was sitting right there in the knowledge base.' },
+      { type: 'p', text: 'Someone finally logged the raw retrieval output instead of just the final answer. The correct passage was being retrieved every single time. It was landing at rank 8. The system only fed the top 3 chunks to the model, so the one paragraph that actually held the answer never made it into the prompt.' },
     {
       type: 'p',
       text: 'Nothing was broken in the usual sense. The database was fine, the embeddings were fine, the passage existed and was findable. The problem was ordering. The first pass of retrieval knew the answer was somewhere in the top ten, but it could not tell that rank 8 was better than rank 2. Fixing that gap is what reranking does, and it usually costs you almost nothing to add.'
     },
-    {
-      type: 'p',
-      text: 'This is worth sitting with for a second, because it changes how you debug a RAG system. Most people, when the answer is wrong, assume the answer was not found. They go widen the index, re-chunk the documents, or swap the embedding model. All of that is expensive and often beside the point. The billing team spent two weeks convinced their embeddings were bad. The moment they logged raw ranks instead of final answers, the real shape of the problem showed up: retrieval was doing its job, the ranking was not, and those are two different failures with two different fixes.'
-    },
+    { type: 'p', text: 'This is worth sitting with for a second, because it changes how you debug a RAG system. Most people, when the answer is wrong, assume the answer was not found.' },
+      { type: 'p', text: 'They go widen the index, re-chunk the documents, or swap the embedding model. All of that is expensive and often beside the point. The billing team spent two weeks convinced their embeddings were bad. The moment they logged raw ranks instead of final answers, the real shape of the problem showed up: retrieval was doing its job, the ranking was not, and those are two different failures with two different fixes.' },
     {
       type: 'h2',
       text: 'Why fast retrieval is only roughly right'
@@ -26,14 +21,10 @@ export const POST = {
       type: 'p',
       text: 'Here is the intuition. When you build a vector search system, you turn every chunk of your documents into a fixed list of numbers, an embedding, and store it ahead of time. At query time you turn the question into numbers the same way and grab the chunks whose numbers sit closest. This is fast because all the document math is done in advance. You are just measuring distances against vectors that already exist, and specialized indexes let you do that across millions of chunks in a few milliseconds.'
     },
-    {
-      type: 'p',
-      text: 'The speed comes from a compromise. The document got compressed into its vector before anyone knew what question you would ask. That single vector has to stand in for the passage against every possible query. So the match is approximate. It reliably pulls relevant material into a rough shortlist, but the exact order inside that shortlist is noisy. The genuinely best passage might sit at rank 8 while three shallower matches sit above it. For the billing team, that noise was the whole bug.'
-    },
-    {
-      type: 'p',
-      text: 'It helps to picture what actually confuses the first pass. A question about being charged twice on an annual plan shares a lot of surface vocabulary with passages about annual plans, about charges, and about billing in general. Those neighbors look close in vector space because they talk about the same things. The one passage that explains the double-charge scenario might use slightly different words and end up looking a touch farther away, even though it is the only one that answers the question. The bi-encoder cannot weigh which topical overlap actually resolves the question, because it never got to read the question and the passage in the same breath. It only compared two summaries.'
-    },
+    { type: 'p', text: 'The speed comes from a compromise. The document got compressed into its vector before anyone knew what question you would ask. That single vector has to stand in for the passage against every possible query.' },
+      { type: 'p', text: 'So the match is approximate. It reliably pulls relevant material into a rough shortlist, but the exact order inside that shortlist is noisy. The genuinely best passage might sit at rank 8 while three shallower matches sit above it. For the billing team, that noise was the whole bug.' },
+    { type: 'p', text: 'It helps to picture what actually confuses the first pass. A question about being charged twice on an annual plan shares a lot of surface vocabulary with passages about annual plans, about charges, and about billing in general. Those neighbors look close in vector space because they talk about the same things.' },
+      { type: 'p', text: 'The one passage that explains the double-charge scenario might use slightly different words and end up looking a touch farther away, even though it is the only one that answers the question. The bi-encoder cannot weigh which topical overlap actually resolves the question, because it never got to read the question and the passage in the same breath. It only compared two summaries.' },
     {
       type: 'h2',
       text: 'Two ways to compare a question and a passage'
@@ -51,22 +42,16 @@ export const POST = {
         { term: 'Two-stage retrieval', def: 'The pattern of retrieving a wide shortlist cheaply, then rescoring only that shortlist with an expensive model. You get broad recall from stage one and sharp precision from stage two.' }
       ]
     },
-    {
-      type: 'p',
-      text: 'A bi-encoder is what your vector database uses. It never sees the query and the passage side by side. It only compares two summaries that were each written in isolation. A cross-encoder reads them together, so it can notice that the passage answers this exact question rather than merely sharing a topic with it. That joint reading is what makes it accurate, and it is also why you cannot use it for the first pass. To score a query against a million passages, a cross-encoder would have to run a million times per query, once for each pair. That is minutes of compute for one search. So you keep it out of the hot path and only let it look at a short list.'
-    },
+    { type: 'p', text: 'A bi-encoder is what your vector database uses. It never sees the query and the passage side by side. It only compares two summaries that were each written in isolation. A cross-encoder reads them together, so it can notice that the passage answers this exact question rather than merely sharing a topic with it.' },
+      { type: 'p', text: 'That joint reading is what makes it accurate, and it is also why you cannot use it for the first pass. To score a query against a million passages, a cross-encoder would have to run a million times per query, once for each pair. That is minutes of compute for one search. So you keep it out of the hot path and only let it look at a short list.' },
     {
       type: 'h2',
       text: 'The retrieve-then-rerank pipeline'
     },
-    {
-      type: 'p',
-      text: 'Put the two together and you get the standard shape. The bi-encoder casts a wide net and pulls in the top 50 or so candidates fast. The cross-encoder then reads all 50 against the query and rescores them. You keep the top 5 of that reordered list and send only those to the language model. Stage one buys you recall, the near certainty that the right passage is somewhere in the 50. Stage two buys you precision, the confidence that the right passage is now near the top.'
-    },
-    {
-      type: 'p',
-      text: 'The split of labor is the clever part. You never ask the slow model to do the impossible job of reading a million passages, and you never ask the fast model to do the delicate job of fine ordering. Each model does the thing it is good at. The bi-encoder is a coarse filter that turns a million candidates into fifty. The cross-encoder is a precise judge that turns fifty into a ranked five. The wider you make that shortlist, the less likely you are to lose the right answer before the judge ever sees it, but the more the judge has to read. Fifty is a common sweet spot. It is wide enough to almost always contain the answer and small enough that the rescoring stays cheap.'
-    },
+    { type: 'p', text: 'Put the two together and you get the standard shape. The bi-encoder casts a wide net and pulls in the top 50 or so candidates fast.' },
+      { type: 'p', text: 'The cross-encoder then reads all 50 against the query and rescores them. You keep the top 5 of that reordered list and send only those to the language model. Stage one buys you recall, the near certainty that the right passage is somewhere in the 50. Stage two buys you precision, the confidence that the right passage is now near the top.' },
+    { type: 'p', text: 'The split of labor is the clever part. You never ask the slow model to do the impossible job of reading a million passages, and you never ask the fast model to do the delicate job of fine ordering. Each model does the thing it is good at. The bi-encoder is a coarse filter that turns a million candidates into fifty.' },
+      { type: 'p', text: 'The cross-encoder is a precise judge that turns fifty into a ranked five. The wider you make that shortlist, the less likely you are to lose the right answer before the judge ever sees it, but the more the judge has to read. Fifty is a common sweet spot. It is wide enough to almost always contain the answer and small enough that the rescoring stays cheap.' },
     {
       type: 'diagram',
       nodes: [
@@ -78,10 +63,8 @@ export const POST = {
       ],
       caption: 'Wide and cheap first, narrow and accurate second. The cross-encoder only ever sees 50 candidates, never the full corpus.'
     },
-    {
-      type: 'p',
-      text: 'For the billing bug, this was the entire fix. The correct passage was already in the top 50 from stage one, because recall was never the problem. When the cross-encoder read that passage together with the actual question, it scored it well above the shallow topic matches that had been crowding it out. It moved from rank 8 to rank 1, landed inside the top 5, and reached the model. No new documents, no re-embedding, no prompt rewrite. One rescoring step.'
-    },
+    { type: 'p', text: 'For the billing bug, this was the entire fix. The correct passage was already in the top 50 from stage one, because recall was never the problem.' },
+      { type: 'p', text: 'When the cross-encoder read that passage together with the actual question, it scored it well above the shallow topic matches that had been crowding it out. It moved from rank 8 to rank 1, landed inside the top 5, and reached the model. No new documents, no re-embedding, no prompt rewrite. One rescoring step.' },
     {
       type: 'h2',
       text: 'Running a reranker over your candidates'
@@ -90,30 +73,98 @@ export const POST = {
       type: 'p',
       text: 'In code this is smaller than people expect. You already have your shortlist from the vector search. You pair the query with each candidate, hand every pair to the cross-encoder, and sort by the scores it returns.'
     },
-    {
-      type: 'code',
-      lang: 'python',
-      title: 'Rerank a shortlist with a cross-encoder',
-      code: `from sentence_transformers import CrossEncoder
+    { type: 'lab', height: 460,
+        title: 'A shortlist, before and after reranking',
+        caption: 'The passage that answers the question shares not one word with it, so topic matching ranked it last of five. Reading the pair together moved it to first. Note the second column: cut before the rerank and you throw away the answer.',
+        code: `# Why a reranker earns its place. A bi-encoder embeds
+# the query and each passage SEPARATELY, so it can only
+# ask "same topic?". A cross-encoder reads the pair
+# together and asks "does this answer the question?"
 
-# a small, fast cross-encoder trained for relevance scoring
-reranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
+QUERY = "Why was I charged twice on my annual plan?"
 
-query = "Why was I charged twice on an annual plan?"
+PASSAGES = [
+    ("billed once every 12 months", "annual"),
+    ("upgrade or downgrade any time", "annual"),
+    ("a repeated transaction is reversed "
+     "within five working days", "duplicate"),
+    ("annual pricing is on the pricing page", "annual"),
+    ("monthly plans charge on the same day", "monthly"),
+]
 
-# candidates came from your fast vector search (the top 50)
-candidates = retrieve_top_k(query, k=50)  # list of passage strings
+def stem(w):
+    w = w.strip("?.,!").lower()
+    for suf in ("ed", "es", "s"):
+        if len(w) > 4 and w.endswith(suf):
+            return w[: -len(suf)]
+    return w
 
-# score the query against each candidate, read jointly
-pairs = [(query, passage) for passage in candidates]
-scores = reranker.predict(pairs)
+def bi_encoder(query, text):
+    """Topic overlap: what an embedding roughly does.
+    Shared subject, not the user's actual problem."""
+    q = {stem(w) for w in query.split()}
+    p = {stem(w) for w in text.split()}
+    return len(q & p) / (len(q) ** 0.5 * len(p) ** 0.5)
 
-# sort candidates by the cross-encoder score, best first
-ranked = sorted(zip(scores, candidates), reverse=True)
+def cross_encoder(query, text, kind):
+    """Reads query and passage jointly, so it can notice
+    that a repeat charge is the actual complaint."""
+    score = bi_encoder(query, text) * 0.4
+    if kind == "duplicate":
+        score += 0.9      # actually resolves the complaint
+    if kind == "monthly":
+        score -= 0.2      # wrong plan type
+    return score
 
-# keep only the few you will actually send to the LLM
-top_passages = [passage for _, passage in ranked[:5]]`
-    },
+stage1 = sorted(PASSAGES,
+                key=lambda p: -bi_encoder(QUERY, p[0]))
+stage2 = sorted(stage1,
+                key=lambda p: -cross_encoder(QUERY, *p))
+KEEP = 2
+
+# ---- Report --------------------------------------------
+E = chr(27)
+DIM, OFF, BOLD = E + "[2m", E + "[0m", E + "[1m"
+OK, BAD, MUTE = E + "[32m", E + "[31m", E + "[90m"
+note = lambda s: print(DIM + s + OFF)
+
+hdr = BOLD + "RERANK" + OFF
+print(hdr + "  %d candidates, keep %d"
+      % (len(PASSAGES), KEEP))
+note("-" * 54)
+note("%-28s %6s %6s %s"
+     % ("PASSAGE", "BEFORE", "AFTER", "MOVE"))
+
+for text, kind in stage2:
+    r1 = stage1.index((text, kind)) + 1
+    r2 = stage2.index((text, kind)) + 1
+    delta = r1 - r2
+    if delta > 0:
+        colour, move = OK, "up %d" % delta
+    elif delta < 0:
+        colour, move = BAD, "down %d" % -delta
+    else:
+        colour, move = MUTE, "same"
+    mark = " <-" if r2 <= KEEP else ""
+    print("%-28s %6d %6d %s%-7s%s%s"
+          % (text[:28], r1, r2, colour, move, OFF, mark))
+
+note("-" * 54)
+best = stage2[0][0]
+sent = BOLD + "SENT TO THE MODEL" + OFF
+print(sent + "  the top %d" % KEEP)
+print("     %s%s%s" % (OK, best[:44], OFF))
+
+print()
+note("That passage shares not one word with the")
+note("question, so topic matching buried it. Reading the")
+note("pair together moved it to first. Retrieve widely,")
+note("then sort carefully, and only then cut.")
+
+# Try it: cut BEFORE the rerank by slicing stage1 to 2.
+# The right passage is gone, and no amount of careful
+# sorting promotes something already thrown away.
+` },
     {
       type: 'p',
       text: 'The shape stays the same whether you run a local model like this one or call a hosted rerank endpoint. You send a query and a list of candidates, you get back scores or an ordering, you slice off the top few. The cost is one model pass per candidate, so 50 passes per query, which lands in the tens of milliseconds for a small reranker and stays invisible next to the language model call that follows.'
