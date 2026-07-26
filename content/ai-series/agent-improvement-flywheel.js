@@ -76,74 +76,97 @@ export const POST = {
     },
     { type: 'lab', height: 460,
         title: 'Mining traces into eval cases, then measuring the fix',
-        caption: 'Note that the tool timeout is separated from the quality failures. Letting infrastructure errors into a quality eval set is how teams spend a day debugging a prompt that was never the problem.',
-        code: `import json, io
-
-# The flywheel: production traces become eval cases, eval
-# cases become fixes, and the fixed behaviour is locked in
-# by the case that caught it.
+        caption: 'One turn of the loop: mine the traces, name the pattern, fix and re-run against the cases that motivated it. Note the infrastructure timeout is separated out. Letting a tool error into a quality eval set is how a team spends a day debugging a prompt that was never the problem.',
+        code: `# The flywheel: production traces become eval cases, cases
+# drive a fix, and the fix is locked in by the case that
+# caught it. Watch a failure go round once.
 
 TRACES = [
-    {"id": "t1", "request": "add a created_at column to orders",
-     "outcome": "reverted", "spans": [{"tool": "edit_file"}]},
+    {"id": "t1", "request": "add a created_at column",
+     "outcome": "reverted", "error": None},
     {"id": "t2", "request": "rename userId to user_id",
-     "outcome": "merged", "spans": [{"tool": "edit_file"}]},
-    {"id": "t3", "request": "add a status column and update the read API",
-     "outcome": "reverted", "spans": [{"tool": "edit_file"}]},
+     "outcome": "merged", "error": None},
+    {"id": "t3", "request": "add status column, API",
+     "outcome": "reverted", "error": None},
     {"id": "t4", "request": "bump the lint rule",
-     "outcome": "merged", "spans": [{"tool": "edit_file"}]},
-    {"id": "t5", "request": "add is_archived and expose it in the response",
-     "outcome": "merged", "spans": [{"tool": "edit_file", "error": "timeout"}]},
+     "outcome": "merged", "error": None},
+    {"id": "t5", "request": "add is_archived to response",
+     "outcome": "merged", "error": "timeout"},
+    {"id": "t6", "request": "add price column, checkout",
+     "outcome": "reverted", "error": None},
 ]
 
-def flag_failures(traces):
-    """Yield runs that ended badly, whatever the reason."""
-    for trace in traces:
-        reverted = trace["outcome"] == "reverted"
-        errored = any(s.get("error") for s in trace["spans"])
-        if reverted or errored:
-            yield {
-                "input": trace["request"],
-                "trace_id": trace["id"],
-                "expected": "",                     # a human fills this in
-                "note": "reverted" if reverted else "tool error",
-            }
+def mine(traces):
+    """Runs that ended badly, tagged by kind. Quality
+    and infra are different piles."""
+    for t in traces:
+        if t["error"]:
+            yield t, "infra", "tool error, not quality"
+        elif t["outcome"] == "reverted":
+            yield t, "quality", "a human had to undo it"
 
-eval_set = io.StringIO()
-cases = list(flag_failures(TRACES))
-for case in cases:
-    eval_set.write(json.dumps(case) + "\\n")
+def touches_two(request):
+    r = request.lower()
+    schema = "column" in r or "migration" in r
+    surface = ("api" in r or "response" in r
+               or "checkout" in r)
+    return schema and surface
 
-print("mined %d failing runs out of %d traces:" % (len(cases), len(TRACES)))
-for c in cases:
-    print("   %-4s %-46s %s" % (c["trace_id"], c["input"][:44], c["note"]))
+def agent(request, has_rule):
+    """With the rule, it remembers the second file."""
+    if touches_two(request) and not has_rule:
+        return "half finished"
+    return "complete"
+
+# ---- Report --------------------------------------------
+E = chr(27)
+DIM, OFF, BOLD = E + "[2m", E + "[0m", E + "[1m"
+OK, WARN, BAD = E + "[32m", E + "[33m", E + "[31m"
+note = lambda s: print(DIM + s + OFF)
+
+found = list(mine(TRACES))
+quality = [t for t, kind, _ in found if kind == "quality"]
+
+h1 = BOLD + "1. MINE" + OFF
+print(h1 + "  %d traces, %d ended badly"
+      % (len(TRACES), len(found)))
+note("-" * 54)
+for t, kind, why in found:
+    colour = BAD if kind == "quality" else WARN
+    print("  %s%-8s%s %s"
+          % (colour, kind, OFF, t["request"][:30]))
+    note("           %s" % why)
 
 print()
-print("two of the three touch a migration AND an API in one request, which is")
-print("the pattern worth naming. The third is an infrastructure timeout and")
-print("belongs in a different bucket, not in a quality eval set.")
-print()
-
-# Once the cases exist, a fix is measurable rather than
-# hopeful.
-def agent(request, has_multifile_rule):
-    touches_two = (("column" in request or "migration" in request)
-                   and ("api" in request.lower() or "response" in request))
-    return "complete" if (has_multifile_rule or not touches_two) else "half-finished"
-
-quality_cases = [c for c in cases if c["note"] == "reverted"]
-for label, rule in [("before the fix", False), ("after adding the rule", True)]:
-    passed = sum(agent(c["input"], rule) == "complete" for c in quality_cases)
-    print("%-22s %d/%d cases pass" % (label, passed, len(quality_cases)))
+print(BOLD + "2. NAME THE PATTERN" + OFF)
+note("-" * 54)
+both = [t for t in quality if touches_two(t["request"])]
+print("  %d of %d quality failures touch a schema AND"
+      % (len(both), len(quality)))
+print("  surface in one request. The infra error is not")
+print("  in this pile, and must not be.")
 
 print()
-print("The number is small and that is fine. The point is that the fix is now")
-print("attached to the cases that motivated it, so a later change that breaks")
-print("it again fails loudly instead of quietly shipping.")
+h3 = BOLD + "3. FIX AND RE-RUN" + OFF
+print(h3 + "  the mined cases")
+note("-" * 54)
+for label, rule in [("before the rule", False),
+                    ("after the rule", True)]:
+    passed = sum(agent(t["request"], rule) == "complete"
+                 for t in quality)
+    colour = OK if passed == len(quality) else BAD
+    print("  %-16s %s%d of %d pass%s"
+          % (label, colour, passed, len(quality), OFF))
 
-# Try it: add a trace with a new kind of failure and watch
-# it flow into the eval set. That is the flywheel: every
-# incident earns a permanent test.
+print()
+note("The eval set did not exist before the failures")
+note("did. Every case in it already went wrong once,")
+note("which is why a two-year-old suite is so much")
+note("harder to fool than a two-week-old one.")
+
+# Try it: add a trace reverted for another reason. It
+# joins the quality pile and the rule does not fix it,
+# which is the loop finding something new.
 ` },
     { type: 'p', text: 'Notice the empty `expected` field. The script does not decide what a correct answer looks like. It collects candidates and hands them to a human, who confirms the failure is real and writes down what should have happened.' },
       { type: 'p', text: 'That review step matters. If you connect a judge to your eval set, you want its labels checked against human judgment, because an automatic grader that nobody audits will happily approve the wrong behavior. This connects to the eval pipeline idea from earlier in the series: the trace miner is the front door that keeps feeding that pipeline fresh, real cases instead of ones you made up at your desk.' },
