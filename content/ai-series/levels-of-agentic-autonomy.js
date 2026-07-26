@@ -48,68 +48,91 @@ export const POST = {
       { type: 'p', text: 'The model is doing real work, but it never chooses the shape of the flow. The steps run in the same order every time. When something breaks you can point at the exact step, because there are only three of them and you wrote all three. Below is roughly what that chain looks like.' },
     { type: 'lab', height: 460,
         title: 'The same task at level 2 and level 4',
-        caption: 'Both designs return the same answer. What differs is how many decisions the model made, and whether you could have predicted the path before it ran.',
-        code: `# One task, two designs. Level 2 is a chain the developer
-# wired by hand. Level 4 lets the model choose its own
-# steps. Watch how the number of decisions the model gets to
-# make changes what can go wrong.
+        caption: 'Both designs return the same answer, and level 4 made twice as many decisions getting there. The enumeration underneath names the two that were unconstrained: which tool to call, and what to pass it. A fixed chain cannot pick the wrong tool because it was never offered a choice.',
+        code: `# One task, two designs. Level 2 is a chain the
+# developer wired by hand. Level 4 lets the model pick
+# its own steps. The count that matters is how many
+# decisions the model makes, since each can be wrong.
 
-ORDERS = {"4417": {"id": "4417", "status": "delayed", "days_late": 6}}
+ORDERS = {"4417": {"status": "delayed", "days": 6}}
 
-def model_extract(message, field):        # stand-in: pulls an id out of text
+DECISIONS = []     # every point the model chose
+
+def decide(what, value):
+    DECISIONS.append(what)
+    return value
+
+# ---- Level 2: a fixed chain ----------------------------
+def level_2(message):
     digits = "".join(c for c in message if c.isdigit())
-    return digits or None
-
-def model_reply(question, facts):         # stand-in: writes the customer reply
-    if not facts:
+    oid = decide("extract order id", digits or None)
+    order = ORDERS.get(oid)      # plain code, no model
+    if not order:
         return "I could not find that order."
-    return "Order %s is %s, %d days behind schedule." % (
-        facts["id"], facts["status"], facts["days_late"])
+    return decide("write the reply",
+                  "Order %s is %s, %d days late."
+                  % (oid, order["status"], order["days"]))
 
-# ---- Level 2: a fixed chain
-# -----------------------------------------------
-def handle_ticket(message):
-    order_id = model_extract(message, field="order_id")   # model step
-    order = ORDERS.get(order_id)                          # plain code, no model
-    return model_reply(question=message, facts=order)     # model step
-
-# ---- Level 4: the agent picks its own steps
-# -------------------------------
-def model_decide(history, tools, step):
-    # A scripted planner standing in for a model choosing
-    # its next move.
-    if step == 0:
-        return {"type": "tool", "name": "get_order", "args": {"order_id": "4417"}}
-    return {"type": "final", "answer": "Order 4417 is delayed by 6 days."}
-
-def agent_loop(message, tools, max_steps=8):
-    history = [message]
+# ---- Level 4: the agent picks its own steps ------------
+def level_4(message, max_steps=6):
+    TOOLS = {"get_order": lambda oid: ORDERS.get(oid)}
+    digits = "".join(c for c in message if c.isdigit())
+    seen = None
     for step in range(max_steps):
-        decision = model_decide(history, tools, step)
-        if decision["type"] == "final":
-            return decision["answer"], step + 1
-        result = tools[decision["name"]](**decision["args"])
-        history.append(result)
-    return "Escalating to a human.", max_steps      # we never promised it finishes
+        nxt = "get_order" if step == 0 else "finish"
+        plan = decide("choose next action", nxt)
+        if plan == "finish":
+            break
+        args = decide("choose arguments", digits or "")
+        seen = TOOLS[plan](args)
+    if not seen:
+        return "I could not find that order."
+    return decide("write the reply",
+                  "Order is %s by %d days."
+                  % (seen["status"], seen["days"]))
 
-TOOLS = {"get_order": lambda order_id: ORDERS.get(order_id)}
+# ---- Report --------------------------------------------
+E = chr(27)
+DIM, OFF, BOLD = E + "[2m", E + "[0m", E + "[1m"
+OK, WARN, BAD = E + "[32m", E + "[33m", E + "[31m"
+note = lambda s: print(DIM + s + OFF)
 
-msg = "where is my order 4417?"
-print("Level 2 (fixed chain)")
-print("   reply:", handle_ticket(msg))
-print("   model decisions: 2, both of them constrained to one field each")
+CASES = [
+    ("where is order 4417?", "a clean request"),
+    ("where is my order?", "no id in the message"),
+]
+
+for message, label in CASES:
+    print(BOLD + label.upper() + OFF + '  "%s"' % message)
+    note("-" * 54)
+    note("%-9s %9s  %s" % ("LEVEL", "DECISIONS", "REPLY"))
+    LEVELS = [("level 2", level_2), ("level 4", level_4)]
+    for name, fn in LEVELS:
+        DECISIONS.clear()
+        reply = fn(message)
+        n = len(DECISIONS)
+        colour = OK if n <= 2 else WARN
+        print("%-9s %s%9d%s  %s"
+              % (name, colour, n, OFF, reply[:30]))
+    print()
+
+DECISIONS.clear()
+level_4("where is order 4417?")
+note("-" * 54)
+print(BOLD + "WHAT LEVEL 4 CHOSE" + OFF)
+for d in DECISIONS:
+    print("     %s" % d)
+
 print()
-answer, steps = agent_loop(msg, TOOLS)
-print("Level 4 (agent loop)")
-print("   reply:", answer)
-print("   model decisions: %d, and it chose the tool AND the arguments" % (steps + 1))
-print()
-print("Same answer. The difference is how many chances there were to be wrong,")
-print("and whether a human could predict the path before it ran.")
+note("Both give the same answer on a clean request.")
+note("Level 4 made more decisions getting there, and two")
+note("were unconstrained: which tool, and what to pass")
+note("it. A fixed chain cannot pick the wrong tool,")
+note("because it was never offered a choice.")
 
-# Try it: make model_decide never return "final" and watch
-# max_steps become the only thing standing between you and
-# an agent that runs all night.
+# Try it: add a refund tool to TOOLS and let the plan
+# reach it. Level 2 has no way to express that: the
+# same rigidity that makes it safe makes it limited.
 ` },
     {
       type: 'p',
