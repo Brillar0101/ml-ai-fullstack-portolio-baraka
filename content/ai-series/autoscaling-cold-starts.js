@@ -72,49 +72,99 @@ export const POST = {
     },
     { type: 'lab', height: 460,
         title: 'Queue-depth scaling across a morning ramp',
-        caption: 'Up is a jump, down is one replica at a time. That asymmetry is deliberate: scaling down early costs you a cold start the next time traffic moves.',
-        code: `MIN_REPLICAS = 2        # warm pool: never drop below this
+        caption: 'The same day under two policies. Scaling to zero through the quiet spell costs two extra cold starts and dozens of queued requests, and the saving is exactly the floor size: the two replicas kept warm are the two boots avoided.',
+        code: `# Two scaling policies over the same day. Same queue;
+# only the rule for changing replica count differs.
+
 MAX_REPLICAS = 12
-TARGET_PER_REPLICA = 4  # desired queued requests per replica
+TARGET_PER_REPLICA = 4
+BOOT_MINUTES = 2   # useless while it loads
+CAPACITY = 4       # requests a warm replica clears/min
 
-def desired_replicas(queue_depth, current):
-    # How many replicas would keep the backlog at target?
-    needed = -(-queue_depth // TARGET_PER_REPLICA)     # ceiling division
+# A ramp, a spike, then a quiet afternoon.
+QUEUE = [0, 2, 6, 14, 30, 60, 48, 30, 18, 9, 4, 1,
+         0, 0, 0, 0, 0, 0,
+         4, 18, 44, 60, 40, 20]
 
-    # Never go below the warm floor or above the ceiling.
-    needed = max(needed, MIN_REPLICAS)
-    needed = min(needed, MAX_REPLICAS)
-
-    # Scale up fast, scale down slow, so one quiet moment does not throw away
-    # a replica you paid minutes of cold start to boot.
-    if needed > current:
-        return needed
-    if needed < current:
-        return current - 1                             # shed one at a time
+def warm_floor(depth, current, floor=2):
+    """Warm pool, shed slowly."""
+    need = -(-depth // TARGET_PER_REPLICA)
+    need = min(max(need, floor), MAX_REPLICAS)
+    if need > current:
+        return need          # scale up fast
+    if need < current:
+        return current - 1   # shed one at a time
     return current
 
-# A morning ramp, a spike, and a quiet afternoon.
-QUEUE = [0, 2, 6, 14, 30, 60, 48, 30, 18, 9, 4, 1, 0, 0, 0, 0]
+def scale_to_zero(depth, current):
+    """Chase the queue both ways, floor of zero."""
+    need = -(-depth // TARGET_PER_REPLICA)
+    return min(max(need, 0), MAX_REPLICAS)
 
-current = MIN_REPLICAS
-print("minute  queue  replicas  action")
-for minute, depth in enumerate(QUEUE):
-    nxt = desired_replicas(depth, current)
-    action = "hold"
-    if nxt > current:
-        action = "scale up  +%d" % (nxt - current)
-    elif nxt < current:
-        action = "shed      -1"
-    print("  %2d     %3d      %2d      %s" % (minute, depth, nxt, action))
-    current = nxt
+def simulate(policy):
+    current, booting, cold, waited = 0, [], 0, 0
+    for depth in QUEUE:
+        warm = current - len(booting)
+        served = warm * CAPACITY
+        waited += max(depth - served, 0)
+        booting = [b - 1 for b in booting if b - 1 > 0]
+        nxt = policy(depth, current)
+        if nxt > current:
+            new = nxt - current
+            cold += new
+            booting += [BOOT_MINUTES] * new
+        current = nxt
+    return cold, waited
+
+# ---- Report --------------------------------------------
+E = chr(27)
+DIM, OFF, BOLD = E + "[2m", E + "[0m", E + "[1m"
+OK, WARN, BAD = E + "[32m", E + "[33m", E + "[31m"
+note = lambda s: print(DIM + s + OFF)
+
+print(BOLD + "TRAFFIC" + OFF + "  queue depth per minute")
+note("-" * 52)
+for i in range(0, len(QUEUE), 6):
+    row = QUEUE[i:i + 6]
+    cells = " ".join("%3d" % q for q in row)
+    print("  min %-2d  %s" % (i, cells))
+print()
+
+print(BOLD + "POLICY" + OFF + "         %-13s %s"
+      % ("COLD STARTS", "QUEUED"))
+note("-" * 52)
+
+results = {}
+for name, policy in [("warm floor", warm_floor),
+                     ("scale to zero", scale_to_zero)]:
+    cold, waited = simulate(policy)
+    results[name] = (cold, waited)
+    colour = OK if name == "warm floor" else BAD
+    print("%-15s %s%-14d%s %s%d%s"
+          % (name, colour, cold, OFF, colour, waited, OFF))
+
+note("-" * 52)
+c1, w1 = results["warm floor"]
+c2, w2 = results["scale to zero"]
+cost = BOLD + "COST" + OFF
+print(cost + "  chasing the queue down costs")
+print("      %s%d%s extra cold starts and %s%d%s more"
+      % (BAD, c2 - c1, OFF, BAD, w2 - w1, OFF))
+print("      queued requests across one day")
 
 print()
-print("Up is a jump, down is one at a time. That asymmetry is deliberate:")
-print("adding a replica late costs you a queue, removing one early costs you")
-print("a cold start the next time traffic moves.")
+note("A replica needs %d minutes to load a model"
+     % BOOT_MINUTES)
+note("before it serves anything. Scaling into a quiet")
+note("spell means paying that wait again on the way")
+note("back up, while the queue builds behind you.")
+note("")
+note("Note the saving is exactly the floor size: the")
+note("two replicas kept warm are the two boots avoided.")
+note("A warm floor buys back precisely what it holds.")
 
-# Try it: make the descent symmetric by returning \`needed\` in both branches,
-# then watch the replica count chase the queue down and back up again.
+# Try it: set BOOT_MINUTES = 0. The two policies converge,
+# because the whole asymmetry exists to pay for that boot.
 ` },
     {
       type: 'p',
