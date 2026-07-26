@@ -117,64 +117,96 @@ export const POST = {
     },
     { type: 'lab', height: 460,
         title: 'A supervisor delegating, with the handoffs printed',
-        caption: 'Watch the briefs, not the answer. Anything left out of a handoff is invisible to the sub-agent, and a single agent would simply still have had it.',
-        code: `# A supervisor delegating to sub-agents. The thing to watch
-# is not the answer, it is what each handoff carries and
-# what it silently drops.
+        caption: 'Same plan, same sources, two briefs. Drop the question from the handoff and both sub-agents come back with confident, on-topic facts that answer something else entirely: 2 of 2 relevant becomes 0 of 2. A single agent still had the question.',
+        code: `# A supervisor delegating to sub-agents. Watch what each
+# handoff carries, and what it silently drops.
 
-QUESTION = "Did the pricing change in v3 break the annual discount?"
+QUESTION = "Did v3 pricing break annual discounts?"
 
-KB = {
-    "pricing docs": "v3 pricing moved annual plans to a flat 20 percent discount.",
-    "changelog":    "v3 removed the legacy discount code path on 2026-01-14.",
-    "support tickets": "Three customers reported a missing annual discount after v3.",
+# Each source holds several facts. A sub-agent returns
+# those matching its brief, so a brief that omits the
+# topic comes back with wrong facts, not fewer facts.
+SOURCES = {
+    "pricing docs": [
+        ("monthly", "monthly pricing was unchanged in v3"),
+        ("annual", "v3 moved annual plans to 20% off"),
+        ("tax", "tax is calculated at checkout"),
+    ],
+    "changelog": [
+        ("ui", "v3 restyled the settings page"),
+        ("annual", "v3 removed the legacy discount path"),
+        ("perf", "v3 halved cold start time"),
+    ],
 }
 
 HANDOFFS = []
 
-def plan(question):
-    return ["pricing docs", "changelog"]        # the supervisor picks the subtasks
-
-def sub_agent(brief, topic):
-    # A focused loop with its own narrow tools. It returns a
-    # short summary, not its whole transcript, so the
-    # supervisor's context stays clean.
+def sub_agent(brief, source):
+    """Reads its brief and returns matching facts.
+    Given nothing to look for, it returns the first."""
     HANDOFFS.append(brief)
-    return KB[topic]
-
-def synthesize(question, results):
-    return "Based on %d findings: %s" % (len(results), " ".join(results))
+    facts = SOURCES[source]
+    wanted = [f for tag, f in facts
+              if tag in brief.lower()]
+    return wanted if wanted else [facts[0][1]]
 
 def supervisor(question, carry_context):
-    subtasks = plan(question)
     results = []
-    for task in subtasks:
-        # Anything left out of this brief is invisible to
-        # the sub-agent.
-        brief = ("Find facts about: %s. Question context: %s" % (task, question)
-                 if carry_context else "Find facts about: %s" % task)
-        results.append(sub_agent(brief, task))
-    return synthesize(question, results)
+    for source in SOURCES:
+        if carry_context:
+            brief = ("Find facts about %s relevant to: %s"
+                     % (source, question))
+        else:
+            brief = "Find facts about %s" % source
+        results.extend(sub_agent(brief, source))
+    return results
 
-for label, carry in [("brief carries the question", True),
-                     ("brief omits the question", False)]:
+# ---- Report --------------------------------------------
+E = chr(27)
+DIM, OFF, BOLD = E + "[2m", E + "[0m", E + "[1m"
+OK, BAD = E + "[32m", E + "[31m"
+note = lambda s: print(DIM + s + OFF)
+
+hdr = BOLD + "HANDOFFS" + OFF
+print(hdr + "  same plan, two briefs")
+note("-" * 54)
+
+for label, carry in [("carries the question", True),
+                     ("omits the question", False)]:
     HANDOFFS.clear()
-    answer = supervisor(QUESTION, carry)
-    print("---", label, "---")
+    found = supervisor(QUESTION, carry)
+    on_topic = [f for f in found
+                if "annual" in f or "discount" in f]
+    good = len(on_topic) == 2
+    colour = OK if good else BAD
+
+    print(BOLD + label + OFF)
     for h in HANDOFFS:
-        print("   handoff:", h)
-    print("   answer:", answer)
+        print("  %sbrief%s %s" % (DIM, OFF, h[:44]))
+    for f in found:
+        hit = f in on_topic
+        mark = (OK + "  ok " if hit else BAD + " off ") + OFF
+        print(" %s %s" % (mark, f[:44]))
+    print("  %s%d of 2 relevant facts%s"
+          % (colour, len(on_topic), OFF))
     print()
 
-print("Both runs return the same text here, because the stand-in sub-agent")
-print("looks up a fixed topic. A real one reads its brief. The second brief")
-print("never mentions the annual discount, so a real sub-agent would not know")
-print("what it was looking for. Every handoff is a chance to lose context that")
-print("a single agent would simply still have had.")
+note("-" * 54)
+lost = BOLD + "WHAT WAS LOST" + OFF
+print(lost + "  the word annual")
+print("     The second brief never says what the")
+print("     question was about, so each sub-agent")
+print("     returned the first thing it found.")
 
-# Try it: add "support tickets" to plan() and watch a third
-# handoff appear. Each one is another message to get right,
-# another place to drop a detail.
+print()
+note("Every handoff is a message you must get right.")
+note("Anything left out is invisible downstream, and")
+note("the supervisor cannot tell a sub-agent that found")
+note("nothing from one that confidently found the wrong")
+note("thing. A single agent still had the question.")
+
+# Try it: add "annual" to the second brief only. One
+# word restores both facts. That is the cost of a handoff.
 ` },
     {
       type: 'p',
