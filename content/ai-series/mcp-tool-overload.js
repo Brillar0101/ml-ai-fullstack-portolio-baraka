@@ -85,41 +85,42 @@ export const POST = {
     },
     { type: 'lab', height: 460,
         title: 'A tool router, cutting twelve tools down to a handful',
-        caption: 'The agent only ever sees what the router picked. Note the caveat at the bottom: matching on words inherits every weakness of keyword search.',
-        code: `# A pool of tools, the kind you end up with after wiring in
-# a few MCP servers.
-ALL_TOOLS = [
-    {"name": "create_ticket",   "description": "open a new support ticket for a bug or request"},
-    {"name": "search_tickets",  "description": "search existing tickets by text"},
-    {"name": "post_slack",      "description": "post a message to a slack channel"},
-    {"name": "query_database",  "description": "run a read only sql query"},
-    {"name": "list_files",      "description": "list files in google drive"},
-    {"name": "create_event",    "description": "add an event to the calendar"},
-    {"name": "issue_refund",    "description": "issue a payment refund to a customer"},
-    {"name": "read_logs",       "description": "read application logs for errors"},
-    {"name": "search_wiki",     "description": "search the internal wiki for a page"},
-    {"name": "web_search",      "description": "search the public web"},
-    {"name": "send_email",      "description": "send an email to a customer"},
-    {"name": "get_order",       "description": "look up a customer order by id"},
+        caption: 'One column per connected tool, lit when the router surfaced it. The exclamation marks are tools that can spend money or email a customer. Note the refund request: routing narrowed twelve tools to three and still handed the model both dangerous ones.',
+        code: `# Wire in a few MCP servers and the tool list grows
+# fast. The model reads every schema on every call and
+# picks from every option. Routing narrows both.
+
+TOOLS = [
+    ("create_ticket", "open a support ticket", False),
+    ("search_tickets", "search existing tickets", False),
+    ("post_slack", "post a message to slack", False),
+    ("query_database", "run a read only sql query", False),
+    ("list_files", "list files in drive", False),
+    ("create_event", "add a calendar event", False),
+    ("issue_refund", "issue a payment refund", True),
+    ("read_logs", "read application logs", False),
+    ("search_wiki", "search the internal wiki", False),
+    ("web_search", "search the public web", False),
+    ("send_email", "send email to a customer", True),
+    ("get_order", "look up a customer order", False),
 ]
 
-STOPWORDS = {"a", "an", "the", "for", "to", "of", "on", "in", "i", "my",
-             "do", "what", "say", "about", "need", "is", "and"}
+STOP = {"a", "an", "the", "for", "to", "of", "on",
+        "in", "i", "my", "do", "what", "say", "about",
+        "is", "and"}
+SCHEMA_TOKENS = 90   # rough cost of one tool schema
 
-def route_tools(request, tools, top_k=5):
-    """Return only the tools most relevant to the request."""
-    words = set(request.lower().split()) - STOPWORDS
+def words(text):
+    return {w.strip("?.,").lower()
+            for w in text.replace("_", " ").split()} - STOP
 
-    def score(tool):
-        text = (tool["name"] + " " + tool["description"]).lower()
-        return len(words & (set(text.replace("_", " ").split()) - STOPWORDS))
-
-    ranked = sorted(tools, key=score, reverse=True)
-    picked = [t for t in ranked if score(t) > 0][:top_k]
-
-    # Fall back to a safe default set if nothing matched at
-    # all.
-    return picked or tools[:top_k]
+def route(request, pool, top_k=5):
+    """Only the tools relevant to this request."""
+    q = words(request)
+    hits = lambda t: len(q & words(t[0] + " " + t[1]))
+    scored = sorted(pool, key=lambda t: -hits(t))
+    picked = [t for t in scored if hits(t)][:top_k]
+    return picked or pool[:top_k]
 
 REQUESTS = [
     "open a ticket for the login bug",
@@ -127,23 +128,59 @@ REQUESTS = [
     "what do the logs say about the timeout",
 ]
 
-for req in REQUESTS:
-    visible = route_tools(req, ALL_TOOLS)
-    print('request: "%s"' % req)
-    print("   agent sees %d of %d tools: %s"
-          % (len(visible), len(ALL_TOOLS), ", ".join(t["name"] for t in visible)))
-    print()
+# ---- Report --------------------------------------------
+E = chr(27)
+DIM, OFF, BOLD = E + "[2m", E + "[0m", E + "[1m"
+OK, WARN = E + "[32m", E + "[33m"
+BAD, MUTE = E + "[31m", E + "[90m"
+note = lambda s: print(DIM + s + OFF)
 
-# Twelve tools become one to three. The second request
-# surfaces issue_refund and get_order together, which is the
-# right pair for that job.
-#
-# Now the caveat: this router matches words, so it inherits
-# every weakness of keyword search. Try "cancel my
-# subscription" and watch it find nothing useful, because no
-# tool description happens to use those words. A real router
-# embeds the request and the tool descriptions and compares
-# meaning instead.
+def lanes(visible):
+    names = {t[0] for t in visible}
+    cells = []
+    for name, _, risky in TOOLS:
+        if name not in names:
+            cells.append(MUTE + "." + OFF)
+        elif risky:
+            cells.append(BAD + "!" + OFF)
+        else:
+            cells.append(OK + "#" + OFF)
+    return "".join(cells)
+
+n = len(TOOLS)
+hdr = BOLD + "TOOL ROUTING" + OFF
+print(hdr + "  %d tools connected" % n)
+note("-" * 54)
+note("%-30s %5s  %s" % ("REQUEST", "SEEN", "WHICH"))
+
+for req in REQUESTS:
+    visible = route(req, TOOLS)
+    risky = [t for t in visible if t[2]]
+    colour = WARN if risky else OK
+    print("%-30s %s%3d/%-2d%s %s"
+          % (req[:30], colour, len(visible), n,
+             OFF, lanes(visible)))
+
+note("-" * 54)
+saved = (n - 3) * SCHEMA_TOKENS
+per = BOLD + "PER CALL" + OFF
+print(per + "  unrouted %d tokens of schema,"
+      % (n * SCHEMA_TOKENS))
+print("          routed about %d. Roughly %d saved."
+      % (3 * SCHEMA_TOKENS, saved))
+red = BOLD + "RED MARKS" + OFF
+print(red + "  a tool that can spend money or")
+print("           email a customer, still offered")
+
+print()
+note("The refund request surfaces send_email as well")
+note("as issue_refund, because both mention a customer.")
+note("That is routing working, and still handing the")
+note("model a dangerous option it did not need.")
+note("Narrowing a list is not the same as making it safe.")
+
+# Try it: set top_k = 12 so nothing is routed. Every
+# request then sees both red tools, on every call.
 ` },
     {
       type: 'p',

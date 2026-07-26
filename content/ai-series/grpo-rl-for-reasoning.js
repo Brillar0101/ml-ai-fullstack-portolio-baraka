@@ -114,7 +114,7 @@ def arrow(a):
 print(BOLD + "GRPO" + OFF + "  3 problems x 4 samples")
 note("-" * 54)
 note("%-11s %7s %5s %9s %s"
-     % ("PROBLEM", "SOLVED", "REWARD", "ADVANTAGE", "UPDATE"))
+     % ("PROBLEM", "SOLVED", "REWARD", "ADV", "UPDATE"))
 
 for i, (name, rs) in enumerate(PROBLEMS):
     block = adv[i * 4:(i + 1) * 4]
@@ -129,7 +129,7 @@ for i, (name, rs) in enumerate(PROBLEMS):
     note("")
 
 note("-" * 54)
-print(BOLD + "READ IT" + OFF + "  a correct answer is worth more")
+rd = BOLD + "READ IT" + OFF\nprint(rd + "  a correct answer is worth more")
 print("         where fewer samples got it right")
 
 print()

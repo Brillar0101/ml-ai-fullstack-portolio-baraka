@@ -158,7 +158,7 @@ active = K * D * D
 print(BOLD + "PARAMS" + OFF + "   %s%d%s in the layer"
       % (INFO, total, OFF))
 pct = 100.0 * active / total
-print(BOLD + "COMPUTE" + OFF + "  %s%d%s per token %s(%.0f%%)%s"
+comp = BOLD + "COMPUTE" + OFF\nprint(comp + "  %s%d%s per token %s(%.0f%%)%s"
       % (OK, active, OFF, DIM, pct, OFF))
 
 print()
