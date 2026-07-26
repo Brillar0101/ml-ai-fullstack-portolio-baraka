@@ -69,38 +69,39 @@ export const POST = {
     },
     { type: 'lab', height: 460,
         title: 'Static against continuous batching, step by step',
-        caption: 'Watch the short requests. Under static batching the yes/no question waits on a 40-step neighbour. Under continuous batching it leaves at step 2 and its slot is reused immediately.',
-        code: `# Static batching against continuous batching, simulated one step at a time.
-# No GPU involved: this is a scheduler you can read. Each request needs a
-# different number of decode steps, which is the whole source of the problem.
+        caption: 'Same requests, same two slots. The three-step question finishes at step 5 under continuous batching and step 100 under static, because it sat behind a long neighbour. Static also finishes the whole workload 35 steps later on identical hardware.',
+        code: `# Static against continuous batching, one step at a
+# time. No GPU: this is a scheduler you can read.
+# Each request needs a different number of decode
+# steps, which is the whole source of the problem.
 
-REQUESTS = [("yes/no question", 2), ("capital of France", 3),
-            ("explain attention", 40), ("400-word overview", 60)]
-SLOTS = 2      # how many requests the GPU can hold at once
+REQUESTS = [
+    ("yes or no", 2),
+    ("explain attention", 40),
+    ("capital of France", 3),
+    ("400-word overview", 60),
+]
+SLOTS = 2      # how many the GPU holds at once
 
 def static_batching(requests, slots):
-    """Fill the bus, run until the LAST rider is done, only then reload."""
-    step = 0
-    waiting = list(requests)
-    finished = {}
+    """Fill the bus, run until the LAST rider is
+    done, only then reload."""
+    step, waiting, done = 0, list(requests), {}
     while waiting:
         batch = waiting[:slots]
         waiting = waiting[slots:]
         longest = max(n for _, n in batch)
         for name, n in batch:
-            # everyone in the batch is held until the slowest one finishes
-            finished[name] = step + longest
+            done[name] = step + longest  # held to slowest
         step += longest
-    return step, finished
+    return step, done
 
 def continuous_batching(requests, slots):
-    """Evict finished requests every step and admit the next one waiting."""
-    step = 0
-    waiting = list(requests)
-    running = []          # [name, steps_left]
-    finished = {}
+    """Evict finished each step, admit the next."""
+    step, waiting = 0, list(requests)
+    running, done = [], {}
     while waiting or running:
-        while waiting and len(running) < slots:      # admit without pausing
+        while waiting and len(running) < slots:
             name, n = waiting.pop(0)
             running.append([name, n])
         step += 1
@@ -108,24 +109,59 @@ def continuous_batching(requests, slots):
             slot[1] -= 1
         for slot in list(running):
             if slot[1] == 0:
-                finished[slot[0]] = step             # leaves the moment it is done
+                done[slot[0]] = step   # leaves at once
                 running.remove(slot)
-    return step, finished
+    return step, done
 
-for label, fn in [("static batching", static_batching),
-                  ("continuous batching", continuous_batching)]:
-    total, finished = fn(REQUESTS, SLOTS)
-    print("%s: all done at step %d" % (label, total))
-    for name, _ in REQUESTS:
-        print("      %-20s finished at step %d" % (name, finished[name]))
-    print()
+# ---- Report --------------------------------------------
+E = chr(27)
+DIM, OFF, BOLD = E + "[2m", E + "[0m", E + "[1m"
+OK, WARN, BAD = E + "[32m", E + "[33m", E + "[31m"
+note = lambda s: print(DIM + s + OFF)
 
-print("Watch the short requests. Under static batching the yes/no question")
-print("waits for a 40-step neighbour before it can leave. Under continuous")
-print("batching it leaves at step 2 and its slot goes to the next request.")
+s_total, s_done = static_batching(REQUESTS, SLOTS)
+c_total, c_done = continuous_batching(REQUESTS, SLOTS)
 
-# Try it: set SLOTS = 4 so everything fits at once. Static batching still
-# makes the fast requests wait for the slowest one, because that is the rule.
+hdr = BOLD + "BATCHING" + OFF
+print(hdr + "  %d requests, %d slots"
+      % (len(REQUESTS), SLOTS))
+note("-" * 52)
+note("%-18s %5s %7s %7s %s"
+     % ("REQUEST", "WORK", "STATIC", "CONT", "WASTED"))
+
+wasted_total = 0
+for name, work in REQUESTS:
+    s, c = s_done[name], c_done[name]
+    wasted = s - work    # steps waiting, not working
+    wasted_total += wasted
+    if wasted >= 20:
+        colour = BAD
+    else:
+        colour = WARN if wasted else OK
+    print("%-18s %5d %7d %7d %s%+d%s"
+          % (name, work, s, c, colour, wasted, OFF))
+
+note("-" * 52)
+tp = BOLD + "THROUGHPUT" + OFF
+print(tp + "  static finishes at %s%d%s, continuous"
+      % (BAD, s_total, OFF))
+print("            at %s%d%s, on the same hardware"
+      % (OK, c_total, OFF))
+print("            static wasted %s%d%s request-steps"
+      % (BAD, wasted_total, OFF))
+print("            holding finished work in its seat")
+
+print()
+note("The yes-or-no question needs 2 steps and leaves")
+note("at 2 under continuous batching. Under static it")
+note("sits in the bus until its 40-step neighbour is")
+note("done. Every short request pays for whoever it")
+note("happened to sit beside, and the whole batch")
+note("finishes later for it.")
+
+# Try it: set SLOTS = 4 so everything fits at once.
+# Static still makes fast requests wait for the
+# slowest, because that is the rule, not capacity.
 ` },
     {
       type: 'h2',
