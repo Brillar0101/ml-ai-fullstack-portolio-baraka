@@ -88,7 +88,7 @@ PASSAGES = [
     ("upgrade or downgrade any time", "annual"),
     ("a repeated transaction is reversed "
      "within five working days", "duplicate"),
-    ("annual plan pricing is on the pricing page", "annual"),
+    ("annual pricing is on the pricing page", "annual"),
     ("monthly plans charge on the same day", "monthly"),
 ]
 
