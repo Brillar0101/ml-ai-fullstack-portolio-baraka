@@ -75,20 +75,21 @@ export const POST = {
     },
     { type: 'lab', height: 460,
         title: 'A shortlist, before and after reranking',
-        caption: 'The passage that answers the question shares almost no words with it, so topic matching ranked it last. Reading the pair together pulls it to first.',
-        code: `# Why a reranker earns its place. A bi-encoder embeds the query and each
-# passage SEPARATELY, so it can only ask "are these about the same topic?".
-# A cross-encoder reads the pair together and can ask the better question:
-# "does this passage actually answer this query?" Both are stand-ins here.
+        caption: 'The passage that answers the question shares not one word with it, so topic matching ranked it last of five. Reading the pair together moved it to first. Note the second column: cut before the rerank and you throw away the answer.',
+        code: `# Why a reranker earns its place. A bi-encoder embeds
+# the query and each passage SEPARATELY, so it can only
+# ask "same topic?". A cross-encoder reads the pair
+# together and asks "does this answer the question?"
 
 QUERY = "Why was I charged twice on my annual plan?"
 
-CANDIDATES = [
-    "Annual plans are billed once every 12 months on your renewal date.",
-    "Your annual plan can be upgraded or downgraded at any time.",
-    "If the same amount appears more than once, we return the extra within 5 business days.",
-    "Annual plan pricing is listed on the pricing page.",
-    "Monthly plans are charged on the same day each month.",
+PASSAGES = [
+    ("billed once every 12 months", "annual"),
+    ("upgrade or downgrade any time", "annual"),
+    ("a repeated transaction is reversed "
+     "within five working days", "duplicate"),
+    ("annual plan pricing is on the pricing page", "annual"),
+    ("monthly plans charge on the same day", "monthly"),
 ]
 
 def stem(w):
@@ -98,52 +99,71 @@ def stem(w):
             return w[: -len(suf)]
     return w
 
-def bi_encoder_score(query, passage):
-    # Topic overlap. This is roughly what an embedding captures: shared
-    # subject matter. It has no idea what the user's actual problem is.
+def bi_encoder(query, text):
+    """Topic overlap: what an embedding roughly does.
+    Shared subject, not the user's actual problem."""
     q = {stem(w) for w in query.split()}
-    p = {stem(w) for w in passage.split()}
+    p = {stem(w) for w in text.split()}
     return len(q & p) / (len(q) ** 0.5 * len(p) ** 0.5)
 
-def cross_encoder_score(query, passage):
-    # Reads query and passage jointly, so it can notice that "the same amount
-    # appears more than once" is the thing the user is complaining about, even
-    # though the passage shares almost no words with the question.
-    p = passage.lower()
-    asks_about_duplicate = "twice" in query.lower() or "charged twice" in query.lower()
-    answers_duplicate = "more than once" in p or "duplicate" in p
-    score = bi_encoder_score(query, passage) * 0.4
-    if asks_about_duplicate and answers_duplicate:
-        score += 0.9        # this passage resolves the actual complaint
-    if "monthly" in p and "annual" in query.lower():
-        score -= 0.2        # wrong plan type
+def cross_encoder(query, text, kind):
+    """Reads query and passage jointly, so it can notice
+    that a repeat charge is the actual complaint."""
+    score = bi_encoder(query, text) * 0.4
+    if kind == "duplicate":
+        score += 0.9      # actually resolves the complaint
+    if kind == "monthly":
+        score -= 0.2      # wrong plan type
     return score
 
-ranked1 = sorted(CANDIDATES, key=lambda c: bi_encoder_score(QUERY, c), reverse=True)
-print("stage 1, bi-encoder, which is what a plain vector search gives you:")
-for i, c in enumerate(ranked1, 1):
-    print("   %d. %.2f  %s" % (i, bi_encoder_score(QUERY, c), c))
+stage1 = sorted(PASSAGES,
+                key=lambda p: -bi_encoder(QUERY, p[0]))
+stage2 = sorted(stage1,
+                key=lambda p: -cross_encoder(QUERY, *p))
+KEEP = 2
 
-# Stage 1 casts a wide net on purpose. Its only job is to not miss the answer,
-# so it hands everything it found to stage 2 rather than deciding early.
-SHORTLIST = 5      # in production this is more like the top 50
-KEEP = 2           # what actually gets sent to the model
+# ---- Report --------------------------------------------
+E = chr(27)
+DIM, OFF, BOLD = E + "[2m", E + "[0m", E + "[1m"
+OK, BAD, MUTE = E + "[32m", E + "[31m", E + "[90m"
+note = lambda s: print(DIM + s + OFF)
 
-shortlist = ranked1[:SHORTLIST]
-ranked2 = sorted(shortlist, key=lambda c: cross_encoder_score(QUERY, c), reverse=True)
+hdr = BOLD + "RERANK" + OFF
+print(hdr + "  %d candidates, keep %d"
+      % (len(PASSAGES), KEEP))
+note("-" * 54)
+note("%-28s %6s %6s %s"
+     % ("PASSAGE", "BEFORE", "AFTER", "MOVE"))
+
+for text, kind in stage2:
+    r1 = stage1.index((text, kind)) + 1
+    r2 = stage2.index((text, kind)) + 1
+    delta = r1 - r2
+    if delta > 0:
+        colour, move = OK, "up %d" % delta
+    elif delta < 0:
+        colour, move = BAD, "down %d" % -delta
+    else:
+        colour, move = MUTE, "same"
+    mark = " <-" if r2 <= KEEP else ""
+    print("%-28s %6d %6d %s%-7s%s%s"
+          % (text[:28], r1, r2, colour, move, OFF, mark))
+
+note("-" * 54)
+best = stage2[0][0]
+sent = BOLD + "SENT TO THE MODEL" + OFF
+print(sent + "  the top %d" % KEEP)
+print("     %s%s%s" % (OK, best[:44], OFF))
+
 print()
-print("stage 2, cross-encoder rerank of the top %d:" % SHORTLIST)
-for i, c in enumerate(ranked2, 1):
-    mark = "  <- sent to the model" if i <= KEEP else ""
-    print("   %d. %+.2f  %s%s" % (i, cross_encoder_score(QUERY, c), c, mark))
+note("That passage shares not one word with the")
+note("question, so topic matching buried it. Reading the")
+note("pair together moved it to first. Retrieve widely,")
+note("then sort carefully, and only then cut.")
 
-print()
-print("The passage that answers the question shares almost no words with it, so")
-print("topic matching ranked it dead last. Reading the pair together pulled it")
-print("to first. Retrieve generously, then sort carefully.")
-
-# Try it: set SHORTLIST = 3. The right passage never reaches the reranker, and
-# no amount of careful sorting can promote something that was already cut.
+# Try it: cut BEFORE the rerank by slicing stage1 to 2.
+# The right passage is gone, and no amount of careful
+# sorting promotes something already thrown away.
 ` },
     {
       type: 'p',
