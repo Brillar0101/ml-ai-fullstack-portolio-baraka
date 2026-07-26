@@ -21,7 +21,12 @@ Declared as data in a post body; no JSX or SVG is written by hand.
 | components and traffic | `diagram` with `edges` | ArchDiagram |
 | a comparison of magnitudes | `chart` | BarChart / LineChart |
 | something computational | `lab` | PythonLab |
+| a trade-off with one knob | `explorer` | Explorer |
 | real document or model output | `image` | figure |
+
+Explorer frames are precomputed and committed: see
+`scripts/gen-topk-explorer.py` for the pattern. The widget lets a reader drag
+the parameter, never invent the numbers.
 
 Renderers live in `src/components/diagrams/`. The block's shape selects one:
 `root` gives the decision tree, `edges` the architecture, `nodes`/`rows` the
