@@ -11,6 +11,7 @@
 import { SOURCES } from './sources-map';
 import { TERM_LINKS } from './termLinks';
 import { DIAGRAMS } from './postDiagrams';
+import { EXPLORERS } from './postExplorers';
 import { gate } from '../lib/publishGate';
 
 // Give a defined term its reference link, unless the post already set one.
@@ -43,6 +44,17 @@ function insertDiagram(body, postId) {
   return [...body.slice(0, at), entry.diagram, ...body.slice(at)];
 }
 
+// Same placement rule as diagrams: anchor on heading text, never an index.
+function insertExplorer(body, postId) {
+  const entry = EXPLORERS.find((e) => e.post === postId);
+  if (!entry || body.some((b) => b.type === 'explorer')) return body;
+  const at = body.findIndex(
+    (b) => b.type === 'h2' && b.text === entry.before.h2,
+  );
+  if (at === -1) return [...body, entry.block];
+  return [...body.slice(0, at), entry.block, ...body.slice(at)];
+}
+
 /**
  * Return a copy of `post` with its verified sources block at the end, its
  * defined terms linked to authoritative references, and its diagram in place. Any sources block already
@@ -53,8 +65,11 @@ export function attachSources(post) {
   if (!Array.isArray(post.body)) return post;
   const items = SOURCES[post.id];
 
-  const body = insertDiagram(
-    post.body.filter((b) => b.type !== 'sources').map(linkTerms),
+  const body = insertExplorer(
+    insertDiagram(
+      post.body.filter((b) => b.type !== 'sources').map(linkTerms),
+      post.id,
+    ),
     post.id,
   );
 

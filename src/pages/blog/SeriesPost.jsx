@@ -6,6 +6,7 @@ import ArchDiagram from '../../components/diagrams/ArchDiagram';
 import BarChart from '../../components/diagrams/BarChart';
 import LineChart from '../../components/diagrams/LineChart';
 import Schematic from '../../components/diagrams/Schematic';
+import Explorer from '../../components/diagrams/Explorer';
 // Shared rules across every diagram renderer, including how they behave on a
 // phone. Imported here because this is the one component that renders all of
 // them; the file was previously imported nowhere and its rules never applied.
@@ -141,6 +142,18 @@ function Block({ block }) {
         );
       }
       return null;
+    case 'explorer':
+      // A parameter the reader can drag, with every state precomputed and
+      // declared as data, so what they see came from a real run.
+      return (
+        <Explorer
+          title={block.title}
+          caption={block.caption}
+          param={block.param}
+          bars={block.bars}
+          data={block.data}
+        />
+      );
     case 'schematic':
       return <Schematic title={block.title} caption={block.caption} parts={block.parts} wires={block.wires} />;
     case 'image':
