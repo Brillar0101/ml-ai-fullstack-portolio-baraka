@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<meta name="description" content="Emoji Riddles: 248 rebus puzzles across eight categories and four difficulty levels. Play alone or take turns with someone over a game PIN." />
+<meta name="description" content="Emoji Riddles: 248 rebus puzzles across eight categories and four levels. Play solo, pass the phone, or open a room and take turns with up to ten people." />
 <meta name="theme-color" content="#FAEDE3" media="(prefers-color-scheme: light)" />
 <meta name="theme-color" content="#1D1922" media="(prefers-color-scheme: dark)" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -224,10 +224,18 @@
     letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft);
   }
   .roster .who.in { border-color: var(--teal); }
+  .roster .who.me { border-color: var(--pink); }
   .roster .who.empty {
     border-style: dashed; border-color: var(--line);
     color: var(--ink-soft); font-weight: 500;
   }
+
+  .alert {
+    border: 2px solid var(--pink); border-radius: 13px;
+    padding: 12px 14px; font-size: 13.5px; line-height: 1.5;
+    color: var(--ink);
+  }
+  .alert b { display: block; font-family: var(--display); margin-bottom: 3px; }
 
   .waitbar {
     display: flex; align-items: center; justify-content: center; gap: 9px;
@@ -836,6 +844,10 @@
       ready: ready,
       async create(row) { const d = await call(base, { method: "POST", body: JSON.stringify(row) }); return d && d[0]; },
       async find(code)  { const d = await call(base + "?code=eq." + encodeURIComponent(code) + "&select=*"); return d && d[0]; },
+      async rpc(fn, args) {
+        const d = await call(root + "/rest/v1/rpc/" + fn, { method: "POST", body: JSON.stringify(args) });
+        return d && d[0];
+      },
       async say(code, sender, body) {
         const d = await call(root + "/rest/v1/rpc/append_game_chat", {
           method: "POST",
@@ -928,8 +940,22 @@
   let log = [];
   let curSeed = "", curCode = "", isJoin = false, codeErr = "", copied = false, codeInput = "";
   let inviteFlow = false, shareNote = "";
-  let online = false, iAmHost = false, room = null, netErr = "", busy = false;
+  let online = false, room = null, netErr = "", busy = false, tableMissing = false;
   let pollTimer = null, chatInput = "", chatOpen = false;
+
+  /* One id per device, kept so a refresh rejoins as the same player rather
+     than appearing in the room twice. */
+  const myId = (() => {
+    const K = "emojiriddles.pid";
+    try {
+      let v = localStorage.getItem(K);
+      if (!v) {
+        v = "p" + Math.random().toString(36).slice(2, 10) + Math.random().toString(36).slice(2, 6);
+        localStorage.setItem(K, v);
+      }
+      return v;
+    } catch { return "p" + Math.random().toString(36).slice(2, 12); }
+  })();
 
   function load() {
     try {
@@ -1099,12 +1125,15 @@
 
   const cardValue = () => POINTS[P.diff] || 100;
 
-  const myIdx    = () => (iAmHost ? 0 : 1);
-  const myTurn   = () => !online || !room || room.turn === myIdx();
-  const myName   = () => (iAmHost ? room.host_name : (room.guest_name || "You"));
-  const theirName= () => (iAmHost ? (room.guest_name || "them") : room.host_name);
-  const myScore  = () => (iAmHost ? room.host_score : room.guest_score);
-  const theirScore=() => (iAmHost ? room.guest_score : room.host_score);
+  const roster    = () => (room && room.players) || [];
+  const meIn      = () => roster().find(p => p.id === myId) || null;
+  const upNow     = () => roster()[room ? room.turn : 0] || null;
+  const iAmHost   = () => { const r = roster(); return !!r.length && r[0].id === myId; };
+  const myTurn    = () => !online || !room ? true : !!(upNow() && upNow().id === myId);
+  const myName    = () => (meIn() && meIn().name) || (P.names[0] || "You");
+  const upName    = () => (upNow() && upNow().name) || "someone";
+  const nameById  = id => { const p = roster().find(x => x.id === id); return p ? p.name : "someone"; };
+  const leaderboard = () => roster().slice().sort((a, b) => (b.score || 0) - (a.score || 0));
 
   function rebuildFromRoom(r) {
     P.diff = r.difficulty;
@@ -1126,61 +1155,74 @@
   }
 
   async function createRoom(deck) {
-    busy = true; netErr = ""; render();
+    busy = true; netErr = ""; tableMissing = false; render();
     const seed = newSeed();
     const code = makeCode(deck, P.diff, seed);
+    const name = (P.names[0] || "").trim() || "Host";
     try {
       room = await NET.create({
         code: code, deck: deck, difficulty: P.diff, seed: seed,
-        host_name: (P.names[0] || "").trim() || "Player 1"
+        players: [{ id: myId, name: name.slice(0, 12), score: 0 }]
       });
-      iAmHost = true; online = true;
+      online = true;
       rebuildFromRoom(room);
       view = "lobby";
     } catch (e) {
-      /* Most likely the game_rooms table is not there yet. Rather than
-         dead-end, drop to the on-device invite: the code still reproduces
-         the same round for both people, just without live turns. */
+      /* Almost always the one-time SQL has not been run. Say so plainly
+         instead of quietly dropping into a mode that looks like broken turns. */
       online = false; room = null;
-      netErr = /(\b404\b|does not exist|schema cache)/i.test(e.message)
-        ? "Turn-by-turn play is not set up on this site yet, so this code just gives you both the same puzzles."
-        : "Could not reach the server. " + e.message + " Falling back to a shared code.";
-      busy = false;
-      return startDeck(deck);
+      tableMissing = /(\b404\b|does not exist|schema cache|Could not find)/i.test(e.message);
+      netErr = tableMissing
+        ? "Taking turns needs a one-time database setup that is not done yet."
+        : "Could not reach the server. " + e.message;
+      view = "setup";
     }
     busy = false; render(); startPolling();
   }
 
   async function joinRoom(code) {
-    busy = true; netErr = ""; render();
+    busy = true; netErr = ""; tableMissing = false; render();
+    const name = (P.names[1] || "").trim() || "Player";
     try {
-      const r = await NET.find(code);
-      if (!r) { netErr = "No game with that code. Check it and try again."; busy = false; return render(); }
-      const name = (P.names[1] || "").trim() || "Player 2";
-      room = await NET.patch(code, { guest_name: name });
-      iAmHost = false; online = true;
+      const r = await NET.rpc("join_game_room", {
+        room_code: code, player_id: myId, player_name: name.slice(0, 12)
+      });
+      if (!r) { netErr = "No game with that PIN. Check it and try again."; busy = false; return render(); }
+
+      room = r; online = true;
       rebuildFromRoom(room);
+
+      if (!meIn()) {
+        // the room turned us away: already begun, or full
+        netErr = room.started
+          ? "That game has already started."
+          : "That game is full.";
+        online = false; room = null;
+        busy = false; return render();
+      }
       view = room.finished ? "done" : room.started ? "play" : "lobby";
     } catch (e) {
-      netErr = "Could not join. " + e.message;
+      tableMissing = /(\b404\b|does not exist|schema cache|Could not find)/i.test(e.message);
+      netErr = tableMissing
+        ? "Taking turns needs a one-time database setup that is not done yet."
+        : "Could not join. " + e.message;
     }
     busy = false; render(); startPolling();
   }
 
-  /* Hand the turn over. The scores and history live on the row so both
-     players read the same truth rather than each keeping their own tally. */
+  /* Hand the turn on. The database decides the rotation and the scoring, so
+     three or more players cannot trample each other's moves. */
   async function pushTurn(gotIt, item) {
     busy = true; render();
-    const nextIndex = room.card_index + 1;
     try {
-      room = await NET.patch(room.code, {
-        host_score:  room.host_score  + (gotIt &&  iAmHost ? cardValue() : 0),
-        guest_score: room.guest_score + (gotIt && !iAmHost ? cardValue() : 0),
-        history: (room.history || []).concat([{ p: item.p, a: item.a, got: !!gotIt, by: myIdx() }]),
-        card_index: nextIndex,
-        turn: 1 - myIdx(),
-        finished: nextIndex >= queue.length
+      const r = await NET.rpc("take_turn", {
+        room_code: room.code,
+        player_id: myId,
+        points: gotIt ? cardValue() : 0,
+        card: { p: item.p, a: item.a, got: !!gotIt, by: myId },
+        total_cards: queue.length
       });
+      if (r) room = r;
       solved = false; shown = false; guess = ""; hint = 0;
       verdict = ""; verdictNear = false;
       view = room.finished ? "done" : "play";
@@ -1215,7 +1257,7 @@
     if (!r) return false;
 
     const chatGrew = (r.chat || []).length !== (room.chat || []).length;
-    const changed = r.guest_name !== room.guest_name
+    const changed = (r.players || []).length !== (room.players || []).length
                  || r.started    !== room.started
                  || r.turn       !== room.turn
                  || r.card_index !== room.card_index
@@ -1328,7 +1370,12 @@
         </div>
 
         ${codeErr ? `<p class="eyebrow" style="color:var(--pink)">${esc(codeErr)}</p>` : ""}
-        ${netErr ? `<p class="eyebrow" style="color:var(--pink)">${esc(netErr)}</p>` : ""}
+        ${tableMissing ? `
+          <div class="alert">
+            <b>Shared rooms are not switched on yet.</b>
+            This site needs a one-time database step before a PIN can join you
+            to someone else's game.
+          </div>` : netErr ? `<p class="eyebrow" style="color:var(--pink)">${esc(netErr)}</p>` : ""}
 
         <button class="btn solid" data-act="join" ${busy ? "disabled" : ""}>
           ${busy ? "Joining…" : NET.ready ? "Join the game" : "Start these puzzles"}
@@ -1423,7 +1470,14 @@
         )))}
         <p class="eyebrow" style="margin-top:-10px">${esc(lvl.note)}</p>
 
-        ${netErr ? `<p class="eyebrow" style="color:var(--pink)">${esc(netErr)}</p>` : ""}
+        ${tableMissing ? `
+          <div class="alert">
+            <b>Taking turns is not switched on yet.</b>
+            This site needs a one-time database step before players can share a
+            room. Until then, pick a deck below to play on this device: the
+            two-player option on this screen still alternates turns and hands
+            the phone over.
+          </div>` : netErr ? `<p class="eyebrow" style="color:var(--pink)">${esc(netErr)}</p>` : ""}
         <div class="cats">
           ${CATS.map(row).join("")}
           <button class="cat" data-deck="__mix">
@@ -1443,20 +1497,32 @@
   /* ---- lobby: everyone gathers, the host decides when to begin ---- */
   function lobbyView() {
     const lvl = LEVELS.find(l => l.d === P.diff);
-    const joined = room && room.guest_name;
+    const ps = roster();
+    const enough = ps.length >= 2;
 
-    if (!iAmHost) {
+    const chips = ps.map((p, n) => `
+      <span class="who ${p.id === myId ? "me" : "in"}">
+        ${esc(p.name)}${n === 0 ? " <i>host</i>" : ""}${p.id === myId && n !== 0 ? " <i>you</i>" : ""}
+      </span>`).join("");
+
+    if (!iAmHost()) {
       return `
         <div class="screen">
           <div class="topbar"><button class="back" data-go="title">‹ Leave</button></div>
-          <div style="flex:1"></div>
           <header>
             <p class="eyebrow">${deckIcon} ${esc(deckName)} · ${esc(lvl.name.toLowerCase())} · ${cardValue()} pts a card</p>
             <h1>You're in</h1>
-            <p class="lede">Playing as <b>${esc(room.guest_name)}</b>. Hang on while ${esc(room.host_name)} starts the game.</p>
+            <p class="lede">Playing as <b>${esc(myName())}</b>. You take turns, one card each, so nobody answers at the same time.</p>
           </header>
+
+          <div class="seg">
+            <span class="lbl">In this room · ${ps.length}</span>
+            <div class="roster">${chips}</div>
+          </div>
+
+          ${chatPanel()}
           <div style="flex:1"></div>
-          <div class="waitbar"><span class="dot"></span>Waiting for ${esc(room.host_name)} to start</div>
+          <div class="waitbar"><span class="dot"></span>Waiting for ${esc(ps.length ? ps[0].name : "the host")} to start</div>
           <button class="btn quiet" data-act="recheck" ${busy ? "disabled" : ""}>
             ${busy ? "Checking…" : "Check again"}
           </button>
@@ -1469,7 +1535,7 @@
         <header>
           <p class="eyebrow">${deckIcon} ${esc(deckName)} · ${esc(lvl.name.toLowerCase())} · ${cardValue()} pts a card</p>
           <h1>Game PIN</h1>
-          <p class="lede">They open the game, tap Join, and type this. You take turns: one card each, alternating.</p>
+          <p class="lede">They open the game, tap Join, and type this. Play goes round the room, one card each.</p>
         </header>
 
         <div class="bigcode" data-pick>${esc(curCode)}</div>
@@ -1482,49 +1548,47 @@
         ${netErr ? `<p class="eyebrow" style="color:var(--pink)">${esc(netErr)}</p>` : ""}
 
         <div class="seg">
-          <span class="lbl">${joined ? "In this game" : "Nobody has joined yet"}</span>
+          <span class="lbl">In this room · ${ps.length}</span>
           <div class="roster">
-            <span class="who host">${esc(room.host_name)} <i>you</i></span>
-            ${joined
-              ? `<span class="who in">${esc(room.guest_name)}</span>`
-              : `<span class="who empty">waiting…</span>`}
+            ${chips}
+            ${enough ? "" : `<span class="who empty">waiting…</span>`}
           </div>
         </div>
 
         ${chatPanel()}
         <div style="flex:1"></div>
-        ${joined
+        ${enough
           ? `<button class="btn solid" data-act="begin" ${busy ? "disabled" : ""}>
-               ${busy ? "Starting…" : `Start the game`}
+               ${busy ? "Starting…" : `Start the game · ${ps.length} players`}
              </button>`
-          : `<div class="waitbar"><span class="dot"></span>Waiting for someone to join</div>
+          : `<div class="waitbar"><span class="dot"></span>Waiting for players to join</div>
              <button class="btn quiet" data-act="recheck" ${busy ? "disabled" : ""}>
                ${busy ? "Checking…" : "Check again"}
              </button>`}
       </div>`;
   }
 
-  /* ---- it is their turn, so there is nothing to do but watch ---- */
+  /* ---- someone else is up, so this screen is deliberately inert ---- */
   function waitingView() {
     const done = (room.history || []).length;
     return `
       <div class="screen">
         <div class="topbar">
           <button class="back" data-go="title">‹ Leave</button>
-          <button class="right codebtn" data-act="copy">${copied ? "copied ✓" : "code " + esc(curCode)}</button>
+          <button class="right codebtn" data-act="copy">${copied ? "copied ✓" : "pin " + esc(curCode)}</button>
         </div>
         <div class="board">
           <div class="card">
             <div class="card-top">
-              <span class="chip t">Their turn</span>
+              <span class="chip t">${esc(upName())}'s turn</span>
               <span class="no">${Math.min(room.card_index + 1, queue.length)} / ${queue.length}</span>
             </div>
             <div class="handoff">
-              <div class="big">${esc(theirName())} is playing</div>
-              <div class="sm">This updates on its own the moment they answer. ${done} card${done === 1 ? "" : "s"} done so far.</div>
+              <div class="big">${esc(upName())} is answering</div>
+              <div class="sm">Sit tight, you cannot play on someone else's turn. This updates by itself. ${done} card${done === 1 ? "" : "s"} done.</div>
             </div>
           </div>
-          <div class="waitbar"><span class="dot"></span>Waiting for ${esc(theirName())}</div>
+          <div class="waitbar"><span class="dot"></span>Waiting for ${esc(upName())}</div>
           <button class="btn quiet" data-act="recheck" ${busy ? "disabled" : ""}>
             ${busy ? "Checking…" : "Check again"}
           </button>
@@ -1537,13 +1601,13 @@
   function chatPanel() {
     if (!online || !room) return "";
     const msgs = room.chat || [];
-    const recent = msgs.slice(-30);
     if (!chatOpen) {
       return `
         <button class="chattoggle" data-act="chatopen">
           Chat${msgs.length ? ` · ${msgs.length}` : ""}
         </button>`;
     }
+    const recent = msgs.slice(-30);
     return `
       <div class="chat">
         <div class="chat-head">
@@ -1561,7 +1625,7 @@
         </div>
         <div class="chat-form">
           <input data-chat type="text" maxlength="240" autocomplete="off"
-                 placeholder="Message${room ? " " + esc(theirName()) : ""}" value="${esc(chatInput)}" />
+                 placeholder="Message the room" value="${esc(chatInput)}" />
           <button class="chatsend" data-act="chatsend" ${chatInput.trim() ? "" : "disabled"}>Send</button>
         </div>
       </div>`;
@@ -1570,8 +1634,11 @@
   function netStrip() {
     return `
       <div class="strip">
-        <div class="${myTurn() ? "up" : ""}"><b>${myScore()}</b><span class="nm">${esc(myName())}</span></div>
-        <div class="${myTurn() ? "" : "up"}"><b>${theirScore()}</b><span class="nm">${esc(theirName())}</span></div>
+        ${leaderboard().slice(0, 4).map(p => `
+          <div class="${upNow() && p.id === upNow().id ? "up" : ""}">
+            <b>${p.score || 0}</b>
+            <span class="nm">${esc(p.id === myId ? "you" : p.name)}</span>
+          </div>`).join("")}
         <div><b>${Math.max(0, queue.length - room.card_index)}</b><span class="nm">left</span></div>
       </div>`;
   }
@@ -1637,7 +1704,7 @@
          </div>
          <button class="btn solid" data-act="next" ${busy ? "disabled" : ""}>
            ${busy ? "Sending…"
-             : online ? `Done, over to ${esc(theirName())} →`
+             : online ? `Done, next player →`
              : (i >= queue.length - 1 ? "See how you did →" : "Next card →")}
          </button>`
       : `<div class="answer">
@@ -1707,9 +1774,13 @@
 
     let head, sub;
     if (online && room) {
-      head = `${myName()} ${myScore()} · ${theirScore()} ${theirName()}`;
-      sub = myScore() === theirScore() ? "A draw, so you will have to settle it another way."
-          : myScore() > theirScore() ? "You take it." : `${theirName()} takes it.`;
+      const board = leaderboard();
+      const top = board[0], runnerUp = board[1];
+      head = board.map(p => `${p.name} ${p.score || 0}`).join(" · ");
+      sub = !top ? "Nobody scored."
+          : runnerUp && (runnerUp.score || 0) === (top.score || 0)
+            ? "A tie at the top, so you will have to settle it another way."
+            : top.id === myId ? "You take it." : `${top.name} takes it.`;
     } else if (P.duo) {
       const [a, b] = scores;
       head = `${nameOf(0)} ${a} · ${b} ${nameOf(1)}`;
@@ -1728,7 +1799,7 @@
       <div class="line">
         <span class="em">${l.item.p}</span>
         <span class="an">${esc(title(l.item.a))}</span>
-        ${online && room ? `<span class="who">${esc(l.by === myIdx() ? myName() : theirName())}</span>`
+        ${online && room ? `<span class="who">${esc(l.by === myId ? "you" : nameById(l.by))}</span>`
           : P.duo ? `<span class="who">${esc(nameOf(l.by))}</span>` : ""}
         <span class="mk ${l.got ? "y" : "n"}">${l.got ? "got it" : "missed"}</span>
       </div>`;
