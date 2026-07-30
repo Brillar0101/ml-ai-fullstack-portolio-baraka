@@ -1,5 +1,7 @@
 {
   "rewrites": [
+    { "source": "/gemoji", "destination": "/gemoji/index.html" },
+    { "source": "/gemoji/", "destination": "/gemoji/index.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [

@@ -1,0 +1,1187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="description" content="Emoji Riddles: 184 rebus puzzles across eight categories. Free hints, no ads, no timers." />
+<meta name="theme-color" content="#FAEDE3" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#1D1922" media="(prefers-color-scheme: dark)" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Emoji Riddles" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>%F0%9F%A7%A9</text></svg>" />
+<link rel="manifest" href="/gemoji/manifest.webmanifest" />
+<title>Emoji Riddles</title>
+</head>
+<body>
+<style>
+  :root {
+    color-scheme: light dark;
+
+    --paper:    #FAEDE3;
+    --card:     #FFF8F3;
+    --ink:      #2B2029;
+    --ink-soft: #7C6A72;
+    --pink:     #DC4C5C;
+    --teal:     #1C776E;
+    --line:     #E4CDBE;
+    --on-pink:  #FFF6F2;
+
+    --display: ui-rounded, "SF Pro Rounded", "Hiragino Maru Gothic ProN", system-ui, sans-serif;
+    --body:    system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono:    ui-monospace, "SF Mono", Menlo, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #1D1922; --card: #292231; --ink: #F7E9E1; --ink-soft: #AC98A4;
+      --pink: #FF7A87; --teal: #5CC3B3; --line: #3E3448; --on-pink: #2A1015;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #1D1922; --card: #292231; --ink: #F7E9E1; --ink-soft: #AC98A4;
+    --pink: #FF7A87; --teal: #5CC3B3; --line: #3E3448; --on-pink: #2A1015;
+  }
+  :root[data-theme="light"] {
+    --paper: #FAEDE3; --card: #FFF8F3; --ink: #2B2029; --ink-soft: #7C6A72;
+    --pink: #DC4C5C; --teal: #1C776E; --line: #E4CDBE; --on-pink: #FFF6F2;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 17px;
+    line-height: 1.5;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Halftone print texture, the thing that makes it read as riso */
+  body::before {
+    content: "";
+    position: fixed; inset: 0; z-index: 0;
+    pointer-events: none; opacity: .5;
+    background-image: radial-gradient(circle at 50% 50%, var(--line) .9px, transparent 1px);
+    background-size: 7px 7px;
+  }
+
+  #app {
+    position: relative; z-index: 1;
+    max-width: 460px; margin: 0 auto;
+    padding: 22px 18px calc(28px + env(safe-area-inset-bottom));
+    min-height: 100dvh;
+    display: flex; flex-direction: column;
+  }
+
+  button { font: inherit; color: inherit; cursor: pointer; border: none; background: none; }
+  button:focus-visible, input:focus-visible { outline: 3px solid var(--teal); outline-offset: 3px; }
+
+  .screen {
+    display: flex; flex-direction: column; flex: 1; gap: 18px;
+    animation: rise .3s cubic-bezier(.2,.8,.3,1) both;
+  }
+  @keyframes rise { from { opacity: 0; transform: translateY(12px); } }
+
+  /* ---------------- type ---------------- */
+  .eyebrow {
+    font-family: var(--mono); font-size: 11px;
+    letter-spacing: .18em; text-transform: uppercase;
+    color: var(--ink-soft); margin: 0;
+  }
+  h1 {
+    font-family: var(--display); font-size: 36px; line-height: 1.02;
+    font-weight: 800; letter-spacing: -.02em; margin: 8px 0 6px;
+    text-wrap: balance;
+  }
+  .lede { margin: 0; color: var(--ink-soft); font-size: 15.5px; max-width: 34ch; }
+
+  /* ---------------- buttons ---------------- */
+  .btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; padding: 15px 20px; border-radius: 14px;
+    font-family: var(--display); font-size: 17px; font-weight: 700;
+    background: var(--card); border: 2px solid var(--ink);
+    box-shadow: 3px 3px 0 var(--ink);
+    transition: transform .1s ease, box-shadow .1s ease;
+  }
+  .btn:active { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--ink); }
+  .btn.solid { background: var(--pink); color: var(--on-pink); }
+  .btn.teal  { background: var(--teal); color: var(--on-pink); border-color: var(--ink); }
+  .btn.quiet {
+    border-color: var(--line); box-shadow: none; background: transparent;
+    color: var(--ink-soft); font-weight: 600; font-size: 15px; padding: 12px;
+  }
+  .btn.quiet:active { transform: scale(.97); box-shadow: none; }
+  .btn:disabled { opacity: .4; cursor: default; }
+  .row { display: flex; gap: 10px; }
+
+  /* ---------------- segmented controls ---------------- */
+  .seg { display: flex; flex-direction: column; gap: 7px; }
+  .seg > .lbl {
+    font-family: var(--mono); font-size: 10.5px;
+    letter-spacing: .16em; text-transform: uppercase; color: var(--ink-soft);
+  }
+  .seg .opts { display: flex; gap: 7px; }
+  .seg .opts button {
+    flex: 1; padding: 10px 6px; border-radius: 11px;
+    font-family: var(--display); font-weight: 700; font-size: 14.5px;
+    background: var(--card); border: 2px solid var(--line);
+    color: var(--ink-soft);
+    transition: transform .1s ease;
+  }
+  .seg .opts button:active { transform: scale(.96); }
+  .seg .opts button[aria-pressed="true"] {
+    border-color: var(--ink); color: var(--ink);
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+
+  .names { display: flex; gap: 8px; }
+  .names input {
+    flex: 1; min-width: 0;
+    font-family: var(--display); font-size: 15px; font-weight: 700;
+    padding: 11px 13px; border-radius: 11px;
+    border: 2px solid var(--line); background: var(--card); color: var(--ink);
+  }
+  .names input::placeholder { color: var(--ink-soft); font-weight: 500; }
+
+  /* ---------------- category list ---------------- */
+  .cats { display: flex; flex-direction: column; gap: 9px; }
+  .cat {
+    display: flex; align-items: center; gap: 13px; text-align: left;
+    padding: 13px 15px; border-radius: 13px;
+    background: var(--card); border: 2px solid var(--ink);
+    box-shadow: 3px 3px 0 var(--ink);
+    transition: transform .1s ease, box-shadow .1s ease;
+  }
+  .cat:active { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--ink); }
+  .cat .ico { font-size: 26px; line-height: 1; flex: none; }
+  .cat .txt { min-width: 0; flex: 1; }
+  .cat .nm { font-family: var(--display); font-weight: 800; font-size: 16.5px; display: block; }
+  .cat .bl { font-size: 13px; color: var(--ink-soft); display: block; }
+  .cat .cnt {
+    font-family: var(--mono); font-size: 11px;
+    font-variant-numeric: tabular-nums; color: var(--ink-soft);
+    flex: none; text-align: right; line-height: 1.3;
+  }
+  .cat .cnt b { display: block; color: var(--teal); font-size: 13px; }
+
+  /* ---------------- puzzle card ---------------- */
+  .board { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 16px; }
+
+  .card {
+    position: relative;
+    background: var(--card); border: 2px solid var(--ink);
+    border-radius: 18px; box-shadow: 5px 5px 0 var(--ink);
+    padding: 18px; transform: rotate(-1.1deg);
+    animation: deal .3s cubic-bezier(.2,.8,.3,1) both;
+  }
+  @keyframes deal { from { opacity: 0; transform: rotate(3deg) translateY(16px) scale(.96); } }
+  .card.shake { animation: shake .38s ease; }
+  @keyframes shake {
+    0%,100% { transform: rotate(-1.1deg) translateX(0); }
+    20% { transform: rotate(-1.1deg) translateX(-9px); }
+    40% { transform: rotate(-1.1deg) translateX(8px); }
+    60% { transform: rotate(-1.1deg) translateX(-5px); }
+    80% { transform: rotate(-1.1deg) translateX(3px); }
+  }
+  .card.wild { transform: rotate(1.4deg); border-color: var(--teal); box-shadow: 5px 5px 0 var(--teal); }
+
+  .card-top {
+    display: flex; align-items: center; gap: 8px;
+    padding-bottom: 12px; border-bottom: 2px dashed var(--line);
+  }
+  .chip {
+    font-family: var(--mono); font-size: 10.5px;
+    letter-spacing: .14em; text-transform: uppercase;
+    color: var(--on-pink); background: var(--pink);
+    padding: 4px 9px; border-radius: 5px;
+  }
+  .chip.t { background: var(--teal); }
+  .chip.lvl { background: transparent; color: var(--ink-soft); border: 1px solid var(--line); }
+  .card-top .no {
+    margin-left: auto; font-family: var(--mono); font-size: 11px;
+    font-variant-numeric: tabular-nums; color: var(--ink-soft);
+  }
+
+  .puzzle {
+    font-size: 56px; line-height: 1.34; text-align: center;
+    padding: 28px 4px; letter-spacing: .07em; word-break: break-word;
+  }
+  .wildq {
+    font-family: var(--display); font-size: 25px; line-height: 1.3;
+    font-weight: 700; text-wrap: balance; padding: 26px 2px 22px;
+  }
+  .asks { font-size: 14px; color: var(--ink-soft); margin: 0; }
+  .asks b { color: var(--ink); font-family: var(--display); }
+
+  .mask {
+    font-family: var(--mono); font-size: 20px; letter-spacing: .26em;
+    text-align: center; color: var(--teal);
+    padding-bottom: 14px; word-break: break-word; min-height: 1.4em;
+  }
+
+  .stamp {
+    position: absolute; top: 42%; left: 50%;
+    transform: translate(-50%, -50%) rotate(-13deg);
+    font-family: var(--display); font-size: 40px; font-weight: 800;
+    color: var(--pink); border: 5px solid var(--pink);
+    border-radius: 12px; padding: 4px 18px; opacity: .92;
+    pointer-events: none; white-space: nowrap;
+    animation: thud .3s cubic-bezier(.3,1.5,.5,1) both;
+  }
+  @keyframes thud {
+    from { opacity: 0; transform: translate(-50%,-50%) rotate(-13deg) scale(2.4); }
+    to   { opacity: .92; transform: translate(-50%,-50%) rotate(-13deg) scale(1); }
+  }
+
+  /* ---------------- answer ---------------- */
+  .answer { display: flex; flex-direction: column; gap: 9px; }
+  .answer input {
+    font-family: var(--display); font-size: 21px; font-weight: 700;
+    padding: 13px 16px; border: none; border-bottom: 3px solid var(--ink);
+    background: transparent; color: var(--ink);
+    width: 100%; border-radius: 0; text-align: center;
+  }
+  .answer input::placeholder { color: var(--ink-soft); font-weight: 500; opacity: .7; }
+
+  .verdict {
+    text-align: center; font-family: var(--display);
+    font-weight: 700; font-size: 15px; min-height: 22px;
+  }
+  .verdict.near { color: var(--pink); }
+
+  .revealed { text-align: center; padding: 4px 0 2px; }
+  .revealed .lbl {
+    font-family: var(--mono); font-size: 10.5px;
+    letter-spacing: .18em; text-transform: uppercase; color: var(--ink-soft);
+  }
+  .revealed .val {
+    font-family: var(--display); font-size: 25px; font-weight: 800;
+    color: var(--teal); line-height: 1.2;
+  }
+
+  /* ---------------- score strip ---------------- */
+  .strip {
+    display: flex; gap: 8px;
+    font-family: var(--mono); font-size: 10.5px;
+    letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft);
+  }
+  .strip div {
+    flex: 1; text-align: center; background: var(--card);
+    border: 2px solid var(--line); border-radius: 10px; padding: 7px 4px;
+    min-width: 0;
+  }
+  .strip b {
+    display: block; font-family: var(--display); font-size: 19px;
+    font-weight: 800; color: var(--ink);
+    font-variant-numeric: tabular-nums; letter-spacing: 0;
+  }
+  .strip .nm {
+    display: block; overflow: hidden;
+    text-overflow: ellipsis; white-space: nowrap;
+  }
+  .strip .up { border-color: var(--ink); box-shadow: 2px 2px 0 var(--ink); }
+  .strip .up b { color: var(--pink); }
+
+  .topbar { display: flex; align-items: center; gap: 10px; }
+  .topbar .back {
+    font-family: var(--display); font-weight: 700; font-size: 15px;
+    color: var(--ink-soft); padding: 4px 0;
+  }
+  .topbar .right { margin-left: auto; }
+
+  .handoff {
+    text-align: center; padding: 30px 10px;
+    font-family: var(--display);
+  }
+  .handoff .big { font-size: 30px; font-weight: 800; margin-bottom: 6px; }
+  .handoff .sm { font-size: 15px; color: var(--ink-soft); font-family: var(--body); }
+
+  .note {
+    display: flex; gap: 10px; align-items: flex-start;
+    border: 2px dashed var(--line); border-radius: 13px;
+    padding: 12px 14px; font-size: 13.5px; line-height: 1.45; color: var(--ink-soft);
+  }
+  .note b { color: var(--ink); }
+
+  .tally { display: flex; flex-direction: column; gap: 4px; }
+  .tally .line {
+    display: flex; gap: 10px; align-items: baseline;
+    font-size: 14px; padding: 7px 0; border-bottom: 1px solid var(--line);
+  }
+  .tally .line .em { font-size: 19px; flex: none; }
+  .tally .line .an { font-family: var(--display); font-weight: 700; flex: 1; }
+  .tally .line .who { font-family: var(--mono); font-size: 11px; color: var(--ink-soft); flex: none; }
+  .tally .line .mk { font-family: var(--mono); font-size: 12px; flex: none; }
+  .tally .line .mk.y { color: var(--teal); }
+  .tally .line .mk.n { color: var(--ink-soft); }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  }
+</style>
+
+<div id="app"></div>
+
+<script>
+(() => {
+  "use strict";
+
+  const CATS = [
+    {
+      id: "action", name: "Actions", icon: "🏃", blurb: "verbs and everyday things people do",
+      items: [
+        { p: "🏃‍♂️💨",   a: "running", d: 1 },
+        { p: "😴💤",     a: "sleeping", d: 1 },
+        { p: "🏊‍♀️🌊",   a: "swimming", d: 1 },
+        { p: "📖👀",     a: "reading", d: 1 },
+        { p: "🎤🎶",     a: "singing", d: 1 },
+        { p: "💃🕺",     a: "dancing", d: 2 },
+        { p: "✍️📝",     a: "writing", d: 2 },
+        { p: "🍳👨‍🍳",   a: "cooking", d: 2 },
+        { p: "🚗🛣️",    a: "driving", d: 2 },
+        { p: "🧹🧽",     a: "cleaning", d: 2 },
+        { p: "🧗‍♀️⛰️",   a: "climbing", d: 2 },
+        { p: "🎣🐟",     a: "fishing", d: 2 },
+        { p: "🧘‍♀️🕯️",   a: "meditating", d: 2 },
+        { p: "🤝👋",     a: "shaking hands", alt: ["handshake"], d: 2 },
+        { p: "🙈🔦",     a: "hiding", d: 2 },
+        { p: "🧵🪡", a: "sewing", d: 3 },
+        { p: "🪓🪵", a: "chopping wood", alt: ["chopping firewood"], d: 3 },
+        { p: "🤹‍♂️🎪", a: "juggling", d: 3 },
+        { p: "🪂☁️", a: "skydiving", d: 3 },
+        { p: "🧶🧣", a: "knitting", d: 3 },
+        { p: "🚣‍♀️🌊", a: "rowing", d: 3 },
+        { p: "🏹🎯", a: "archery", alt: ["shooting a bow"], d: 3 },
+        { p: "🪁💨", a: "flying a kite", alt: ["kite flying"], d: 3 }
+      ]
+    },
+    {
+      id: "country", name: "Countries", icon: "🌍", blurb: "no flags, that'd be cheating",
+      items: [
+        { p: "🗼🥐🍷",   a: "france", d: 1 },
+        { p: "🍕🍝🏛️",  a: "italy", d: 1 },
+        { p: "🌸🗾🍣",  a: "japan", d: 1 },
+        { p: "🦘🐨🏄",   a: "australia", d: 1 },
+        { p: "🐼🏯🥢",   a: "china", d: 1 },
+        { p: "🌮🎺🌵",   a: "mexico", d: 2 },
+        { p: "🍁🏒🐻",   a: "canada", d: 2 },
+        { p: "⚽🌴💃",   a: "brazil", d: 2 },
+        { p: "🕌🐘🍛",   a: "india", d: 2 },
+        { p: "🐫🔺🏜️",  a: "egypt", d: 2 },
+        { p: "⛰️🦓🏝️",  a: "tanzania", d: 2 },
+        { p: "🏃‍♂️🦁☕",  a: "kenya", d: 2 },
+        { p: "🌷🚲🧀",   a: "netherlands", alt: ["holland", "the netherlands"], d: 2 },
+        { p: "🏔️🍫⌚",  a: "switzerland", d: 2 },
+        { p: "🥁🎬🛢️",  a: "nigeria", d: 2 },
+        { p: "🦙⛰️🏛️", a: "peru", d: 3 },
+        { p: "🌋🧊♨️", a: "iceland", d: 3 },
+        { p: "🕌🐪🍵", a: "morocco", d: 3 },
+        { p: "🍜🛵👒", a: "vietnam", d: 3 },
+        { p: "🥩💃⚽", a: "argentina", d: 3 },
+        { p: "🎿🐟🏔️", a: "norway", d: 3 },
+        { p: "🕌☕🎈", a: "turkey", d: 3 },
+        { p: "🎤💄🌶️", a: "south korea", alt: ["korea"], d: 3 }
+      ]
+    },
+    {
+      id: "movie", name: "Movies", icon: "🎬", blurb: "films most people have already seen",
+      items: [
+        { p: "🦁👑",     a: "the lion king", d: 1 },
+        { p: "❄️👸⛄",   a: "frozen", d: 1 },
+        { p: "🐟🔍🌊",   a: "finding nemo", d: 1 },
+        { p: "🚢🧊💔",   a: "titanic", d: 1 },
+        { p: "🎈🏠👴",   a: "up", d: 2 },
+        { p: "🧸👦🤠",   a: "toy story", d: 1 },
+        { p: "🤖❤️🌱",   a: "wall-e", alt: ["walle", "wall e"], d: 2 },
+        { p: "🐼🥋🍜",   a: "kung fu panda", d: 2 },
+        { p: "👨‍🍳🐀🇫🇷", a: "ratatouille", d: 2 },
+        { p: "😼👢⚔️",   a: "puss in boots", d: 2 },
+        { p: "🦖🏝️🧬",  a: "jurassic park", d: 2 },
+        { p: "🕶️💊🔴",  a: "the matrix", d: 2 },
+        { p: "🏹🔥👧",   a: "the hunger games", d: 2 },
+        { p: "🧙‍♂️💍🌋", a: "the lord of the rings", alt: ["lotr"], d: 2 },
+        { p: "🦇🃏🌃",   a: "the dark knight", d: 2 },
+        { p: "🐰🚔🦊", a: "zootopia", alt: ["zootropolis"], d: 3 },
+        { p: "🧠😢😡😀", a: "inside out", d: 3 },
+        { p: "🚀🌽🕳️", a: "interstellar", d: 3 },
+        { p: "🏨🎩🍰", a: "the grand budapest hotel", d: 3 },
+        { p: "🏃🍫🪑", a: "forrest gump", d: 3 },
+        { p: "🌪️👠🌈", a: "the wizard of oz", d: 3 },
+        { p: "🐺💵📈", a: "the wolf of wall street", d: 3 },
+        { p: "🚿🔪🎻", a: "psycho", d: 3 }
+      ]
+    },
+    {
+      id: "saying", name: "Sayings", icon: "💬", blurb: "idioms and phrases people repeat",
+      items: [
+        { p: "🌧️🐱🐶",  a: "raining cats and dogs", d: 1 },
+        { p: "🍰🚶",     a: "a piece of cake", d: 1 },
+        { p: "⏰🪰",     a: "time flies", d: 1 },
+        { p: "🧊🎂",     a: "the icing on the cake", d: 2 },
+        { p: "🐦🪨",     a: "two birds with one stone", alt: ["kill two birds with one stone"], d: 2 },
+        { p: "🐱👜",     a: "let the cat out of the bag", d: 2 },
+        { p: "🥛😭",     a: "crying over spilled milk", d: 1 },
+        { p: "🐘🛋️",    a: "the elephant in the room", d: 2 },
+        { p: "🎯🔨",     a: "hit the nail on the head", d: 2 },
+        { p: "🔵🌙",     a: "once in a blue moon", d: 2 },
+        { p: "🥚🧺",     a: "all your eggs in one basket", alt: ["dont put all your eggs in one basket"], d: 2 },
+        { p: "☔💰",     a: "save it for a rainy day", alt: ["saving for a rainy day"], d: 2 },
+        { p: "🫘💦",     a: "spill the beans", d: 2 },
+        { p: "🦵💥",     a: "break a leg", d: 1 },
+        { p: "🍳🔥",     a: "out of the frying pan into the fire", d: 2 },
+        { p: "🐦✋🌳🌳", a: "a bird in the hand is worth two in the bush", alt: ["a bird in the hand"], d: 3 },
+        { p: "🐴🚰", a: "you can lead a horse to water", d: 3 },
+        { p: "🍎🌳", a: "the apple doesnt fall far from the tree", d: 3 },
+        { p: "🐕😴", a: "let sleeping dogs lie", d: 3 },
+        { p: "🐟🌊", a: "plenty of fish in the sea", d: 3 },
+        { p: "📚🙈", a: "dont judge a book by its cover", d: 3 },
+        { p: "🐍🌿", a: "a snake in the grass", d: 3 },
+        { p: "🌅🐦🪱", a: "the early bird catches the worm", alt: ["early bird gets the worm"], d: 3 }
+      ]
+    },
+    {
+      id: "food", name: "Food", icon: "🍜", blurb: "dishes, and things that go together",
+      items: [
+        { p: "🍍🍕",     a: "pineapple pizza", d: 1 },
+        { p: "🥜🧈🍇",   a: "peanut butter and jelly", alt: ["pbj", "pb and j"], d: 2 },
+        { p: "🐟🍟",     a: "fish and chips", d: 1 },
+        { p: "🥞🍯",     a: "pancakes and syrup", alt: ["pancakes"], d: 2 },
+        { p: "🍗🧇",     a: "chicken and waffles", d: 2 },
+        { p: "☕🥐",     a: "coffee and a croissant", alt: ["coffee and croissant"], d: 2 },
+        { p: "🍫🍪",     a: "chocolate chip cookie", d: 1 },
+        { p: "🥑🍞",     a: "avocado toast", d: 1 },
+        { p: "🧄🍞",     a: "garlic bread", d: 1 },
+        { p: "🥩🥔",     a: "steak and potatoes", d: 2 },
+        { p: "🌶️🍗",    a: "hot wings", d: 2 },
+        { p: "🍋🥧",     a: "lemon pie", alt: ["lemon meringue pie"], d: 2 },
+        { p: "🌽🍞",     a: "cornbread", d: 2 },
+        { p: "🥛🍦",     a: "milkshake", d: 2 },
+        { p: "🍚🫘",     a: "rice and beans", d: 2 },
+        { p: "🥓🥬🍅", a: "blt", alt: ["bacon lettuce and tomato"], d: 3 },
+        { p: "🍝🥓🥚", a: "carbonara", alt: ["spaghetti carbonara"], d: 3 },
+        { p: "🌯🫘🍚", a: "burrito", d: 3 },
+        { p: "🍌🍞", a: "banana bread", d: 3 },
+        { p: "🫓🧆🥒", a: "falafel wrap", alt: ["falafel"], d: 3 },
+        { p: "🥥🍛🌶️", a: "coconut curry", d: 3 },
+        { p: "🍎🥧🍪", a: "apple crumble", alt: ["apple crisp"], d: 3 },
+        { p: "🐑🥧🥔", a: "shepherds pie", d: 3 }
+      ]
+    },
+    {
+      id: "job", name: "Jobs", icon: "👔", blurb: "what people do all day",
+      items: [
+        { p: "🔥🚒",     a: "firefighter", alt: ["fireman"], d: 1 },
+        { p: "🩺💊",     a: "doctor", d: 1 },
+        { p: "📚🍎",     a: "teacher", d: 1 },
+        { p: "🍳🔪",     a: "chef", alt: ["cook"], d: 1 },
+        { p: "✂️💇",     a: "hairdresser", alt: ["barber", "hair stylist"], d: 2 },
+        { p: "✈️🎧",     a: "pilot", d: 1 },
+        { p: "🐄🚜🌾",   a: "farmer", d: 2 },
+        { p: "🔧🚗",     a: "mechanic", d: 2 },
+        { p: "💻⌨️",    a: "programmer", alt: ["developer", "software engineer", "coder"], d: 2 },
+        { p: "🦷🪥",     a: "dentist", d: 2 },
+        { p: "⚖️🔨",    a: "judge", d: 2 },
+        { p: "📦🚚",     a: "delivery driver", alt: ["courier"], d: 2 },
+        { p: "🎨🖌️",    a: "artist", alt: ["painter"], d: 2 },
+        { p: "📰🎤",     a: "journalist", alt: ["reporter"], d: 2 },
+        { p: "🧱🏗️",    a: "builder", alt: ["construction worker"], d: 2 },
+        { p: "🐝🍯🧑‍🌾", a: "beekeeper", d: 3 },
+        { p: "🦴🏺⛏️", a: "archaeologist", d: 3 },
+        { p: "🔭🌌", a: "astronomer", d: 3 },
+        { p: "💐✂️", a: "florist", d: 3 },
+        { p: "🍞🥐", a: "baker", d: 3 },
+        { p: "🧵📏", a: "tailor", alt: ["seamstress"], d: 3 },
+        { p: "🎬📢", a: "film director", alt: ["director"], d: 3 },
+        { p: "💉🐕🐈", a: "vet", alt: ["veterinarian"], d: 3 }
+      ]
+    },
+    {
+      id: "song", name: "Songs", icon: "🎵", blurb: "the ones everybody already knows",
+      items: [
+        { p: "🎂🎉🎈",   a: "happy birthday", d: 1 },
+        { p: "⭐⭐🌟",   a: "twinkle twinkle little star", d: 1 },
+        { p: "🚣‍♂️🚣‍♂️🛶", a: "row row row your boat", d: 1 },
+        { p: "🕷️☔",    a: "itsy bitsy spider", d: 1 },
+        { p: "🐑🖤🧶",   a: "baa baa black sheep", d: 1 },
+        { p: "🌉🍂",     a: "london bridge is falling down", alt: ["london bridge"], d: 2 },
+        { p: "👏😀",     a: "if youre happy and you know it", d: 2 },
+        { p: "🐄🚜🅾️",  a: "old macdonald had a farm", alt: ["old macdonald"], d: 2 },
+        { p: "🐭🐭🐭🕶️", a: "three blind mice", d: 2 },
+        { p: "🔔🔔🛷",   a: "jingle bells", d: 2 },
+        { p: "🌧️🌧️🚶", a: "rain rain go away", d: 2 },
+        { p: "🌞🌞🌞",   a: "you are my sunshine", d: 2 },
+        { p: "🐭🐭🕰️",  a: "hickory dickory dock", d: 2 },
+        { p: "🅰️🅱️©️",  a: "the alphabet song", alt: ["abc song", "alphabet song", "abcs"], d: 2 },
+        { p: "🚂🛤️👷",  a: "ive been working on the railroad", alt: ["working on the railroad"], d: 2 },
+        { p: "🚫😟😀", a: "dont worry be happy", d: 3 },
+        { p: "🌈🔝", a: "somewhere over the rainbow", alt: ["over the rainbow"], d: 3 },
+        { p: "🌍☮️🤔", a: "imagine", d: 3 },
+        { p: "💃👑", a: "dancing queen", d: 3 },
+        { p: "💔🚢🎻", a: "my heart will go on", d: 3 },
+        { p: "🌙🏞️", a: "moon river", d: 3 },
+        { p: "👣👣👏", a: "we will rock you", d: 3 },
+        { p: "🎃👻🕺", a: "thriller", d: 3 }
+      ]
+    },
+    {
+      id: "compound", name: "Compound Words", icon: "🧩", blurb: "two emoji that join into one word",
+      items: [
+        { p: "🌞🌻",     a: "sunflower", d: 1 },
+        { p: "🌈",       a: "rainbow", hint2: "rain + bow", d: 2 },
+        { p: "🐝🏠",     a: "beehive", d: 1 },
+        { p: "🐷🏦",     a: "piggy bank", d: 1 },
+        { p: "🌟🐟",     a: "starfish", d: 1 },
+        { p: "🔥🦋",     a: "firefly", d: 2 },
+        { p: "🍯🌙",     a: "honeymoon", d: 2 },
+        { p: "🐄👦",     a: "cowboy", d: 2 },
+        { p: "🚗🐶",     a: "carpet", d: 2 },
+        { p: "🥛🛣️",    a: "milky way", d: 2 },
+        { p: "📚🐛",     a: "bookworm", d: 2 },
+        { p: "👀🏀",     a: "eyeball", d: 2 },
+        { p: "🌊🐴",     a: "seahorse", d: 1 },
+        { p: "🍳🎂",     a: "pancake", d: 2 },
+        { p: "🔔🌶️",    a: "bell pepper", d: 2 },
+        { p: "🧈🪰", a: "butterfly", d: 3 },
+        { p: "🐂🐸", a: "bullfrog", d: 3 },
+        { p: "👂🥁", a: "eardrum", d: 3 },
+        { p: "🧠🌩️", a: "brainstorm", d: 3 },
+        { p: "❄️🧑", a: "snowman", d: 3 },
+        { p: "🌧️🧥", a: "raincoat", d: 3 },
+        { p: "🕯️🥢", a: "candlestick", d: 3 },
+        { p: "🐟🪝", a: "fishhook", d: 3 }
+      ]
+    }
+  ];
+
+  /* Wildcards. These interrupt the puzzles every few cards. Nothing is
+     scored and there is no right answer, you just say it out loud.
+     Kept curious rather than flirty, because trying too hard reads badly. */
+  const WILD = [
+    "What's the last thing that genuinely made you laugh?",
+    "What do people usually get wrong about you?",
+    "What's something small that instantly makes your day better?",
+    "What's your most-used emoji? Be honest.",
+    "What's a compliment you have trouble accepting?",
+    "Best meal you've had this month?",
+    "What are you weirdly good at?",
+    "What's a hill you'd genuinely die on?",
+    "What's your comfort movie?",
+    "Morning person or night person, and are you lying?",
+    "What's something you've changed your mind about recently?",
+    "What's the dumbest thing you've ever cried about?",
+    "What's your most useless talent?",
+    "What did you want to be when you were a kid?",
+    "What song fixes a bad mood for you?",
+    "What's the nicest thing anyone has said about you?",
+    "When do you feel most like yourself?",
+    "What's a green flag you notice in people?",
+    "What's an instant ick, no explanation needed?",
+    "Best trip you've ever taken?",
+    "What's something you're still figuring out?",
+    "Describe your whole day in three emojis.",
+    "Pettiest reason you've ever unfollowed someone?",
+    "What's a food opinion that gets you in trouble?"
+  ];
+
+  const LEVELS = [
+    { d: 1, name: "Easy",   note: "warm up" },
+    { d: 2, name: "Medium", note: "a bit of thinking" },
+    { d: 3, name: "Hard",   note: "properly tricky" }
+  ];
+
+  /* ========================== ANSWER MATCHING ==========================
+     Worth getting right. If the game rejects an answer that a person
+     would accept, the whole thing feels broken.
+  ==================================================================== */
+
+  const norm = s => String(s)
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9 ]/g, " ")
+    .replace(/\b(the|a|an|of|is|it|to)\b/g, " ")
+    .replace(/\s+/g, "")
+    .trim();
+
+  const answersFor = it => [it.a].concat(it.alt || []);
+  function isCorrect(input, it) {
+    const g = norm(input);
+    return !!g && answersFor(it).some(a => norm(a) === g);
+  }
+
+  // Levenshtein, capped. Only used to tell someone they made a typo.
+  function edits(a, b) {
+    if (Math.abs(a.length - b.length) > 3) return 99;
+    const prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+    for (let i = 1; i <= a.length; i++) {
+      let diag = prev[0];
+      prev[0] = i;
+      for (let j = 1; j <= b.length; j++) {
+        const tmp = prev[j];
+        prev[j] = Math.min(prev[j] + 1, prev[j - 1] + 1, diag + (a[i - 1] === b[j - 1] ? 0 : 1));
+        diag = tmp;
+      }
+    }
+    return prev[b.length];
+  }
+  const isNear = (input, it) => {
+    const g = norm(input);
+    return g.length > 2 && answersFor(it).some(a => edits(g, norm(a)) <= 2);
+  };
+
+  /* ============================ HINT LADDER ============================
+     Hints cost nothing and you can always take them. They are built from
+     the answer itself, so none of them had to be written by hand.
+  ==================================================================== */
+
+  function masked(answer, level) {
+    if (level <= 0) return "";
+    let flip = 0;
+    return answer.split(" ").map(w =>
+      w.split("").map((ch, i) => {
+        if (!/[a-z0-9]/i.test(ch)) return ch;
+        if (i === 0) return ch.toUpperCase();
+        if (level >= 2 && (flip++ % 2 === 0)) return ch.toUpperCase();
+        return "_";
+      }).join("")
+    ).join("   ");
+  }
+
+  /* ============================== STATE ============================== */
+
+  const KEY = "emojiriddles.v2";
+  const blank = () => ({ best: {}, diff: 1, duo: false, names: ["", ""] });
+
+  let P = load();
+  let view = "title";
+  let deckName = "", deckIcon = "", deckId = null;
+  let queue = [];            // [{kind:"p", item} | {kind:"w", q}]
+  let i = 0;
+  let guess = "", hint = 0;
+  let solved = false, shown = false;
+  let verdict = "", verdictNear = false, shakeNow = false;
+  let handoff = false;       // "pass the phone" gate between turns
+  let turn = 0;
+  let scores = [0, 0];
+  let log = [];
+  let curSeed = "", curCode = "", isJoin = false, codeErr = "", copied = false, codeInput = "";
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(KEY);
+      const p = raw ? JSON.parse(raw) : null;
+      return (p && typeof p === "object") ? Object.assign(blank(), p) : blank();
+    } catch { return blank(); }
+  }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(P)); } catch {} }
+
+  /* Seeded shuffling, so a short code reproduces the exact same round on
+     someone else's phone. There is no server here: the code IS the state. */
+  function rngFrom(seed) {
+    let a = 0;
+    for (let k = 0; k < seed.length; k++) a = (a * 31 + seed.charCodeAt(k)) | 0;
+    return function () {
+      a = (a + 0x6D2B79F5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  const shuffleWith = (arr, rnd) => {
+    const a = arr.slice();
+    for (let k = a.length - 1; k > 0; k--) {
+      const j = Math.floor(rnd() * (k + 1));
+      [a[k], a[j]] = [a[j], a[k]];
+    }
+    return a;
+  };
+  const newSeed = () => {
+    let s = "";
+    for (let k = 0; k < 4; k++) s += "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[Math.floor(Math.random() * 32)];
+    return s;
+  };
+
+  const DECK_IDS = CATS.map(c => c.id).concat(["__mix"]);
+  const makeCode = (id, diff, seed) =>
+    String.fromCharCode(65 + DECK_IDS.indexOf(id)) + diff + seed;
+  function readCode(raw) {
+    const s = String(raw || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+    if (s.length !== 6) return null;
+    const idx = s.charCodeAt(0) - 65;
+    const diff = +s[1];
+    if (idx < 0 || idx >= DECK_IDS.length) return null;
+    if (diff !== 1 && diff !== 2 && diff !== 3) return null;
+    return { id: DECK_IDS[idx], diff: diff, seed: s.slice(2) };
+  }
+
+  const atLevel = c => c.items.filter(it => it.d === P.diff);
+  const nameOf = n => (P.names[n] || "").trim() || (n ? "Player 2" : "Player 1");
+
+  function buildQueue(items, rnd) {
+    const wilds = shuffleWith(WILD, rnd);
+    const q = [];
+    let w = 0;
+    items.forEach((item, n) => {
+      q.push({ kind: "p", item });
+      // a flirty card every 5th puzzle, never as the very last thing
+      if ((n + 1) % 5 === 0 && n < items.length - 1 && w < wilds.length) {
+        q.push({ kind: "w", q: wilds[w++] });
+      }
+    });
+    return q;
+  }
+
+  function startDeck(id, seed, joined) {
+    deckId = id;
+    curSeed = seed || newSeed();
+    curCode = makeCode(id, P.diff, curSeed);
+    isJoin = !!joined;
+    codeErr = ""; copied = false;
+    const rnd = rngFrom(curCode);
+    let items;
+    if (id === "__mix") {
+      const pool = CATS.flatMap(c => atLevel(c).map(it => Object.assign({ cat: c.name }, it)));
+      items = shuffleWith(pool, rnd).slice(0, 15);
+      deckName = "Mixed Bag"; deckIcon = "🎲";
+    } else {
+      const c = CATS.find(x => x.id === id);
+      items = shuffleWith(atLevel(c), rnd);
+      deckName = c.name; deckIcon = c.icon;
+    }
+    queue = buildQueue(items, rnd);
+    i = 0; guess = ""; hint = 0; solved = false; shown = false;
+    verdict = ""; verdictNear = false; log = [];
+    turn = 0; scores = [0, 0];
+    handoff = false;
+    view = "play";
+    render();
+  }
+
+  const cur = () => queue[i];
+
+  function submit() {
+    if (solved || shown) return;
+    const it = cur().item;
+    if (!guess.trim()) return;
+    if (isCorrect(guess, it)) {
+      solved = true;
+      scores[P.duo ? turn : 0]++;
+      log.push({ item: it, got: true, by: turn });
+      verdict = ""; verdictNear = false;
+    } else if (isNear(guess, it)) {
+      verdict = "Very close. Check your spelling."; verdictNear = true; shakeNow = true;
+    } else {
+      verdict = "That's not it. There's a hint button below."; verdictNear = false; shakeNow = true;
+    }
+    render();
+  }
+
+  function giveUp() {
+    shown = true;
+    log.push({ item: cur().item, got: false, by: turn });
+    render();
+  }
+
+  function advance() {
+    if (i >= queue.length - 1) {
+      if (deckId !== "__mix") {
+        const k = deckId + ":" + P.diff;
+        P.best[k] = Math.max(P.best[k] || 0, scores[0] + scores[1]);
+        save();
+      }
+      view = "done"; render(); return;
+    }
+    i++; guess = ""; hint = 0; solved = false; shown = false;
+    verdict = ""; verdictNear = false;
+    if (P.duo) { turn = 1 - turn; handoff = true; }
+    render();
+  }
+
+  /* ============================== RENDER ============================== */
+
+  const app = document.getElementById("app");
+  const esc = s => String(s).replace(/[&<>"']/g, c =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const title = s => s.replace(/\b[a-z]/g, m => m.toUpperCase());
+
+  function render() {
+    app.innerHTML = view === "title" ? titleView()
+                  : view === "setup" ? setupView()
+                  : view === "join"  ? joinView()
+                  : view === "play"  ? (handoff ? handoffView() : playView())
+                  : doneView();
+    wire();
+    if (shakeNow) {
+      const c = app.querySelector(".card");
+      if (c) { c.classList.add("shake"); setTimeout(() => c.classList.remove("shake"), 400); }
+      shakeNow = false;
+    }
+  }
+
+  function seg(label, opts) {
+    return `
+      <div class="seg">
+        <span class="lbl">${esc(label)}</span>
+        <div class="opts">
+          ${opts.map(o => `
+            <button type="button" data-set="${o.set}" data-val="${o.val}"
+                    aria-pressed="${o.on}">${esc(o.text)}</button>`).join("")}
+        </div>
+      </div>`;
+  }
+
+  /* ---- title ---- */
+  function titleView() {
+    const total = CATS.reduce((n, c) => n + c.items.length, 0);
+    return `
+      <div class="screen">
+        <div style="flex:1"></div>
+        <header>
+          <p class="eyebrow">${total} puzzles · 8 categories · 3 levels</p>
+          <h1>Emoji Riddles</h1>
+          <p class="lede">Read the emoji, type what they spell. Nothing is timed and every hint is free.</p>
+        </header>
+        <div style="flex:1"></div>
+        <button class="btn solid" data-go="setup">Start a game</button>
+        <button class="btn" data-go="join">Join with a code</button>
+      </div>`;
+  }
+
+  /* ---- join by code ---- */
+  function joinView() {
+    return `
+      <div class="screen">
+        <div class="topbar">
+          <button class="back" data-go="title">‹ Back</button>
+        </div>
+        <header>
+          <p class="eyebrow">Same puzzles, same order</p>
+          <h1>Join a game</h1>
+          <p class="lede">Type the six-character code you were sent. You will get exactly the same puzzles in the same order, so the scores actually compare.</p>
+        </header>
+        <div class="names">
+          <input data-code type="text" maxlength="7" autocomplete="off"
+                 autocapitalize="characters" autocorrect="off" spellcheck="false"
+                 placeholder="e.g. C2K7F2" value="${esc(codeInput)}" />
+        </div>
+        ${codeErr ? `<span class="lbl" style="color:var(--pink); font-family:var(--mono); font-size:11px">${esc(codeErr)}</span>` : ""}
+        <button class="btn solid" data-act="join">Start these puzzles</button>
+        <div style="flex:1"></div>
+      </div>`;
+  }
+
+  /* ---- setup ---- */
+  function setupView() {
+    const lvl = LEVELS.find(l => l.d === P.diff);
+    const total = CATS.reduce((n, c) => n + atLevel(c).length, 0);
+
+    const row = c => {
+      const n = atLevel(c).length;
+      const best = P.best[c.id + ":" + P.diff];
+      return `
+      <button class="cat" data-deck="${c.id}">
+        <span class="ico">${c.icon}</span>
+        <span class="txt">
+          <span class="nm">${esc(c.name)}</span>
+          <span class="bl">${esc(c.blurb)}</span>
+        </span>
+        <span class="cnt">${best != null ? `<b>${best}/${n}</b>best` : `${n}<br>puzzles`}</span>
+      </button>`;
+    };
+
+    return `
+      <div class="screen">
+        <div class="topbar">
+          <button class="back" data-go="title">‹ Back</button>
+        </div>
+        <header>
+          <p class="eyebrow">${total} puzzles at ${esc(lvl.name.toLowerCase())}</p>
+          <h1>Pick a deck</h1>
+        </header>
+
+        ${seg("Playing", [
+          { set: "duo", val: "0", text: "Just me",   on: !P.duo },
+          { set: "duo", val: "1", text: "Two of us", on: P.duo }
+        ])}
+
+        ${P.duo ? `
+          <div class="seg">
+            <span class="lbl">Names (optional)</span>
+            <div class="names">
+              <input data-name="0" type="text" maxlength="12" autocomplete="off"
+                     placeholder="Player 1" value="${esc(P.names[0])}" />
+              <input data-name="1" type="text" maxlength="12" autocomplete="off"
+                     placeholder="Player 2" value="${esc(P.names[1])}" />
+            </div>
+          </div>` : ""}
+
+        ${seg("Difficulty", LEVELS.map(l => (
+          { set: "diff", val: String(l.d), text: l.name, on: P.diff === l.d }
+        )))}
+        <p class="eyebrow" style="margin-top:-10px">${esc(lvl.note)}</p>
+
+        <div class="cats">
+          ${CATS.map(row).join("")}
+          <button class="cat" data-deck="__mix">
+            <span class="ico">🎲</span>
+            <span class="txt">
+              <span class="nm">Mixed Bag</span>
+              <span class="bl">15 pulled at random from all eight</span>
+            </span>
+            <span class="cnt">15<br>puzzles</span>
+          </button>
+        </div>
+
+      </div>`;
+  }
+
+  /* ---- pass the phone ---- */
+  function handoffView() {
+    return `
+      <div class="screen">
+        <div class="topbar">
+          <button class="back" data-go="setup">‹ Decks</button>
+          <span class="right eyebrow">${deckIcon} ${esc(deckName)}</span>
+        </div>
+        <div class="board">
+          <div class="card">
+            <div class="handoff">
+              <div class="big">${esc(nameOf(turn))}, you're up</div>
+              <div class="sm">Pass the phone over, then tap to see the card.</div>
+            </div>
+          </div>
+          <button class="btn solid" data-act="ready">I'm ready</button>
+        </div>
+        ${strip()}
+      </div>`;
+  }
+
+  /* ---- play ---- */
+  function playView() {
+    const c = cur();
+    const lvl = LEVELS.find(l => l.d === P.diff);
+
+    if (c.kind === "w") {
+      return `
+        <div class="screen">
+          <div class="topbar">
+            <button class="back" data-go="setup">‹ Decks</button>
+            <span class="right eyebrow">${deckIcon} ${esc(deckName)}</span>
+          </div>
+          <div class="board">
+            <div class="card wild">
+              <div class="card-top">
+                <span class="chip t">Wildcard</span>
+                <span class="no">${i + 1} / ${queue.length}</span>
+              </div>
+              ${P.duo ? `<p class="asks" style="padding-top:12px">For <b>${esc(nameOf(turn))}</b></p>` : ""}
+              <div class="wildq">${esc(c.q)}</div>
+            </div>
+            <button class="btn teal" data-act="skipwild">Answered, keep going →</button>
+          </div>
+          ${strip()}
+        </div>`;
+    }
+
+    const it = c.item;
+    const showMask = hint > 0 && !solved && !shown;
+
+    const body = (solved || shown)
+      ? `<div class="revealed">
+           <div class="lbl">${solved ? "you said" : "the answer"}</div>
+           <div class="val">${esc(title(it.a))}</div>
+         </div>
+         <button class="btn solid" data-act="next">
+           ${i >= queue.length - 1 ? "See how you did →" : "Next card →"}
+         </button>`
+      : `<div class="answer">
+           <input id="guess" type="text" inputmode="text" autocomplete="off"
+                  autocapitalize="off" autocorrect="off" spellcheck="false"
+                  placeholder="type your answer" value="${esc(guess)}" />
+           <div class="verdict ${verdictNear ? "near" : ""}">${esc(verdict)}</div>
+           <button class="btn solid" data-act="check">Check answer</button>
+           <div class="row">
+             <button class="btn quiet" data-act="hint" ${hint >= 2 ? "disabled" : ""}>
+               ${hint === 0 ? "Hint 💡" : hint === 1 ? "Bigger hint 💡💡" : "That's all the hints"}
+             </button>
+             <button class="btn quiet" data-act="giveup">Show answer</button>
+           </div>
+         </div>`;
+
+    return `
+      <div class="screen">
+        <div class="topbar">
+          <button class="back" data-go="setup">‹ Decks</button>
+          <span class="right eyebrow">${deckIcon} ${esc(deckName)}</span>
+        </div>
+        <div class="board">
+          <div class="card">
+            ${solved ? `<div class="stamp">GOT IT</div>` : shown ? `<div class="stamp">ANSWER</div>` : ""}
+            <div class="card-top">
+              <span class="chip">${esc(it.cat || deckName)}</span>
+              <span class="chip lvl">${esc(lvl.name)}</span>
+              <span class="no">${i + 1} / ${queue.length}</span>
+            </div>
+            ${P.duo ? `<p class="asks" style="padding-top:10px">Answering: <b>${esc(nameOf(turn))}</b></p>` : ""}
+            <div class="puzzle">${it.p}</div>
+            <div class="mask">${showMask ? esc(masked(it.a, hint)) : ""}</div>
+          </div>
+          ${body}
+        </div>
+        ${strip()}
+      </div>`;
+  }
+
+  function strip() {
+    if (P.duo) {
+      return `
+        <div class="strip">
+          <div class="${turn === 0 ? "up" : ""}"><b>${scores[0]}</b><span class="nm">${esc(nameOf(0))}</span></div>
+          <div class="${turn === 1 ? "up" : ""}"><b>${scores[1]}</b><span class="nm">${esc(nameOf(1))}</span></div>
+          <div><b>${queue.length - i - 1}</b><span class="nm">left</span></div>
+        </div>`;
+    }
+    return `
+      <div class="strip">
+        <div><b>${scores[0]}</b><span class="nm">right</span></div>
+        <div><b>${queue.length - i - 1}</b><span class="nm">left</span></div>
+      </div>`;
+  }
+
+  /* ---- results ---- */
+  function doneView() {
+    const puzzles = queue.filter(c => c.kind === "p").length;
+    const got = log.filter(l => l.got).length;
+    const pct = puzzles ? Math.round((got / puzzles) * 100) : 0;
+
+    let head, sub;
+    if (P.duo) {
+      const [a, b] = scores;
+      head = `${nameOf(0)} ${a} · ${b} ${nameOf(1)}`;
+      sub = a === b ? "A draw, which means you have to play again."
+          : `${nameOf(a > b ? 0 : 1)} takes it.`;
+    } else {
+      head = `${got} out of ${puzzles}`;
+      sub = pct === 100 ? "A perfect run, which almost nobody gets first time."
+          : pct >= 80   ? "That's a strong score. You clearly know your emoji."
+          : pct >= 50   ? "Right around the middle, which is where most people land."
+          : pct >= 25   ? "That deck went badly, but you'll remember these next time."
+          :               "These are genuinely hard. A second run usually goes much better.";
+    }
+
+    const line = l => `
+      <div class="line">
+        <span class="em">${l.item.p}</span>
+        <span class="an">${esc(title(l.item.a))}</span>
+        ${P.duo ? `<span class="who">${esc(nameOf(l.by))}</span>` : ""}
+        <span class="mk ${l.got ? "y" : "n"}">${l.got ? "got it" : "missed"}</span>
+      </div>`;
+
+    return `
+      <div class="screen">
+        <header>
+          <p class="eyebrow">${deckIcon} ${esc(deckName)} · ${esc(LEVELS.find(l => l.d === P.diff).name.toLowerCase())}</p>
+          <h1>${esc(head)}</h1>
+          <p class="lede">${esc(sub)}</p>
+        </header>
+        <div class="tally">${log.map(line).join("")}</div>
+
+        <div class="note">
+          <span>🔗</span>
+          <span>${isJoin
+            ? `You played code <b>${esc(curCode)}</b>. Send your score back and see who did better.`
+            : `Send <b>${esc(curCode)}</b> to someone. They get these exact puzzles in this exact order, so the scores actually compare.`}</span>
+        </div>
+        <button class="btn quiet" data-act="copy">${copied ? "Copied ✓" : "Copy code " + esc(curCode)}</button>
+
+        <button class="btn solid" data-act="again">Play this deck again 🔁</button>
+        <div class="row">
+          <button class="btn quiet" data-go="setup">Another deck</button>
+          <button class="btn quiet" data-go="title">Home</button>
+        </div>
+      </div>`;
+  }
+
+  /* ============================== EVENTS ============================== */
+
+  function wire() {
+    app.querySelectorAll("[data-set]").forEach(b => {
+      b.onclick = () => {
+        const v = +b.dataset.val;
+        if (b.dataset.set === "duo") P.duo = !!v; else P.diff = v;
+        save(); render();
+      };
+    });
+
+    app.querySelectorAll("[data-name]").forEach(inp => {
+      inp.oninput = () => { P.names[+inp.dataset.name] = inp.value; save(); };
+    });
+
+    const code = app.querySelector("[data-code]");
+    if (code) {
+      code.oninput = () => { codeInput = code.value; };
+      code.onkeydown = e => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          const parsed = readCode(codeInput);
+          if (!parsed) { codeErr = "That code doesn't look right. It's 6 characters."; return render(); }
+          P.diff = parsed.diff; save();
+          startDeck(parsed.id, parsed.seed, true);
+        }
+      };
+    }
+
+    app.querySelectorAll("[data-deck]").forEach(b => {
+      b.onclick = () => startDeck(b.dataset.deck);
+    });
+
+    app.querySelectorAll("[data-go]").forEach(b => {
+      b.onclick = () => { view = b.dataset.go; handoff = false; codeErr = ""; render(); };
+    });
+
+    app.querySelectorAll("[data-act]").forEach(b => {
+      b.onclick = () => {
+        const a = b.dataset.act;
+        if (a === "check")    return submit();
+        if (a === "hint")     { hint = Math.min(2, hint + 1); verdict = ""; return render(); }
+        if (a === "giveup")   return giveUp();
+        if (a === "next")     return advance();
+        if (a === "skipwild") return advance();
+        if (a === "ready")    { handoff = false; return render(); }
+        if (a === "again")    return startDeck(deckId);
+        if (a === "copy") {
+          try {
+            navigator.clipboard.writeText(curCode);
+            copied = true; render();
+            setTimeout(() => { copied = false; render(); }, 1800);
+          } catch { codeErr = "Copying is blocked here, type it out instead."; render(); }
+          return;
+        }
+        if (a === "join") {
+          const parsed = readCode(codeInput);
+          if (!parsed) { codeErr = "That code doesn't look right. It's 6 characters."; return render(); }
+          P.diff = parsed.diff; save();
+          return startDeck(parsed.id, parsed.seed, true);
+        }
+      };
+    });
+
+    const inp = app.querySelector("#guess");
+    if (inp) {
+      inp.oninput = () => { guess = inp.value; };
+      inp.onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); submit(); } };
+      if (guess) { inp.focus(); inp.setSelectionRange(guess.length, guess.length); }
+    }
+  }
+
+  render();
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "name": "Emoji Riddles",
+  "short_name": "Riddles",
+  "start_url": "/gemoji/",
+  "scope": "/gemoji/",
+  "display": "standalone",
+  "background_color": "#FAEDE3",
+  "theme_color": "#FAEDE3",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>%F0%9F%A7%A9</text></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
