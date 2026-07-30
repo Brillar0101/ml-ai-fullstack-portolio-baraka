@@ -18,15 +18,24 @@ CREATE TABLE IF NOT EXISTS game_rooms (
   host_name     TEXT NOT NULL DEFAULT 'Player 1',
   guest_name    TEXT,
 
+  -- Kahoot-style: players gather in the lobby and the host chooses when to
+  -- begin, so nobody is dropped into question one before they are ready.
+  started       BOOLEAN NOT NULL DEFAULT FALSE,
+
   -- whose turn it is: 0 = host, 1 = guest
   turn          SMALLINT NOT NULL DEFAULT 0 CHECK (turn IN (0, 1)),
   -- pointer into the rebuilt card queue
   card_index    INTEGER NOT NULL DEFAULT 0 CHECK (card_index >= 0),
+  -- Jeopardy-style: a card is worth more the harder the level, so these
+  -- are point totals rather than a count of correct answers.
   host_score    INTEGER NOT NULL DEFAULT 0 CHECK (host_score >= 0),
   guest_score   INTEGER NOT NULL DEFAULT 0 CHECK (guest_score >= 0),
 
   -- what happened on each card, for the results screen
   history       JSONB NOT NULL DEFAULT '[]'::jsonb,
+
+  -- in-game chat: [{ n: name, m: message, at: epoch_ms }]
+  chat          JSONB NOT NULL DEFAULT '[]'::jsonb,
   finished      BOOLEAN NOT NULL DEFAULT FALSE,
 
   created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -79,6 +88,24 @@ CREATE POLICY "Anyone can update a room"
 
 -- Push row changes to both players.
 ALTER PUBLICATION supabase_realtime ADD TABLE game_rooms;
+
+-- Appending a chat message from the client is a read-modify-write, so two
+-- people typing in the same instant can lose one message. This appends inside
+-- the database instead, which cannot interleave.
+CREATE OR REPLACE FUNCTION append_game_chat(room_code TEXT, sender TEXT, body TEXT)
+RETURNS SETOF game_rooms
+LANGUAGE sql
+AS $$
+  UPDATE game_rooms
+     SET chat = chat || jsonb_build_object(
+           'n', left(sender, 12),
+           'm', left(body, 240),
+           'at', (EXTRACT(EPOCH FROM NOW()) * 1000)::bigint
+         )
+   WHERE code = room_code
+     AND length(btrim(body)) > 0
+  RETURNING *;
+$$;
 
 -- Abandoned rooms are pure litter. Run this on a schedule (Supabase
 -- Dashboard -> Integrations -> Cron) or call it by hand now and then.

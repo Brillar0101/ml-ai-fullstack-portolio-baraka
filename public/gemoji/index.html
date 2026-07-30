@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<meta name="description" content="Emoji Riddles: 248 rebus puzzles across eight categories and four difficulty levels. Play alone or take turns with someone." />
+<meta name="description" content="Emoji Riddles: 248 rebus puzzles across eight categories and four difficulty levels. Play alone or take turns with someone over a game PIN." />
 <meta name="theme-color" content="#FAEDE3" media="(prefers-color-scheme: light)" />
 <meta name="theme-color" content="#1D1922" media="(prefers-color-scheme: dark)" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -137,6 +137,96 @@
   .seg .opts button[aria-pressed="true"] {
     border-color: var(--ink); color: var(--ink);
     box-shadow: 2px 2px 0 var(--ink);
+  }
+
+  .chattoggle {
+    width: 100%; padding: 11px; border-radius: 12px;
+    font-family: var(--mono); font-size: 11px;
+    letter-spacing: .14em; text-transform: uppercase;
+    color: var(--ink-soft);
+    border: 2px dashed var(--line); background: transparent;
+  }
+  .chattoggle:active { transform: scale(.98); }
+
+  .chat {
+    display: flex; flex-direction: column; gap: 9px;
+    border: 2px solid var(--ink); border-radius: 14px;
+    background: var(--card); padding: 11px 12px;
+  }
+  .chat-head { display: flex; align-items: center; }
+  .chat-head .lbl {
+    font-family: var(--mono); font-size: 10.5px;
+    letter-spacing: .16em; text-transform: uppercase; color: var(--ink-soft);
+  }
+  .chatclose {
+    margin-left: auto;
+    font-family: var(--mono); font-size: 10.5px;
+    letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft);
+  }
+  .chat-log {
+    display: flex; flex-direction: column; gap: 6px;
+    max-height: 168px; overflow-y: auto;
+  }
+  .chat-empty {
+    margin: 0; font-size: 13px; color: var(--ink-soft);
+    font-style: italic;
+  }
+  .msg { display: flex; flex-direction: column; gap: 1px; }
+  .msg .who {
+    font-family: var(--mono); font-size: 9.5px;
+    letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft);
+  }
+  .msg .body {
+    font-size: 14.5px; line-height: 1.4;
+    background: var(--paper); border: 1px solid var(--line);
+    border-radius: 10px; padding: 7px 10px;
+    align-self: flex-start; max-width: 92%;
+    overflow-wrap: anywhere;
+  }
+  .msg.mine { align-items: flex-end; }
+  .msg.mine .body {
+    align-self: flex-end;
+    background: var(--teal); border-color: var(--teal); color: var(--on-pink);
+  }
+  .chat-form { display: flex; gap: 7px; }
+  .chat-form input {
+    flex: 1; min-width: 0; font-size: 15px;
+    padding: 10px 12px; border-radius: 10px;
+    border: 2px solid var(--line); background: var(--paper); color: var(--ink);
+  }
+  .chatsend {
+    font-family: var(--display); font-weight: 700; font-size: 14px;
+    padding: 10px 15px; border-radius: 10px;
+    background: var(--pink); color: var(--on-pink);
+    border: 2px solid var(--ink);
+  }
+  .chatsend:disabled { opacity: .35; }
+
+  .pin {
+    width: 100%; text-align: center;
+    font-family: var(--mono); font-weight: 700;
+    font-size: clamp(26px, 9vw, 36px); letter-spacing: .2em; text-indent: .2em;
+    padding: 14px 10px; border-radius: 13px;
+    border: 2px solid var(--ink); background: var(--card); color: var(--ink);
+    text-transform: uppercase;
+  }
+  .pin::placeholder { color: var(--ink-soft); opacity: .45; letter-spacing: .2em; }
+
+  .roster { display: flex; flex-wrap: wrap; gap: 7px; }
+  .roster .who {
+    font-family: var(--display); font-weight: 700; font-size: 14.5px;
+    padding: 9px 13px; border-radius: 999px;
+    border: 2px solid var(--ink); background: var(--card);
+    display: inline-flex; align-items: baseline; gap: 6px;
+  }
+  .roster .who i {
+    font-family: var(--mono); font-style: normal; font-size: 10px;
+    letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft);
+  }
+  .roster .who.in { border-color: var(--teal); }
+  .roster .who.empty {
+    border-style: dashed; border-color: var(--line);
+    color: var(--ink-soft); font-weight: 500;
   }
 
   .waitbar {
@@ -700,6 +790,10 @@
     "What's a food opinion that gets you in trouble?"
   ];
 
+  /* Jeopardy-style values. A right answer on Expert is worth four Easy ones,
+     so picking a harder deck is a real wager rather than just bragging. */
+  const POINTS = { 1: 100, 2: 200, 3: 300, 4: 400 };
+
   const LEVELS = [
     { d: 1, name: "Easy",   note: "warm up" },
     { d: 2, name: "Medium", note: "a bit of thinking" },
@@ -722,7 +816,8 @@
   const NET = (() => {
     const cfg = (typeof window !== "undefined" && window.GEMOJI_CONFIG) || {};
     const ready = !!(cfg.supabaseUrl && cfg.supabaseAnonKey);
-    const base = ready ? cfg.supabaseUrl.replace(/\/+$/, "") + "/rest/v1/game_rooms" : "";
+    const root = ready ? cfg.supabaseUrl.replace(/\/+$/, "") : "";
+    const base = ready ? root + "/rest/v1/game_rooms" : "";
     const headers = ready ? {
       apikey: cfg.supabaseAnonKey,
       Authorization: "Bearer " + cfg.supabaseAnonKey,
@@ -741,6 +836,13 @@
       ready: ready,
       async create(row) { const d = await call(base, { method: "POST", body: JSON.stringify(row) }); return d && d[0]; },
       async find(code)  { const d = await call(base + "?code=eq." + encodeURIComponent(code) + "&select=*"); return d && d[0]; },
+      async say(code, sender, body) {
+        const d = await call(root + "/rest/v1/rpc/append_game_chat", {
+          method: "POST",
+          body: JSON.stringify({ room_code: code, sender: sender, body: body })
+        });
+        return d && d[0];
+      },
       async patch(code, fields) {
         const d = await call(base + "?code=eq." + encodeURIComponent(code),
                              { method: "PATCH", body: JSON.stringify(fields) });
@@ -827,7 +929,7 @@
   let curSeed = "", curCode = "", isJoin = false, codeErr = "", copied = false, codeInput = "";
   let inviteFlow = false, shareNote = "";
   let online = false, iAmHost = false, room = null, netErr = "", busy = false;
-  let pollTimer = null;
+  let pollTimer = null, chatInput = "", chatOpen = false;
 
   function load() {
     try {
@@ -931,7 +1033,7 @@
     if (isCorrect(guess, it)) {
       solved = true;
       if (!online) {
-        scores[P.duo ? turn : 0]++;
+        scores[P.duo ? turn : 0] += cardValue();
         log.push({ item: it, got: true, by: turn });
       }
       verdict = ""; verdictNear = false;
@@ -995,6 +1097,8 @@
 
   /* ---------------- room lifecycle ---------------- */
 
+  const cardValue = () => POINTS[P.diff] || 100;
+
   const myIdx    = () => (iAmHost ? 0 : 1);
   const myTurn   = () => !online || !room || room.turn === myIdx();
   const myName   = () => (iAmHost ? room.host_name : (room.guest_name || "You"));
@@ -1053,10 +1157,10 @@
       const r = await NET.find(code);
       if (!r) { netErr = "No game with that code. Check it and try again."; busy = false; return render(); }
       const name = (P.names[1] || "").trim() || "Player 2";
-      room = r.guest_name ? r : await NET.patch(code, { guest_name: name });
+      room = await NET.patch(code, { guest_name: name });
       iAmHost = false; online = true;
       rebuildFromRoom(room);
-      view = room.finished ? "done" : "play";
+      view = room.finished ? "done" : room.started ? "play" : "lobby";
     } catch (e) {
       netErr = "Could not join. " + e.message;
     }
@@ -1070,8 +1174,8 @@
     const nextIndex = room.card_index + 1;
     try {
       room = await NET.patch(room.code, {
-        host_score:  room.host_score  + (gotIt &&  iAmHost ? 1 : 0),
-        guest_score: room.guest_score + (gotIt && !iAmHost ? 1 : 0),
+        host_score:  room.host_score  + (gotIt &&  iAmHost ? cardValue() : 0),
+        guest_score: room.guest_score + (gotIt && !iAmHost ? cardValue() : 0),
         history: (room.history || []).concat([{ p: item.p, a: item.a, got: !!gotIt, by: myIdx() }]),
         card_index: nextIndex,
         turn: 1 - myIdx(),
@@ -1086,6 +1190,19 @@
     busy = false; render(); startPolling();
   }
 
+  async function sendChat() {
+    const text = chatInput.trim();
+    if (!online || !room || !text) return;
+    chatInput = ""; render();
+    try {
+      const r = await NET.say(room.code, myName(), text);
+      if (r) room = r;
+    } catch (e) {
+      netErr = "Message did not send. " + e.message;
+    }
+    render();
+  }
+
   function stopPolling() { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } }
 
   /* Pull the row and adopt it. Split out from the timer so the turn handoff
@@ -1097,15 +1214,17 @@
     catch (e) { return false; }          // a dropped poll is not worth shouting about
     if (!r) return false;
 
+    const chatGrew = (r.chat || []).length !== (room.chat || []).length;
     const changed = r.guest_name !== room.guest_name
+                 || r.started    !== room.started
                  || r.turn       !== room.turn
                  || r.card_index !== room.card_index
                  || r.finished   !== room.finished;
     room = r;
-    if (!changed) return false;
+    if (!changed) { if (chatGrew) render(); return false; }
 
     if (room.finished) view = "done";
-    else if (view === "lobby" && room.guest_name) view = "play";
+    else if (view === "lobby" && room.started) view = "play";
 
     solved = false; shown = false; guess = ""; hint = 0;
     verdict = ""; verdictNear = false;
@@ -1117,10 +1236,10 @@
   function startPolling() {
     stopPolling();
     if (!online || !room) return;
-    const waiting = view === "lobby" ? !room.guest_name
-                  : view === "play"  ? !myTurn()
-                  : false;
-    if (!waiting) return;
+    // Poll for the whole game rather than only while waiting on a turn,
+    // otherwise chat would only arrive when it is not your move.
+    if (room.finished) return;
+    if (view !== "lobby" && view !== "play") return;
     pollTimer = setInterval(async () => {
       if (await refreshRoom()) { stopPolling(); startPolling(); }
     }, 2200);
@@ -1180,7 +1299,7 @@
       </div>`;
   }
 
-  /* ---- join by code ---- */
+  /* ---- join by PIN, then say who you are ---- */
   function joinView() {
     return `
       <div class="screen">
@@ -1188,17 +1307,29 @@
           <button class="back" data-go="title">‹ Back</button>
         </div>
         <header>
-          <p class="eyebrow">Same puzzles, same order</p>
+          <p class="eyebrow">Enter the game</p>
           <h1>Join a game</h1>
-          <p class="lede">Type the six-character code you were sent. You will get exactly the same puzzles in the same order, so the scores actually compare.</p>
+          <p class="lede">Type the PIN you were sent, then pick a name for the scoreboard.</p>
         </header>
-        <div class="names">
-          <input data-code type="text" maxlength="7" autocomplete="off"
+
+        <div class="seg">
+          <span class="lbl">Game PIN</span>
+          <input class="pin" data-code type="text" maxlength="7" autocomplete="off"
                  autocapitalize="characters" autocorrect="off" spellcheck="false"
-                 placeholder="e.g. C2K7F2" value="${esc(codeInput)}" />
+                 placeholder="C2K7F2" value="${esc(codeInput)}" />
         </div>
-        ${codeErr ? `<span class="lbl" style="color:var(--pink); font-family:var(--mono); font-size:11px">${esc(codeErr)}</span>` : ""}
+
+        <div class="seg">
+          <span class="lbl">Your name</span>
+          <div class="names">
+            <input data-name="1" type="text" maxlength="12" autocomplete="off"
+                   placeholder="What should we call you?" value="${esc(P.names[1])}" />
+          </div>
+        </div>
+
+        ${codeErr ? `<p class="eyebrow" style="color:var(--pink)">${esc(codeErr)}</p>` : ""}
         ${netErr ? `<p class="eyebrow" style="color:var(--pink)">${esc(netErr)}</p>` : ""}
+
         <button class="btn solid" data-act="join" ${busy ? "disabled" : ""}>
           ${busy ? "Joining…" : NET.ready ? "Join the game" : "Start these puzzles"}
         </button>
@@ -1206,7 +1337,9 @@
       </div>`;
   }
 
-  /* ---- invite: hand out the code before anyone plays ---- */
+  /* ---- invite: the on-device fallback when there is no shared room ----
+     Reached when turn-by-turn is unavailable. Both people get the same round
+     from the same code, which is a comparison rather than a shared game. */
   function inviteView() {
     const puzzles = queue.filter(c => c.kind === "p").length;
     const lvl = LEVELS.find(l => l.d === P.diff);
@@ -1216,16 +1349,18 @@
           <button class="back" data-go="setup">‹ Back</button>
         </div>
         <header>
-          <p class="eyebrow">${deckIcon} ${esc(deckName)} · ${esc(lvl.name.toLowerCase())}</p>
+          <p class="eyebrow">${deckIcon} ${esc(deckName)} · ${esc(lvl.name.toLowerCase())} · ${cardValue()} pts a card</p>
           <h1>Your game is ready</h1>
-          <p class="lede">Send this code to whoever you want to play with. They get the same ${puzzles} puzzles in the same order, so the scores actually mean something.</p>
+          <p class="lede">Send this code. They get the same ${puzzles} puzzles in the same order, so the scores compare.</p>
           ${netErr ? `<p class="eyebrow" style="color:var(--pink)">${esc(netErr)}</p>` : ""}
         </header>
 
         <div class="bigcode" data-pick>${esc(curCode)}</div>
 
-        <button class="btn solid" data-act="share">Send the invite</button>
-        <button class="btn" data-act="copy">${copied ? "Copied ✓" : "Copy code"}</button>
+        <div class="row">
+          <button class="btn" data-act="share">Send it</button>
+          <button class="btn" data-act="copy">${copied ? "Copied ✓" : "Copy"}</button>
+        </div>
         ${shareNote ? `<p class="eyebrow" style="text-align:center; color:var(--pink)">${esc(shareNote)}</p>` : ""}
 
         <div class="seg">
@@ -1305,34 +1440,67 @@
   }
 
 
-  /* ---- lobby: room made, nobody has joined yet ---- */
+  /* ---- lobby: everyone gathers, the host decides when to begin ---- */
   function lobbyView() {
+    const lvl = LEVELS.find(l => l.d === P.diff);
+    const joined = room && room.guest_name;
+
+    if (!iAmHost) {
+      return `
+        <div class="screen">
+          <div class="topbar"><button class="back" data-go="title">‹ Leave</button></div>
+          <div style="flex:1"></div>
+          <header>
+            <p class="eyebrow">${deckIcon} ${esc(deckName)} · ${esc(lvl.name.toLowerCase())} · ${cardValue()} pts a card</p>
+            <h1>You're in</h1>
+            <p class="lede">Playing as <b>${esc(room.guest_name)}</b>. Hang on while ${esc(room.host_name)} starts the game.</p>
+          </header>
+          <div style="flex:1"></div>
+          <div class="waitbar"><span class="dot"></span>Waiting for ${esc(room.host_name)} to start</div>
+          <button class="btn quiet" data-act="recheck" ${busy ? "disabled" : ""}>
+            ${busy ? "Checking…" : "Check again"}
+          </button>
+        </div>`;
+    }
+
     return `
       <div class="screen">
         <div class="topbar"><button class="back" data-go="title">‹ Leave</button></div>
         <header>
-          <p class="eyebrow">${deckIcon} ${esc(deckName)} · ${esc(LEVELS.find(l => l.d === P.diff).name.toLowerCase())}</p>
-          <h1>Send this code</h1>
-          <p class="lede">You take turns. They answer one card, you answer the next, and each screen updates when the other person plays.</p>
+          <p class="eyebrow">${deckIcon} ${esc(deckName)} · ${esc(lvl.name.toLowerCase())} · ${cardValue()} pts a card</p>
+          <h1>Game PIN</h1>
+          <p class="lede">They open the game, tap Join, and type this. You take turns: one card each, alternating.</p>
         </header>
 
         <div class="bigcode" data-pick>${esc(curCode)}</div>
 
-        <button class="btn solid" data-act="share">Send the invite</button>
-        <button class="btn" data-act="copy">${copied ? "Copied ✓" : "Copy code"}</button>
+        <div class="row">
+          <button class="btn" data-act="share">Send it</button>
+          <button class="btn" data-act="copy">${copied ? "Copied ✓" : "Copy"}</button>
+        </div>
         ${shareNote ? `<p class="eyebrow" style="text-align:center; color:var(--pink)">${esc(shareNote)}</p>` : ""}
         ${netErr ? `<p class="eyebrow" style="color:var(--pink)">${esc(netErr)}</p>` : ""}
 
         <div class="seg">
-          <span class="lbl">Or copy this message by hand</span>
-          <textarea class="invitebox" data-invite readonly rows="2">${esc(inviteText())}</textarea>
+          <span class="lbl">${joined ? "In this game" : "Nobody has joined yet"}</span>
+          <div class="roster">
+            <span class="who host">${esc(room.host_name)} <i>you</i></span>
+            ${joined
+              ? `<span class="who in">${esc(room.guest_name)}</span>`
+              : `<span class="who empty">waiting…</span>`}
+          </div>
         </div>
 
+        ${chatPanel()}
         <div style="flex:1"></div>
-        <div class="waitbar"><span class="dot"></span>Waiting for someone to join</div>
-        <button class="btn quiet" data-act="recheck" ${busy ? "disabled" : ""}>
-          ${busy ? "Checking…" : "Check again"}
-        </button>
+        ${joined
+          ? `<button class="btn solid" data-act="begin" ${busy ? "disabled" : ""}>
+               ${busy ? "Starting…" : `Start the game`}
+             </button>`
+          : `<div class="waitbar"><span class="dot"></span>Waiting for someone to join</div>
+             <button class="btn quiet" data-act="recheck" ${busy ? "disabled" : ""}>
+               ${busy ? "Checking…" : "Check again"}
+             </button>`}
       </div>`;
   }
 
@@ -1362,6 +1530,40 @@
           </button>
         </div>
         ${netStrip()}
+        ${chatPanel()}
+      </div>`;
+  }
+
+  function chatPanel() {
+    if (!online || !room) return "";
+    const msgs = room.chat || [];
+    const recent = msgs.slice(-30);
+    if (!chatOpen) {
+      return `
+        <button class="chattoggle" data-act="chatopen">
+          Chat${msgs.length ? ` · ${msgs.length}` : ""}
+        </button>`;
+    }
+    return `
+      <div class="chat">
+        <div class="chat-head">
+          <span class="lbl">Chat</span>
+          <button class="chatclose" data-act="chatclose">Hide</button>
+        </div>
+        <div class="chat-log" data-log>
+          ${recent.length
+            ? recent.map(m => `
+                <div class="msg ${m.n === myName() ? "mine" : ""}">
+                  <span class="who">${esc(m.n)}</span>
+                  <span class="body">${esc(m.m)}</span>
+                </div>`).join("")
+            : `<p class="chat-empty">Nothing yet. Say something.</p>`}
+        </div>
+        <div class="chat-form">
+          <input data-chat type="text" maxlength="240" autocomplete="off"
+                 placeholder="Message${room ? " " + esc(theirName()) : ""}" value="${esc(chatInput)}" />
+          <button class="chatsend" data-act="chatsend" ${chatInput.trim() ? "" : "disabled"}>Send</button>
+        </div>
       </div>`;
   }
 
@@ -1466,7 +1668,7 @@
             ${solved ? `<div class="stamp">GOT IT</div>` : shown ? `<div class="stamp">ANSWER</div>` : ""}
             <div class="card-top">
               <span class="chip">${esc(it.cat || deckName)}</span>
-              <span class="chip lvl">${esc(lvl.name)}</span>
+              <span class="chip lvl">${esc(lvl.name)} · ${cardValue()}</span>
               <span class="no">${(online && room ? room.card_index : i) + 1} / ${queue.length}</span>
             </div>
             ${online ? `<p class="asks" style="padding-top:10px">Your turn, <b>${esc(myName())}</b></p>`
@@ -1476,7 +1678,7 @@
           </div>
           ${body}
         </div>
-        ${online && room ? netStrip() : strip()}
+        ${online && room ? netStrip() + chatPanel() : strip()}
       </div>`;
   }
 
@@ -1491,7 +1693,7 @@
     }
     return `
       <div class="strip">
-        <div><b>${scores[0]}</b><span class="nm">right</span></div>
+        <div><b>${scores[0]}</b><span class="nm">points</span></div>
         <div><b>${queue.length - i - 1}</b><span class="nm">left</span></div>
       </div>`;
   }
@@ -1571,6 +1773,23 @@
       inp.oninput = () => { P.names[+inp.dataset.name] = inp.value; save(); };
     });
 
+    const chat = app.querySelector("[data-chat]");
+    if (chat) {
+      chat.oninput = () => {
+        const was = !!chatInput.trim();
+        chatInput = chat.value;
+        // only repaint when the Send button needs to flip state
+        if (was !== !!chatInput.trim()) {
+          const btn = app.querySelector('[data-act="chatsend"]');
+          if (btn) btn.disabled = !chatInput.trim();
+        }
+      };
+      chat.onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); sendChat(); } };
+      if (chatOpen && chatInput) { chat.focus(); chat.setSelectionRange(chatInput.length, chatInput.length); }
+    }
+    const logEl = app.querySelector("[data-log]");
+    if (logEl) logEl.scrollTop = logEl.scrollHeight;
+
     const box = app.querySelector("[data-invite]");
     if (box) box.onclick = () => { box.focus(); box.select(); };
 
@@ -1621,6 +1840,18 @@
         if (a === "again")    return startDeck(deckId);
         if (a === "solo")   { inviteFlow = false; view = "setup"; codeErr = ""; return render(); }
         if (a === "invite") { inviteFlow = true;  view = "setup"; codeErr = ""; return render(); }
+        if (a === "chatopen")  { chatOpen = true;  return render(); }
+        if (a === "chatclose") { chatOpen = false; return render(); }
+        if (a === "chatsend")  return sendChat();
+        if (a === "begin") {
+          busy = true; render();
+          try {
+            room = await NET.patch(room.code, { started: true });
+            view = "play";
+          } catch (e) { netErr = "Could not start. " + e.message; }
+          busy = false; render(); startPolling();
+          return;
+        }
         if (a === "recheck") {
           busy = true; render();
           await refreshRoom();
