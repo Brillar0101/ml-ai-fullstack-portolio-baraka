@@ -293,6 +293,15 @@
     color: var(--ink-soft); padding: 4px 0;
   }
   .topbar .right { margin-left: auto; }
+  .codebtn {
+    font-family: var(--mono); font-size: 11px;
+    letter-spacing: .12em; text-transform: uppercase;
+    color: var(--ink-soft);
+    border: 1px solid var(--line); border-radius: 8px;
+    padding: 5px 9px;
+    transition: transform .1s ease;
+  }
+  .codebtn:active { transform: scale(.95); }
 
   .handoff {
     text-align: center; padding: 30px 10px;
@@ -946,7 +955,10 @@
       <div class="screen">
         <div class="topbar">
           <button class="back" data-go="setup">‹ Decks</button>
-          <span class="right eyebrow">${deckIcon} ${esc(deckName)}</span>
+          <button class="right codebtn" data-act="copy"
+                  title="Copy this round's code and send it to someone">
+            ${copied ? "copied ✓" : "code " + esc(curCode)}
+          </button>
         </div>
         <div class="board">
           <div class="card">
@@ -1017,7 +1029,10 @@
       <div class="screen">
         <div class="topbar">
           <button class="back" data-go="setup">‹ Decks</button>
-          <span class="right eyebrow">${deckIcon} ${esc(deckName)}</span>
+          <button class="right codebtn" data-act="copy"
+                  title="Copy this round's code and send it to someone">
+            ${copied ? "copied ✓" : "code " + esc(curCode)}
+          </button>
         </div>
         <div class="board">
           <div class="card">
@@ -1158,7 +1173,7 @@
           try {
             navigator.clipboard.writeText(curCode);
             copied = true; render();
-            setTimeout(() => { copied = false; render(); }, 1800);
+            setTimeout(() => { copied = false; render(); }, 1600);
           } catch { codeErr = "Copying is blocked here, type it out instead."; render(); }
           return;
         }
