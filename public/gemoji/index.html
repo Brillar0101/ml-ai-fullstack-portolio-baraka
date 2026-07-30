@@ -139,6 +139,20 @@
     box-shadow: 2px 2px 0 var(--ink);
   }
 
+  .bigcode {
+    font-family: var(--mono);
+    font-size: clamp(34px, 12vw, 52px);
+    font-weight: 700;
+    letter-spacing: .22em;
+    text-align: center;
+    padding: 22px 10px 20px;
+    color: var(--ink);
+    background: var(--card);
+    border: 2px dashed var(--ink);
+    border-radius: 16px;
+    text-indent: .22em;
+  }
+
   .names { display: flex; gap: 8px; }
   .names input {
     flex: 1; min-width: 0;
@@ -679,6 +693,7 @@
   let scores = [0, 0];
   let log = [];
   let curSeed = "", curCode = "", isJoin = false, codeErr = "", copied = false, codeInput = "";
+  let inviteFlow = false, shareNote = "";
 
   function load() {
     try {
@@ -767,7 +782,7 @@
     verdict = ""; verdictNear = false; log = [];
     turn = 0; scores = [0, 0];
     handoff = false;
-    view = "play";
+    view = inviteFlow ? "invite" : "play";
     render();
   }
 
@@ -822,6 +837,7 @@
     app.innerHTML = view === "title" ? titleView()
                   : view === "setup" ? setupView()
                   : view === "join"  ? joinView()
+                  : view === "invite" ? inviteView()
                   : view === "play"  ? (handoff ? handoffView() : playView())
                   : doneView();
     wire();
@@ -856,7 +872,8 @@
           <p class="lede">Read the emoji, type what they spell. Nothing is timed and every hint is free.</p>
         </header>
         <div style="flex:1"></div>
-        <button class="btn solid" data-go="setup">Start a game</button>
+        <button class="btn solid" data-act="solo">Play on my own</button>
+        <button class="btn" data-act="invite">Create a game to share</button>
         <button class="btn" data-go="join">Join with a code</button>
       </div>`;
   }
@@ -881,6 +898,32 @@
         ${codeErr ? `<span class="lbl" style="color:var(--pink); font-family:var(--mono); font-size:11px">${esc(codeErr)}</span>` : ""}
         <button class="btn solid" data-act="join">Start these puzzles</button>
         <div style="flex:1"></div>
+      </div>`;
+  }
+
+  /* ---- invite: hand out the code before anyone plays ---- */
+  function inviteView() {
+    const puzzles = queue.filter(c => c.kind === "p").length;
+    const lvl = LEVELS.find(l => l.d === P.diff);
+    return `
+      <div class="screen">
+        <div class="topbar">
+          <button class="back" data-go="setup">‹ Back</button>
+        </div>
+        <header>
+          <p class="eyebrow">${deckIcon} ${esc(deckName)} · ${esc(lvl.name.toLowerCase())}</p>
+          <h1>Your game is ready</h1>
+          <p class="lede">Send this code to whoever you want to play with. They get the same ${puzzles} puzzles in the same order, so the scores actually mean something.</p>
+        </header>
+
+        <div class="bigcode">${esc(curCode)}</div>
+
+        <button class="btn solid" data-act="share">Send the invite</button>
+        <button class="btn" data-act="copy">${copied ? "Copied ✓" : "Copy code"}</button>
+        ${shareNote ? `<p class="eyebrow" style="text-align:center">${esc(shareNote)}</p>` : ""}
+
+        <div style="flex:1"></div>
+        <button class="btn teal" data-act="beginplay">Start playing</button>
       </div>`;
   }
 
@@ -909,8 +952,8 @@
           <button class="back" data-go="title">‹ Back</button>
         </div>
         <header>
-          <p class="eyebrow">${total} puzzles at ${esc(lvl.name.toLowerCase())}</p>
-          <h1>Pick a deck</h1>
+          <p class="eyebrow">${inviteFlow ? "creating a game to share" : `${total} puzzles at ${esc(lvl.name.toLowerCase())}`}</p>
+          <h1>${inviteFlow ? "Pick a deck to share" : "Pick a deck"}</h1>
         </header>
 
         ${seg("Playing", [
@@ -1156,7 +1199,12 @@
     });
 
     app.querySelectorAll("[data-go]").forEach(b => {
-      b.onclick = () => { view = b.dataset.go; handoff = false; codeErr = ""; render(); };
+      b.onclick = () => {
+        view = b.dataset.go;
+        handoff = false; codeErr = ""; shareNote = "";
+        if (view === "title") inviteFlow = false;
+        render();
+      };
     });
 
     app.querySelectorAll("[data-act]").forEach(b => {
@@ -1169,9 +1217,29 @@
         if (a === "skipwild") return advance();
         if (a === "ready")    { handoff = false; return render(); }
         if (a === "again")    return startDeck(deckId);
+        if (a === "solo")   { inviteFlow = false; view = "setup"; codeErr = ""; return render(); }
+        if (a === "invite") { inviteFlow = true;  view = "setup"; codeErr = ""; return render(); }
+        if (a === "beginplay") { view = "play"; shareNote = ""; return render(); }
+        if (a === "share") {
+          const where = location.origin + location.pathname.replace(/index\.html$/, "");
+          const msg = "Play Emoji Riddles with me. Code " + curCode + "\n" + where;
+          if (navigator.share) {
+            navigator.share({ title: "Emoji Riddles", text: msg })
+              .catch(() => { shareNote = ""; render(); });
+            return;
+          }
+          try {
+            navigator.clipboard.writeText(msg);
+            shareNote = "Invite copied. Paste it wherever you like.";
+          } catch {
+            shareNote = "Copying is blocked here. The code is " + curCode + ".";
+          }
+          return render();
+        }
         if (a === "copy") {
           try {
             navigator.clipboard.writeText(curCode);
+            shareNote = "";
             copied = true; render();
             setTimeout(() => { copied = false; render(); }, 1600);
           } catch { codeErr = "Copying is blocked here, type it out instead."; render(); }
