@@ -11,6 +11,20 @@
 <meta name="apple-mobile-web-app-title" content="Emoji Riddles" />
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>%F0%9F%A7%A9</text></svg>" />
 <link rel="manifest" href="/gemoji/manifest.webmanifest" />
+<script>
+  /* Values are substituted by Vite at build time from VITE_SUPABASE_*.
+     If the vars are unset the literal placeholders survive, so treat any
+     value still containing "%VITE_" as absent. */
+  (function () {
+    var url = "%VITE_SUPABASE_URL%";
+    var key = "%VITE_SUPABASE_ANON_KEY%";
+    var unset = function (v) { return !v || v.indexOf("%VITE_") === 0; };
+    window.GEMOJI_CONFIG = (unset(url) || unset(key))
+      ? null
+      : { supabaseUrl: url, supabaseAnonKey: key };
+  })();
+</script>
+
 <title>Emoji Riddles</title>
 </head>
 <body>
@@ -470,8 +484,6 @@
 </style>
 
 <div id="app"></div>
-
-<script src="config.js"></script>
 
 <script>
 (() => {

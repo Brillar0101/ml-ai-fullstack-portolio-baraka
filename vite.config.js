@@ -10,7 +10,13 @@ export default defineConfig({
   // Support client-side routing - redirect all paths to index.html
   build: {
     rollupOptions: {
-      input: './index.html'
+      input: {
+        // the React portfolio
+        main: './index.html',
+        // the standalone game at /gemoji, built by Vite so that %VITE_*%
+        // placeholders in its HTML get the same env substitution as the app
+        gemoji: './gemoji/index.html'
+      }
     }
   }
 });

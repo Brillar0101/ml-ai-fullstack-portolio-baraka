@@ -71,11 +71,20 @@ CREATE POLICY "Anyone can update a room" ON game_rooms FOR UPDATE USING (true) W
 -- No DELETE policy: clients cannot remove rooms. Cleanup is the job below.
 
 -- Harmless if realtime is not used; leaves the door open for it later.
+-- Guarded by existence checks rather than an exception handler, because the
+-- error class for "already in this publication" is not worth relying on.
 DO $$
 BEGIN
-  ALTER PUBLICATION supabase_realtime ADD TABLE game_rooms;
-EXCEPTION WHEN duplicate_object OR undefined_object THEN
-  NULL;
+  IF EXISTS (SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime')
+     AND NOT EXISTS (
+       SELECT 1 FROM pg_publication_tables
+        WHERE pubname = 'supabase_realtime'
+          AND schemaname = 'public'
+          AND tablename = 'game_rooms'
+     )
+  THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.game_rooms;
+  END IF;
 END;
 $$;
 

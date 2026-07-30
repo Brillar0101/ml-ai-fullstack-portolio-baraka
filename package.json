@@ -17,8 +17,8 @@
     "vite": "^5.0.0"
   },
   "scripts": {
-    "dev": "node scripts/gen-gemoji-config.mjs && vite",
-    "build": "node scripts/gen-gemoji-config.mjs && vite build",
+    "dev": "vite",
+    "build": "vite build",
     "preview": "vite preview",
     "verify:labs": "./scripts/run.sh scripts/verify-labs.mjs",
     "verify:sources": "./scripts/run.sh scripts/verify-sources.mjs",
