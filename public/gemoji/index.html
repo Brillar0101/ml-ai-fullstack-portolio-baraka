@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<meta name="description" content="Emoji Riddles: 184 rebus puzzles across eight categories. Free hints, no ads, no timers." />
+<meta name="description" content="Emoji Riddles: 248 rebus puzzles across eight categories and four difficulty levels. Free hints, no ads, no timers." />
 <meta name="theme-color" content="#FAEDE3" media="(prefers-color-scheme: light)" />
 <meta name="theme-color" content="#1D1922" media="(prefers-color-scheme: dark)" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -139,7 +139,15 @@
     box-shadow: 2px 2px 0 var(--ink);
   }
 
+  .invitebox {
+    width: 100%;
+    font-family: var(--mono); font-size: 12.5px; line-height: 1.5;
+    padding: 11px 13px; border-radius: 11px; resize: none;
+    border: 2px solid var(--line); background: var(--card); color: var(--ink);
+  }
+
   .bigcode {
+    user-select: all; -webkit-user-select: all;
     font-family: var(--mono);
     font-size: clamp(34px, 12vw, 52px);
     font-weight: 700;
@@ -380,7 +388,15 @@
         { p: "🧶🧣", a: "knitting", d: 3 },
         { p: "🚣‍♀️🌊", a: "rowing", d: 3 },
         { p: "🏹🎯", a: "archery", alt: ["shooting a bow"], d: 3 },
-        { p: "🪁💨", a: "flying a kite", alt: ["kite flying"], d: 3 }
+        { p: "🪁💨", a: "flying a kite", alt: ["kite flying"], d: 3 },
+        { p: "🧗‍♂️🪨🧤", a: "bouldering", d: 4 },
+        { p: "🤿🐠🫧", a: "snorkelling", alt: ["snorkeling"], d: 4 },
+        { p: "🐦🔭📓", a: "birdwatching", alt: ["bird watching"], d: 4 },
+        { p: "🍄🧺🌲", a: "foraging", d: 4 },
+        { p: "🧶🪝", a: "crocheting", alt: ["crochet"], d: 4 },
+        { p: "🪵🔨🪑", a: "woodworking", alt: ["carpentry"], d: 4 },
+        { p: "🪁🏄", a: "kitesurfing", alt: ["kite surfing"], d: 4 },
+        { p: "🧊🕳️🎣", a: "ice fishing", d: 4 }
       ]
     },
     {
@@ -408,7 +424,15 @@
         { p: "🥩💃⚽", a: "argentina", d: 3 },
         { p: "🎿🐟🏔️", a: "norway", d: 3 },
         { p: "🕌☕🎈", a: "turkey", d: 3 },
-        { p: "🎤💄🌶️", a: "south korea", alt: ["korea"], d: 3 }
+        { p: "🎤💄🌶️", a: "south korea", alt: ["korea"], d: 3 },
+        { p: "🏔️🐉😊", a: "bhutan", d: 4 },
+        { p: "🏇🏕️🦅", a: "mongolia", d: 4 },
+        { p: "🐒🌴🏝️", a: "madagascar", d: 4 },
+        { p: "🐟🎼⛵", a: "portugal", d: 4 },
+        { p: "🧖❄️📱", a: "finland", d: 4 },
+        { p: "🏔️🧘🐅", a: "nepal", d: 4 },
+        { p: "🚬🚗🎺", a: "cuba", d: 4 },
+        { p: "🥁🌴🏃‍♂️", a: "jamaica", d: 4 }
       ]
     },
     {
@@ -436,7 +460,15 @@
         { p: "🏃🍫🪑", a: "forrest gump", d: 3 },
         { p: "🌪️👠🌈", a: "the wizard of oz", d: 3 },
         { p: "🐺💵📈", a: "the wolf of wall street", d: 3 },
-        { p: "🚿🔪🎻", a: "psycho", d: 3 }
+        { p: "🚿🔪🎻", a: "psycho", d: 3 },
+        { p: "🪳🏠🪜", a: "parasite", d: 4 },
+        { p: "🥁🩸🎼", a: "whiplash", d: 4 },
+        { p: "🌀💭🎩", a: "inception", d: 4 },
+        { p: "🛸🔤🐙", a: "arrival", d: 4 },
+        { p: "🏨🪓❄️", a: "the shining", d: 4 },
+        { p: "🥊🧼🧠", a: "fight club", d: 4 },
+        { p: "🤠🪙💀", a: "no country for old men", d: 4 },
+        { p: "📺🏝️⛵", a: "the truman show", d: 4 }
       ]
     },
     {
@@ -464,7 +496,15 @@
         { p: "🐟🌊", a: "plenty of fish in the sea", d: 3 },
         { p: "📚🙈", a: "dont judge a book by its cover", d: 3 },
         { p: "🐍🌿", a: "a snake in the grass", d: 3 },
-        { p: "🌅🐦🪱", a: "the early bird catches the worm", alt: ["early bird gets the worm"], d: 3 }
+        { p: "🌅🐦🪱", a: "the early bird catches the worm", alt: ["early bird gets the worm"], d: 3 },
+        { p: "🐔🥚🔢", a: "dont count your chickens before they hatch", alt: ["dont count your chickens"], d: 4 },
+        { p: "👀🍲🚫", a: "a watched pot never boils", d: 4 },
+        { p: "☁️🥈", a: "every cloud has a silver lining", d: 4 },
+        { p: "🌱🟩🚧", a: "the grass is always greener on the other side", alt: ["the grass is always greener"], d: 4 },
+        { p: "🐕🌳❌", a: "barking up the wrong tree", d: 4 },
+        { p: "🔥🕛🛢️", a: "burn the midnight oil", d: 4 },
+        { p: "💰💪🦵", a: "cost an arm and a leg", d: 4 },
+        { p: "🌾🐫", a: "the straw that broke the camels back", d: 4 }
       ]
     },
     {
@@ -492,7 +532,15 @@
         { p: "🫓🧆🥒", a: "falafel wrap", alt: ["falafel"], d: 3 },
         { p: "🥥🍛🌶️", a: "coconut curry", d: 3 },
         { p: "🍎🥧🍪", a: "apple crumble", alt: ["apple crisp"], d: 3 },
-        { p: "🐑🥧🥔", a: "shepherds pie", d: 3 }
+        { p: "🐑🥧🥔", a: "shepherds pie", d: 3 },
+        { p: "🐄🥧👑", a: "beef wellington", d: 4 },
+        { p: "🥚🙏🧈", a: "eggs benedict", d: 4 },
+        { p: "💥🥔", a: "bangers and mash", d: 4 },
+        { p: "🐸🕳️", a: "toad in the hole", d: 4 },
+        { p: "🦞🥩", a: "surf and turf", d: 4 },
+        { p: "☕🍰🥄", a: "tiramisu", d: 4 },
+        { p: "🔥🍦❄️", a: "baked alaska", d: 4 },
+        { p: "🫧🐭", a: "bubble and squeak", d: 4 }
       ]
     },
     {
@@ -520,7 +568,15 @@
         { p: "🍞🥐", a: "baker", d: 3 },
         { p: "🧵📏", a: "tailor", alt: ["seamstress"], d: 3 },
         { p: "🎬📢", a: "film director", alt: ["director"], d: 3 },
-        { p: "💉🐕🐈", a: "vet", alt: ["veterinarian"], d: 3 }
+        { p: "💉🐕🐈", a: "vet", alt: ["veterinarian"], d: 3 },
+        { p: "🗺️✏️", a: "cartographer", alt: ["map maker"], d: 4 },
+        { p: "🔒🔨", a: "locksmith", d: 4 },
+        { p: "⚫🔨🐴", a: "blacksmith", d: 4 },
+        { p: "🍷👃", a: "sommelier", d: 4 },
+        { p: "🦌🪡", a: "taxidermist", d: 4 },
+        { p: "🗼💡🌊", a: "lighthouse keeper", d: 4 },
+        { p: "🦅🧤", a: "falconer", d: 4 },
+        { p: "⌨️⚖️", a: "stenographer", alt: ["court reporter"], d: 4 }
       ]
     },
     {
@@ -548,7 +604,15 @@
         { p: "💔🚢🎻", a: "my heart will go on", d: 3 },
         { p: "🌙🏞️", a: "moon river", d: 3 },
         { p: "👣👣👏", a: "we will rock you", d: 3 },
-        { p: "🎃👻🕺", a: "thriller", d: 3 }
+        { p: "🎃👻🕺", a: "thriller", d: 3 },
+        { p: "🪜☁️😇", a: "stairway to heaven", d: 4 },
+        { p: "💜🌧️", a: "purple rain", d: 4 },
+        { p: "🏨🌴🌇", a: "hotel california", d: 4 },
+        { p: "🍬👶", a: "sweet child o mine", alt: ["sweet child of mine"], d: 4 },
+        { p: "👧👖", a: "billie jean", d: 4 },
+        { p: "🎭🎸👑", a: "bohemian rhapsody", d: 4 },
+        { p: "👃🧑‍🎓👻", a: "smells like teen spirit", d: 4 },
+        { p: "⬇️😰", a: "under pressure", d: 4 }
       ]
     },
     {
@@ -576,7 +640,15 @@
         { p: "❄️🧑", a: "snowman", d: 3 },
         { p: "🌧️🧥", a: "raincoat", d: 3 },
         { p: "🕯️🥢", a: "candlestick", d: 3 },
-        { p: "🐟🪝", a: "fishhook", d: 3 }
+        { p: "🐟🪝", a: "fishhook", d: 3 },
+        { p: "🌙🐴", a: "nightmare", d: 4 },
+        { p: "☕🛹", a: "cupboard", d: 4 },
+        { p: "🤐🔔", a: "dumbbell", d: 4 },
+        { p: "💋🥢", a: "lipstick", d: 4 },
+        { p: "👂💇", a: "earwig", d: 4 },
+        { p: "🦊🧤", a: "foxglove", d: 4 },
+        { p: "🧈☕", a: "buttercup", d: 4 },
+        { p: "🐉🪰", a: "dragonfly", d: 4 }
       ]
     }
   ];
@@ -614,7 +686,8 @@
   const LEVELS = [
     { d: 1, name: "Easy",   note: "warm up" },
     { d: 2, name: "Medium", note: "a bit of thinking" },
-    { d: 3, name: "Hard",   note: "properly tricky" }
+    { d: 3, name: "Hard",   note: "properly tricky" },
+    { d: 4, name: "Expert", note: "these are meant to hurt" }
   ];
 
   /* ========================== ANSWER MATCHING ==========================
@@ -739,7 +812,7 @@
     const idx = s.charCodeAt(0) - 65;
     const diff = +s[1];
     if (idx < 0 || idx >= DECK_IDS.length) return null;
-    if (diff !== 1 && diff !== 2 && diff !== 3) return null;
+    if (!(diff >= 1 && diff <= 4)) return null;
     return { id: DECK_IDS[idx], diff: diff, seed: s.slice(2) };
   }
 
@@ -824,6 +897,33 @@
     verdict = ""; verdictNear = false;
     if (P.duo) { turn = 1 - turn; handoff = true; }
     render();
+  }
+
+  /* Copying is easy to get wrong. navigator.clipboard.writeText returns a
+     promise that can REJECT (not focused, no permission, no user gesture),
+     so it has to be awaited. execCommand still works where the async API
+     is blocked, and we report failure rather than pretending it worked. */
+  const inviteText = () => {
+    const where = location.origin + location.pathname.replace(/index\.html$/, "");
+    return "Play Emoji Riddles with me. Code " + curCode + "\n" + where;
+  };
+
+  async function copyText(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      try { await navigator.clipboard.writeText(text); return true; } catch (e) { /* fall through */ }
+    }
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.cssText = "position:fixed;top:-1000px;opacity:0";
+      document.body.appendChild(ta);
+      ta.select();
+      ta.setSelectionRange(0, text.length);
+      const ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+      return !!ok;
+    } catch (e) { return false; }
   }
 
   /* ============================== RENDER ============================== */
@@ -916,11 +1016,16 @@
           <p class="lede">Send this code to whoever you want to play with. They get the same ${puzzles} puzzles in the same order, so the scores actually mean something.</p>
         </header>
 
-        <div class="bigcode">${esc(curCode)}</div>
+        <div class="bigcode" data-pick>${esc(curCode)}</div>
 
         <button class="btn solid" data-act="share">Send the invite</button>
         <button class="btn" data-act="copy">${copied ? "Copied ✓" : "Copy code"}</button>
-        ${shareNote ? `<p class="eyebrow" style="text-align:center">${esc(shareNote)}</p>` : ""}
+        ${shareNote ? `<p class="eyebrow" style="text-align:center; color:var(--pink)">${esc(shareNote)}</p>` : ""}
+
+        <div class="seg">
+          <span class="lbl">Or copy this message by hand</span>
+          <textarea class="invitebox" data-invite readonly rows="2">${esc(inviteText())}</textarea>
+        </div>
 
         <div style="flex:1"></div>
         <button class="btn teal" data-act="beginplay">Start playing</button>
@@ -1180,6 +1285,9 @@
       inp.oninput = () => { P.names[+inp.dataset.name] = inp.value; save(); };
     });
 
+    const box = app.querySelector("[data-invite]");
+    if (box) box.onclick = () => { box.focus(); box.select(); };
+
     const code = app.querySelector("[data-code]");
     if (code) {
       code.oninput = () => { codeInput = code.value; };
@@ -1208,7 +1316,7 @@
     });
 
     app.querySelectorAll("[data-act]").forEach(b => {
-      b.onclick = () => {
+      b.onclick = async () => {
         const a = b.dataset.act;
         if (a === "check")    return submit();
         if (a === "hint")     { hint = Math.min(2, hint + 1); verdict = ""; return render(); }
@@ -1221,28 +1329,27 @@
         if (a === "invite") { inviteFlow = true;  view = "setup"; codeErr = ""; return render(); }
         if (a === "beginplay") { view = "play"; shareNote = ""; return render(); }
         if (a === "share") {
-          const where = location.origin + location.pathname.replace(/index\.html$/, "");
-          const msg = "Play Emoji Riddles with me. Code " + curCode + "\n" + where;
+          const msg = inviteText();
           if (navigator.share) {
-            navigator.share({ title: "Emoji Riddles", text: msg })
-              .catch(() => { shareNote = ""; render(); });
-            return;
+            try {
+              await navigator.share({ title: "Emoji Riddles", text: msg });
+              shareNote = ""; return render();
+            } catch (e) {
+              if (e && e.name === "AbortError") return;   // they closed the sheet
+            }
           }
-          try {
-            navigator.clipboard.writeText(msg);
-            shareNote = "Invite copied. Paste it wherever you like.";
-          } catch {
-            shareNote = "Copying is blocked here. The code is " + curCode + ".";
-          }
+          const ok = await copyText(msg);
+          shareNote = ok
+            ? "Invite copied. Paste it into any chat."
+            : "Copy the message in the box below and send it.";
           return render();
         }
         if (a === "copy") {
-          try {
-            navigator.clipboard.writeText(curCode);
-            shareNote = "";
-            copied = true; render();
-            setTimeout(() => { copied = false; render(); }, 1600);
-          } catch { codeErr = "Copying is blocked here, type it out instead."; render(); }
+          const ok = await copyText(curCode);
+          copied = ok;
+          shareNote = ok ? "" : "Could not copy. Select the code above and copy it by hand.";
+          render();
+          if (ok) setTimeout(() => { copied = false; render(); }, 1600);
           return;
         }
         if (a === "join") {
