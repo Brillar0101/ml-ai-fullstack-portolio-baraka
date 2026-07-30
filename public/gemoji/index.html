@@ -1470,7 +1470,13 @@
         )))}
         <p class="eyebrow" style="margin-top:-10px">${esc(lvl.note)}</p>
 
-        ${tableMissing ? `
+        ${inviteFlow && !NET.ready ? `
+          <div class="alert">
+            <b>Live rooms are unavailable on this build.</b>
+            Picking a deck will give you a code that deals everyone the same
+            puzzles instead of a room with turns. The two-player option above
+            does take turns, on this one device.
+          </div>` : tableMissing ? `
           <div class="alert">
             <b>Taking turns is not switched on yet.</b>
             This site needs a one-time database step before players can share a

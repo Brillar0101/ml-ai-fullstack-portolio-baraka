@@ -1,4 +1,5 @@
 {
+  "buildCommand": "npm run build",
   "rewrites": [
     { "source": "/gemoji", "destination": "/gemoji/index.html" },
     { "source": "/gemoji/", "destination": "/gemoji/index.html" },
