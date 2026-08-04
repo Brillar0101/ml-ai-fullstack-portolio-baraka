@@ -105,6 +105,106 @@
   color: var(--primary);
 }
 
+.card-exchange-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xl);
+  padding: 10px var(--space-lg);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.card-exchange-toggle:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.card-exchange {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xl);
+  text-align: left;
+}
+
+.card-exchange input {
+  width: 100%;
+  padding: 10px var(--space-md);
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.card-exchange input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.card-exchange-actions {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.card-exchange-actions button {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px var(--space-md);
+  background: var(--primary);
+  border: none;
+  border-radius: var(--radius-md);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.card-exchange-actions button:hover {
+  background: var(--primary-dark);
+}
+
+.card-exchange-actions button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.card-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  margin: 0;
+}
+
+.card-status-success { color: var(--success, #3e8635); }
+.card-status-error   { color: var(--error, #c9190b); }
+.card-status-sending { color: var(--text-muted); }
+
+.card-spin {
+  animation: card-spin 1s linear infinite;
+}
+
+@keyframes card-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-spin { animation: none; }
+}
+
 .card-portfolio {
   display: inline-flex;
   align-items: center;
