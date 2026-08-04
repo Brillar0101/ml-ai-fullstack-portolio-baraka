@@ -65,8 +65,11 @@ const CardPage = () => {
       );
       setStatus({ type: 'success', message: "Got it — I have your details. I'll reach out." });
       setLead({ name: '', email: '', phone: '' });
-    } catch {
-      setStatus({ type: 'error', message: `Could not send. Email me instead: ${CONFIG.email}` });
+    } catch (error) {
+      // Surface the EmailJS reason (e.g. an expired provider grant) instead of
+      // a blind failure -- a 412 here once hid "reconnect your Outlook account".
+      const detail = error?.text ? ` (${error.text})` : '';
+      setStatus({ type: 'error', message: `Could not send${detail}. Email me instead: ${CONFIG.email}` });
     }
   };
 

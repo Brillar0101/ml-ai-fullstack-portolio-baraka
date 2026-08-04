@@ -106,6 +106,7 @@
 }
 
 .card-exchange-toggle {
+  font-family: inherit;
   display: inline-flex;
   align-items: center;
   gap: var(--space-sm);
@@ -135,6 +136,9 @@
 }
 
 .card-exchange input {
+  /* inputs and buttons do not inherit font-family; without this they fall
+     back to Arial and break the Red Hat / PatternFly type system */
+  font-family: inherit;
   width: 100%;
   padding: 10px var(--space-md);
   background: var(--background);
@@ -156,6 +160,7 @@
 }
 
 .card-exchange-actions button {
+  font-family: inherit;
   flex: 1;
   display: inline-flex;
   align-items: center;
