@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 300" font-family="Inter, Arial, sans-serif">
+  <defs><marker id="a" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#5f6b7c"/></marker></defs>
+  <rect x="8" y="14" width="804" height="272" rx="14" fill="none" stroke="#c7d3e6" stroke-width="1.2" stroke-dasharray="6 4"/>
+  <text x="28" y="36" fill="#5f6b7c" font-size="11">credit-card PCB</text>
+
+  <rect x="60" y="120" width="150" height="52" rx="8" fill="#eef2f8" stroke="#215db0" stroke-width="1.5"/>
+  <text x="135" y="144" text-anchor="middle" fill="#14203a" font-size="14" font-weight="600">6-axis IMU</text>
+  <text x="135" y="161" text-anchor="middle" fill="#5f6b7c" font-size="11">motion, over I2C</text>
+
+  <rect x="320" y="120" width="160" height="52" rx="8" fill="#dbe7fb" stroke="#215db0" stroke-width="1.5"/>
+  <text x="400" y="144" text-anchor="middle" fill="#14203a" font-size="14" font-weight="600">ESP32-S3</text>
+  <text x="400" y="161" text-anchor="middle" fill="#5f6b7c" font-size="11">tiny classifier on-device</text>
+
+  <rect x="590" y="120" width="170" height="52" rx="8" fill="#dff0e6" stroke="#1c6e42" stroke-width="1.5"/>
+  <text x="675" y="144" text-anchor="middle" fill="#14203a" font-size="14" font-weight="600">24-LED array</text>
+  <text x="675" y="161" text-anchor="middle" fill="#5f6b7c" font-size="11">charlieplexed, is the network</text>
+
+  <rect x="320" y="220" width="160" height="40" rx="8" fill="#f4f6fa" stroke="#5f6b7c" stroke-width="1.2"/>
+  <text x="400" y="245" text-anchor="middle" fill="#5f6b7c" font-size="12">USB (power + flash)</text>
+
+  <path d="M210,146 L314,146" stroke="#5f6b7c" stroke-width="1.5" marker-end="url(#a)"/>
+  <path d="M480,146 L584,146" stroke="#5f6b7c" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="532" y="138" text-anchor="middle" fill="#5f6b7c" font-size="10">gesture</text>
+  <path d="M400,214 L400,178" stroke="#5f6b7c" stroke-width="1.5" marker-end="url(#a)"/>
+</svg>
