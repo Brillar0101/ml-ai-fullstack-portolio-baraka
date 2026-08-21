@@ -79,6 +79,7 @@ export const PROJECTS = [
     category: "hardware",
     featured: false,
     status: "in-development",
+    visible: false,
     route: "/projects/16bit-alu"
   },
   {
@@ -90,6 +91,7 @@ export const PROJECTS = [
     category: "hardware",
     featured: false,
     status: "in-development",
+    visible: false,
     route: "/projects/3-filter-audio"
   },
   {
