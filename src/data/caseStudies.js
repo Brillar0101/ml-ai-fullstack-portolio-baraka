@@ -682,7 +682,7 @@ export const neuralCardCaseStudy = {
     { value: '0', label: 'cloud calls' },
   ],
   sections: [
-    { type: 'introduction', title: 'Introduction', body: 'NeuralCard is a business card you can hand someone that also runs a small neural network. An ESP32-S3 reads a 6-axis IMU, runs a tiny classifier on the motion, and lights an LED array laid out to look like the network it runs. Everything happens on the card.' },
+    { type: 'introduction', title: 'Introduction', body: 'NeuralCard is a business card you can hand someone that also runs a small neural network. An ESP32-S3 reads a 6-axis IMU, runs a tiny classifier on the motion, and lights an LED array laid out to look like the network it runs. Everything happens on the card.', image: '/assets/images/neuralcard/block.svg', imageAlt: 'NeuralCard block diagram: IMU to ESP32-S3 classifier to LED array' },
     { type: 'problem', title: 'The idea', body: 'Most AI demos need a phone, a laptop, or a server. I wanted the whole thing, sensing, inference, and output, to fit on one card and run from USB, so the demo is the hardware.' },
     { type: 'process', title: 'How it was built', steps: [
       { title: 'The board', body: 'A credit-card outline in KiCad: an ESP32-S3, a 6-axis IMU over I2C, and 24 LEDs driven by charlieplexing so a handful of GPIO pins run the whole array. The LED layout traces the shape of the network on the silkscreen.', bullets: ['ESP32-S3 with Wi-Fi, BLE, and USB', '6-axis IMU over I2C', '24 LEDs via charlieplexing', 'Card-sized PCB in KiCad'] },
@@ -708,7 +708,7 @@ export const agentDeckCaseStudy = {
     { value: 'Per-key', label: 'RGB' },
   ],
   sections: [
-    { type: 'introduction', title: 'Introduction', body: 'AgentDeck is a small mechanical macropad built around an RP2040. It has 13 hot-swap keys with per-key RGB, a rotary encoder, and a joystick, and it runs CircuitPython. I built it to drive the approve, redirect, and stop loop of working with AI coding agents from dedicated keys instead of hunting for shortcuts.' },
+    { type: 'introduction', title: 'Introduction', body: 'AgentDeck is a small mechanical macropad built around an RP2040. It has 13 hot-swap keys with per-key RGB, a rotary encoder, and a joystick, and it runs CircuitPython. I built it to drive the approve, redirect, and stop loop of working with AI coding agents from dedicated keys instead of hunting for shortcuts.', image: '/assets/images/agentdeck/block.svg', imageAlt: 'AgentDeck block diagram: keys, encoder, joystick to RP2040 to USB HID and RGB' },
     { type: 'problem', title: 'Why', body: 'Supervising an agent is a lot of small repeated actions: approve, reject, scroll a diff, jump to the next change. Doing those on the main keyboard breaks flow. A dedicated deck puts each action on its own labeled, lit key.' },
     { type: 'process', title: 'How it was built', steps: [
       { title: 'The board', body: 'A 4-layer PCB in KiCad with hot-swap sockets so switches drop in without soldering, per-key addressable RGB, an encoder for scrolling, and a small joystick. The RP2040 handles USB HID.', bullets: ['RP2040 microcontroller', '13 hot-swap key switches', 'Per-key addressable RGB', 'Rotary encoder and joystick', '4-layer PCB in KiCad'] },
@@ -734,7 +734,7 @@ export const uhfRfidCaseStudy = {
     { value: '50 ohm', label: 'RF design' },
   ],
   sections: [
-    { type: 'introduction', title: 'Introduction', body: 'This is a UHF RFID reader for passive EPC Class 1 Gen 2 tags. It inventories many tags at once in the 902-928 MHz band, then does the interesting part: a small model turns raw signal strength into a distance, so each read says about 1.4 m out, not just present. The first build uses a MagicRF M100 module with an ESP32-S3 host, and the design vision is a chip-down RF board around a reader IC.' },
+    { type: 'introduction', title: 'Introduction', body: 'This is a UHF RFID reader for passive EPC Class 1 Gen 2 tags. It inventories many tags at once in the 902-928 MHz band, then does the interesting part: a small model turns raw signal strength into a distance, so each read says about 1.4 m out, not just present. The first build uses a MagicRF M100 module with an ESP32-S3 host, and the design vision is a chip-down RF board around a reader IC.', image: '/assets/images/uhf-rfid-reader/architecture.svg', imageAlt: 'UHF reader signal chain: USB-C to ESP32-S3 to M100 to antenna, with the RSSI ranging model' },
     { type: 'problem', title: 'The problem', body: 'A plain reader tells you a tag is present. It does not tell you where. I wanted rough distance from a single antenna, and I wanted to learn how to design a real 900 MHz RF PCB while doing it.' },
     { type: 'process', title: 'How it was built', steps: [
       { title: 'Reader and host', body: 'An ESP32-S3 drives the reader over UART and streams EPC and RSSI per read. The firmware handles the framed protocol, sets region and power, and runs inventory.', bullets: ['MagicRF M100 UHF module', 'ESP32-S3 host over UART', 'Framed protocol, region and power control'] },
