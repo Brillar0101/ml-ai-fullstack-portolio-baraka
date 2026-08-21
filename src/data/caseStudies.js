@@ -667,3 +667,86 @@ caseStudies.swishvision = swishVisionCaseStudy;
 caseStudies['psiv-rentals'] = psivRentalsCaseStudy;
 caseStudies.touhou = touhouCaseStudy;
 caseStudies['pixel-monarch'] = pixelMonarchCaseStudy;
+
+export const neuralCardCaseStudy = {
+  id: 'neuralcard',
+  eyebrow: 'Hardware Design',
+  context: 'Personal project',
+  headline: 'A business card that runs a neural network',
+  subhead:
+    'A credit-card-sized PCB with an ESP32-S3, a 6-axis IMU, and 24 charlieplexed LEDs wired to look like the network itself. It classifies motion on the board, with no phone and no cloud.',
+  metrics: [
+    { value: 'Card', label: 'form factor' },
+    { value: 'ESP32-S3', label: 'on-device compute' },
+    { value: '24', label: 'charlieplexed LEDs' },
+    { value: '0', label: 'cloud calls' },
+  ],
+  sections: [
+    { type: 'introduction', title: 'Introduction', body: 'NeuralCard is a business card you can hand someone that also runs a small neural network. An ESP32-S3 reads a 6-axis IMU, runs a tiny classifier on the motion, and lights an LED array laid out to look like the network it runs. Everything happens on the card.' },
+    { type: 'problem', title: 'The idea', body: 'Most AI demos need a phone, a laptop, or a server. I wanted the whole thing, sensing, inference, and output, to fit on one card and run from USB, so the demo is the hardware.' },
+    { type: 'process', title: 'How it was built', steps: [
+      { title: 'The board', body: 'A credit-card outline in KiCad: an ESP32-S3, a 6-axis IMU over I2C, and 24 LEDs driven by charlieplexing so a handful of GPIO pins run the whole array. The LED layout traces the shape of the network on the silkscreen.', bullets: ['ESP32-S3 with Wi-Fi, BLE, and USB', '6-axis IMU over I2C', '24 LEDs via charlieplexing', 'Card-sized PCB in KiCad'] },
+      { title: 'On-device inference', body: 'A small classifier runs on the ESP32-S3 and maps IMU motion to a few gestures. Keeping the model tiny is the point: it has to run in real time on the MCU with no network.', bullets: ['Motion features from the IMU', 'Tiny classifier on the MCU', 'Real time, no phone or cloud'] },
+    ]},
+    { type: 'conclusion', title: 'What it taught me', bullets: ['Charlieplexing to drive many LEDs from few pins', 'Fitting a real sensor, compute, and output on a card', 'Keeping a model small enough to run on an MCU'] },
+    { type: 'extra', title: 'Tech stack', tags: ['KiCad', 'ESP32-S3', 'C', 'Embedded ML', 'I2C', 'Charlieplexing'] },
+  ],
+  cta: [{ label: 'View code', href: 'https://github.com/Brillar0101', primary: true }],
+};
+
+export const agentDeckCaseStudy = {
+  id: 'agentdeck',
+  eyebrow: 'Hardware Design',
+  context: 'Personal project',
+  headline: 'A macropad for supervising AI coding agents',
+  subhead:
+    'An RP2040 macropad with 13 hot-swap keys, per-key RGB, an encoder, and a joystick on a 4-layer PCB, built to approve, redirect, and steer coding agents without leaving the keyboard.',
+  metrics: [
+    { value: '13', label: 'hot-swap keys' },
+    { value: 'RP2040', label: 'controller' },
+    { value: '4-layer', label: 'PCB' },
+    { value: 'Per-key', label: 'RGB' },
+  ],
+  sections: [
+    { type: 'introduction', title: 'Introduction', body: 'AgentDeck is a small mechanical macropad built around an RP2040. It has 13 hot-swap keys with per-key RGB, a rotary encoder, and a joystick, and it runs CircuitPython. I built it to drive the approve, redirect, and stop loop of working with AI coding agents from dedicated keys instead of hunting for shortcuts.' },
+    { type: 'problem', title: 'Why', body: 'Supervising an agent is a lot of small repeated actions: approve, reject, scroll a diff, jump to the next change. Doing those on the main keyboard breaks flow. A dedicated deck puts each action on its own labeled, lit key.' },
+    { type: 'process', title: 'How it was built', steps: [
+      { title: 'The board', body: 'A 4-layer PCB in KiCad with hot-swap sockets so switches drop in without soldering, per-key addressable RGB, an encoder for scrolling, and a small joystick. The RP2040 handles USB HID.', bullets: ['RP2040 microcontroller', '13 hot-swap key switches', 'Per-key addressable RGB', 'Rotary encoder and joystick', '4-layer PCB in KiCad'] },
+      { title: 'Firmware', body: 'CircuitPython presents the deck as a USB HID device and maps keys, the encoder, and the joystick to the actions I use most when supervising an agent. RGB shows per-key state at a glance.', bullets: ['CircuitPython on the RP2040', 'USB HID keymap', 'Layers for different tools'] },
+    ]},
+    { type: 'conclusion', title: 'What it taught me', bullets: ['4-layer board design with hot-swap sockets and RGB', 'USB HID firmware in CircuitPython', 'Designing an input device around a real workflow'] },
+    { type: 'extra', title: 'Tech stack', tags: ['KiCad', 'RP2040', 'CircuitPython', 'USB HID', '4-layer PCB'] },
+  ],
+  cta: [{ label: 'View code', href: 'https://github.com/Brillar0101', primary: true }],
+};
+
+export const uhfRfidCaseStudy = {
+  id: 'uhf-rfid-reader',
+  eyebrow: 'Hardware Design',
+  context: 'Personal project',
+  headline: 'A UHF RFID reader that knows how far the tag is',
+  subhead:
+    'An EPC Gen2 reader in the 902-928 MHz band that inventories passive tags and estimates the distance to each one with a small on-device model, built to learn UHF RF PCB design end to end.',
+  metrics: [
+    { value: '902-928 MHz', label: 'FCC UHF band' },
+    { value: '~0.24 m', label: 'ranging error (model)' },
+    { value: 'ESP32-S3', label: 'host' },
+    { value: '50 ohm', label: 'RF design' },
+  ],
+  sections: [
+    { type: 'introduction', title: 'Introduction', body: 'This is a UHF RFID reader for passive EPC Class 1 Gen 2 tags. It inventories many tags at once in the 902-928 MHz band, then does the interesting part: a small model turns raw signal strength into a distance, so each read says about 1.4 m out, not just present. The first build uses a MagicRF M100 module with an ESP32-S3 host, and the design vision is a chip-down RF board around a reader IC.' },
+    { type: 'problem', title: 'The problem', body: 'A plain reader tells you a tag is present. It does not tell you where. I wanted rough distance from a single antenna, and I wanted to learn how to design a real 900 MHz RF PCB while doing it.' },
+    { type: 'process', title: 'How it was built', steps: [
+      { title: 'Reader and host', body: 'An ESP32-S3 drives the reader over UART and streams EPC and RSSI per read. The firmware handles the framed protocol, sets region and power, and runs inventory.', bullets: ['MagicRF M100 UHF module', 'ESP32-S3 host over UART', 'Framed protocol, region and power control'] },
+      { title: 'Ranging model', body: 'RSSI to distance uses the log-distance path-loss model, fit per antenna and environment from a short distance sweep. Median smoothing over several reads and frequency-hop averaging across channels steady the number. On a clean sweep the fit lands near 0.24 m mean error.', bullets: ['Log-distance path-loss fit', 'Median smoothing over reads', 'Frequency-hop averaging across channels', 'About 0.24 m mean error on a synthetic sweep'] },
+      { title: 'The RF board (chip-down)', body: 'The design vision is a chip-down board around a single reader IC: a 50 ohm controlled-impedance feed, a via fence at a fraction of the guided wavelength, a pi match, and a harmonic low-pass filter to the antenna. The trace geometry was computed, not guessed.', bullets: ['50 ohm GCPW, W 0.39 mm and gap 0.25 mm', 'Via fence at 9 mm or less', 'Match and 3rd-order harmonic LPF', '4-layer controlled-impedance stackup'] },
+    ]},
+    { type: 'results', title: 'Where it is', body: 'A working firmware slice reads tags and streams distance to a dashboard, the ranging pipeline is built and tested, and the chip-down schematic is captured in KiCad. The RF PCB layout is the next step.', bullets: ['Firmware streams EPC, RSSI, and distance', 'Ranging pipeline built and tested', 'Chip-down schematic done in KiCad', 'Next: RF PCB layout and NanoVNA bring-up'] },
+    { type: 'extra', title: 'Tech stack', tags: ['KiCad', 'ESP32-S3', 'RFID', 'RF PCB', 'C', 'Python', 'EPC Gen2'] },
+  ],
+  cta: [{ label: 'View code', href: 'https://github.com/Brillar0101/uhf-rfid-reader', primary: true }],
+};
+
+caseStudies.neuralcard = neuralCardCaseStudy;
+caseStudies.agentdeck = agentDeckCaseStudy;
+caseStudies['uhf-rfid-reader'] = uhfRfidCaseStudy;
