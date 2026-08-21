@@ -124,6 +124,9 @@ export default function App() {
             <Route path="/projects/swishvision" element={<ProjectCaseStudy />} />
             <Route path="/projects/pixel-monarch" element={<ProjectCaseStudy />} />
             <Route path="/projects/touhou" element={<ProjectCaseStudy />} />
+            <Route path="/projects/neuralcard" element={<ProjectCaseStudy />} />
+            <Route path="/projects/agentdeck" element={<ProjectCaseStudy />} />
+            <Route path="/projects/uhf-rfid-reader" element={<ProjectCaseStudy />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/blog" element={<BlogPage />} />
             <Route path="/blog/:slug" element={<BlogPostPage />} />
