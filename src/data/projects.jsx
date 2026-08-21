@@ -1,4 +1,4 @@
-import { Camera, Layers, Cpu, Crosshair, Music } from 'lucide-react';
+import { Camera, Layers, Cpu, Crosshair, Music, Radio, Keyboard, CircuitBoard } from 'lucide-react';
 
 // Custom Basketball Icon
 const Basketball = () => (
@@ -91,5 +91,35 @@ export const PROJECTS = [
     featured: false,
     status: "in-development",
     route: "/projects/3-filter-audio"
+  },
+  {
+    id: "neuralcard",
+    title: "NeuralCard",
+    shortDesc: "Credit-card-sized PCB that runs a neural network: ESP32-S3, a 6-axis IMU, and 24 charlieplexed LEDs wired as the network itself",
+    icon: CircuitBoard,
+    tags: ["KiCad", "ESP32-S3", "Embedded ML", "C"],
+    category: "hardware",
+    featured: true,
+    route: "/projects/neuralcard"
+  },
+  {
+    id: "agentdeck",
+    title: "AgentDeck",
+    shortDesc: "RP2040 macropad for supervising AI coding agents: 13 hot-swap keys with per-key RGB, an encoder, a joystick, and a 4-layer PCB",
+    icon: Keyboard,
+    tags: ["KiCad", "RP2040", "CircuitPython"],
+    category: "hardware",
+    featured: false,
+    route: "/projects/agentdeck"
+  },
+  {
+    id: "uhf-rfid-reader",
+    title: "UHF RFID Reader",
+    shortDesc: "UHF Gen2 RFID reader that inventories tags and estimates how far each one is with an on-device model (ESP32-S3 + MagicRF M100)",
+    icon: Radio,
+    tags: ["KiCad", "ESP32-S3", "RFID", "RF PCB"],
+    category: "hardware",
+    featured: false,
+    route: "/projects/uhf-rfid-reader"
   }
 ];
