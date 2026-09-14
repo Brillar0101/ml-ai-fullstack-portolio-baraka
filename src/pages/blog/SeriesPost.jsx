@@ -69,7 +69,7 @@ function slugify(text) {
     .slice(0, 60);
 }
 
-function Block({ block }) {
+function Block({ block, format }) {
   switch (block.type) {
     case 'h2':
       return <h2 id={slugify(block.text)}>{block.text}</h2>;
@@ -78,6 +78,7 @@ function Block({ block }) {
     case 'ul':
       return <ul>{block.items.map((it, i) => <li key={i}>{rich(it)}</li>)}</ul>;
     case 'terms':
+      if (format !== 'build' && block.optional !== false) return null;
       return (
         <ul className="series-terms">
           {block.items.map((t, i) => (
@@ -90,6 +91,7 @@ function Block({ block }) {
         </ul>
       );
     case 'code':
+      if (format !== 'build' && !block.essential) return null;
       return (
         <figure className="series-code">
           {block.title ? <figcaption>{block.title}</figcaption> : null}
@@ -97,6 +99,7 @@ function Block({ block }) {
         </figure>
       );
     case 'diagram':
+      if (format === 'essay' && !block.essential) return null;
       // Three styles, chosen by shape: a `root` tree renders the hand-drawn
       // pastel decision tree (option A); `edges` renders the icon-based
       // architecture diagram (option B); `nodes`/`rows` alone render the
@@ -203,6 +206,11 @@ function Block({ block }) {
 
 export default function SeriesPost({ post }) {
   if (!post || !Array.isArray(post.body)) return null;
+  // Older series entries do not carry editorial metadata. Give them a stable
+  // rotation too, so the full archive does not collapse into one template.
+  const format = post.format || (
+    post.seriesNum % 3 === 0 ? 'essay' : post.seriesNum % 3 === 1 ? 'field-notes' : 'build'
+  );
   // Layer-cake scanning support: posts with 4+ sections get a jump list so
   // readers can navigate by heading instead of scrolling blind.
   const headings = post.body.filter((b) => b.type === 'h2');
@@ -218,7 +226,9 @@ export default function SeriesPost({ post }) {
           </ol>
         </nav>
       )}
-      {post.body.map((block, i) => <Block block={block} key={i} />)}
+      <article className={`series-body series-format-${format}`}>
+        {post.body.map((block, i) => <Block block={block} format={format} key={i} />)}
+      </article>
     </>
   );
 }

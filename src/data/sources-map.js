@@ -73,7 +73,7 @@ export const SOURCES = {
   'why-llm-deployment-is-different': [S.scaleInfer, S.pagedattn, S.flashattn, S.mqa, S.vllmDocs, S.transformer],
   'vllm-continuous-batching': [S.pagedattn, S.vllmDocs, S.scaleInfer, S.mqa, S.flashattn, S.transformer],
   'serving-frameworks-compared': [S.pagedattn, S.vllmDocs, S.scaleInfer, S.flashattn, S.int8, S.mqa],
-  'autoscaling-cold-starts': [S.pagedattn, S.scaleInfer, S.vllmDocs, S.mqa, S.flashattn, S.llmSurvey2],
+  'autoscaling-cold-starts': [S.chiron, S.pagedattn, S.scaleInfer, S.vllmDocs, S.mqa, S.flashattn, S.llmSurvey2],
   'evaluation-vs-observability': [S.otelTraces, S.evalSurvey, S.helm, S.ragas, S.checklist, S.mtbench],
   'tracing-llm-requests': [S.otelTraces, S.agentSurvey, S.evalSurvey, S.react, S.ragas, S.gaia],
   'what-to-log-and-alert': [S.otelTraces, S.owasp, S.evalSurvey, S.nist, S.helm, S.agentSurvey],

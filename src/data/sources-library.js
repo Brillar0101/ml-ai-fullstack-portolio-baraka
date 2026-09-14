@@ -135,6 +135,7 @@ export const S = {
   awq:          a('2306.00978', 'Lin et al., AWQ: Activation-aware Weight Quantization', 2023),
   qlora:        a('2305.14314', 'Dettmers et al., QLoRA: Efficient Finetuning of Quantized LLMs', 2023),
   vllmDocs:     { title: 'vLLM documentation', url: 'https://docs.vllm.ai/en/latest/' },
+  chiron:       a('2501.08090', 'Kumar et al., Hierarchical Autoscaling for Large Language Model Serving with Chiron', 2025),
   wikiQuant:    { title: 'Quantization (signal processing) (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Quantization_(signal_processing)' },
 
   // ---- Architecture ----

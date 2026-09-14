@@ -88,5 +88,14 @@ export const AI_SERIES_POSTS = SCHEDULE.map(([post, publishAt, seriesNum, chapte
   series: SERIES,
   seriesNum,
   chapter,
+  format: [
+    'context-vs-prompt-engineering', 'context-rot', 'what-mcp-solves',
+    'levels-of-agentic-autonomy', 'single-vs-multi-agent', 'vector-databases-explained',
+    'cag-vs-rag', 'why-llm-deployment-is-different', 'mixture-of-experts',
+    'training-llm-from-scratch',
+  ].includes(post.id) ? 'essay' : [
+    'context-budgeting', 'mcp-tool-overload', 'evaluation-vs-observability',
+    'what-to-log-and-alert', 'cost-token-observability', 'autoscaling-cold-starts',
+  ].includes(post.id) ? 'field-notes' : 'build',
   publishAt: `${publishAt}T12:00:00Z`,
 }));

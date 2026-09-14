@@ -1,21 +1,18 @@
 export const POST = {
   id: 'autoscaling-cold-starts',
-  title: 'Why Your GPU Endpoint Times Out Right When Traffic Arrives: Autoscaling and Cold Starts',
-  excerpt: 'Scaling a web app is easy. Scaling a model that lives in VRAM is not, because a new node takes minutes to warm up and the spike is already gone by then. Here is how cold starts wreck autoscaling, told through an endpoint that scaled on the wrong signal.',
+  title: 'Autoscaling LLM Inference When a New GPU Takes Minutes',
+  excerpt: 'A GPU replica is not capacity until its weights are in memory and it passes a real readiness check. This is a practical failure analysis of queue-driven scaling, warm capacity, and cold-start budgets.',
   category: 'AI',
   tags: ['Deployment', 'Autoscaling', 'GPU'],
   body: [
-    { type: 'p', text: 'Picture a team putting their first large language model behind an HTTP endpoint, wired to the same autoscaler that ran their web tier. The rule was the one everybody copies: watch CPU, add a replica when average CPU crosses seventy percent, remove one when it drops. It looked fine in staging.' },
-      { type: 'p', text: 'Then a product launch sent a burst of real traffic, and the endpoint started returning timeouts. The dashboard showed the autoscaler doing its job, asking for more replicas, yet requests kept failing for a solid four or five minutes into every spike. By the time the new GPU nodes were actually answering, the burst had passed and the autoscaler was already scaling back down. The service was always late, and it was always late by the same few minutes.' },
-    {
-      type: 'p',
-      text: 'That delay has a name, and it is the whole reason serving a model is harder than serving a web app. It is the cold start. Understanding why it is so long, and why CPU was the wrong thing to watch, is what separates an endpoint that survives a spike from one that folds every time attention arrives.'
-    },
+    { type: 'p', text: 'The incident began with a plausible dashboard. CPU was below 70%, GPU utilization looked moderate, and the deployment had two healthy replicas. Yet the request queue crossed the latency budget whenever traffic arrived in a burst. The autoscaler reacted only after the queue had formed, and the replica it requested could not serve until the model had been copied into GPU memory.' },
+    { type: 'p', text: 'This is a control-loop problem, not a mysterious property of language models. The controller observes a delayed and indirect signal, takes an action with a multi-minute effect, and then measures a system that has already changed. A policy tuned for stateless web workers is observing the wrong state variable and assuming the wrong actuation delay.' },
+    { type: 'p', text: 'The useful quantities are concrete: arrival rate, service rate per loaded replica, queueing delay, time-to-first-token, and the distribution of cold-start duration. Once those are measured, the warm-pool decision becomes an SLO and cost tradeoff instead of a rule copied from a CPU dashboard.' },
     {
       type: 'h2',
-      text: 'A web replica starts in seconds, a model replica starts in minutes'
+      text: 'The capacity that the autoscaler cannot see'
     },
-    { type: 'p', text: 'Start with the intuition, because the gap is bigger than most people guess. When your web autoscaler adds a replica, the new container pulls a small image, starts a process, and is ready to take traffic almost immediately.' },
+    { type: 'p', text: 'Treat a replica as a state machine: pending GPU, node available, image present, weights loaded, runtime warmed, and serving. Only the last state is capacity. A Kubernetes pod in Running state can still be useless to the endpoint if the model has not loaded or the readiness probe does not exercise an actual inference path.' },
       { type: 'p', text: 'The whole thing might take a few seconds. Autoscaling works well there precisely because the reaction is fast enough to catch a rising curve while it is still rising. You see load climbing, you add capacity, the capacity shows up before the load peaks. The feedback loop is tight.' },
     { type: 'p', text: 'A model replica breaks that assumption in several places at once. To bring one online you first have to get a GPU node, and GPU nodes are scarcer and slower to provision than ordinary compute, so you may wait just for the hardware. Then the container has to fetch the model weights, and for a modern model that is many gigabytes moving across the network onto the box.' },
       { type: 'p', text: 'Then those weights have to be loaded off disk and into the GPU memory, the VRAM, which is its own slow copy. And even after all that, the first few requests run slower than normal while caches fill and the runtime settles, a period usually called warmup. Add those up and you are looking at minutes, not seconds. The autoscaler is still reacting at web speed, but the thing it is trying to summon moves at a completely different pace.' },
@@ -64,7 +61,7 @@ export const POST = {
         { from: 'scaler', to: 'queue', label: 'read depth' },
         { from: 'scaler', to: 'cold', label: 'add replica on backlog' }
       ],
-      caption: 'The scaler reads the depth of the request queue, not CPU. A warm floor of replicas absorbs the spike immediately while a cold replica boots in the background to catch up.'
+      caption: 'The control loop should observe backlog or SLO pressure. Warm replicas serve immediately; cold replicas are capacity-in-progress until the readiness check passes. Adapted from the queue- and SLO-aware autoscaling framing in Chiron (Kumar et al., 2025), cited below.'
     },
     {
       type: 'p',
