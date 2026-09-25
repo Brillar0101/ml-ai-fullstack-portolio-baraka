@@ -56,10 +56,4 @@ export const SOURCES = {
   'mcp-vs-function-calling': [S.mcpSpec, S.toolformer, S.react, S.guided, S.jsonSchema, S.agentSurvey],
   'mcp-architecture': [S.mcpSpec, S.agentSurvey, S.toolformer, S.react, S.jsonSchema, S.gaia],
   'mcp-primitives': [S.mcpSpec, S.toolformer, S.jsonSchema, S.react, S.agentSurvey, S.guided],
-  'mcp-tool-overload': [S.mcpSpec, S.toolformer, S.distracted, S.lostmiddle, S.agentSurvey, S.react],
-  'build-an-mcp-server': [S.mcpSpec, S.toolformer, S.jsonSchema, S.react, S.agentSurvey, S.guided],
-  'levels-of-agentic-autonomy': [S.agentSurvey, S.react, S.reflexion, S.voyager, S.gaia, S.webgpt],
-  'single-vs-multi-agent': [S.autogen, S.agentSurvey, S.react, S.reflexion, S.gaia, S.voyager],
-  'multi-agent-orchestration': [S.autogen, S.agentSurvey, S.react, S.reflexion, S.gaia, S.selfrag],
-  'a2a-protocol': [S.mcpSpec, S.autogen, S.agentSurvey, S.jsonSchema, S.gaia, S.react],
 };

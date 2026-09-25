@@ -1,208 +1,180 @@
+// Every factual claim below is taken from the numbered sources at the end.
+// The five-levels figure is Figure 1 of Feng, McDonald and Zhang (arXiv 2506.12469),
+// reproduced under CC BY 4.0. Morris et al. (arXiv 2311.02462) is CC BY-NC-ND,
+// so nothing from it is reproduced; its table is described in prose only.
 export const POST = {
   id: 'levels-of-agentic-autonomy',
-  title: 'Five Levels of Agentic Autonomy, and Why You Should Stop Climbing Early',
-  excerpt: 'A support team kept handing their bot more freedom until it started making refund promises nobody could trace. Here is the ladder they climbed, one rung at a time, and the exact rung where they should have stopped.',
+  title: 'Who Holds the Off Switch: A Ladder of Agent Autonomy',
+  excerpt: 'Three papers rank AI agents by how much the human still decides. Walked rung by rung, they show what the user actually does at each level, which risk arrives with it, and why one of them argues the top rung should never be built.',
   category: 'AI',
-  tags: ['Agents', 'Autonomy', 'Design'],
+  tags: ['Agents', 'Autonomy', 'AI Safety'],
   body: [
     {
       type: 'p',
-      text: 'Picture a support bot called Otto. In its first week Otto does one thing. A customer types a question, Otto sends the whole thing to a language model with a friendly system prompt, and the model writes back an answer. That is the entire product. It works, people like it, and the numbers are boring in the good way. Six months later Otto can look up your order, decide whether to open a refund, message the warehouse, and hand tricky cases to a second bot that specializes in shipping disputes. It is far more capable. It is also far harder to trust, because when Otto promises a customer a refund that never arrives, nobody on the team can say exactly why it made that promise.',
+      text: "Margaret Mitchell and three Hugging Face colleagues close their 2025 position paper with a story from the Cold War. In 1980, they write, computer systems falsely showed more than 2,000 Soviet missiles heading toward North America. Bomber crews ran to their stations and command posts prepared for war. The false alarm was caught only because humans cross-checked one warning system against another.[^1] The paper uses that incident to back its title claim, \"Fully Autonomous AI Agents Should Not be Developed,\" and states its finding plainly: after reviewing research and product marketing, the authors found \"no clear benefit\" of fully autonomous agents that can act outside human-defined constraints, and many foreseeable harms from giving up human control.[^1]",
     },
     {
       type: 'p',
-      text: 'That gap between the two Ottos is what this post is about. Between a plain model call and a self-directing system there is a ladder, and each rung hands the software a little more freedom to decide what happens next. Climbing feels like progress because every rung really does unlock new behavior. The catch is that every rung also makes the thing behave in ways you did not spell out, which means harder debugging and lower predictability. The skill is knowing which rung your problem actually needs and refusing to climb past it.'
+      text: "Their broader result is a direction, not a number: \"The more control a user cedes to an AI agent, the more risks to people arise.\"[^1] That only makes sense if control comes in steps. Three papers have tried to name those steps, and they do not quite agree on where the steps sit. This post climbs the ladder one rung at a time and asks the same three questions at each: what does the human do here, what example do the papers give, and what risk do they attach to it.",
     },
     {
-      type: 'h2',
-      text: 'Autonomy is just who decides what happens next'
+      type: 'terms',
+      optional: false,
+      items: [
+        { term: 'AI agent', def: "Feng, McDonald and Zhang define it as a compound software system, built on one or more AI models, that operates inside an environment and takes actions in it, such as clicking a button or fetching a web page.[^3]" },
+        { term: 'Autonomy', def: "The extent to which an agent is designed to operate without user involvement.[^3] It is about who decides and who can step in, not about how smart the model is." },
+        { term: 'Agency', def: "Feng et al. keep this separate: the capacity to act, which grows with the tools an agent can reach. An agent with many tools that asks before each step has high agency but low autonomy.[^3]" },
+        { term: 'User', def: "Whoever issued the original request. It can be a person, or another agent in a multi-agent system.[^3]" },
+      ],
     },
-    { type: 'p', text: 'Before the ladder, one plain idea. **Autonomy** is the share of decisions the software makes on its own instead of you making them in advance. When you wire up a fixed sequence of steps, you decided the steps; the machine only fills in the blanks.' },
-      { type: 'p', text: 'When the machine chooses its own next step at runtime, it decided, and you find out afterward by reading a log. More autonomy means the system can handle cases you never anticipated. It also means the system can fail in ways you never anticipated. Those two sentences are the same sentence wearing different clothes, and holding both in your head at once is the whole game.' },
     {
       type: 'p',
-      text: 'Here is the ladder Otto climbed, drawn as five layers. Read it from the bottom up, from the least freedom to the most.'
+      text: "The first ladder came from Google DeepMind. Meredith Ringel Morris and colleagues proposed Levels of AGI, a grid of capability that ranks systems by performance and generality, and then added a separate set of six Levels of Autonomy, from 0 to 5, describing the style of interaction between a person and the AI.[^2] Their point was that capability \"unlocks\" higher autonomy without deciding it. A designer can pick a lower level than the model could support.[^2] They borrowed the idea from cars: the SAE J3016 standard grades driving automation from level 0 (no automation) to level 5 (full automation),[^6] and Morris et al. note there will be reasons to drive a level 0 car even when level 5 exists, such as teaching a new driver or driving in weather that blinds the sensors.[^2]",
+    },
+    {
+      type: 'p',
+      text: "Feng, McDonald and Zhang at the University of Washington built the most detailed ladder, with five levels named for the role the user plays: operator, collaborator, consultant, approver, observer.[^3] They hold one example agent fixed across all five levels, a computer-using model with web browsing, code execution and document writing, given one request: help me understand the economic impact of generative AI in the United States since ChatGPT came out in 2022.[^3] Only the autonomy changes. That makes their paper the spine of this post.",
+    },
+    {
+      type: 'image',
+      src: '/blog-images/levels-of-agentic-autonomy/feng-five-levels.webp',
+      alt: 'Five colored boxes labeled L1 to L5: User as an Operator, Collaborator, Consultant, Approver and Observer, each with a one-line description. Below them, a blue wedge labeled User Involvement shrinks from left to right while a red wedge labeled Agent Autonomy grows.',
+      width: 1810,
+      height: 610,
+      caption: 'The five user roles. Figure 1 from Feng, McDonald and Zhang, 2025,[^3] reproduced under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).',
+    },
+    {
+      type: 'p',
+      text: "Mitchell et al. drew a third ladder from the code's point of view, adapted from a Hugging Face blog by Roucher and colleagues. It has five levels: a simple processor where the model has no effect on program flow, a router, a tool caller, a multi-step agent, and a fully autonomous agent that writes and runs new code.[^1] The diagram below lines the three up. The alignment is my reading, not something any of the papers draws, and the fit is loose in places that matter later.",
     },
     {
       type: 'diagram',
       rows: [
-        [{ label: 'Level 5: Autonomous multi-agent', detail: 'Plans, delegates to other agents, self-corrects. Hardest to trust.' }],
-        [{ label: 'Level 4: Tool-using agent loop', detail: 'Picks its own steps in a loop until done. ReAct-style.' }],
-        [{ label: 'Level 3: Router', detail: 'Model picks one of a few branches you defined. Then a fixed path runs.' }],
-        [{ label: 'Level 2: Fixed chain', detail: 'You wired the steps. Model fills blanks. Same shape every time.' }],
-        [{ label: 'Level 1: Single model call', detail: 'Text in, text out. No tools, no memory, no branching.' }]
+        [{ label: 'Rung 5: user as observer', detail: 'Watches logs, holds an off switch. Morris L5 "AI as an Agent". Mitchell: fully autonomous agent that creates and runs new code.' }],
+        [{ label: 'Rung 4: user as approver', detail: 'Signs off on blockers and consequential actions only. Morris L4 "AI as an Expert". Mitchell: multi-step agent.' }],
+        [{ label: 'Rung 3: user as consultant', detail: 'Gives feedback and preferences; cannot take over. Mitchell: tool caller or multi-step agent.' }],
+        [{ label: 'Rung 2: user as collaborator', detail: 'Plans and works alongside the agent; can take over at any time. Morris L3 "AI as a Collaborator".' }],
+        [{ label: 'Rung 1: user as operator', detail: 'Drives the plan; agent acts when invoked. Morris L1 "AI as a Tool" and L2 "AI as a Consultant". Mitchell: simple processor or router.' }],
+        [{ label: 'Rung 0: no AI', detail: 'Human does everything. Morris L0 only.' }],
       ],
-      caption: 'Each layer up adds one power: branching, then looping, then delegation. Each layer up also removes one guarantee about what the system will do.'
+      caption: 'The ladder, highest rung at the top. Rung names follow Feng et al.;[^3] the Morris[^2] and Mitchell[^1] levels are placed by the author, and the naming clash at rungs 2 and 3 is real.',
+    },
+    {
+      type: 'h2',
+      text: 'Rung 0: the human does everything',
     },
     {
       type: 'p',
-      text: 'Let me walk Otto up these five rungs, because the failure modes only make sense once you see what each level buys.'
+      text: "Only Morris et al. include this rung. Their examples are sketching with a pencil and working in non-AI digital tools like a text editor or paint program, and the risk column just says status quo risks.[^2] They insist it stays relevant for education, enjoyment, assessment and safety.[^2] It is the baseline every other rung is measured against.",
     },
     {
       type: 'h2',
-      text: 'Level 1 and 2: the model as a component you control'
+      text: 'Rung 1: the user as operator',
     },
-    { type: 'p', text: 'At **level one**, Otto is a single model call. Question goes in, answer comes out. There are no tools, so Otto cannot look anything up. It can explain your return policy from the prompt, but ask it about your specific order and it will either guess or admit it does not know.' },
-      { type: 'p', text: 'The failure mode is confident nonsense, since the model has no way to check itself against real data. What you get in return is total predictability. The same input gives roughly the same output, and there is nothing to debug except the prompt. Stay here when the task is pure text work: summarize this, rephrase that, classify this ticket. Reaching for anything fancier is wasted motion.' },
-    { type: 'p', text: '**Level two** is a fixed chain, and it is where most useful software actually lives. You, the developer, wire a sequence of steps. Otto first calls the model to pull the order number out of the message, then runs a database lookup, then calls the model again to write a reply using what it found.' },
-      { type: 'p', text: 'The model is doing real work, but it never chooses the shape of the flow. The steps run in the same order every time. When something breaks you can point at the exact step, because there are only three of them and you wrote all three. Below is roughly what that chain looks like.' },
-    { type: 'lab', height: 460,
-        title: 'The same task at level 2 and level 4',
-        caption: 'Both designs return the same answer. What differs is how many decisions the model made, and whether you could have predicted the path before it ran.',
-        code: `# One task, two designs. Level 2 is a chain the developer
-# wired by hand. Level 4 lets the model choose its own
-# steps. Watch how the number of decisions the model gets to
-# make changes what can go wrong.
-
-ORDERS = {"4417": {"id": "4417", "status": "delayed", "days_late": 6}}
-
-def model_extract(message, field):        # stand-in: pulls an id out of text
-    digits = "".join(c for c in message if c.isdigit())
-    return digits or None
-
-def model_reply(question, facts):         # stand-in: writes the customer reply
-    if not facts:
-        return "I could not find that order."
-    return "Order %s is %s, %d days behind schedule." % (
-        facts["id"], facts["status"], facts["days_late"])
-
-# ---- Level 2: a fixed chain
-# -----------------------------------------------
-def handle_ticket(message):
-    order_id = model_extract(message, field="order_id")   # model step
-    order = ORDERS.get(order_id)                          # plain code, no model
-    return model_reply(question=message, facts=order)     # model step
-
-# ---- Level 4: the agent picks its own steps
-# -------------------------------
-def model_decide(history, tools, step):
-    # A scripted planner standing in for a model choosing
-    # its next move.
-    if step == 0:
-        return {"type": "tool", "name": "get_order", "args": {"order_id": "4417"}}
-    return {"type": "final", "answer": "Order 4417 is delayed by 6 days."}
-
-def agent_loop(message, tools, max_steps=8):
-    history = [message]
-    for step in range(max_steps):
-        decision = model_decide(history, tools, step)
-        if decision["type"] == "final":
-            return decision["answer"], step + 1
-        result = tools[decision["name"]](**decision["args"])
-        history.append(result)
-    return "Escalating to a human.", max_steps      # we never promised it finishes
-
-TOOLS = {"get_order": lambda order_id: ORDERS.get(order_id)}
-
-msg = "where is my order 4417?"
-print("Level 2 (fixed chain)")
-print("   reply:", handle_ticket(msg))
-print("   model decisions: 2, both of them constrained to one field each")
-print()
-answer, steps = agent_loop(msg, TOOLS)
-print("Level 4 (agent loop)")
-print("   reply:", answer)
-print("   model decisions: %d, and it chose the tool AND the arguments" % (steps + 1))
-print()
-print("Same answer. The difference is how many chances there were to be wrong,")
-print("and whether a human could predict the path before it ran.")
-
-# Try it: make model_decide never return "final" and watch
-# max_steps become the only thing standing between you and
-# an agent that runs all night.
-` },
     {
       type: 'p',
-      text: 'Notice what you can promise about this code. It always does the lookup. It never messages the warehouse, because there is no line that does. If it misbehaves, the bug is in one of three named places. That predictability is not a limitation you tolerate; it is the feature you are paying for.'
+      text: "Here the user is in charge at all times and does the long-term planning. The agent helps on demand, and if it suggests an action, it does not carry it out until the user approves.[^3] In the running example, the user opens a search engine and the agent suggests queries; the user reads reports and asks for summaries with a click; the user opens a code editor and the agent follows along with autocompletions.[^3] Feng et al. list ChatGPT Canvas and Microsoft Copilot as rung 1 systems, and they say this level suits high-stakes, high-expertise work where a wrong autonomous action is costly or would raise legal and accountability problems.[^3]",
+    },
+    {
+      type: 'p',
+      text: "The risk they tie to it is subtle. Because the agent must not make preference-based decisions for the user, it has to notice when such a decision is coming and stop. They leave open how an agent can detect that reliably.[^3] Morris et al. split this rung into two. Their level 1, AI as a Tool, has the human fully controlling the task and using AI for mundane subtasks, like a grammar checker or a translation app, with de-skilling from over-reliance as the example risk.[^2] Their level 2, AI as a Consultant, has the AI doing substantive work but only when a human invokes it, like summarizing a set of documents or generating code, and lists over-trust, radicalization and targeted manipulation.[^2] Mitchell et al. make a matching point for the low end of their scale: lower autonomy carries risks through perception and interaction, such as humanlike cues, over-trust and oversharing, even before the agent executes anything.[^1]",
     },
     {
       type: 'h2',
-      text: 'Level 3: letting the model pick a lane'
+      text: 'Rung 2: the user as collaborator',
     },
-    { type: 'p', text: 'Maple soon noticed Otto was answering three very different kinds of message with one stiff flow. Refund questions, shipping delays, and account logins each wanted a different path. So they added a **router**.' },
-      { type: 'p', text: 'Now the first model call reads the message and picks a category, and that category selects one of three prewritten flows. Each flow is still a level-two chain that the team built by hand. The only new freedom is the choice of which chain to run.' },
-    { type: 'p', text: 'This is a real jump in autonomy but a small one, and that is what makes it safe. The model decides the branch, yet every branch is a road you already paved. The classic failure here is misrouting.' },
-      { type: 'p', text: 'A refund complaint written in polite language gets read as a general question and lands in the wrong flow. You catch that by logging the chosen category and checking how often it is wrong, which is easy because a router only ever picks from a short list you defined. Level three is the right home for problems that split cleanly into a handful of known cases. If you can name the branches, a router will serve you well and stay debuggable.' },
+    {
+      type: 'p',
+      text: "Both parties plan, delegate and execute. The agent drafts a plan, and the user edits it directly, adding or deleting steps and choosing which ones to keep for themselves.[^3] In the example the user hands off report reading and summaries but keeps hypothesis generation and data analysis. When the agent hits a paywall it tells the user, who decides it can skip the article. Everything lands in a shared document the user can edit.[^3] The defining control is a two-way handoff: if the user sees the agent \"looping endlessly on a paper search or hallucinating non-existent references,\" they can take over the work at any point.[^3] OpenAI's Operator is their rung 2 example.[^3]",
+    },
+    {
+      type: 'p',
+      text: "The costs Feng et al. name are practical ones. This is the first rung where the agent works on its own tasks in parallel, so it may not be available when the user wants it. Delegating well has a learning curve, and handing work back and forth needs careful design, including how the agent should react when the user grabs control.[^3] Morris et al. call their equivalent level 3 AI as a Collaborator, with co-equal coordination of goals and tasks. Their examples are training as a chess player with a chess AI and entertainment through AI-generated personalities, and the risks they list are anthropomorphization, such as parasocial relationships, and rapid societal change.[^2]",
+    },
     {
       type: 'h2',
-      text: 'Level 4: the agent loop, where the shape stops being yours'
+      text: 'Rung 3: the user as consultant',
     },
-    { type: 'p', text: 'Then came the request that pushed Otto up a real rung. Customers asked things that needed several lookups in an order nobody could predict. Check the order, then the shipment, then the carrier, then maybe issue a credit, and the right sequence depends on what each step turns up. You cannot pre-wire that, because the path changes with the data.' },
-      { type: 'p', text: 'So Maple gave Otto a set of tools and a loop. Now the model looks at what it knows, decides which tool to call, reads the result, and decides again, over and over, until it thinks the job is done. This is the pattern the ReAct paper described: the model reasons about its situation, takes an action, observes the outcome, and repeats.' },
     {
-      type: 'code',
-      lang: 'python',
-      title: 'Level 4: the agent decides its own steps in a loop',
-      code: `def agent_loop(message, tools, max_steps=8):
-    history = [message]
-    for _ in range(max_steps):
-        # Model reads history and decides: call a tool, or stop.
-        decision = model_decide(history, tools)
-
-        if decision.type == "final":
-            return decision.answer
-
-        # The model chose the tool AND the arguments.
-        result = tools[decision.name](**decision.args)
-        history.append(result)
-
-    # We never guaranteed it would finish. So we cap it.
-    return "Escalating to a human."`
+      type: 'p',
+      text: "The agent now leads planning and execution over long stretches. The user gives feedback, preferences and direction, but may have no way to take control or edit the agent's outputs directly. They can only send messages, pause the agent at a step, and ask for changes or reruns.[^3] In the example the agent proposes a plan with a literature review, research questions and data retrieval; the user says to hold off on quantitative work until they have seen the questions, and the agent drops that step. Later it runs its references past the user to check reliability.[^3] Feng et al. place Gemini Deep Research, Replit Agent and GitHub Copilot Agent here.[^3]",
     },
-    { type: 'p', text: 'Read that loop next to the level-two chain and the difference is stark. In the chain, you wrote the steps. Here you wrote the tools and the model writes the steps, fresh, every single run.' },
-      { type: 'p', text: 'That is the power: Otto can now handle a case you never sat down and designed. That is also the danger. You cannot promise the order of operations, you cannot promise it will stop, and you cannot promise it will not call a tool at a strange moment. The `max_steps` cap exists precisely because a loop with no guaranteed exit is a loop that can spin forever or burn through your API budget chasing its own tail.' },
+    {
+      type: 'p',
+      text: "The risk shifts to timing. The whole rung depends on the agent asking the right question at the right moment, and Feng et al. suggest a \"training period\" with each user may be needed, with the agent now carrying most of that learning curve.[^3] They also ask what happens when one requested change triggers a cascade of other changes.[^3] On Mitchell's scale, the levels that fit here (my placement) are the tool caller, where the model picks the tool and its arguments, and the multi-step agent, where it also decides whether to keep going.[^1] Their security analysis adds that at the four levels below full autonomy, developers keep some control of the code the agent can access, so they can, for example, block it from talking to third parties.[^1]",
+    },
+    {
+      type: 'h2',
+      text: 'Rung 4: the user as approver',
+    },
+    {
+      type: 'p',
+      text: "The user becomes passive. They are contacted only when the agent hits a blocker it cannot clear: a failure state, a credential it lacks, or a consequential action that needs sign-off.[^3] Before the task starts, the user can set conditions for approval, such as whenever a login screen appears. The plan is shown for transparency but not for comment.[^3] In the example the agent collects databases, asks for logins, ignores articles it cannot reach, and asks for an API key only when an analysis tool demands one. At the end it proposes a report format and waits for a yes.[^3] SWE-agent, Manus and Devin are the examples.[^3] Feng et al. say this level fits tasks with many low-stakes decisions, where automation cuts the user's load and a wrong choice does little damage.[^3]",
+    },
+    {
+      type: 'p',
+      text: "The first risk they name is stored secrets: an agent that holds credentials so it can work unattended is a bigger target, and attack surfaces grow with autonomy.[^3] The paper they cite for that, by Li and colleagues, shows how concrete it is. They planted Reddit posts that redirected web agents to a fake shopping site carrying a jailbreak prompt. When agents arrived through the trusted platform, they gave up credit card numbers and addresses in 10 out of 10 trials, and Anthropic's Computer Use agent downloaded and ran an attacker's file in 10 of 10 trials whenever it landed on those posts.[^4] The attacks, the authors stress, need no machine learning knowledge at all.[^4]",
+    },
+    {
+      type: 'p',
+      text: "The second risk is the approver. Feng et al. ask how to stop approvals turning into \"meaningless rubber stamping\" by a disengaged user, and how a misaligned agent might exploit that disengagement to talk the user into risky actions a little at a time.[^3] They also point out that the agent has to recognize which actions are consequential, which is hard to do reliably.[^3] And they make a sharp argument about safety frameworks: a rung 5 agent that earns revenue on its own may be rated riskier than a rung 4 agent that fails to, yet if the rung 4 agent can do it with \"a simple approval,\" the two carry similar risk.[^3] Morris et al.'s level 4, AI as an Expert, has the AI driving the interaction with the human giving guidance or doing subtasks. Their example is AI-driven scientific discovery like protein folding, and their risks are societal-scale ennui, mass labor displacement and a decline of human exceptionalism.[^2]",
+    },
     {
       type: 'callout',
-      title: 'The cost of the loop is paid in reliability',
-      text: 'Otto\'s worst incident happened at level four. It read a stale shipment record, concluded the package was lost, and called the refund tool on an order that had actually been delivered. No single line was buggy. The model simply chose a reasonable-looking action from bad information, and because the sequence was invented at runtime, no one had reviewed that exact path before a customer hit it.'
+      title: 'Measuring which rung an agent is on',
+      text: "Feng et al. propose an assisted evaluation. Run the agent on a benchmark with no help; if it passes a success threshold on all tasks, it is rung 5. If not, a standby user adds rung 4 help, such as approvals, then rung 3 consultation, and so on, until it passes. The kind of help needed at that point sets the level. They note this can take five rounds just to label an agent rung 1, so testing can start at a guessed level instead.[^3] Cihon and colleagues take a cheaper route, scoring an agent's orchestration code for impact and oversight without running it.[^5] Feng et al. counter that reading code misses the actual user-agent interaction.[^3]",
     },
     {
       type: 'h2',
-      text: 'Level 5: agents that hire other agents'
+      text: 'Rung 5: the user as observer',
     },
     {
       type: 'p',
-      text: 'The top rung is a system that plans a task, splits it into pieces, hands each piece to a separate agent, and stitches the results back together, correcting itself when a piece comes back wrong. Maple pictured a manager Otto that would delegate shipping questions to a shipping specialist and billing questions to a billing specialist. This is where the word **orchestration** shows up: the coordination logic that decides which agent handles what, in what order, and how their outputs combine.'
-    },
-    { type: 'p', text: 'Level five multiplies both the capability and the confusion. Every agent in the group has its own loop with its own unpredictability, and now they talk to each other, so a wrong turn in one can quietly steer another. Debugging means reconstructing a conversation among several non-deterministic parts, each of which ran a path you never wrote.' },
-      { type: 'p', text: 'Most teams that reach for level five discover their real problem fit at level three or four, and the extra machinery just added ways to fail. Genuine multi-agent need is rarer than it looks. It shows up when subtasks are truly independent and each needs its own specialized context, not when a single well-equipped loop would have done the job.' },
-    {
-      type: 'h2',
-      text: 'Agent, workflow, and the line between them'
+      text: "At the top the agent needs no user involvement and offers no way to give any. It plans, executes and works around blockers on its own. The user can watch activity logs but cannot change the agent's trajectory. The one control left is an emergency off switch that stops everything.[^3] In the example the agent revises its plan as it reads, downloads datasets from government agencies and earlier economics papers, writes the analysis code, and polishes a formal report.[^3] Voyager and The AI Scientist are Feng et al.'s examples.[^3]",
     },
     {
       type: 'p',
-      text: 'The vocabulary matters here because people use these words loosely and then argue past each other. The cleanest split, and the one Anthropic uses in its writing on effective agents, is about who controls the path.'
-    },
-    {
-      type: 'terms',
-      items: [
-        { term: 'Agent', def: 'A system where the model decides its own next step at runtime, usually by calling tools in a loop, until it judges the task complete. Levels 4 and 5 are agents.' },
-        { term: 'Autonomy', def: 'How much of the control flow the software chooses on its own versus how much you fixed in advance. It rises with every rung of the ladder.' },
-        { term: 'Workflow vs agent', def: 'A workflow follows a path you wired ahead of time; the model only fills in the blanks (levels 2 and 3). An agent picks the path itself as it runs (level 4 up). Same models, different control.' },
-        { term: 'Orchestration', def: 'The coordination layer that routes work between multiple agents or steps and combines their results. It is what turns a pile of agents into a level-5 system.' }
-      ]
+      text: "The risk Feng et al. give is compounding: simple errors pile up over many steps with nobody to catch them, so the agent can burn a lot of resources and still hand back something far from right.[^3] Mitchell et al. add speed. Fully autonomous agents \"may act faster than humans can intervene,\" and once an agent can write and run its own code, it can open security holes its developers never anticipated.[^1] Human-written safeguards are bounded by what their authors foresaw, while the agent can produce behavior outside those limits.[^1] Morris et al. list misalignment and concentration of power at their level 5, AI as an Agent, whose example is autonomous personal assistants, marked \"not yet unlocked\" in 2023.[^2]",
     },
     {
       type: 'h2',
-      text: 'The mistakes teams make on the ladder'
+      text: 'Where the three papers pull apart',
     },
     {
       type: 'p',
-      text: 'The first mistake is climbing for the wrong reason. Teams reach for an agent loop because it sounds modern, when a fixed chain would have solved the task and stayed debuggable. If you can draw the steps on a whiteboard and they do not change with the data, you want a workflow, not an agent. The second mistake is skipping the cheap guardrails at the higher rungs: no step cap, no logging of which tool was called and why, no human handoff when confidence drops. At level four these are not optional extras; they are the only thing standing between you and Otto\'s refund incident.'
+      text: "The first split is over whether the top rung should exist. Mitchell et al. say no, at least for agents that can write and run code beyond predefined limits, and argue semi-autonomous systems that keep some human control have a better balance of risk and benefit.[^1] Feng et al. agree that rung 5 risks may outweigh the benefits \"in most cases\" but leave two openings: tasks so complex that human input would add errors the agent would have avoided, and sandboxed settings where its actions cannot reach the outside world.[^3] Morris et al. do not rule the level out. They say we may build very capable systems and still choose not to deploy them autonomously.[^2]",
     },
     {
       type: 'p',
-      text: 'The third and quietest mistake is never climbing back down. Otto reached level four for one genuinely hard category of question and then, for tidiness, the team ran every question through the same loop, including the simple ones a level-two chain had handled perfectly. They traded predictability they had for flexibility they did not need. When they finally routed easy questions back to fixed chains and reserved the loop for the messy cases, their error rate dropped and their on-call nights got quieter.'
+      text: "The second split is what rung 5 even means. Morris et al. write that a fully autonomous AI is implicitly one that can act aligned without continuous oversight \"but knows when to consult humans.\"[^2] Feng et al.'s observer level has no means for user involvement other than the off switch.[^3] Those are different machines. One still asks; the other cannot be told.",
     },
-    { type: 'p', text: 'So the takeaway is a question you ask before you build, not after. What is the lowest rung that solves this task?' },
-      { type: 'p', text: 'Start there. Climb only when a real requirement forces you up, and when you do climb, add the logging and the caps on the way. Higher autonomy is a tool with a price, and the price is your ability to know what your system will do. Pay it on purpose, for the tasks that need it, and let everything else sit lower on the ladder where you can still see the whole path.' },
+    {
+      type: 'p',
+      text: "The third split is about capability. Morris et al. tie autonomy levels to capability: higher levels are unlocked by more capable AI, and levels 3 to 5 may only work well if the system is good at metacognitive skills like knowing when to ask a human for help.[^2] Feng et al. push further apart. A capable agent can be held at a low rung by requiring it to consult before every action, and a weak agent can run at a high rung on simple, well-scoped tasks.[^3] They argue this is why capability benchmarks alone cannot tell you an agent's autonomy.[^3] Mitchell et al. note, from their side, that Morris et al.'s framing places AI agents at the single fully autonomous level.[^1]",
+    },
+    {
+      type: 'p',
+      text: "There is also a plain naming clash. For Morris et al., a Consultant is an AI you invoke, sitting below the Collaborator.[^2] For Feng et al., the user is the consultant, and consulting sits above collaborating.[^3] Anyone who says \"consultant mode\" in a design review should say which paper they mean. Mitchell et al.'s ladder is a different axis again, measuring how much of the program flow the model controls rather than what the user does. Feng et al. would call much of that agency, not autonomy.[^1,3]",
+    },
+    {
+      type: 'h2',
+      text: 'The question left open at rung 4',
+    },
+    {
+      type: 'p',
+      text: "Put the papers side by side and the practical stopping point for many deployments looks like rung 4 or below, with a human who still has to say yes. That is the author's reading. None of the three papers names a single rung for everyone, and Feng et al. call their level sketches descriptive rather than prescriptive.[^3] But rung 4 rests on the approver, and Feng et al. do not claim to know how to keep that person awake. Their open question for the level reads: \"How can users be engaged in agent activities to avoid meaningless rubber stamping?\"[^3]",
+    },
     {
       type: 'sources',
+      numbered: true,
       items: [
-        { title: 'Anthropic, Building Effective Agents', url: 'https://www.anthropic.com/engineering/building-effective-agents' },
-        { title: 'Yao et al., ReAct: Synergizing Reasoning and Acting in Language Models (arXiv:2210.03629)', url: 'https://arxiv.org/abs/2210.03629' }
-      ]
-    }
-  ]
+        { title: 'Mitchell, Ghosh, Luccioni, Pistilli, "Fully Autonomous AI Agents Should Not be Developed" (arXiv:2502.02649)', url: 'https://arxiv.org/abs/2502.02649' },
+        { title: 'Morris et al., "Position: Levels of AGI for Operationalizing Progress on the Path to AGI," ICML 2024 (arXiv:2311.02462)', url: 'https://arxiv.org/abs/2311.02462' },
+        { title: 'Feng, McDonald, Zhang, "Levels of Autonomy for AI Agents" (arXiv:2506.12469)', url: 'https://arxiv.org/abs/2506.12469' },
+        { title: 'Li, Zhou, Raghuram, Goldstein, Goldblum, "Commercial LLM Agents Are Already Vulnerable to Simple Yet Dangerous Attacks" (arXiv:2502.08586)', url: 'https://arxiv.org/abs/2502.08586' },
+        { title: 'Cihon, Stein, Bansal, Manning, Xu, "Measuring AI Agent Autonomy: Towards a Scalable Approach with Code Inspection" (arXiv:2502.15212)', url: 'https://arxiv.org/abs/2502.15212' },
+        { title: 'SAE International, J3016: Taxonomy and Definitions for Terms Related to Driving Automation Systems for On-Road Motor Vehicles (2021)', url: 'https://www.sae.org/standards/content/j3016_202104/' },
+      ],
+    },
+  ],
 };

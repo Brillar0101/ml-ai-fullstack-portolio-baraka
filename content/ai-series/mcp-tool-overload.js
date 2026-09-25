@@ -1,188 +1,213 @@
+// Every factual claim below is taken from the numbered sources at the end.
+// The MCP-Zero needle-in-a-haystack figure is reproduced under CC BY 4.0
+// (arXiv 2506.01056). The charts are redrawn from table values in RAG-MCP
+// (CC BY-NC-ND), MCP-Zero, and Gorilla. Token arithmetic is the author's.
 export const POST = {
   id: 'mcp-tool-overload',
-  title: 'Tool Overload: Why Eight MCP Servers Made the Agent Worse',
-  excerpt: 'A team wired in eight MCP servers in one afternoon and the agent started picking the wrong tool. Here is why a big pile of tools hurts, and the server-manager pattern that pulls it back.',
+  title: 'More Tools, Worse Picks: What the Tool Selection Papers Measured',
+  excerpt: 'When RAG-MCP buried one correct MCP server among thousands of distractors, success held above 90% for small pools and collapsed past about 100. Here is the curve, the reasons the papers give for it, and what retrieval, two-stage routing, and fine-tuning on API docs actually recovered.',
   category: 'AI',
   tags: ['MCP', 'Agents', 'Tools'],
   body: [
     {
       type: 'p',
-      text: 'Picture a working agent. It can read tickets, post to Slack, and query one database. Three tools, maybe four, and it picks the right one almost every time. Then someone has a good idea: connect more MCP servers so the agent can do more. In a single afternoon eight of them get wired in. GitHub, Jira, Google Drive, a calendar server, a payments server, a logs server, a search server, and an internal wiki. Each one shows up green in the client. On paper the agent has gotten much more capable.',
-    },
-    { type: 'p', text: 'What actually happened is that it got worse. The agent started calling the wiki search when the user asked about a pull request. It tried to create a calendar event when someone wanted a Jira ticket.' },
-      { type: 'p', text: 'On a few runs it froze for a long beat before doing anything at all, like it was reading a menu that was too long. Nobody had touched the model or the prompt. The only thing that changed was the number of tools sitting in front of it.' },
-    {
-      type: 'p',
-      text: 'This surprises people because adding a tool feels free. You flip a server on and walk away. But every tool you connect has a cost that you do not see in the client UI, and that cost is paid on every single turn the agent takes. Once you understand where the cost lives, the fix is straightforward and the eight servers can stay.'
-    },
-    {
-      type: 'h2',
-      text: 'Every tool you connect is text the model has to read first'
+      text: "In May 2025 Tiantian Gan and Qiyao Sun ran what they called an MCP stress test. Each trial handed a model N MCP server descriptions. Exactly one of them could do the job, a web search server, and the other N minus 1 were distractors drawn at random from more than 4,400 servers publicly listed on mcp.so. The model had to pick the right server, send it a valid query, and return the result, across 20 web-search tasks. They varied N from 1 to 11,100 in 26 steps.[^1]",
     },
     {
       type: 'p',
-      text: 'When an agent connects to an MCP server, the server hands over a list of the tools it offers. Each tool comes with a **tool schema**: a name, a description of what it does, and a full spec of the arguments it takes, with types and notes on each one. All of that is text. Before the model can pick a tool, that text gets placed into the context window alongside your system prompt and the conversation. The model reads the whole menu on every turn.'
-    },
-    { type: 'p', text: 'A single tool schema is small on its own, but it is rarely just a few words. A well documented tool with five arguments and clear descriptions can run a few hundred tokens once you count the argument specs. Now multiply. The GitHub server alone might expose thirty tools.' },
-      { type: 'p', text: 'The calendar server another ten. Across eight servers you can easily land at a hundred or more tools. If each averages two hundred tokens of schema, that is twenty thousand tokens spent describing tools before the user has said a word. That is real space taken from a fixed window, and it is money spent on every request.' },
-    {
-      type: 'callout',
-      title: 'The hidden line item',
-      text: 'Connecting a server does not just add capability. It adds a fixed block of schema text that rides along in the context on every turn, whether or not the agent ever uses that server. Ninety unused tools still get read ninety times over.'
-    },
-    { type: 'p', text: 'Tokens are only half the problem. The other half is that picking the right tool is a decision, and decisions get harder as the list of options grows. Ask a person to choose from four labeled buttons and they will be fast and accurate.' },
-      { type: 'p', text: 'Ask them to choose from a hundred and twenty buttons, many with similar names like `search_wiki`, `search_issues`, `search_drive`, and `search_logs`, and they slow down and start making mistakes. Models behave the same way. As the tool count climbs, selection accuracy tends to fall, because more options means more chances for two of them to look like a fit for the same request.' },
-    {
-      type: 'h2',
-      text: 'Watch one confused turn in slow motion'
-    },
-    { type: 'p', text: 'Take the moment the agent tried to create a calendar event when the user asked for a Jira ticket. The user typed "open a ticket for the login bug." In front of the model sat a hundred plus schemas. Three of them mentioned creating something: `calendar_create_event`, `jira_create_issue`, and `drive_create_file`.' },
-      { type: 'p', text: 'Each description started with the word "Create." The model had to disambiguate "ticket" against all three descriptions at once, plus resist the ninety other tools also competing for attention. It landed on the calendar tool. Not because it is a bad model, but because the right answer was buried in a crowd of near neighbors, and reading that whole crowd is what it had to do first.' },
-    {
-      type: 'p',
-      text: 'Now imagine the same request when the agent only had three or four tools in view, and all of them were plausibly related to issue tracking. The decision is nearly trivial. Same model, same prompt, same user. The only thing that changed is how many wrong doors were standing open at the same time. That gap is the whole problem, and it points straight at the fix.'
-    },
-    {
-      type: 'h2',
-      text: 'Put a manager between the servers and the model'
+      text: "Their Figure 3 shows the result as a grid of successes and failures. Read in bands, it says three things. With fewer than 30 servers in view, success was above 90%. Between 31 and 70, failures began to appear in clusters, which the authors tie to growing semantic overlap among the server descriptions. Past about 100, failures dominated.[^1] The paper does not publish the per-N numbers behind the grid, so the bands are as exact as this curve gets. Its text is also muddled about which method the grid shows: the results paragraph describes it as the retrieval method degrading at scale.[^1] The shape, though, is plain. More candidate tools, fewer correct picks.",
     },
     {
       type: 'p',
-      text: 'The pattern that fixes this is a **server manager**, sometimes called a tool manager or a tool gateway. Instead of dumping every tool from every server directly into the context, you place a layer in between. The manager knows about all eight servers, but the model does not see all of them at once. For any given task, the manager selects a small, relevant subset of tools and surfaces only those. The rest stay loaded in the background, ready but out of sight.'
+      text: "The same paper then compared three ways of choosing a server on the web search subset of MCPBench, with qwen-max-0125 as the model, 20 trials per method and up to 10 rounds of interaction per trial.[^1] Putting every description in the prompt got the right server 13.62% of the time. Pre-filtering by keyword match got 18.20%. Retrieving the best match by embedding similarity and showing the model only that one got 43.13%, with about half the prompt tokens.[^1]",
     },
     {
-      type: 'p',
-      text: 'The step where the manager decides which tools to surface is called **tool routing**. Routing looks at what the user is trying to do and matches it against the pool of available tools, then returns the handful that actually fit. A common way to route is retrieval: you keep a short description of each tool, embed the user request, and pull the closest matches, the same trick used to fetch relevant documents in a search system. You can also group tools by server or by domain, so a request tagged "scheduling" only ever pulls from the calendar group. Either way, the model receives four or five tools instead of a hundred, and its job goes back to being easy.'
+      type: 'chart',
+      kind: 'bar',
+      title: 'Tool selection accuracy, RAG-MCP web search test',
+      yLabel: 'Accuracy (%)',
+      series: [{ label: 'Accuracy', key: 'a' }],
+      data: [
+        { label: 'All tools in prompt', values: { a: 13.62 } },
+        { label: 'Keyword pre-filter', values: { a: 18.2 } },
+        { label: 'Retrieve top tool first', values: { a: 43.13 } },
+      ],
+      caption: 'Redrawn from Table 1 of Gan and Sun, 2025.[^1] Average prompt size was 2,133.84 tokens with every description included, 1,646 with the keyword filter, and 1,084 with retrieval. Model: qwen-max-0125.',
     },
     {
       type: 'terms',
+      optional: false,
       items: [
-        { term: 'Tool schema', def: 'The full description of one tool that the model reads: its name, what it does, and the typed spec of every argument it accepts. All of it is text that costs tokens in the context window.' },
-        { term: 'Tool overload', def: 'The failure mode where an agent has so many connected tools that schemas eat the context budget and selection accuracy drops, so the agent gets slower and picks the wrong tool more often.' },
-        { term: 'Server manager', def: 'A layer between the agent and its MCP servers that holds every tool but exposes only a small, relevant set at a time, loading servers on demand instead of all at once.' },
-        { term: 'Tool routing', def: 'The step where the manager decides which tools to surface for a given task, often by retrieving the closest matches to the user request or by selecting a named group of tools.' }
-      ]
-    },
-    {
-      type: 'diagram',
-      rows: [
-        [
-          { label: 'Before: flat dump', detail: 'user request' },
-          { label: '8 MCP servers', detail: '100+ tool schemas' },
-          { label: 'Model', detail: 'reads all 100+, picks 1' }
-        ],
-        [
-          { label: 'After: managed', detail: 'user request' },
-          { label: 'Server manager', detail: 'routes, picks 4-5 relevant tools' },
-          { label: 'Model', detail: 'reads 4-5, picks 1' }
-        ]
+        { term: 'Tool schema', def: 'The text that describes one tool to the model: its name, a description in plain words, and a JSON Schema for its parameters. An MCP server exposes a list of these.' },
+        { term: 'Distractor', def: 'A tool in the prompt that cannot do the current task. Stress tests add distractors on purpose to see when the model starts picking them.' },
+        { term: 'Retriever', def: 'A search step that runs before the model. It scores every tool description against the request and passes along only the best few.' },
+        { term: 'Top-k', def: 'Keeping the k highest-scoring results from a retriever. RAG-MCP and MCP-Zero both report their main results with k = 1.' },
+        { term: 'Oracle retriever', def: 'A fake retriever that always returns the correct tool. Papers use it to measure the ceiling: how well the model does when retrieval is perfect.' },
       ],
-      caption: 'The top row pours every schema into the context on every turn. The bottom row inserts a manager that surfaces only the tools that fit the current task.'
-    },
-    {
-      type: 'p',
-      text: 'Here is a small router that captures the core idea. It scores each tool against the request with a plain keyword overlap, then returns only the top few. In production you would swap the scoring for real embeddings, but the shape is the same: rank, then trim.'
-    },
-    { type: 'lab', height: 460,
-        title: 'A tool router, cutting twelve tools down to a handful',
-        caption: 'The agent only ever sees what the router picked. Note the caveat at the bottom: matching on words inherits every weakness of keyword search.',
-        code: `# A pool of tools, the kind you end up with after wiring in
-# a few MCP servers.
-ALL_TOOLS = [
-    {"name": "create_ticket",   "description": "open a new support ticket for a bug or request"},
-    {"name": "search_tickets",  "description": "search existing tickets by text"},
-    {"name": "post_slack",      "description": "post a message to a slack channel"},
-    {"name": "query_database",  "description": "run a read only sql query"},
-    {"name": "list_files",      "description": "list files in google drive"},
-    {"name": "create_event",    "description": "add an event to the calendar"},
-    {"name": "issue_refund",    "description": "issue a payment refund to a customer"},
-    {"name": "read_logs",       "description": "read application logs for errors"},
-    {"name": "search_wiki",     "description": "search the internal wiki for a page"},
-    {"name": "web_search",      "description": "search the public web"},
-    {"name": "send_email",      "description": "send an email to a customer"},
-    {"name": "get_order",       "description": "look up a customer order by id"},
-]
-
-STOPWORDS = {"a", "an", "the", "for", "to", "of", "on", "in", "i", "my",
-             "do", "what", "say", "about", "need", "is", "and"}
-
-def route_tools(request, tools, top_k=5):
-    """Return only the tools most relevant to the request."""
-    words = set(request.lower().split()) - STOPWORDS
-
-    def score(tool):
-        text = (tool["name"] + " " + tool["description"]).lower()
-        return len(words & (set(text.replace("_", " ").split()) - STOPWORDS))
-
-    ranked = sorted(tools, key=score, reverse=True)
-    picked = [t for t in ranked if score(t) > 0][:top_k]
-
-    # Fall back to a safe default set if nothing matched at
-    # all.
-    return picked or tools[:top_k]
-
-REQUESTS = [
-    "open a ticket for the login bug",
-    "refund the customer for order 4417",
-    "what do the logs say about the timeout",
-]
-
-for req in REQUESTS:
-    visible = route_tools(req, ALL_TOOLS)
-    print('request: "%s"' % req)
-    print("   agent sees %d of %d tools: %s"
-          % (len(visible), len(ALL_TOOLS), ", ".join(t["name"] for t in visible)))
-    print()
-
-# Twelve tools become one to three. The second request
-# surfaces issue_refund and get_order together, which is the
-# right pair for that job.
-#
-# Now the caveat: this router matches words, so it inherits
-# every weakness of keyword search. Try "cancel my
-# subscription" and watch it find nothing useful, because no
-# tool description happens to use those words. A real router
-# embeds the request and the tool descriptions and compares
-# meaning instead.
-` },
-    {
-      type: 'p',
-      text: 'With this in place, the eight servers stay connected and the agent keeps every ability it had. The difference is that on the "open a ticket" turn, the router surfaces the Jira tools and leaves the calendar and drive tools out of view. The model no longer has to tell three "Create" tools apart. It sees the one that fits.'
     },
     {
       type: 'h2',
-      text: 'Where teams get the manager pattern wrong'
+      text: 'A cleaner picture of the curve, and why it depends on the model',
     },
     {
       type: 'p',
-      text: 'The first mistake is surfacing too few tools, or the wrong ones, and calling it a day. If your router trims to three tools but the real task needed a fourth that got left out, the agent simply cannot do the job, and that failure is quieter and more confusing than picking the wrong tool. Give yourself a safe fallback set and lean toward surfacing a few extra when the request is ambiguous. Trimming is a dial, not a switch.'
+      text: "A month later Xiang Fei, Xiawu Zheng and Hao Feng ran a similar needle-in-a-haystack test on MCP-tools, a dataset they built from the official MCP servers repository: 308 servers and 2,797 tools. They placed between 1 and 2,797 tools in context, took task descriptions from different positions in the list, and asked the model to retrieve the target tool.[^2] Their figure publishes every cell.",
     },
     {
-      type: 'ul',
-      items: [
-        'Routing on the first user message only. Tasks shift mid conversation. Re-route on each turn so the visible tool set follows what the agent is doing now, not what it started with.',
-        'Vague tool descriptions. Retrieval routing is only as good as the text it matches against. If two tools both say "search data," the router cannot tell them apart either. Write descriptions that name the specific domain.',
-        'Hiding the manager from your own logs. When the agent misbehaves you need to see which tools were surfaced on that turn. If the routing step is invisible, you are back to guessing.',
-        'Treating every server as always-on. Load a server only when its group is in play. Cold servers cost nothing if their schemas never enter the context.'
-      ]
+      type: 'image',
+      src: '/blog-images/mcp-tool-overload/mcp-zero-needle-haystack.webp',
+      alt: 'A three by three grid of heat maps. Rows are Claude-3.5-Sonnet, Gemini-2.5-Flash and GPT-4.1. Columns are standard tool calling, MCP-Zero, and MCP-Zero with one example. The x-axis is the number of tools on a log scale from 1 to 2,797; the y-axis is the position of the target tool. In the standard tool calling column, Claude fails in a dense red block at the largest tool counts and Gemini fails in scattered columns from mid-size pools on. GPT-4.1 is almost all blue.',
+      width: 2040,
+      height: 1140,
+      caption: "Each cell is one trial: blue succeeded, red failed. The x-axis is the number of tools in context; the y-axis is where the target sat in the list. Figure 5 from Fei et al., 2025,[^2] reproduced under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).",
     },
     {
       type: 'p',
-      text: 'The second common trap is skipping measurement. The team in the story only noticed the regression because they happened to watch a few live runs. Keep a small set of example requests with the tool you expect each one to trigger, and check the hit rate whenever you add a server. That turns "the agent feels dumber lately" into a number you can act on before users feel it.'
+      text: "Look at the left column. Claude-3.5-Sonnet with all schemas in context fails in a solid block at the right edge, where the pool is largest. Gemini-2.5-Flash fails in scattered columns starting at much smaller pools. GPT-4.1 barely fails at all, and the authors say their own method gave it no improvement because its baseline was already strong across all collection sizes.[^2] So the degradation curve is real, but its shape belongs to a particular model. A threshold measured on one model does not transfer to another.",
+    },
+    {
+      type: 'p',
+      text: "The same paper ran a smaller test on API-Bank, a conversational tool benchmark: 48 tools in total, compared against a hand-picked subset of tools relevant to each domain.[^2] Moving from the subset to all 48 with standard schema injection took Claude-3.5-Sonnet from 97.60% to 69.23% on single-turn conversations and from 100.00% to 60.22% on multi-turn ones. GPT-4.1 went from 98.08% to 94.71% single-turn. Gemini-2.5-Flash went from 92.79% to 94.23%, a small rise.[^2] Average prompt size grew from 312.4 tokens to 6,308.2.[^2]",
+    },
+    {
+      type: 'chart',
+      kind: 'bar',
+      title: 'API-Bank single-turn accuracy, all schemas in the prompt',
+      yLabel: 'Top-1 accuracy (%)',
+      series: [
+        { label: 'Domain subset', key: 'd', baseline: true },
+        { label: 'All 48 tools', key: 'f' },
+      ],
+      data: [
+        { label: 'Claude-3.5-Sonnet', values: { d: 97.6, f: 69.23 } },
+        { label: 'GPT-4.1', values: { d: 98.08, f: 94.71 } },
+        { label: 'Gemini-2.5-Flash', values: { d: 92.79, f: 94.23 } },
+      ],
+      caption: 'Redrawn from Table 1 of Fei et al., 2025,[^2] standard tool calling rows only. The drop is large for one model, small for another, and absent for the third.',
     },
     {
       type: 'h2',
-      text: 'What to carry away from this'
+      text: 'Three reasons the papers give for the drop',
     },
-    { type: 'p', text: 'More tools is not more capability past a point. Every connected tool spends context tokens on every turn and adds one more option the model has to rule out, and both of those costs push the agent toward slower, wronger choices.' },
-      { type: 'p', text: 'The eight servers were not the mistake. Pouring all of their tools into the window at once was. Put a manager in the middle that routes each task to a small, relevant handful, re-route as the conversation moves, and keep an eye on the hit rate. You get the reach of many servers without making the model read the whole menu every time it wants to order one thing.' },
+    {
+      type: 'p',
+      text: "The first is plain length. Gan and Sun call it prompt bloat: every tool's description competes for the same context window, and the window fills with distractors that make the correct tool harder to tell apart and recall.[^1] Fei and colleagues give a concrete size. One tool from the GitHub MCP server, a repository search, takes 143 tokens to describe, and the full server takes over 4,600 tokens for 26 tools. Their whole 2,797-tool collection comes to 248.1k tokens.[^2]",
+    },
+    {
+      type: 'p',
+      text: "The second is similarity. Many APIs overlap in what they do and differ only in nuanced limits, Patil and colleagues wrote in the Gorilla paper, and it is no longer possible to describe a full set of them in one context.[^3] Gan and Sun blame the failures that start between 31 and 70 servers on exactly this overlap among descriptions.[^1] When two tools both say they search something, the model has little to separate them by.",
+    },
+    {
+      type: 'p',
+      text: "The third is position, and the evidence here is indirect. Gan and Sun modeled their test on needle-in-a-haystack evaluations, which bury one fact in a long context, and moved the correct server from the top of the list to the bottom.[^1] They do not report accuracy by position. The clearest measurement comes from Liu and colleagues' study of documents rather than tools: with 20 retrieved documents, GPT-3.5-Turbo did best when the answer sat at the start or end of the context, and when it sat in the middle, accuracy fell below the 56.1% the model scored with no documents at all.[^5] Whether tool lists show the same U shape is not something these tool papers isolate. My reading of the MCP-Zero grid is that list size mattered much more than position.[^2]",
+    },
+    {
+      type: 'p',
+      text: "Small models make all three worse. Paramanayakam and colleagues ran a 4-bit quantized Llama 3.1 8B on an Nvidia Jetson AGX Orin against a GeoEngine query that came with 46 tools. It chose the wrong tool, even though its 16K context window could hold all of them. Given 19 tools it succeeded, and the run took 20 seconds instead of 30.[^6] That is one query, not a benchmark, but it is the same effect on hardware where every token costs time and power.",
+    },
+    {
+      type: 'eq',
+      tex: '\\begin{gathered} T_{\\text{tools}} = N \\times \\bar{d} \\\\[4pt] T_{\\text{session}} \\approx R \\times N \\times \\bar{d} \\end{gathered}',
+      caption: 'My arithmetic, not a formula from the papers. \\(N\\) is the number of tools in the prompt, \\(\\bar{d}\\) the average tokens per tool description, and \\(R\\) the number of model calls that each resend the tool list.',
+    },
+    {
+      type: 'p',
+      text: "Plugging the papers' numbers into that equation gives rough averages. The GitHub server works out to about 177 tokens per tool (4,600 divided by 26). The full MCP-tools collection averages about 89 (248.1k divided by 2,797). The API-Bank prompt with all 48 tools averaged 6,308.2 tokens, which is at most about 131 per tool, since that figure includes the rest of the prompt.[^2] At 177 tokens a tool, 100 tools is about 17,700 tokens before the user has said anything. An agent that calls the model 10 times in a task and resends the list each time spends about 177,000 tokens on descriptions. Those totals are my extrapolation, but each input comes from a measured figure.",
+    },
+    {
+      type: 'h2',
+      text: 'Fix one: retrieve the tools before the model sees them',
+    },
+    {
+      type: 'p',
+      text: "RAG-MCP stores every server's description in a vector index. When a request arrives, a retriever encodes it, runs a semantic search, and returns the closest match, and only that server's schema goes into the prompt.[^1] The paper also describes an optional check that sends each retrieved server a generated test query before using it.[^1] That design is what produced the jump from 13.62% to 43.13% in the chart above. Two caveats come with the number. Even the winning method missed the right server more often than it found it. And the paper names two different graders for answer correctness, DeepSeek-V3 in the setup and a Llama-based judge in the metrics section, without saying how they were combined.[^1]",
+    },
+    {
+      type: 'p',
+      text: "Retrieval is only as good as the retriever, and Gorilla measured how much that matters. Its APIBench covers 1,645 machine learning model APIs from Torch Hub, TensorFlow Hub and HuggingFace, chosen partly because their functions are so similar.[^3] The team gave each model the top-1 document from one of three retrievers: BM25 (a classic keyword ranking method), a GPT embedding index, or an oracle.[^3] On HuggingFace, GPT-4's accuracy went from 19.80% with no retrieval to 16.48% with BM25, 44.58% with the GPT index, and 85.07% with the oracle.[^3]",
+    },
+    {
+      type: 'chart',
+      kind: 'bar',
+      title: 'HuggingFace API accuracy by retriever',
+      yLabel: 'Overall accuracy (%)',
+      series: [
+        { label: 'GPT-4', key: 'g' },
+        { label: 'Gorilla (LLaMA-7B, fine-tuned)', key: 'o' },
+      ],
+      data: [
+        { label: 'No retriever', values: { g: 19.8, o: 71.68 } },
+        { label: 'BM25', values: { g: 16.48, o: 17.03 } },
+        { label: 'GPT index', values: { g: 44.58, o: 47.46 } },
+        { label: 'Oracle', values: { g: 85.07, o: 91.26 } },
+      ],
+      caption: 'Redrawn from Table 1 of Patil et al., 2023.[^3] Each Gorilla bar is the version trained for that setting: zero-shot for no retriever, retrieval-aware for the rest. A weak retriever pulled both models far below a perfect one.',
+    },
+    {
+      type: 'p',
+      text: "ToolLLM, from Qin and colleagues, shows that a retriever trained for the job closes much of that gap. They collected 16,464 REST APIs across 49 categories from RapidAPI and trained a dense retriever on Sentence-BERT, using the APIs tied to each generated instruction as positive examples.[^4] Averaged over their three instruction types, it scored an NDCG@5 of 84.9, against 45.4 for OpenAI's text-embedding-ada-002 and 17.0 for BM25. NDCG@5 measures how well the right APIs are ranked within the top five, where 100 is perfect.[^4] When the top 5 retrieved APIs replaced the ground-truth set, their model's average pass rate went from 66.7% to 67.3%. The authors explain this by saying many ground-truth APIs have similar alternatives that work better, and the retriever found them.[^4]",
+    },
+    {
+      type: 'h2',
+      text: 'Fix two: choose a server first, then a tool inside it',
+    },
+    {
+      type: 'p',
+      text: "MCP-Zero changes two things. First, the model writes the search query itself. When it notices a capability it lacks, it emits a short block naming the server domain it needs and the operation it wants, and it can do this again at every step of a task.[^2] Second, the search runs in two stages. It picks candidate servers by comparing the request to server descriptions and to longer summaries generated for each server, then ranks tools inside those servers, using OpenAI's text-embedding-3-large embeddings.[^2] The final score combines both levels:",
+    },
+    {
+      type: 'eq',
+      tex: '\\begin{gathered} \\text{score} = (s_{\\text{server}} \\times s_{\\text{tool}}) \\\\ \\times \\max(s_{\\text{server}}, s_{\\text{tool}}) \\end{gathered}',
+      caption: 'Equation 1 of Fei et al., 2025.[^2] Each \\(s\\) is a cosine similarity. A strong match at either level lifts the score.',
+    },
+    {
+      type: 'p',
+      text: "On API-Bank with all tools available, MCP-Zero reached 95.19% on Claude-3.5-Sonnet, 95.19% on GPT-4.1 and 96.63% on Gemini-2.5-Flash in single-turn conversations, using an average of 111.0 tokens instead of 6,308.2, a cut of 98.24%.[^2] Retrieving with the user's raw query instead of the model's own request reached only 71.63% single-turn and 65.05% multi-turn.[^2] The paper counts that gap as evidence for letting the model write the request.",
+    },
+    {
+      type: 'p',
+      text: "The conditions matter here. API-Bank has no server level, so the authors skipped the server stage and retrieved tools directly.[^2] Those numbers test the model-written request, not the two-stage routing. And on the small domain subsets, MCP-Zero was sometimes worse than just showing all schemas: Claude-3.5-Sonnet scored 96.15% against 97.60% single-turn, and 91.40% against 100.00% multi-turn.[^2] Routing pays off when the pool is big. When the pool is already small and curated, it can cost a few points.",
+    },
+    {
+      type: 'h2',
+      text: 'Fix three: train the model on the API documentation',
+    },
+    {
+      type: 'p',
+      text: "Gorilla is LLaMA-7B fine-tuned on about 16,450 instruction and API pairs, generated by GPT-4 from the 1,645 API documents using self-instruct.[^3] With no retriever at all, it beat every prompted model on all three hubs. On HuggingFace it scored 71.68% against GPT-4's 19.80%, and on TensorFlow Hub 83.79% against 18.20%.[^3] Its hallucination rate, meaning calls to APIs that do not exist, was 10.95% on HuggingFace where GPT-4's was 37.16%.[^3] A second version, trained with the correct document appended to each example, reached 91.26% on HuggingFace when an oracle supplied the document at test time.[^3]",
+    },
+    {
+      type: 'p',
+      text: "That second version is also where fine-tuning gets fragile. Paired with BM25 at test time, the retrieval-trained Gorilla fell to about 17% on HuggingFace, well below the zero-shot version's 71.68%.[^3] The authors conclude that a non-optimal retriever can misguide the model, and that when no good retriever is available, zero-shot fine-tuning may be the better choice.[^3] The paper also notes that API documents change faster than models get retrained, which makes a model that memorized them brittle. Its answer is retriever-aware training, and it shows the model switching to a new backbone or repository when the retrieved document changes.[^3]",
+    },
+    {
+      type: 'p',
+      text: "ToolLLM fine-tuned LLaMA-2 7B on 126,486 instruction and solution pairs. It found those solutions with DFSDT, a depth-first search over a tree of reasoning paths that can abandon a failing branch and try another, where the common ReAct method follows a single path.[^4] With ground-truth APIs supplied, ToolLLaMA with DFSDT averaged a 66.7% pass rate, above ChatGPT with DFSDT at 64.8% and below GPT-4 with DFSDT at 71.1%. Vicuna and Alpaca, general chat fine-tunes of LLaMA, passed nothing.[^4] Fine-tuning here raises the ceiling on using the tools a model is given. It does not by itself shrink the list the model has to read.",
+    },
+    {
+      type: 'callout',
+      title: 'Reading these numbers against your own setup',
+      text: "Each result above comes from one task family and one or a few models: web search on qwen-max-0125,[^1] API-Bank and MCP-tools on three commercial models,[^2] machine learning model hubs,[^3] RapidAPI REST endpoints.[^4] The MCP-Zero grid shows GPT-4.1 barely degrading where Claude-3.5-Sonnet collapsed.[^2] The only threshold worth trusting is one measured on your model, with your tool descriptions.",
+    },
+    {
+      type: 'h2',
+      text: 'The retriever has a curve of its own',
+    },
+    {
+      type: 'p',
+      text: "Retrieval takes the long list out of the prompt, but it does not make the list go away. The search step still has to pick one server out of thousands, and Gan and Sun say so directly. Their method curbs prompt bloat and keeps accuracy high in small to moderate pools, they write, but retrieval precision problems arise as the total number of MCPs grows, and past about 100 servers failures dominate their grid.[^1] Gorilla puts a number on the same weakness from the other side: for its retrieval-trained model, swapping the oracle for the GPT index at evaluation time cost 29.20% accuracy, and swapping it for BM25 cost 52.27%.[^3] Gan and Sun leave the fix to future work on hierarchical or adaptive retrieval.[^1]",
+    },
     {
       type: 'sources',
+      numbered: true,
       items: [
-        { title: 'Model Context Protocol documentation', url: 'https://modelcontextprotocol.io' },
-        { title: 'Anthropic: Writing effective tools for agents', url: 'https://www.anthropic.com/engineering/writing-tools-for-agents' },
-        { title: 'Anthropic: Building effective agents', url: 'https://www.anthropic.com/research/building-effective-agents' }
-      ]
-    }
-  ]
+        { title: 'Gan and Sun, RAG-MCP: Mitigating Prompt Bloat in LLM Tool Selection via Retrieval-Augmented Generation, 2025', url: 'https://arxiv.org/abs/2505.03275' },
+        { title: 'Fei, Zheng, and Feng, MCP-Zero: Active Tool Discovery for Autonomous LLM Agents, 2025', url: 'https://arxiv.org/abs/2506.01056' },
+        { title: 'Patil, Zhang, Wang, and Gonzalez, Gorilla: Large Language Model Connected with Massive APIs, 2023', url: 'https://arxiv.org/abs/2305.15334' },
+        { title: 'Qin et al., ToolLLM: Facilitating Large Language Models to Master 16000+ Real-world APIs, 2023', url: 'https://arxiv.org/abs/2307.16789' },
+        { title: 'Liu et al., Lost in the Middle: How Language Models Use Long Contexts, 2023', url: 'https://arxiv.org/abs/2307.03172' },
+        { title: 'Paramanayakam et al., Less is More: Optimizing Function Calling for LLM Execution on Edge Devices, 2024', url: 'https://arxiv.org/abs/2411.15399' },
+      ],
+    },
+  ],
 };

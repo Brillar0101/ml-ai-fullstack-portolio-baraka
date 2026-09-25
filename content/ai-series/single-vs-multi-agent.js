@@ -1,222 +1,201 @@
+// Every factual claim below is taken from the numbered sources at the end.
+// Figure 3 of Tran & Kiela (arXiv 2604.02460) is reproduced under CC BY 4.0.
+// The two bar charts are redrawn from reported numbers: Kim et al. (arXiv
+// 2512.08296, arXiv non-exclusive license) and Table 1 of Tran & Kiela.
 export const POST = {
   id: 'single-vs-multi-agent',
-  title: 'Five Agents Were Slower Than One: When to Split and When to Stay',
-  excerpt: 'A team broke their research assistant into five specialized agents and it got slower and less reliable. Here is why splitting usually costs more than it pays, and the three cases where it actually earns its keep.',
+  title: 'Splitting an Agent: An Evidence Ledger',
+  excerpt: 'A Berkeley team annotated 1,642 traces from seven multi-agent frameworks and found failure rates between 41% and 86.7%. Here is what the controlled studies say about when splitting a task across agents helps, when it hurts, and whether the gains survive an equal token budget.',
   category: 'AI',
-  tags: ['Agents', 'Multi-Agent', 'Architecture'],
+  tags: ['Agents', 'Multi-Agent', 'Evaluation'],
   body: [
     {
       type: 'p',
-      text: 'Picture a research assistant that works well. You give it a question, it searches a few sources, reads what it finds, and writes up an answer with citations. One model, a handful of tools, one loop. Not fancy, but steady, and people trust it. Then someone reads a post about multi-agent systems and decides the single agent is doing too much. It gets split into five: a planner, two searchers, a reader, and a writer. Each one has its own prompt and its own narrow job. On the whiteboard it looks clean.',
-    },
-    { type: 'p', text: 'In practice it fell apart. The whole thing got slower, because every question now bounced through five handoffs instead of running in one loop. It also got less reliable in a way that was hard to pin down.' },
-      { type: 'p', text: 'The planner would tell a searcher to look up one thing, the searcher would find something slightly different, and the reader downstream never learned what the planner had actually wanted. Answers came back confident and subtly wrong. After a few weeks of patching, the team folded the five agents back into one and the assistant got good again. The lesson stuck with them, and it is worth unpacking, because splitting an agent feels like progress and often is not.' },
-    {
-      type: 'h2',
-      text: 'Splitting adds a tax that runs on every request'
-    },
-    { type: 'p', text: 'Here is the intuition to hold onto. When you split one agent into several, you are not just dividing up the work. You are adding a new kind of work that did not exist before: the work of coordinating.' },
-      { type: 'p', text: 'The agents have to pass information between each other, agree on what to do, and hand results back and forth. None of that helped the user directly. It is pure overhead, and unlike a one-time setup cost, you pay it on every single request.' },
-    { type: 'p', text: 'Think about how a small, tight team of people works versus a large one. Two people who sit together barely need meetings.' },
-      { type: 'p', text: 'They just talk. Grow that to ten people spread across roles and suddenly half the day is status updates, handoffs, and clarifying who owns what. The work itself did not get harder. The coordination did. Agents hit the same wall, except they coordinate through text messages they pass to each other, and text is a lossy way to move intent around.' },
-    {
-      type: 'p',
-      text: 'The research team felt all three of the classic costs at once. Latency went up because five sequential steps take longer than one. Failures got stranger because a mistake early in the chain quietly poisoned everything after it. And the agents talked past each other, since the planner\'s full understanding of the task never traveled intact to the reader three steps down the line. That last one is the sneakiest, so it is worth naming clearly before we go further.'
-    },
-    {
-      type: 'h2',
-      text: 'The words that make this discussion possible'
+      text: 'In 2025 a UC Berkeley group collected 1,642 execution traces from seven open-source multi-agent frameworks, running coding, math and general assistant tasks, and labeled every way each run went wrong.[^1] The failure rates they report for six of the systems run from 41.0% on an Olympiad math benchmark to 86.7% on a cross-app assistant benchmark, with a software engineering system at 74.7% and a web and file assistant at 62.0%.[^1] The authors warn that these were measured on different benchmarks and are not directly comparable. They are still a sobering baseline. Their paper opens by noting that the gains these systems show on popular benchmarks are often minimal.[^1]',
     },
     {
       type: 'p',
-      text: 'Before we get to the decision, we need shared vocabulary. These four terms come up constantly and people use them loosely, which is part of why teams reach for multi-agent designs they do not need.'
+      text: 'From those traces they built MAST, a taxonomy of 14 failure modes in three groups. Six annotators first worked through 150 traces, each averaging over 15,000 lines of text, and three of them reached a Cohen\'s kappa of 0.88 on shared labels, which means they almost always agreed.[^1] An LLM judge calibrated against those humans then labeled the full set. Across all traces, 44.2% of failures came from system design (agents ignoring the task spec, repeating steps, not knowing when to stop), 32.3% from misalignment between agents, and 23.5% from weak verification.[^1]',
+    },
+    {
+      type: 'p',
+      text: 'The single most common modes are telling. Step repetition accounts for 15.7% of failures, and reasoning-action mismatch, where an agent says one thing and does another, for 13.2%.[^1] One trace in the paper shows a phone agent that knew the login API wanted a phone number as the username. It never told the supervisor agent, which kept retrying with an email address until the task failed.[^1] A single agent holding both pieces of information in one context could not have made that particular mistake.',
+    },
+    {
+      type: 'p',
+      text: 'MAST tells you how multi-agent systems break. It does not tell you whether one agent would have done better. For that you need studies that run both designs on the same tasks, and the rest of this post is a ledger of what those studies measured.',
     },
     {
       type: 'terms',
+      optional: false,
       items: [
-        { term: 'Single agent', def: 'One model running in one loop with access to a set of tools. It reads the task, decides on an action, sees the result, and repeats until it is done. All the context lives in one place.' },
-        { term: 'Multi-agent system', def: 'Two or more agents, each with its own prompt and often its own tools, that work on parts of a task and exchange information to finish it. Coordination between them is a real part of the design, not an afterthought.' },
-        { term: 'Supervisor', def: 'Also called an orchestrator. An agent whose job is to break the task into pieces, hand each piece to a sub-agent, and combine what comes back. It manages the others rather than doing the underlying work itself.' },
-        { term: 'Handoff', def: 'The moment one agent passes control and information to another. Everything the receiving agent knows about the task arrives through this message, so whatever the handoff leaves out is simply lost.' }
-      ]
-    },
-    { type: 'p', text: 'That last definition is the crux. In a single agent, context is shared for free because there is only one context. Every tool result, every earlier decision, every nuance of the request sits in the same window the model reads on every turn.' },
-      { type: 'p', text: 'The moment you split, that shared memory breaks into pieces. Each agent sees only what it was handed. If the planner understood that the user wanted recent sources but phrased the handoff as "search for X," the searcher has no idea recency mattered. The information did not travel because nobody put it in the message.' },
-    {
-      type: 'h2',
-      text: 'The default is one agent with good tools'
-    },
-    { type: 'p', text: 'So here is the position to start from. Reach for a single agent with a solid set of tools first, every time, and make the multi-agent design prove it is worth the tax. Most tasks that look like they need a team of specialists actually just need one capable agent that can call a search tool, a read tool, and a write tool in whatever order the work requires.' },
-      { type: 'p', text: 'The research assistant was already that. The split did not give it new abilities. It gave it new seams to fail along.' },
-    {
-      type: 'p',
-      text: 'This runs against a common instinct. We organize human companies into specialized roles, so it feels natural to organize agents the same way. But a person in a role carries years of shared context and can walk over and ask a colleague a question. An agent handoff is a single text message with no follow-up. Splitting by role gives you the org chart without the hallway conversations that make an org chart work.'
+        { term: 'Single-agent system (SAS)', def: 'One model in one loop. All perception, planning and action happen in one sequence of calls with one growing context, even when the model uses tools or reflects on its own output.' },
+        { term: 'Multi-agent system (MAS)', def: 'Two or more model instances that exchange messages, share memory, or are coordinated by a protocol. Each agent sees only what its prompt and its incoming messages give it.' },
+        { term: 'Topology', def: 'Who talks to whom. Kim et al. test four: independent (agents never talk, outputs are aggregated), centralized (an orchestrator routes everything), decentralized (peers message each other), and hybrid (both).' },
+        { term: 'Token budget', def: 'A cap on how many tokens a system may spend on a task. A fair comparison gives both designs the same cap, otherwise the one allowed to think longer may win for that reason alone.' },
+        { term: 'Sampling and voting', def: 'Ask the same model the same question many times, then take the most common answer. The agents never communicate. It is the simplest possible multi-agent baseline.' },
+      ],
     },
     {
       type: 'h2',
-      text: 'The three questions that justify a split'
+      text: 'Entries in favor of splitting, with their conditions',
     },
     {
       type: 'p',
-      text: 'There are real reasons to go multi-agent. The trick is that they are specific, and if none of them apply, you are just buying coordination cost with no return. Walk your task through these three questions in order.'
+      text: '**Voting helps weak models on hard questions.** Li et al. fed the same query to one model up to 40 times and took a majority vote. Llama2-13B went from 0.35 to 0.59 accuracy on GSM8K math problems, passing a single call to Llama2-70B at 0.54.[^3] The relative gain grew with difficulty and shrank with model strength: on the harder MATH set it was 200% for Llama2-13B but 34% for GPT-3.5-Turbo.[^3] The conditions are in the same paper. Token usage rises in proportion to the number of agents, and in a synthetic difficulty sweep the gains tapered off once problems got hard enough to exceed the model\'s reasoning ability.[^3] This entry is also the one with zero coordination. Nothing is handed off, so nothing is lost in a handoff.',
     },
-    {
-      type: 'diagram',
-      title: 'Should this be more than one agent?',
-      root: {
-        label: 'Look at the task',
-        color: 'purple',
-        children: [
-          {
-            edge: 'Independent parts that can run at once?',
-            node: {
-              label: 'Split for parallelism',
-              color: 'green'
-            }
-          },
-          {
-            edge: 'Distinct skill sets needing different tools or prompts?',
-            node: {
-              label: 'Split by separation of concerns',
-              color: 'green'
-            }
-          },
-          {
-            edge: 'Too much context to fit or focus in one window?',
-            node: {
-              label: 'Split to relieve context pressure',
-              color: 'yellow'
-            }
-          },
-          {
-            edge: 'None of the above',
-            node: {
-              label: 'Stay single',
-              color: 'blue'
-            }
-          }
-        ]
-      },
-      caption: 'Work down the branches. You only split when a task clearly hits one of the first three cases. If it does not, the single agent wins by default.'
-    },
-    { type: 'p', text: 'The first case is genuine parallelism. If a task has parts that do not depend on each other, running them at the same time on separate agents can cut wall-clock time. Reviewing forty documents against a checklist is a good fit, because document twelve does not care what document thirty said.' },
-      { type: 'p', text: 'The parts are truly independent, so the coordination cost buys you real speed. Notice this only works when the parts do not need to talk to each other while they run. The research assistant failed this test: its steps were a chain, where each one depended on the last, so there was nothing to run in parallel.' },
-    { type: 'p', text: 'The second case is separation of concerns that needs different tools or prompts. Sometimes two jobs are so unlike that jamming them into one agent makes it worse at both. A coding agent that also has to send customer emails wants two different personalities, two different tool sets, and two different sets of guardrails.' },
-      { type: 'p', text: 'Here a split can sharpen each agent rather than blur one. The bar is high, though. "The steps feel different" is not enough. The tools and the required behavior have to genuinely diverge.' },
     {
       type: 'p',
-      text: 'The third case is context-window pressure. If a single task drags in more material than one context window can hold, or so much that the model loses focus, you can split so each agent handles a slice and only reports a short summary back. This is the case the research team thought they were solving, but they were not close to the limit. Their queries fit in one window with room to spare. They paid for a fix to a problem they did not have.'
+      text: '**Decomposable analysis tasks gain the most.** Kim et al., from Google Research, Google DeepMind and MIT, ran 260 configurations: six agentic benchmarks, five architectures, and nine models from the OpenAI, Google and Anthropic families, with prompts, tools and budgets held identical.[^2] On Finance Agent, a benchmark of entry-level analyst questions, a centralized team reached a mean success of 0.631 against 0.349 for the single agent, a gain of 80.8%.[^2] The traces show why. A single agent explored news, filings and operations one after another with limited depth, while the team gave each stream to its own sub-agent and had the orchestrator combine them.[^2] On dynamic web browsing (BrowseComp-Plus) the best team gained 9.2%, and on a 16-tool workplace benchmark 5.6%.[^2]',
+    },
+    {
+      type: 'p',
+      text: '**Parallel breadth, when you can pay for it.** Anthropic reported that its research system, a Claude Opus 4 lead agent with Claude Sonnet 4 sub-agents, beat single-agent Claude Opus 4 by 90.2% on an internal research evaluation.[^6] The same report says multi-agent systems use about 15 times as many tokens as chat, and that token usage alone explained 80% of the performance variance on BrowseComp.[^6] It is an engineering report, not a peer-reviewed study, and the comparison does not hold compute fixed. It also names its own boundary: tasks where agents must share the same context or depend heavily on each other, such as most coding, are not a good fit today.[^6]',
+    },
+    {
+      type: 'p',
+      text: '**A structured pipeline resists corrupted context.** Tran and Kiela compared a single agent with a sequential pipeline (planner, step workers, aggregator) on 4-hop MuSiQue questions under a fixed 1,000-token thinking budget, then deliberately damaged the context.[^4] With 70% of tokens replaced by random vocabulary, the pipeline was clearly ahead. Under masking it pulled ahead only at the heaviest level. With deletion or with distractor sentences added, the single agent stayed level or ahead.[^4]',
+    },
+    {
+      type: 'image',
+      src: '/blog-images/single-vs-multi-agent/context-degradation-sas-vs-sequential.webp',
+      alt: 'Four line plots of answer accuracy against degradation level for a single agent (blue) and a sequential multi-agent pipeline (orange). Under deletion the single agent starts ahead, dips below at 0.5, and recovers. Under masking the lines cross near 0.5 and the pipeline ends slightly ahead. Under substitution the single agent falls from about 0.24 to 0.20 while the pipeline rises to about 0.225. Under distractors the single agent stays ahead throughout.',
+      width: 1670,
+      height: 1060,
+      caption: 'Qwen3-30B-A3B on MuSiQue 4-hop at a 1,000-token thinking budget, as context is deleted, masked, substituted, or padded with distractors. Figure 3 from Tran and Kiela, 2026,[^4] reproduced under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).',
+    },
+    {
+      type: 'p',
+      text: 'The authors read this as the boundary of their main claim: splitting helps less when context is merely longer and more when a single reasoning trajectory struggles to separate relevant from misleading information.[^4]',
     },
     {
       type: 'h2',
-      text: 'What a justified split actually looks like'
+      text: 'Entries against splitting, with their conditions',
     },
     {
       type: 'p',
-      text: 'When you do have a real case, usually parallelism, the shape to reach for is a supervisor delegating to sub-agents. The supervisor owns the full task and the full context. It fans out independent pieces, waits for the results, and stitches them together. The key is that the supervisor writes each handoff carefully, because whatever it leaves out never reaches the sub-agent. Here is the bare skeleton.'
+      text: '**Sequential planning collapses.** On PlanCraft, a Minecraft crafting benchmark, every multi-agent variant in Kim et al. did worse than one agent. The single agent averaged 0.568. Hybrid, the least bad, fell to 0.346, centralized to 0.282, and independent agents to 0.170, a drop of 70%.[^2] The paper\'s example is crafting a diorite wall. One agent looks up the recipe, moves the stone and crafts, in three turns. The centralized team split that into research, inventory check and execution, two of which were redundant, and spent its budget on messages instead of reasoning.[^2]',
     },
-    { type: 'lab', height: 460,
-        title: 'A supervisor delegating, with the handoffs printed',
-        caption: 'Watch the briefs, not the answer. Anything left out of a handoff is invisible to the sub-agent, and a single agent would simply still have had it.',
-        code: `# A supervisor delegating to sub-agents. The thing to watch
-# is not the answer, it is what each handoff carries and
-# what it silently drops.
-
-QUESTION = "Did the pricing change in v3 break the annual discount?"
-
-KB = {
-    "pricing docs": "v3 pricing moved annual plans to a flat 20 percent discount.",
-    "changelog":    "v3 removed the legacy discount code path on 2026-01-14.",
-    "support tickets": "Three customers reported a missing annual discount after v3.",
-}
-
-HANDOFFS = []
-
-def plan(question):
-    return ["pricing docs", "changelog"]        # the supervisor picks the subtasks
-
-def sub_agent(brief, topic):
-    # A focused loop with its own narrow tools. It returns a
-    # short summary, not its whole transcript, so the
-    # supervisor's context stays clean.
-    HANDOFFS.append(brief)
-    return KB[topic]
-
-def synthesize(question, results):
-    return "Based on %d findings: %s" % (len(results), " ".join(results))
-
-def supervisor(question, carry_context):
-    subtasks = plan(question)
-    results = []
-    for task in subtasks:
-        # Anything left out of this brief is invisible to
-        # the sub-agent.
-        brief = ("Find facts about: %s. Question context: %s" % (task, question)
-                 if carry_context else "Find facts about: %s" % task)
-        results.append(sub_agent(brief, task))
-    return synthesize(question, results)
-
-for label, carry in [("brief carries the question", True),
-                     ("brief omits the question", False)]:
-    HANDOFFS.clear()
-    answer = supervisor(QUESTION, carry)
-    print("---", label, "---")
-    for h in HANDOFFS:
-        print("   handoff:", h)
-    print("   answer:", answer)
-    print()
-
-print("Both runs return the same text here, because the stand-in sub-agent")
-print("looks up a fixed topic. A real one reads its brief. The second brief")
-print("never mentions the annual discount, so a real sub-agent would not know")
-print("what it was looking for. Every handoff is a chance to lose context that")
-print("a single agent would simply still have had.")
-
-# Try it: add "support tickets" to plan() and watch a third
-# handoff appear. Each one is another message to get right,
-# another place to drop a detail.
-` },
     {
       type: 'p',
-      text: 'Two things in that sketch do the heavy lifting. The handoff brief includes the original question, not just the narrow subtask, so the sub-agent inherits the intent behind its assignment. And the sub-agent returns a summary rather than its full transcript, so the supervisor does not drown in detail. Get those two right and you avoid the failure that sank the research team, where intent evaporated at each handoff and the downstream agents were working blind.'
+      text: '**Strong baselines leave nothing to gain.** Kim et al. found that once single-agent success passes about 45%, adding agents gives negative returns (regression coefficient \\(\\beta = -0.236\\), \\(p = 0.004\\)).[^2] SWE-bench Verified fits: the single agent averaged 0.522 and every team did slightly worse, from 0.511 for hybrid down to 0.444 for independent.[^2] Gao et al. saw the same drift across model generations. Tasks where multi-agent frameworks had a clear edge with older models showed a much smaller one when rerun with Gemini-2.0-Flash, and on simple tasks the teams sometimes did worse from overthinking.[^5]',
+    },
+    {
+      type: 'p',
+      text: '**Unchecked errors multiply.** Kim et al. estimated how much a trace-level error grows as it passes through each architecture. Independent agents amplified errors 17.2 times, decentralized 7.8, hybrid 5.1, and centralized 4.4, because the orchestrator acts as a checkpoint before outputs are merged.[^2] MAST points the same way from the failure side: nearly a quarter of labeled failures were verification failures, and many verifiers only checked that code compiled.[^1]',
+    },
+    {
+      type: 'p',
+      text: '**Tools and messages compete for the same budget.** Kim et al. report a significant negative interaction between tool count and coordination efficiency (\\(\\beta = -0.096\\), \\(p = 0.002\\)); their explanation is that splitting fragments each agent\'s token budget, leaving too little for complex tool use.[^2] Gao et al. measured the cost directly. On GSM8K the multi-agent setup consumed 34.7 times the prefill tokens and 12.8 times the output tokens of its single-agent counterpart, and on AIME 220 times the prefill tokens.[^5]',
+    },
+    {
+      type: 'p',
+      text: '**Fixes help, but not enough.** In MAST\'s own case studies, a redesigned agent topology raised one framework\'s success on a small program-writing set from 25.0% to 40.6%, and clearer role prompts alone reached 34.4%. The authors state that task completion stays low and more substantial changes are needed.[^1]',
     },
     {
       type: 'h2',
-      text: 'The mistakes that turn a split sour'
+      text: 'Does the gain survive an equal token budget?',
     },
     {
       type: 'p',
-      text: 'The research team hit the biggest trap, which is splitting a chain of dependent steps. If step two needs the output of step one, and step three needs step two, you have not created a team. You have created a relay race with a lossy baton. Every handoff is a chance for intent to leak, and none of the steps can run in parallel, so you get all of the cost and none of the speed. A chain like that belongs in one agent, where each step reads the full history of the ones before it.'
+      text: 'Most entries in favor share one problem: the team spent more compute. Kim et al. list this as a main obstacle in prior work, where architectures were compared with different prompts, tools or budgets.[^2] So the test that matters is whether a team still wins when the single agent can spend the same number of tokens.',
     },
     {
-      type: 'ul',
-      items: [
-        'Splitting by human job title. Copying an org chart into agents feels natural but usually just adds handoffs. Split by whether the work is actually independent, not by what a person in that role would be called.',
-        'Thin handoffs. If the sub-agent gets a one-line instruction stripped of context, it will confidently solve the wrong problem. Put the goal and the relevant background in every brief.',
-        'Sub-agents that dump their whole transcript back. This blows up the supervisor context and reintroduces the overload you split to avoid. Have them return short, structured summaries.',
-        'No measurement before and after. The team only noticed the regression by feel. Keep a set of test questions with expected answers and compare the single-agent and multi-agent versions head to head before you commit.'
-      ]
+      type: 'p',
+      text: 'Tran and Kiela give a reason to expect it would not. Let \\(Y\\) be the correct answer, \\(C\\) the full context a single agent holds, and \\(M\\) the messages that agents pass to each other, computed from \\(C\\). Because \\(M\\) is a function of \\(C\\), the data processing inequality applies:[^4]',
+    },
+    {
+      type: 'eq',
+      tex: '\\begin{gathered} Y \\leftrightarrow C \\leftrightarrow M \\\\[4pt] I(Y;C) \\ge I(Y;M) \\end{gathered}',
+      caption: 'Section 3 of Tran and Kiela.[^4] \\(I\\) is mutual information: how much knowing one variable tells you about the other.',
+    },
+    {
+      type: 'p',
+      text: 'In plain terms, summarizing can only keep or lose information about the answer; it cannot add any. A single agent that uses its whole context perfectly can therefore do at least as well as a team reading summaries of that context.[^4] The argument breaks exactly where the degradation figure above showed: real models do not use long, noisy contexts perfectly, and a pipeline that filters can recover what a degraded single pass misses.[^4]',
+    },
+    {
+      type: 'p',
+      text: 'Their experiment then fixed the thinking-token budget across the single agent and five multi-agent designs, on FRAMES and MuSiQue, with Qwen3, DeepSeek-R1-Distill-Llama and Gemini 2.5 models.[^4] At every budget above 100 tokens the single agent was the best system or statistically tied with it, and it used fewer thinking tokens.[^4] At 100 tokens most teams led, but the authors note that at that budget neither design produces a useful reasoning trace.[^4] Debate was the most consistently strong team design; it still averaged below the single agent at every budget from 500 tokens up.[^4]',
+    },
+    {
+      type: 'chart',
+      kind: 'bar',
+      title: 'Average accuracy at matched thinking budgets, FRAMES and MuSiQue',
+      yLabel: 'Mean accuracy',
+      series: [
+        { label: 'Single agent', key: 'sas', baseline: true },
+        { label: 'Sequential team', key: 'seq' },
+        { label: 'Parallel roles', key: 'roles' },
+      ],
+      data: [
+        { label: '100', values: { sas: 0.29, seq: 0.364, roles: 0.363 } },
+        { label: '500', values: { sas: 0.39, seq: 0.376, roles: 0.365 } },
+        { label: '1k', values: { sas: 0.418, seq: 0.379, roles: 0.381 } },
+        { label: '2k', values: { sas: 0.421, seq: 0.389, roles: 0.398 } },
+        { label: '5k', values: { sas: 0.427, seq: 0.386, roles: 0.417 } },
+        { label: '10k', values: { sas: 0.426, seq: 0.387, roles: 0.423 } },
+      ],
+      caption: 'Redrawn from the "Average" rows of Table 1 of Tran and Kiela, 2026,[^4] averaged over four models and two datasets. Group labels are the thinking-token budget. Parallel roles gives the whole question to a solver, a fact extractor, a skeptic and a second solver, splitting the budget evenly.',
+    },
+    {
+      type: 'p',
+      text: 'Budget matching is harder than it sounds. For Gemini 2.5 Flash at a requested 10,000-token budget, the API reported about 1,687 thinking tokens per question for the single agent, while the visible reasoning came to about 359 tokens, a 4.7 times gap.[^4] A sequential team made several calls and so produced more visible reasoning under the same requested budget, 693 proxy tokens against 390 at 1,000 tokens on Gemini 2.5 Pro.[^4] A team can get extra compute that the bill does not show.',
+    },
+    {
+      type: 'p',
+      text: 'Kim et al. matched total reasoning tokens at a mean of about 4,800 per trial, on agentic tasks with tools.[^2] Averaged over all six benchmarks and architectures, the multi-agent change relative to the single agent was −0.3%, with a 95% interval from −58.7% to +77.2%.[^2] In other words, no average effect, and a huge spread. The single agent also took 7.2 turns per task against 26.1 to 44.3 for the communicating teams, and delivered 67.7 successes per thousand tokens against 13.6 for hybrid.[^2]',
+    },
+    {
+      type: 'chart',
+      kind: 'bar',
+      title: 'Single agent vs best team per benchmark, matched budgets',
+      yLabel: 'Mean success (%)',
+      series: [
+        { label: 'Single agent', key: 'sas', baseline: true },
+        { label: 'Best multi-agent variant', key: 'mas' },
+      ],
+      data: [
+        { label: 'Finance Agent', values: { sas: 34.9, mas: 63.1 } },
+        { label: 'BrowseComp+', values: { sas: 31.8, mas: 34.7 } },
+        { label: 'Workbench', values: { sas: 62.9, mas: 66.4 } },
+        { label: 'Terminal', values: { sas: 34.4, mas: 35.0 } },
+        { label: 'SWE-bench V.', values: { sas: 52.2, mas: 51.1 } },
+        { label: 'PlanCraft', values: { sas: 56.8, mas: 34.6 } },
+      ],
+      caption: 'Redrawn from the mean success rates reported in Section 4.2 of Kim et al., 2025.[^2] The best variant differs by benchmark: centralized for Finance Agent, decentralized for BrowseComp-Plus and Workbench, independent for Terminal-Bench, and hybrid for SWE-bench Verified and PlanCraft.',
+    },
+    {
+      type: 'p',
+      text: 'Read side by side, and this is my reading rather than either paper\'s, the two budget-controlled studies agree more than their headlines suggest. With compute held equal, one large team win survives: Finance Agent, whose subtasks really are independent. Elsewhere the best team is within a few points of the single agent or well below it. And the sampling-and-voting result from Li et al. is not a counterexample, since its gains came from spending 40 times the calls.[^3]',
+    },
+    {
+      type: 'h2',
+      text: 'My reading of the ledger',
     },
     {
       type: 'callout',
-      title: 'A quick gut check',
-      text: 'Before splitting, ask: could a sub-agent do its piece without needing to interrupt another one mid-task? If the honest answer is no, the parts are not independent, and you almost certainly want one agent, not several.'
+      title: 'Decision rule (the author\'s reading, not a finding of any one paper)',
+      text: 'Start with one agent and give it the whole budget. Split only when the task breaks into streams that do not need each other\'s intermediate results, the single agent is still well below the roughly 45% success level Kim et al. identify,[^2] and you put a central checkpoint in front of the final merge.[^2] Never split a chain of dependent steps. If you evaluate a team, give the single agent the same token budget and count tokens from the content, not only from the API bill.[^4] If the team wins only when it spends more, try sampling and voting at that spend before building coordination.[^3]',
     },
     {
       type: 'h2',
-      text: 'What to carry away from this'
+      text: 'What the two studies say they could not test',
     },
     {
       type: 'p',
-      text: 'A single agent with good tools is the right default, and multi-agent is a targeted move you make only when a task truly has independent parallel parts, genuinely divergent tools and behavior, or more context than one window can carry. Splitting is never free. It adds latency, new failure modes, and the constant risk that agents talk past each other because context stops being shared the moment you divide it. The research team learned this the expensive way, then got their reliable assistant back by putting it in one loop again. When you do have a real reason to split, keep a supervisor in charge of the whole picture, write handoffs that carry intent, and measure the split against the single-agent version so the coordination tax you are paying actually buys you something.'
+      text: 'That rule leans on two studies with narrow coverage, and both say so. Kim et al. note that their SWE-bench Verified and Terminal-Bench cells used 20-instance subsets, and that bootstrap 95% confidence intervals were typically plus or minus 20 percentage points per cell.[^2] They also did not tune prompts for each model family, and write that architecture-specific prompt tuning may produce different scaling behavior.[^2] Tran and Kiela limit their claim to text-only multi-hop reasoning and state that multi-agent advantages with tools, vision, or safety constraints are out of scope.[^4] Their budget is a cap, not a floor: they do not force a model to spend all of the tokens it is allowed.[^4]',
     },
     {
       type: 'sources',
+      numbered: true,
       items: [
-        { title: 'Anthropic: Building effective agents', url: 'https://www.anthropic.com/research/building-effective-agents' },
-        { title: 'Cognition: Don\'t build multi-agents', url: 'https://cognition.ai/blog/dont-build-multi-agents' },
-        { title: 'LangGraph: Multi-agent systems documentation', url: 'https://langchain-ai.github.io/langgraph/concepts/multi_agent/' }
-      ]
-    }
-  ]
+        { title: 'Cemri et al., Why Do Multi-Agent LLM Systems Fail?, NeurIPS 2025 Datasets and Benchmarks', url: 'https://arxiv.org/abs/2503.13657' },
+        { title: 'Kim et al., Towards a Science of Scaling Agent Systems, 2025', url: 'https://arxiv.org/abs/2512.08296' },
+        { title: 'Li, Zhang, Yu, Fu, and Ye, More Agents Is All You Need, TMLR 2024', url: 'https://arxiv.org/abs/2402.05120' },
+        { title: 'Tran and Kiela, Single-Agent LLMs Outperform Multi-Agent Systems on Multi-Hop Reasoning Under Equal Thinking Token Budgets, 2026', url: 'https://arxiv.org/abs/2604.02460' },
+        { title: 'Gao et al., Single-agent or Multi-agent Systems? Why Not Both, 2025', url: 'https://arxiv.org/abs/2505.18286' },
+        { title: 'Anthropic, How we built our multi-agent research system, 2025', url: 'https://www.anthropic.com/engineering/multi-agent-research-system' },
+      ],
+    },
+  ],
 };
