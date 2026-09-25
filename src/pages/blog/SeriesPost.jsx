@@ -104,7 +104,7 @@ function slugify(text) {
     .slice(0, 60);
 }
 
-function Block({ block, format }) {
+function Block({ block, format, showAll }) {
   switch (block.type) {
     case 'h2':
       return <h2 id={slugify(block.text)}>{block.text}</h2>;
@@ -113,7 +113,7 @@ function Block({ block, format }) {
     case 'ul':
       return <ul>{block.items.map((it, i) => <li key={i}>{rich(it)}</li>)}</ul>;
     case 'terms':
-      if (format !== 'build' && block.optional !== false) return null;
+      if (!showAll && format !== 'build' && block.optional !== false) return null;
       return (
         <ul className="series-terms">
           {block.items.map((t, i) => (
@@ -126,7 +126,7 @@ function Block({ block, format }) {
         </ul>
       );
     case 'code':
-      if (format !== 'build' && !block.essential) return null;
+      if (!showAll && format !== 'build' && !block.essential) return null;
       return (
         <figure className="series-code">
           {block.title ? <figcaption>{block.title}</figcaption> : null}
@@ -134,25 +134,24 @@ function Block({ block, format }) {
         </figure>
       );
     case 'diagram':
-      if (format === 'essay' && !block.essential) return null;
+      if (!showAll && format === 'essay' && !block.essential) return null;
       // Three styles, chosen by shape: a `root` tree renders the hand-drawn
       // pastel decision tree (option A); `edges` renders the icon-based
       // architecture diagram (option B); `nodes`/`rows` alone render the
       // simple boxed flow (default).
       // Wide diagrams scroll sideways on a phone; their caption is rendered
       // outside that scroll box so it wraps instead of being cut off.
-      if (block.root || block.edges) {
-        const diagram = block.root
-          ? <SketchTreeDiagram title={block.title} root={block.root} />
-          : <ArchDiagram title={block.title} nodes={block.nodes} edges={block.edges} groups={block.groups} />;
-        return block.caption ? (
-          <figure className="series-chart">
-            {diagram}
-            <figcaption className="series-chart-caption">{rich(block.caption)}</figcaption>
-          </figure>
-        ) : diagram;
-      }
-      return <FlowDiagram nodes={block.nodes} rows={block.rows} caption={block.caption} />;
+      const diagram = block.root
+        ? <SketchTreeDiagram title={block.title} root={block.root} />
+        : block.edges
+          ? <ArchDiagram title={block.title} nodes={block.nodes} edges={block.edges} groups={block.groups} />
+          : <FlowDiagram nodes={block.nodes} rows={block.rows} />;
+      return block.caption ? (
+        <figure className="series-chart">
+          {diagram}
+          <figcaption className="series-chart-caption">{rich(block.caption)}</figcaption>
+        </figure>
+      ) : diagram;
     case 'chart': {
       // `kind` selects the chart renderer. A caption that cites sources is
       // rendered here, outside the chart's scroll box, so [^n] markers resolve
@@ -276,6 +275,9 @@ export default function SeriesPost({ post }) {
   // Layer-cake scanning support: posts with 4+ sections get a jump list so
   // readers can navigate by heading instead of scrolling blind.
   const headings = post.body.filter((b) => b.type === 'h2');
+  // Research rewrites (numbered, cited sources) are written as one piece; the
+  // format rotation must not drop their diagrams, code, or definitions.
+  const showAll = post.body.some((b) => b.type === 'sources' && b.numbered);
   return (
     <>
       {headings.length >= 4 && (
@@ -289,7 +291,7 @@ export default function SeriesPost({ post }) {
         </nav>
       )}
       <article className={`series-body series-format-${format}`}>
-        {post.body.map((block, i) => <Block block={block} format={format} key={i} />)}
+        {post.body.map((block, i) => <Block block={block} format={format} showAll={showAll} key={i} />)}
       </article>
     </>
   );
