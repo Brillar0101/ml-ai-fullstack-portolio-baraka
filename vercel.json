@@ -1,5 +1,6 @@
 {
   "buildCommand": "npm run build",
+  "cleanUrls": true,
   "rewrites": [
     {
       "source": "/gemoji",
@@ -11,7 +12,7 @@
     },
     {
       "source": "/(.*)",
-      "destination": "/index.html"
+      "destination": "/app-shell.html"
     }
   ],
   "headers": [

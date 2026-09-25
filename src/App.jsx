@@ -8,7 +8,6 @@ import ContactPage from './pages/ContactPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import { usePageTracking } from './hooks/useAnalytics';
 import { CONFIG } from './config';
-import { BLOG_POSTS } from './data/blog';
 import './styles/global.css';
 
 // Lazy-load heavy project pages
@@ -73,8 +72,9 @@ function titleFor(pathname) {
   const exact = pageTitles[pathname];
   if (exact) return exact;
 
-  const post = BLOG_POSTS.find((p) => p.route === pathname);
-  if (post) return post.title;
+  // Blog posts set their own title in BlogPostPage. Importing the post list
+  // here would pull every post body into the main bundle.
+  if (/^\/blog\/[^/]+\/?$/.test(pathname)) return null;
 
   // Unknown child route: name its section rather than claiming it is the
   // home page. Better a slightly generic title than a false one.
@@ -91,7 +91,8 @@ export default function App() {
 
   // Update document title based on route
   useEffect(() => {
-    document.title = `${titleFor(location.pathname)} | ${CONFIG.name}, Computer Engineer`;
+    const title = titleFor(location.pathname);
+    if (title) document.title = `${title} | ${CONFIG.name}, Computer Engineer`;
   }, [location.pathname]);
 
   const isHomePage = location.pathname === '/';
