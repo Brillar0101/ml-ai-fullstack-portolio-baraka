@@ -1,228 +1,251 @@
+// Every factual claim below is taken from the numbered sources at the end.
+// HyDE (arXiv 2212.10496) carries the arXiv non-exclusive license, so its
+// tables are redrawn as charts, not reproduced. The Query2doc chart is also
+// redrawn from its table values.
 export const POST = {
   id: 'hyde',
-  title: 'HyDE: Retrieve With a Made-Up Answer Instead of the Question',
-  excerpt: 'Short questions and long answer passages live in different neighborhoods of embedding space. HyDE closes that gap by drafting a fake answer first, then searching with it.',
+  title: 'HyDE: Searching With an Answer That Might Be Wrong',
+  excerpt: 'In December 2022 a CMU and Waterloo team trained nothing and still nearly matched a retriever fine-tuned on MS MARCO. Their trick was to embed a made-up answer instead of the question. Here is one query followed through every step, then the results, the Query2doc variant, and where the papers say it breaks.',
   category: 'AI',
   tags: ['RAG', 'Retrieval', 'Embeddings'],
   body: [
     {
       type: 'p',
-      text: 'Picture a support engineer typing into your internal knowledge base: **"how do I rotate my API keys"**. Somewhere in your docs sits the exact passage that answers this. It is titled "Credential lifecycle management" and it walks through generating a replacement secret, updating the dependent services, and revoking the old value after a grace window. The answer is right there. But your retrieval system returns three unrelated pages about rate limiting, and the engineer walks away thinking the docs are useless.'
+      text: "In December 2022, Luyu Gao, Xueguang Ma, Jimmy Lin and Jamie Callan posted a retrieval paper with an unusual footnote: no models were trained or fine-tuned in making it.[^1] They took two models off the shelf. One was InstructGPT (the text-davinci-003 model), a GPT-3 model tuned to follow instructions.[^1,4] The other was Contriever, a text encoder trained without any relevance labels.[^1,2] On the TREC Deep Learning 2019 web search queries, Contriever alone scored 44.5 nDCG@10. With their method, HyDE, the same Contriever scored 61.3. A Contriever fine-tuned on the MS MARCO training data, which is richly labeled for exactly this kind of search, scored 62.1.[^1]",
     },
     {
       type: 'p',
-      text: 'Nothing is broken in the usual sense. The embedding model works, the vector index works, the similarity search works. The failure is quieter than that. The question and its own answer barely share any words, and that mismatch is enough to sink the search.'
-    },
-    { type: 'p', text: 'I want to sit with this failure for a moment because it is easy to blame the wrong thing. When retrieval misses, the reflex is to swap embedding models, re-chunk the documents, or bolt on a reranker. Those steps sometimes help.' },
-      { type: 'p', text: 'But if the root cause is that your query and your answer are shaped differently, none of them touch it directly. You can buy a better map of the city and still be standing in the wrong neighborhood. HyDE is one of the cleaner ways to walk to a better starting point before you even open the map.' },
-    {
-      type: 'h2',
-      text: 'Why a good question can point at the wrong passage'
-    },
-    { type: 'p', text: 'Standard retrieval-augmented generation embeds the user question into a vector, then looks for stored document chunks whose vectors sit nearby. The quiet assumption is that a question lands close to its answer in that space. Often it does.' },
-      { type: 'p', text: 'But questions and answers are different kinds of text. A question is short, uses casual verbs, and names the goal. An answer passage is longer, uses precise nouns, and describes a procedure. "How do I rotate my API keys" and "Credential lifecycle management: generating a replacement secret and revoking the prior value" are talking about the same thing, yet they look almost nothing alike on the surface.' },
-    {
-      type: 'p',
-      text: 'Embedding models pick up on that surface difference. The question drifts toward other short, casual, question-shaped text. The answer sits with other formal, procedural text. Even a strong model leaves a real gap between the two. When you search using only the raw question vector, you are searching from the wrong neighborhood, and the passage you need is a street over.'
+      text: "The setting matters for reading that number. It is **zero-shot**: HyDE never saw a labeled query-document pair from any test set, and the authors counted the instruction tuning inside InstructGPT as the only supervision anywhere in the system.[^1] They tested on 11 query sets: TREC DL19 and DL20 for web search, six low-resource sets from the BEIR benchmark, and Swahili, Korean, Japanese and Bengali from Mr. TyDi.[^1,7,6] The trick is one sentence long. Ask a language model to write a passage that answers the question, then search with the embedding of that passage instead of the question.",
     },
     {
       type: 'p',
-      text: 'It helps to name the effect. Embeddings are trained to place text with similar meaning close together, but "similar meaning" is learned from data, and most of that signal comes from words and phrasing. Two texts about the same topic that use different words can still end up far apart, especially when one is a terse request and the other is a detailed writeup. The shorter the query, the fewer anchors the model has to work with, so a five-word question is unusually fragile. This is why a search that works fine for a paragraph-long query can quietly fall apart for a quick one-liner from a rushed engineer.'
-    },
-    {
-      type: 'p',
-      text: 'This is the core problem HyDE was built to solve. If the question is a bad probe, maybe the fix is to stop searching with the question at all.'
-    },
-    {
-      type: 'p',
-      text: 'Before we get to the technique, it is worth being honest about scope. HyDE does not fix bad documents, missing content, or a poorly tuned index. If the answer simply is not written down anywhere, no amount of clever probing will conjure it. What HyDE addresses is a specific and common failure: the answer exists, it is indexed, and the search still walks past it because the query does not resemble it. Keep that boundary in mind so you reach for the tool when it actually applies.'
+      text: "This post follows one query through that pipeline, using the example the HyDE paper itself prints in its Figure 1.",
     },
     {
       type: 'h2',
-      text: 'The trick: answer the question badly on purpose, then search with that'
+      text: 'Why the query needed a stand-in',
     },
     {
       type: 'p',
-      text: 'HyDE stands for Hypothetical Document Embeddings. The idea is almost cheeky. Before touching your document store, you hand the question to a language model and ask it to write an answer. Not a correct answer necessarily, just a plausible one that reads like the kind of passage that would live in your docs.'
+      text: "**Dense retrieval** turns a query and every document into vectors and ranks documents by the inner product between them. Written out, the score is \\(\\mathrm{sim}(q, d) = \\langle \\mathrm{enc}_q(q), \\mathrm{enc}_d(d) \\rangle\\), where the two encoders map text to vectors of the same size.[^1] The hard part, the HyDE authors argue, sits inside that equation. Both encoders have to land in one space where inner product means relevance, and without relevance judgments to fit, they call learning that space intractable.[^1] A **relevance label** is a human mark saying this document answers this query. MS MARCO's passage task has 503 thousand training queries,[^5] but MS MARCO restricts commercial use, and many real search setups have nothing like it.[^1]",
     },
     {
       type: 'p',
-      text: 'For our key-rotation question, the model might produce something like: "To rotate your API keys, generate a new key from the credentials dashboard, update every service that references the old key, then revoke the previous key after confirming traffic has moved over. Keep a short overlap window so nothing breaks during the switch." The model may have invented the exact button name. It may be wrong about the overlap window. That does not matter yet.'
+      text: "Contriever came from the other direction. Gautier Izacard and colleagues at Meta AI trained a BERT-base encoder with contrastive learning on documents alone, drawn half from Wikipedia and half from CCNet web text.[^2] To make a training pair, they cut two random spans out of the same document, deleted 10% of the tokens in each, and taught the model to put those two spans close together and spans from other documents far apart.[^2] They call this independent cropping, and they point out that it is symmetric: both sides of a pair come from the same distribution of text.[^2] One encoder embeds queries and documents alike, and a text's vector is the average of the last layer's hidden states.[^2]",
     },
     {
       type: 'p',
-      text: 'What matters is the shape. This drafted paragraph is long, procedural, and full of the same nouns your real documentation uses: generate, revoke, credentials, services, overlap window. It reads like an answer because it is trying to be one. So when you embed this draft instead of the bare question, its vector lands in the answer neighborhood, right next to your genuine "Credential lifecycle management" page. You search from there and finally pull back the real passage.'
-    },
-    { type: 'p', text: 'Notice the sleight of hand. The language model does not need to know your specific product to be useful here. It has read enough documentation in its training to know roughly how a key-rotation answer is worded, even if it has never seen yours.' },
-      { type: 'p', text: 'That general sense of "what an answer looks like" is exactly what you borrow. You are not asking the model to be correct. You are asking it to be shaped like the target, and models are good at that even when they are shaky on the facts.' },
-    {
-      type: 'diagram',
-      nodes: [
-        { label: 'User question', detail: '"how do I rotate my API keys"' },
-        { label: 'LLM drafts a fake answer', detail: 'plausible passage, maybe wrong facts' },
-        { label: 'Embed the draft', detail: 'vector lands in answer-space' },
-        { label: 'Retrieve real docs', detail: 'nearest genuine passages' },
-        { label: 'Generate grounded answer', detail: 'facts come from real docs, not the draft' }
-      ],
-      caption: 'The draft is a search probe, not the final answer. Real retrieved docs supply the facts.'
-    },
-    {
-      type: 'p',
-      text: 'The made-up answer is discarded once retrieval finishes. It never reaches the user. Its only job was to point the search in a better direction. The final response is written from the real documents you pulled back, so any errors in the draft get washed out by grounded, factual sources.'
-    },
-    {
-      type: 'terms',
-      items: [
-        { term: 'HyDE', def: 'Hypothetical Document Embeddings. Draft a fake answer to the query with an LLM, embed that draft, and retrieve documents similar to it rather than to the raw question.' },
-        { term: 'Query-document mismatch', def: 'The gap in embedding space between a short question and the longer passage that answers it, caused by their different length, tone, and vocabulary.' },
-        { term: 'Hypothetical document', def: 'The throwaway answer the LLM writes before retrieval. It supplies answer-shaped vocabulary for the search and is never shown to the user.' }
-      ]
+      text: "So Contriever learned what makes two pieces of text similar as passages, without ever being taught what makes a passage answer a question. On BEIR it beat BM25 on 11 of 15 datasets by Recall@100, but still trailed BM25 on nDCG@10.[^2] **BM25** is the classic keyword-weighting method that scores documents by shared terms. HyDE's move is to stop asking Contriever to compare a question with a passage at all. It turns the question into a passage first, so the search becomes document against document, the one comparison Contriever was trained for.[^1]",
     },
     {
       type: 'h2',
-      text: 'Wiring it up in about twenty lines'
+      text: "Step one: the query and the instruction",
     },
     {
       type: 'p',
-      text: 'Mechanically, HyDE adds one model call in front of your normal retrieval loop. You generate a draft, embed the draft, and feed that vector to the same vector search you already run. Everything downstream stays the same.'
-    },
-    { type: 'lab', height: 460,
-        title: 'HyDE, and the ranking it flips',
-        caption: 'The question is phrased in the language of safety, so plain retrieval puts the do-not-commit page first. The draft supplies the word rotate, which the question never contained, and the top hit flips to the page that actually answers it.',
-        code: `import math
-
-# HyDE: embed a hypothetical ANSWER instead of the question,
-# because answers use the vocabulary documents use and
-# questions often do not. Vectors are hand-written over four
-# traits so you can read the arithmetic.
-#          [ keys, rotation, security, billing ]
-STORE = [
-    ("kb-1", "rotate a key in Settings, then Regenerate",
-     [0.9, 0.9, 0.4, 0.0]),
-    ("kb-2", "API keys are secrets, never commit them",
-     [0.9, 0.1, 0.9, 0.0]),
-    ("kb-3", "billing questions go to the Plans page",
-     [0.0, 0.0, 0.0, 0.9]),
-]
-
-KEYS = {"key", "keys", "credential", "token"}
-ROTATE = {"rotate", "regenerate", "settings", "renew"}
-SAFE = {"safe", "secret", "secrets", "secure", "commit"}
-BILL = {"billing", "plan", "plans", "invoice"}
-
-def embed(text):
-    """Stand-in embedder: a trait fires when the text uses
-    that trait's vocabulary. Crude, but it has the property
-    that matters here, which is that wording drives it."""
-    w = {t.strip("?.,") for t in text.lower().split()}
-    return [1.0 if w & KEYS else 0.0,
-            1.0 if w & ROTATE else 0.0,
-            1.0 if w & SAFE else 0.0,
-            1.0 if w & BILL else 0.0]
-
-def cosine(a, b):
-    dot = sum(x * y for x, y in zip(a, b))
-    na = math.sqrt(sum(x * x for x in a))
-    nb = math.sqrt(sum(y * y for y in b))
-    return dot / (na * nb + 1e-9)
-
-def rank(vec):
-    scored = ((cosine(vec, v), i, t) for i, t, v in STORE)
-    return sorted(scored, reverse=True)
-
-QUESTION = "is it safe to keep using the same API key?"
-
-def draft_answer(question):
-    """Stand-in for the model writing a plausible answer.
-    The valuable part is that it reaches for words a real
-    document uses, like rotate and Settings, which the
-    question never contained."""
-    return "rotate your API key in Settings and Regenerate"
-
-DRAFT = draft_answer(QUESTION)
-plain, hyde = rank(embed(QUESTION)), rank(embed(DRAFT))
-
-# ---- Report --------------------------------------------
-E = chr(27)
-DIM, OFF, BOLD = E + "[2m", E + "[0m", E + "[1m"
-OK, BAD, MUTE = E + "[32m", E + "[31m", E + "[90m"
-note = lambda s: print(DIM + s + OFF)
-
-hdr = BOLD + "HyDE" + OFF
-print(hdr + "  same store, two query vectors")
-note("-" * 54)
-note("%-6s %8s %7s %s"
-     % ("DOC", "QUESTION", "DRAFT", "MOVE"))
-
-for doc, text, _vec in STORE:
-    r1 = [d for _, d, _ in plain].index(doc) + 1
-    r2 = [d for _, d, _ in hyde].index(doc) + 1
-    d = r1 - r2
-    if d > 0:
-        colour, move = OK, "up %d" % d
-    elif d < 0:
-        colour, move = BAD, "down %d" % -d
-    else:
-        colour, move = MUTE, "same"
-    print("%-6s %8d %7d %s%s%s"
-          % (doc, r1, r2, colour, move, OFF))
-
-note("-" * 54)
-print(BOLD + "QUESTION" + OFF + "  %s" % QUESTION)
-print(BOLD + "DRAFT" + OFF + "     %s" % DRAFT)
-print(BOLD + "TOP HIT" + OFF + "   %s%s%s -> %s%s%s"
-      % (BAD, plain[0][1], OFF, OK, hyde[0][1], OFF))
-
-print()
-note("The question is phrased in the language of")
-note("safety, so plain retrieval put the do-not-commit")
-note("page first. The draft supplies the word rotate,")
-note("which the question never had, and that flips the")
-note("top hit to the page that answers it.")
-note("")
-note("The draft is only a probe. What you show a user")
-note("is grounded in kb-1, never in the draft itself.")
-
-# Try it: make the draft talk about secrets instead of
-# rotation and the ranking swings back. HyDE is only ever
-# as good as the draft it writes.
-` },
-    {
-      type: 'p',
-      text: 'The original HyDE paper pushed this further and averaged the vectors of several drafts to smooth out any single bad generation. In practice a single draft already helps a lot, and you can add more drafts later if one weird generation ever throws off a search.'
-    },
-    {
-      type: 'p',
-      text: 'One design choice worth thinking about is whether to keep the original question in the mix. A common variation embeds both the draft and the raw question, then blends the two vectors or runs two searches and merges the results. This gives you the vocabulary boost from the draft while keeping a tether to what the user literally asked. If your drafts occasionally wander, this hybrid is a gentle safety net that costs almost nothing to add.'
-    },
-    {
-      type: 'h2',
-      text: 'Where teams trip over their own HyDE'
-    },
-    { type: 'p', text: 'The mistake I see most is treating the draft as the answer. Someone reads the hypothetical passage, notices it looks fluent, and pipes it straight to the user. Now you are shipping a hallucination.' },
-      { type: 'p', text: 'The draft exists to move the search, nothing more. The user should only ever see text written from retrieved documents. A useful habit is to log the draft separately from the final answer during development so you never confuse the two, then drop it from the response payload entirely once you ship.' },
-    {
-      type: 'ul',
-      items: [
-        'Skipping the grounding step and returning the draft directly, which serves confident made-up facts.',
-        'Running HyDE on queries that already match well, such as exact error strings or product names, where the extra model call only adds latency.',
-        'Letting the draft run long. A rambling three-paragraph draft can drift off topic and pull the search vector away from the real answer.',
-        'Forgetting the added cost. Every query now includes an extra LLM call, so cache drafts for repeated questions and measure whether recall actually improved.'
-      ]
+      text: "The query in the paper's figure is a real web-search-style question, typed the way people type: **how long does it take to remove wisdom tooth**.[^1] No capital letter, no question mark, missing an article. Before it reaches any index, HyDE wraps it in an instruction. For the web search sets the appendix gives the exact prompt:[^1]",
     },
     {
       type: 'callout',
-      title: 'A quick gut check',
-      text: 'Before adding HyDE, look at your failing queries. If they are short and phrased nothing like the documents that answer them, HyDE will likely help. If they already share vocabulary with your docs, plain retrieval is cheaper and just as good.'
+      title: 'HyDE web search instruction (Appendix A.1.1)',
+      text: '"Please write a passage to answer the question. Question: [QUESTION] Passage:" The model continues the text after "Passage:". (Line breaks in the original are shown here as spaces.)',
     },
-    { type: 'p', text: 'The reason HyDE works is worth holding onto even if you never ship it. Retrieval quality depends on the two things you compare living in the same kind of space.' },
-      { type: 'p', text: 'When your probe and your target are different kinds of text, you can transform the probe until it resembles the target. HyDE does that by borrowing the language model to imagine what an answer looks like, then searching with that imagination instead of the raw question. The facts come later, from real sources. The draft just gets you into the right room.' },
+    {
+      type: 'p',
+      text: "Each dataset got its own version with a different quantifier. SciFact asks for \"a scientific paper passage to support/refute the claim,\" FiQA for \"a financial article passage,\" TREC-NEWS for \"a news passage about the topic,\" and Mr. TyDi for a passage in Swahili, Korean, Japanese or Bengali \"to answer the question in detail.\"[^1] The instruction is the only place a task description enters the system. The encoder is the same for every dataset.[^1]",
+    },
+    {
+      type: 'h2',
+      text: 'Step two: a passage that nobody checked',
+    },
+    {
+      type: 'p',
+      text: "InstructGPT then writes the passage, sampled at temperature 0.7, the OpenAI playground default.[^1] For the wisdom tooth query, the snippet the paper shows reads: \"It usually takes between 30 minutes and two hours to remove a wisdom tooth...\"[^1] That is the **hypothetical document**. The authors are blunt about what it is: not real, able to contain factual errors, and likely to be ungrounded.[^1] They only need it to look like a relevant document. In their framing, the language model captures relevance by producing an example of it, which moves relevance modeling out of the encoder and into a generator that follows instructions.[^1]",
+    },
+    {
+      type: 'p',
+      text: "This changes what the encoder sees. The raw query is nine words of search shorthand. The draft is fluent prose with a duration, a procedure name and the vocabulary a dental page would use. Whether its two-hour figure is right does not matter yet.",
+    },
+    {
+      type: 'h2',
+      text: 'Step three: averaging drafts into one query vector',
+    },
+    {
+      type: 'p',
+      text: "A generator samples, so it could write a different passage each time. HyDE treats the query vector as an expected value over those samples. It writes \\(g(q, \\mathrm{INST})\\) for the instruction model's output, calls the Contriever encoder \\(f\\), and estimates the vector by drawing \\(N\\) documents and averaging their embeddings.[^1] The query itself can go into the average as one more hypothesis:[^1]",
+    },
+    {
+      type: 'eq',
+      tex: '\\begin{gathered} \\hat{d}_k \\sim g(q, \\mathrm{INST}), \\quad k = 1, \\dots, N \\\\[4pt] \\hat{v}_q = \\frac{1}{N+1} \\Big[ \\sum_{k=1}^{N} f(\\hat{d}_k) + f(q) \\Big] \\end{gathered}',
+      caption: 'The HyDE query vector, equation 8 of Gao et al., 2022.[^1] Without the \\(f(q)\\) term and with \\(1/N\\) in front, it becomes equation 7.',
+    },
+    {
+      type: 'p',
+      text: "Term by term: \\(q\\) is the query text and \\(\\mathrm{INST}\\) the dataset's instruction. \\(\\hat{d}_k\\) is the \\(k\\)-th generated document, and the hat marks it as generated, not taken from the corpus. \\(N\\) is how many are sampled. \\(f\\) is the unchanged Contriever encoder, the same function that embedded every real document ahead of time. \\(f(q)\\) is the query's own embedding, added so the average has \\(N+1\\) members, which is why the fraction is \\(1/(N+1)\\). The result \\(\\hat{v}_q\\) is a single vector of the same size as every document vector.[^1]",
+    },
+    {
+      type: 'p',
+      text: "Averaging comes with an assumption that the paper states outright. Taking a plain expectation assumes the distribution of query vectors is uni-modal, which the authors gloss as \"the query is not ambiguous.\"[^1] The arXiv version does not say in its text what value of \\(N\\) the experiments used.",
+    },
+    {
+      type: 'h2',
+      text: 'Step four: the nearest real passage',
+    },
+    {
+      type: 'p',
+      text: "HyDE takes the inner product between \\(\\hat{v}_q\\) and every document vector in the corpus and returns the closest ones.[^1] The experiments ran this through the Pyserini toolkit with a standard maximum inner product search index, no special index, no training.[^1] For the wisdom tooth query, the figure's retrieved real document reads: \"How wisdom teeth are removed... Some ... a few minutes, whereas others can take 20 minutes or longer....\"[^1]",
+    },
+    {
+      type: 'p',
+      text: "Put the two snippets side by side. The draft says 30 minutes to two hours. The real passage says a few minutes to 20 minutes or longer. My reading is that the draft got the specific numbers wrong and still landed on the right document, which is the behavior the authors designed for. They describe the encoder's dense bottleneck as a lossy compressor: squeezing a passage into one vector filters out the extra, hallucinated details, and the nearest-neighbor search grounds what is left in real documents.[^1] The figure shows the same pattern in Korean. The generated passage dates human use of fire to about 8 million years ago; the retrieved passage says 1.42 million years, in the time of Homo erectus.[^1]",
+    },
+    {
+      type: 'p',
+      text: "Note what never got computed. At no point did the system score the query against a document. The authors point this out themselves: with HyDE's factorization, query-document similarity is no longer modeled or computed, and retrieval is split into a generation task and a document-document similarity task.[^1]",
+    },
+    {
+      type: 'h2',
+      text: 'What happened across the 11 query sets',
+    },
+    {
+      type: 'terms',
+      optional: false,
+      items: [
+        { term: 'nDCG@10', def: 'A score for the top 10 results that rewards putting the most relevant documents highest. Contriever\'s authors describe it as suited to rankings shown to people.[^2]' },
+        { term: 'Recall@k', def: 'The share of all relevant documents that appear anywhere in the top k results. Contriever\'s authors use it for retrievers that feed systems like question answering models, which read hundreds of documents and ignore their order.[^2]' },
+        { term: 'MRR@100', def: 'The average over queries of 1 divided by the rank of the first relevant result, counting only the top 100. Mr. TyDi\'s baselines are tuned for it, and HyDE reports it for Mr. TyDi.[^6,1]' },
+      ],
+    },
+    {
+      type: 'chart',
+      kind: 'bar',
+      title: 'Web search, nDCG@10',
+      yLabel: 'nDCG@10',
+      series: [
+        { label: 'TREC DL19', key: 'dl19' },
+        { label: 'TREC DL20', key: 'dl20' },
+      ],
+      data: [
+        { label: 'Contriever', values: { dl19: 44.5, dl20: 42.1 } },
+        { label: 'BM25', values: { dl19: 50.6, dl20: 48.0 } },
+        { label: 'HyDE', values: { dl19: 61.3, dl20: 57.9 } },
+        { label: 'Contriever, fine-tuned', values: { dl19: 62.1, dl20: 63.2 } },
+      ],
+      caption: 'Redrawn from Table 1 of Gao et al., 2022.[^1] The first three use no relevance labels. The last is fine-tuned on MS MARCO, the collection DL19 and DL20 are built on.',
+    },
+    {
+      type: 'p',
+      text: "The 2019 track judged 43 test queries over a corpus of 8.8 million passages.[^5] On DL19 HyDE matched the fine-tuned Contriever on precision and beat it on recall@1k, 88.0 against 83.6. On DL20 it fell about 10% short on nDCG@10 and map, with similar recall.[^1] Without HyDE, plain Contriever lost to BM25 on both years. With it, HyDE beat BM25 by about 10 points of nDCG@10 each year.[^1]",
+    },
+    {
+      type: 'p',
+      text: "The low-resource BEIR sets told the same story, with one case worth dwelling on. On TREC-COVID, Contriever scored 27.3 nDCG@10 and BM25 59.5. HyDE brought Contriever to 59.3, so BM25 stayed ahead there, but only by 0.2.[^1] The Contriever paper had already given a likely reason for the weak baseline: its training data was collected before the COVID outbreak.[^2] The encoder did not change, so the gain came from a generator that could write COVID-shaped text for it to embed.",
+    },
+    {
+      type: 'p',
+      text: "The generator's size mattered. The authors swapped InstructGPT for smaller instruction models, keeping Contriever fixed.[^1]",
+    },
+    {
+      type: 'chart',
+      kind: 'bar',
+      title: 'HyDE with different generators, nDCG@10',
+      yLabel: 'nDCG@10',
+      series: [
+        { label: 'TREC DL19', key: 'dl19' },
+        { label: 'TREC DL20', key: 'dl20' },
+      ],
+      data: [
+        { label: 'No generator', values: { dl19: 44.5, dl20: 42.1 } },
+        { label: 'Flan-T5, 11B', values: { dl19: 48.9, dl20: 52.9 } },
+        { label: 'Cohere, 52B', values: { dl19: 53.8, dl20: 53.8 } },
+        { label: 'InstructGPT, 175B', values: { dl19: 61.3, dl20: 57.9 } },
+      ],
+      caption: 'Redrawn from Table 4 of Gao et al., 2022,[^1] all using the unsupervised Contriever encoder. Model sizes are the ones the paper reports.',
+    },
+    {
+      type: 'p',
+      text: "Every generator helped, and larger ones helped more. The authors add a caution that the Cohere model was experimental and undocumented at the time, so training techniques may explain part of the gap, not size alone.[^1]",
+    },
+    {
+      type: 'h2',
+      text: 'Query2doc puts the question back in',
+    },
+    {
+      type: 'p',
+      text: "Three months later Liang Wang, Nan Yang and Furu Wei at Microsoft Research published Query2doc, which uses the same kind of generated passage in a different way.[^3] Instead of a zero-shot instruction, they few-shot prompt text-davinci-003: the instruction \"Write a passage that answers the given query:\" followed by 4 labeled query-passage pairs sampled from MS MARCO training data, sampled at temperature 1 with at most 128 tokens.[^3] Their Figure 1 shows the output for \"when was pokemon green released\": a passage saying it came out in Japan on February 27th, 1996.[^3]",
+    },
+    {
+      type: 'p',
+      text: "Then they keep the query. For BM25, the new query is the original repeated 5 times and concatenated with the pseudo-document, because the passage is much longer than the query and would otherwise swamp its terms. For dense retrievers, it is the query, a [SEP] token and the passage.[^3] Unlike HyDE, the dense retrievers in Query2doc were trained with the expanded queries, so this is not zero-shot on that side.[^3]",
+    },
+    {
+      type: 'p',
+      text: "With no fine-tuning, BM25 plus Query2doc rose from 51.2 to 66.2 nDCG@10 on DL19 and from 47.7 to 62.9 on DL20.[^3] The ablation shows why they kept the query:",
+    },
+    {
+      type: 'chart',
+      kind: 'bar',
+      title: 'BM25 query variants in Query2doc, nDCG@10',
+      yLabel: 'nDCG@10',
+      series: [
+        { label: 'TREC DL19', key: 'dl19' },
+        { label: 'TREC DL20', key: 'dl20' },
+      ],
+      data: [
+        { label: 'Pseudo-doc only', values: { dl19: 48.7, dl20: 44.5 } },
+        { label: 'Query only', values: { dl19: 51.2, dl20: 47.7 } },
+        { label: 'Query + pseudo-doc', values: { dl19: 66.2, dl20: 62.9 } },
+      ],
+      caption: 'Redrawn from Table 4 of Wang et al., 2023.[^3] All three runs use BM25, a keyword retriever, so this does not measure HyDE\'s dense setup directly.',
+    },
+    {
+      type: 'p',
+      text: "Alone, the generated passage did worse than the bare query under BM25; together they did far better. The authors read this as the two being complementary.[^3] In the same paper's main table, HyDE appears at the 61.3 and 57.9 it reported for DL19 and DL20, below BM25 plus Query2doc.[^3] Keep the caveat in mind: that comparison mixes a zero-shot dense method with a keyword method whose prompt contains labeled examples. For trained dense retrievers the gains were smaller. DPR went from 33.7 to 35.1 MRR@10 on the MS MARCO dev set, while SimLM and E5, which already distill from a cross-encoder reranker, gained 0.4 and 0.8.[^3]",
+    },
+    {
+      type: 'p',
+      text: "Query2doc also states a criticism of HyDE directly: HyDE implicitly assumes the ground-truth document and the pseudo-document express the same meaning in different words, which may not hold for some queries.[^3]",
+    },
+    {
+      type: 'h2',
+      text: 'Where the drafts go wrong',
+    },
+    {
+      type: 'p',
+      text: "**Hallucinated specifics that do not wash out.** The wisdom tooth example shows the encoder ignoring a wrong number. Query2doc shows the other side. For \"who sings monk theme song,\" the generated passage correctly named Randy Newman and \"It's a Jungle Out There,\" but said the song had been the theme since the 2002 premiere. It was used from season two, in 2003.[^3] The authors call such errors subtle and hard to verify, and a serious obstacle to building trustworthy systems on LLM output.[^3] Retrieval can still work with that passage. A system that shows the passage to a user, or lets it stand in for retrieval, would pass the error along.",
+    },
+    {
+      type: 'p',
+      text: "**Languages the models know less well.** The HyDE authors expected trouble here. A small contrastive encoder gets saturated as the number of languages grows, and a large generator can be under-trained on languages with less data than English or French.[^1] On Mr. TyDi, HyDE improved mContriever in all four languages, but in Bengali it scored 41.3 MRR@100 against BM25's 41.8. In Swahili it reached 41.7 while the fine-tuned mContriever reached 51.2.[^1] Their hypothesis is that these languages are under-trained in both pre-training and instruction tuning.[^1]",
+    },
+    {
+      type: 'p',
+      text: "**Weak generators and vague instructions.** Query2doc found that texts from smaller models \"tend to be shorter and contain more factual errors.\" The 1.3B babbage model moved BM25 on DL19 only from 51.2 to 52.0.[^3] HyDE trailed the fine-tuned Contriever most clearly on FiQA and DBPedia, financial posts and entities, and its authors blame under-specified instructions.[^1] Query2doc's out-of-domain results were mixed too: with SimLM and E5, SciFact nDCG@10 fell by 2.9 points.[^3]",
+    },
+    {
+      type: 'p',
+      text: "**Cost at query time.** Query2doc measured it. Retrieving the top 100 BM25 results took 16 ms of index search. With Query2doc, the LLM call alone took more than 2,000 ms, and the index search rose to 177 ms because the expanded query has many more terms.[^3] HyDE's own conclusion suggests a way to live with this. Use HyDE when a search system is new and has no logs, then roll out a supervised retriever as logs accumulate, sending only rare and emerging queries to the HyDE backend.[^1]",
+    },
+    {
+      type: 'h2',
+      text: 'The assumption the paper left open',
+    },
+    {
+      type: 'p',
+      text: "Go back to step three. The average in equation 8 makes sense when every sampled draft is a variation on one meaning. If a query could mean two things, the drafts would split between two neighborhoods of the embedding space, and their mean could fall between them, near neither kind of relevant document. That picture is my reading of the equation; the paper does not test it. What the authors do say is that they simply take the expectation, assuming the distribution is uni-modal and the query is not ambiguous, and that \"the study of ambiguous queries and diversity is left to future work.\"[^1]",
+    },
     {
       type: 'sources',
+      numbered: true,
       items: [
-        { title: 'Gao et al., Precise Zero-Shot Dense Retrieval without Relevance Labels (HyDE), 2022', url: 'https://arxiv.org/abs/2212.10496' },
-        { title: 'LangChain documentation: Hypothetical Document Embeddings', url: 'https://python.langchain.com/docs/how_to/hypothetical_document_embeddings/' }
-      ]
-    }
-  ]
+        { title: 'Gao, Ma, Lin, and Callan, Precise Zero-Shot Dense Retrieval without Relevance Labels, 2022', url: 'https://arxiv.org/abs/2212.10496' },
+        { title: 'Izacard et al., Unsupervised Dense Information Retrieval with Contrastive Learning (Contriever), TMLR 2022', url: 'https://arxiv.org/abs/2112.09118' },
+        { title: 'Wang, Yang, and Wei, Query2doc: Query Expansion with Large Language Models, 2023', url: 'https://arxiv.org/abs/2303.07678' },
+        { title: 'Ouyang et al., Training Language Models to Follow Instructions with Human Feedback, 2022', url: 'https://arxiv.org/abs/2203.02155' },
+        { title: 'Craswell et al., Overview of the TREC 2019 Deep Learning Track, 2020', url: 'https://arxiv.org/abs/2003.07820' },
+        { title: 'Zhang, Ma, Shi, and Lin, Mr. TyDi: A Multi-lingual Benchmark for Dense Retrieval, 2021', url: 'https://arxiv.org/abs/2108.08787' },
+        { title: 'Thakur et al., BEIR: A Heterogeneous Benchmark for Zero-shot Evaluation of Information Retrieval Models, 2021', url: 'https://arxiv.org/abs/2104.08663' },
+      ],
+    },
+  ],
 };

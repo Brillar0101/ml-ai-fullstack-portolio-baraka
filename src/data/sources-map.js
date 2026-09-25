@@ -62,10 +62,4 @@ export const SOURCES = {
   'single-vs-multi-agent': [S.autogen, S.agentSurvey, S.react, S.reflexion, S.gaia, S.voyager],
   'multi-agent-orchestration': [S.autogen, S.agentSurvey, S.react, S.reflexion, S.gaia, S.selfrag],
   'a2a-protocol': [S.mcpSpec, S.autogen, S.agentSurvey, S.jsonSchema, S.gaia, S.react],
-  'agent-deployment': [S.agentSurvey, S.react, S.gaia, S.owasp, S.reflexion, S.otelTraces],
-  'agent-improvement-flywheel': [S.reflexion, S.agentSurvey, S.checklist, S.evalSurvey, S.gaia, S.otelTraces],
-  'vector-databases-explained': [S.hnsw, S.dpr, S.sbert, S.e5, S.ragSurvey, S.wikiCosine],
-  'agentic-rag': [S.selfrag, S.react, S.ragSurvey, S.ragBest, S.reflexion, S.rag],
-  'hyde': [S.hydePaper, S.dpr, S.ragSurvey, S.sbert, S.rag, S.ragBest],
-  'cag-vs-rag': [S.rag, S.ragSurvey, S.lostmiddle, S.pagedattn, S.longformer, S.scaleInfer],
 };
