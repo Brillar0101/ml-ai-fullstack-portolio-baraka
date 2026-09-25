@@ -74,5 +74,4 @@ export const SOURCES = {
   'vllm-continuous-batching': [S.pagedattn, S.vllmDocs, S.scaleInfer, S.mqa, S.flashattn, S.transformer],
   'serving-frameworks-compared': [S.pagedattn, S.vllmDocs, S.scaleInfer, S.flashattn, S.int8, S.mqa],
   'autoscaling-cold-starts': [S.chiron, S.pagedattn, S.scaleInfer, S.vllmDocs, S.mqa, S.flashattn, S.llmSurvey2],
-  'cost-token-observability': [S.tokenCost, S.scaleInfer, S.pagedattn, S.otelTraces, S.vllmDocs, S.chinchilla],
 };
