@@ -1,212 +1,206 @@
+// Every factual claim below is taken from the numbered sources at the end.
+// Figure 2 of Kwon et al. (arXiv 2309.06180) is reproduced under CC BY 4.0.
+// The batched-requests chart is redrawn from Figure 13 of the same paper.
+// The four-request schedule and its chart are the author's own illustrative
+// arithmetic, labeled as such in the text.
 export const POST = {
   id: 'vllm-continuous-batching',
-  title: 'vLLM and Continuous Batching: Where the Extra Throughput Actually Comes From',
-  excerpt: 'A self-hosted 13B model on one GPU could barely serve a handful of people before it choked. The model never changed. Two scheduling and memory ideas did, and the same card started serving several times as many users.',
+  title: 'Counting Idle Slots: Where vLLM Gets Its Throughput',
+  excerpt: 'When the vLLM team profiled existing LLM servers, as little as 20.4% of the memory reserved for the KV cache held actual token states. Walk four requests through two schedulers by hand, then follow the memory, and the 2 to 4 times throughput gain stops looking like magic.',
   category: 'AI',
-  tags: ['Deployment', 'vLLM', 'Batching'],
+  tags: ['Deployment', 'vLLM', 'Batching', 'Inference'],
   body: [
-    { type: 'p', text: 'Picture an internal assistant running on a 13B model the team hosts themselves. One A100, one process, a plain generation server in front of it. During the demo it feels quick.' },
-      { type: 'p', text: 'Then twenty people open the tool at once and it falls apart. Requests sit in a queue for seconds before the first token appears, the GPU utilization graph reads a sad 30 percent, and someone asks the obvious question: we paid for a whole GPU, why does it act like it can only talk to five people at a time? Nothing is broken.' },
-      { type: 'p', text: 'The model is fine. The problem is how requests are packed onto the card, and how the memory for each request is reserved. Fix those two things and the same hardware serves several times the traffic.' },
     {
       type: 'p',
-      text: 'This is the exact gap **vLLM** was built to close. It did not train a faster model or quantize anything away. It changed the scheduler and it changed how the key-value cache is stored. Those two ideas are the whole story behind the throughput jump, and once you see them the earlier slowness looks less like bad luck and more like the default way of serving models leaving most of the GPU on the table.'
+      text: 'In 2023 a Berkeley team measured how GPU memory was being used by the best large language model servers of the time, and the number was bad. While serving requests, the system they profiled used only 20.4% to 38.2% of its key and value cache memory to store actual token data. The rest was reserved for tokens that had not been generated yet, or was lost to fragmentation.[^1] Their fix, PagedAttention, and the server built on it, vLLM, raised that figure to 96.3% and improved throughput by 2 to 4 times at the same latency, against FasterTransformer and Orca.[^1]',
     },
     {
-      type: 'h2',
-      text: 'Why the GPU sits half-idle while people wait'
+      type: 'p',
+      text: 'vLLM\'s gain comes from two separate ideas working together. The first is a scheduling idea from the Orca paper of 2022: rebuild the batch after every token instead of after every request.[^2] The second is a memory idea: stop storing each request\'s cache as one contiguous slab. The Kwon et al. paper calls the two "complementary". Orca lets more requests run side by side, and paging makes it possible for more of them to fit in memory at once.[^1] The clearest way to see both is to run a tiny schedule by hand and count the wasted slots.',
     },
-    { type: 'p', text: 'Start with an intuition that has nothing to do with machine learning. Picture a small shuttle bus that only leaves when every seat is full and only returns to the depot once every passenger has reached their stop. Eight people board. Seven have short trips downtown, one is going to the far edge of the city.' },
-      { type: 'p', text: 'The bus drops the seven, then drives the whole rest of the route for the single long rider while seven empty seats ride along. Back at the depot, a line of new passengers has been waiting the entire time, because the bus could not pick anyone up until it finished its slowest rider. Most of the trip, most of the seats were empty, and the depot queue kept growing.' },
-    { type: 'p', text: 'That bus is **static batching**, the old default. The server collects a batch of requests, runs them together step by step, and does not accept new work until the entire batch finishes. Language model requests are wildly uneven in length. One user wants a two-word yes or no, another wants a thousand-token essay. Under static batching the short requests finish early but their slots stay locked, producing nothing, until the longest request in the batch is done.' },
-      { type: 'p', text: 'The GPU keeps doing math for those dead slots. That is where the 30 percent utilization comes from. You are paying to move empty seats.' },
-    {
-      type: 'h2',
-      text: 'Adding and dropping riders at every stop'
-    },
-    { type: 'p', text: 'Now change one rule on the bus. It may pick up and drop off at every single stop. The moment a rider reaches their destination, their seat opens, and the moment a seat is open a waiting person climbs in.' },
-      { type: 'p', text: 'The bus is always as full as the depot line allows, and nobody waits for the slowest rider to finish before boarding. That is **continuous batching**, sometimes called in-flight batching. A transformer generates one token per request per step, so every step is a natural stop. At each step vLLM checks the running group: any request that just emitted its end token is evicted immediately, and its freed slot is handed to a request that was waiting in the queue.' },
-    { type: 'p', text: 'Walk the earlier example through it. Eight requests are running, seven short and one long. Around step forty the seven short ones finish. Under static batching those seven slots would idle until the long request wraps up near step eight hundred. Under continuous batching, at step forty-one seven queued requests slide into the freed slots and start generating.' },
-      { type: 'p', text: 'The long request keeps going in its lane, undisturbed, while fresh work fills the space around it. The GPU is doing useful math on a full batch almost the whole time instead of grinding through mostly-empty steps. Same model, same card, but the idle time that static batching baked in is mostly gone.' },
     {
       type: 'terms',
+      optional: false,
       items: [
-        { term: 'Static batching', def: 'Grouping requests and running them together until every request in the group finishes, only then accepting new work. Short requests hold their slots idle while the longest one runs.' },
-        { term: 'Continuous (in-flight) batching', def: 'Re-forming the running batch at every token step: finished requests are removed and queued requests are admitted right away, so the batch stays full.' },
-        { term: 'KV cache', def: 'The per-request store of key and value vectors for every token generated so far. The model reuses it each step instead of recomputing attention over the whole sequence.' },
-        { term: 'PagedAttention', def: 'Storing the KV cache in small fixed-size pages that need not be contiguous in memory, mapped through a lookup table, the way an operating system maps virtual memory to physical pages.' },
-        { term: 'Throughput', def: 'How many tokens or requests the server completes per second across all users, as opposed to the latency any single user feels.' }
-      ]
-    },
-    {
-      type: 'h2',
-      text: 'The memory tax that capped the batch size'
-    },
-    { type: 'p', text: 'Better scheduling only helps if you can actually fit more requests in memory at the same time, and here the old approach quietly wasted most of it. Each request needs a **KV cache** that grows as it generates. Because you cannot know in advance how long an answer will run, the classic serving stack reserves one contiguous block sized for the maximum possible length, up front, for every request.' },
-      { type: 'p', text: 'A user who stops after 30 tokens still holds a block cut for 2,000. That reserved-but-unused space, plus the gaps left between blocks, meant a large share of GPU memory sat claimed and empty. The batch could not grow because memory looked full even though most of it held nothing.' },
-    { type: 'p', text: 'PagedAttention borrows the trick your operating system uses for RAM. Instead of one big contiguous reservation, the KV cache is cut into small fixed-size **pages**, and a per-request table maps the sequence to whatever physical pages are free, in any order. A request grabs pages only as it generates, one at a time.' },
-      { type: 'p', text: 'When it finishes, its pages return to a shared pool for the next request. The near-total reservation waste collapses to a sliver, at most one partly-filled page per sequence. With that memory freed, far more requests fit at once, which is exactly the fuel continuous batching needs to keep the batch full.' },
-    {
-      type: 'diagram',
-      rows: [
-        [
-          { label: 'Static batching', detail: 'Batch of 8 held until slowest finishes' },
-          { label: 'Step 40', detail: '7 slots idle, 1 still running' },
-          { label: 'Utilization', detail: 'GPU mostly empty, queue waits' }
-        ],
-        [
-          { label: 'Continuous batching', detail: 'Batch re-formed every token step' },
-          { label: 'Step 41', detail: '7 freed slots filled from queue' },
-          { label: 'Utilization', detail: 'Batch stays full, queue drains' }
-        ],
-        [
-          { label: 'PagedAttention', detail: 'KV cache split into small pages' },
-          { label: 'On demand', detail: 'Pages allocated as tokens arrive' },
-          { label: 'On finish', detail: 'Pages returned to shared pool' }
-        ]
+        { term: 'Iteration', def: 'One forward pass of the whole model over the current batch. In the generation phase, each iteration produces one new token per running request.' },
+        { term: 'KV cache', def: 'The key and value vectors saved for every earlier token of a request, so each new token can attend to them without recomputing them.' },
+        { term: 'Request-level (static) batching', def: 'The server hands a fixed batch to the engine and gets nothing back until every request in it has finished.' },
+        { term: 'Iteration-level (continuous) batching', def: 'The scheduler runs one iteration, checks which requests finished, and may change the batch before the next iteration.' },
+        { term: 'Slot', def: 'In this post, one place in the batch for one request during one iteration. A slot-step is one slot held for one step.' },
       ],
-      caption: 'Two levers stacked: the scheduler keeps the batch full, paged memory lets far more requests share the card at once.'
-    },
-    { type: 'lab', height: 460,
-        title: 'Static against continuous batching, step by step',
-        caption: 'Same requests, same two slots. The three-step question finishes at step 5 under continuous batching and step 100 under static, because it sat behind a long neighbour. Static also finishes the whole workload 35 steps later on identical hardware.',
-        code: `# Static against continuous batching, one step at a
-# time. No GPU: this is a scheduler you can read.
-# Each request needs a different number of decode
-# steps, which is the whole source of the problem.
-
-REQUESTS = [
-    ("yes or no", 2),
-    ("explain attention", 40),
-    ("capital of France", 3),
-    ("400-word overview", 60),
-]
-SLOTS = 2      # how many the GPU holds at once
-
-def static_batching(requests, slots):
-    """Fill the bus, run until the LAST rider is
-    done, only then reload."""
-    step, waiting, done = 0, list(requests), {}
-    while waiting:
-        batch = waiting[:slots]
-        waiting = waiting[slots:]
-        longest = max(n for _, n in batch)
-        for name, n in batch:
-            done[name] = step + longest  # held to slowest
-        step += longest
-    return step, done
-
-def continuous_batching(requests, slots):
-    """Evict finished each step, admit the next."""
-    step, waiting = 0, list(requests)
-    running, done = [], {}
-    while waiting or running:
-        while waiting and len(running) < slots:
-            name, n = waiting.pop(0)
-            running.append([name, n])
-        step += 1
-        for slot in running:
-            slot[1] -= 1
-        for slot in list(running):
-            if slot[1] == 0:
-                done[slot[0]] = step   # leaves at once
-                running.remove(slot)
-    return step, done
-
-# ---- Report --------------------------------------------
-E = chr(27)
-DIM, OFF, BOLD = E + "[2m", E + "[0m", E + "[1m"
-OK, WARN, BAD = E + "[32m", E + "[33m", E + "[31m"
-note = lambda s: print(DIM + s + OFF)
-
-s_total, s_done = static_batching(REQUESTS, SLOTS)
-c_total, c_done = continuous_batching(REQUESTS, SLOTS)
-
-hdr = BOLD + "BATCHING" + OFF
-print(hdr + "  %d requests, %d slots"
-      % (len(REQUESTS), SLOTS))
-note("-" * 52)
-note("%-18s %5s %7s %7s %s"
-     % ("REQUEST", "WORK", "STATIC", "CONT", "WASTED"))
-
-wasted_total = 0
-for name, work in REQUESTS:
-    s, c = s_done[name], c_done[name]
-    wasted = s - work    # steps waiting, not working
-    wasted_total += wasted
-    if wasted >= 20:
-        colour = BAD
-    else:
-        colour = WARN if wasted else OK
-    print("%-18s %5d %7d %7d %s%+d%s"
-          % (name, work, s, c, colour, wasted, OFF))
-
-note("-" * 52)
-tp = BOLD + "THROUGHPUT" + OFF
-print(tp + "  static finishes at %s%d%s, continuous"
-      % (BAD, s_total, OFF))
-print("            at %s%d%s, on the same hardware"
-      % (OK, c_total, OFF))
-print("            static wasted %s%d%s request-steps"
-      % (BAD, wasted_total, OFF))
-print("            holding finished work in its seat")
-
-print()
-note("The yes-or-no question needs 2 steps and leaves")
-note("at 2 under continuous batching. Under static it")
-note("sits in the bus until its 40-step neighbour is")
-note("done. Every short request pays for whoever it")
-note("happened to sit beside, and the whole batch")
-note("finishes later for it.")
-
-# Try it: set SLOTS = 4 so everything fits at once.
-# Static still makes fast requests wait for the
-# slowest, because that is the rule, not capacity.
-` },
-    {
-      type: 'h2',
-      text: 'How the two ideas multiply each other'
-    },
-    { type: 'p', text: 'It helps to see why these are worth more together than apart. Continuous batching keeps the batch full, but a full batch is useless if memory only lets eight requests coexist. PagedAttention raises that ceiling by reclaiming the wasted reservation, so the running group can be thirty or forty deep instead of eight.' },
-      { type: 'p', text: 'Continuous batching then keeps that larger group busy every step. One idea removes the idle time, the other removes the memory cap on how many can run, and stacked they push a card that limped along near 30 percent up toward heavy, sustained use. That compounding is why the reported gains are measured in multiples, not percentages.' },
-    {
-      type: 'callout',
-      title: 'The knob that matters most',
-      text: 'gpu-memory-utilization controls how much of the card vLLM claims for the paged KV pool. Set it too low and you starve the batch, capping how many requests can share the GPU. Raise it carefully, watch for out-of-memory errors under real load, and leave headroom for activation spikes.'
     },
     {
       type: 'h2',
-      text: 'The mistakes that quietly give the gains back'
+      text: 'Four requests, two slots, thirteen steps',
     },
-    { type: 'p', text: 'The first trap is measuring the wrong number. If you benchmark one request at a time, continuous batching looks like it did nothing, because its whole advantage shows up only when many requests overlap. Load-test with real concurrency or you will conclude the upgrade was pointless.' },
-      { type: 'p', text: 'The second trap is confusing throughput with latency. Packing the batch fuller lifts total tokens per second, but any single user can wait a touch longer at the front of a busy queue. That trade is usually worth it, though you should decide it on purpose rather than discover it in production.' },
+    {
+      type: 'p',
+      text: 'This example is illustrative. The arithmetic is mine, not from either paper. Four requests arrive together at time zero. Request A will produce 2 tokens, B will produce 8, C will produce 3 and D will produce 5, for 18 useful tokens in total. The GPU has room for two requests at once. That limit of two is set by memory, and the second half of this post is about it. To keep the counting clean, assume every step produces exactly one token per occupied slot and that reading the prompt costs nothing.',
+    },
+    {
+      type: 'p',
+      text: 'Under request-level batching the scheduler forms a batch, and the engine gives back results only when the whole batch is done. Orca\'s authors describe this behavior in existing systems such as Triton with FasterTransformer: a request that finishes early cannot return to the client, a request that arrives mid-batch waits for the batch to finish, and the engine keeps computing for the finished, "inactive" requests on every remaining iteration.[^2] Here is the schedule:',
+    },
     {
       type: 'ul',
       items: [
-        'Benchmarking with one request at a time, then wondering where the promised speedup went.',
-        'Leaving gpu-memory-utilization at a timid default so the paged KV pool stays small and the batch cannot grow.',
-        'Setting max-model-len far larger than real prompts need, which shrinks how many sequences share the card.',
-        'Reading a slightly higher single-user latency as a regression instead of the expected cost of a fuller batch.',
-        'Assuming a bigger GPU alone fixes it, when the real limit was scheduling and memory layout, not raw compute.'
-      ]
-    },
-    {
-      type: 'h2',
-      text: 'What to carry away'
+        'Steps 1 and 2: slot 1 runs A, slot 2 runs B. A emits its last token at step 2.',
+        'Steps 3 to 8: slot 1 is held by the finished A and does no useful work. Slot 2 runs B. That is 6 idle slot-steps, while C and D sit in the queue.',
+        'End of step 8: B finishes, so the batch is done. A and B go back to their clients together, and A has waited 6 steps for no reason.',
+        'Steps 9 to 11: slot 1 runs C, slot 2 runs D. C finishes at step 11.',
+        'Steps 12 and 13: slot 1 is idle again while D runs. That is 2 more idle slot-steps. C and D return at step 13.',
+      ],
     },
     {
       type: 'p',
-      text: 'Two mistakes undo these gains in practice. The first is setting the running batch far too large in the hope of more throughput, then watching latency spike and requests get preempted when the KV cache runs out of pages partway through generation. Continuous batching only helps up to the memory the GPU actually has, so the right move is to cap the batch to what fits and let the queue absorb the rest. The second is measuring throughput on short prompts with short outputs, where the scheduler barely matters, and then being surprised in production when long generations behave nothing like the benchmark did. Always test with output lengths that match real traffic.'
+      text: 'Totals: 13 steps, which gives 26 slot-steps. 18 did useful work and 8 were idle, so about 31% of the batch capacity was wasted. The results came back at steps 8, 8, 13 and 13, for a mean of 10.5.',
     },
-    { type: 'p', text: 'The self-hosted model that could barely handle a handful of users was never the bottleneck. The bottleneck was a scheduler that made short requests wait on long ones and a memory scheme that reserved space it never used. Continuous batching keeps the GPU working on a full group by swapping finished requests for waiting ones at every token step. PagedAttention frees the memory that let the group be small in the first place.' },
-      { type: 'p', text: 'When you serve your own model and the utilization graph looks embarrassing, reach for these two levers before you reach for a bigger card. The extra throughput was sitting inside the GPU you already owned.' },
+    {
+      type: 'p',
+      text: 'Now apply Orca\'s rule. The scheduler repeats three things: pick the requests to run, run one iteration on them, collect the results. Because control comes back after every iteration, a finished request can return at once, and a new request only has to wait one iteration before it can be picked.[^2]',
+    },
+    {
+      type: 'ul',
+      items: [
+        'Steps 1 and 2: slot 1 runs A, slot 2 runs B. A finishes at step 2 and returns at once.',
+        'Step 3: the scheduler puts C into the free slot. Steps 3 to 5 run C and B, and C returns at step 5.',
+        'Step 6: D takes the free slot. Steps 6 to 8 run D and B, and B returns at step 8.',
+        'Steps 9 and 10: D runs alone. Slot 2 is idle because nothing is left in the queue. That is 2 idle slot-steps. D returns at step 10.',
+      ],
+    },
+    {
+      type: 'p',
+      text: 'Totals: 10 steps, which gives 20 slot-steps. The same 18 did useful work, and only 2 were idle, about 10%. The results came back at steps 2, 5, 8 and 10, for a mean of 6.25. The model and the hardware are the same, and the total work is the same 18 tokens. All of the difference is idle time that the request-level scheduler created and the iteration-level scheduler filled.',
+    },
+    {
+      type: 'chart',
+      kind: 'bar',
+      title: 'Step at which each request\'s result reaches the client',
+      yLabel: 'Step number (lower is better)',
+      series: [
+        { label: 'Request-level batching', key: 'req' },
+        { label: 'Iteration-level batching', key: 'iter' },
+      ],
+      data: [
+        { label: 'A (2 tokens)', values: { req: 8, iter: 2 } },
+        { label: 'B (8 tokens)', values: { req: 8, iter: 8 } },
+        { label: 'C (3 tokens)', values: { req: 13, iter: 5 } },
+        { label: 'D (5 tokens)', values: { req: 13, iter: 10 } },
+      ],
+      caption: 'Illustrative example, the author\'s own arithmetic: four requests, two slots, one token per step, free prefill. B is the longest request, and it finishes at step 8 either way. Every other request gains.',
+    },
+    {
+      type: 'p',
+      text: 'Two simplifications flatter the iteration-level version, and they are worth stating. First, a request that joins has to process its prompt. Orca calls this the initiation phase, and it handles all input tokens in one iteration, while later iterations handle one token each.[^2] Requests at different stages have tensors of different shapes, so they cannot simply be stacked into one batched matrix. Orca\'s answer is **selective batching**: it batches the linear layers across requests and splits the batch only for the attention operation, which has no model weights to share across requests anyway.[^2] Second, a long prompt joining the batch slows the iteration for everyone else in it. The Sarathi-Serve paper, a later work, calls these pauses "generation stalls" and shows one in vLLM lasting over several seconds on Yi-34B.[^5]',
+    },
+    {
+      type: 'p',
+      text: 'Measured on real models, the scheduling gain is large. With traces of mixed-length requests on a GPT-3 175B model, Orca matched a median normalized latency of 190 ms at 6.81 requests per second, while FasterTransformer managed 0.185, a 36.9 times gap.[^2] That comparison measures Orca\'s whole system, pipelining design included, so not all of it comes from the scheduler.',
+    },
+    {
+      type: 'h2',
+      text: 'Why the batch had only two slots',
+    },
+    {
+      type: 'p',
+      text: 'In the example, capacity was fixed at two, and in a real server capacity is set by the KV cache. At each generation step, the model computes a key and a value vector only for the newest token and reads the cached vectors for all earlier positions.[^1] That cache grows by one entry per token, in every layer.',
+    },
+    {
+      type: 'eq',
+      tex: '\\begin{gathered} M_{\\text{KV}} = 2 \\times L \\times H \\times d_{\\text{head}} \\\\ \\times\\; b \\times T \\end{gathered}',
+      caption: 'KV cache size for one request. Kwon et al. compute the per-token cost of OPT-13B this way;[^1] splitting the hidden size into heads times head width is standard arithmetic.',
+    },
+    {
+      type: 'p',
+      text: 'Term by term: the 2 counts one key vector and one value vector. \\(L\\) is the number of layers, because every layer keeps its own cache. \\(H\\) is the number of key and value heads, and \\(d_{\\text{head}}\\) is the width of each head. In the original Transformer each head has width \\(d_{\\text{model}}/h\\), so \\(H \\times d_{\\text{head}}\\) equals the hidden size.[^3] \\(b\\) is the number of bytes per number, which is 2 for FP16. \\(T\\) is the number of tokens in the sequence so far.',
+    },
+    {
+      type: 'p',
+      text: 'The Kwon et al. paper plugs in OPT-13B: 2 times a hidden size of 5,120 times 40 layers times 2 bytes gives about 800 KB per token. OPT can generate up to 2,048 tokens, so one request can need up to 1.6 GB.[^1] On their single 40 GB A100, the weights take 26 GB and 12 GB is left for the cache, about 15.7 thousand token slots.[^1] One note on \\(H\\): models that use grouped-query attention share one key and value head across a group of query heads, and that shrinks \\(H\\) directly.[^4]',
+    },
+    {
+      type: 'p',
+      text: 'Orca reserves memory in exactly this way. When a new request is admitted, its scheduler reserves max_tokens slots for that request\'s keys and values in advance. This guarantees the request can never run out of memory partway through, but it means the reservation is sized for the worst case.[^2] My reading of the numbers: 15.7 thousand slots divided by 2,048 reserved slots per request is about 7.7 requests. In the Kwon et al. experiments, their Orca variant that reserves the maximum length ran an average of exactly 7.00 requests at a time on ShareGPT, and also on Alpaca.[^1] The scheduler can be perfect and the batch still cannot grow past what the reservations allow.',
+    },
+    {
+      type: 'h2',
+      text: 'Three ways a contiguous reservation wastes memory',
+    },
+    {
+      type: 'p',
+      text: 'Deep learning frameworks mostly want tensors in contiguous memory, so earlier servers stored each request\'s cache as one contiguous block sized for its maximum possible length.[^1] Kwon et al. name three kinds of waste that come from this. **Reserved** slots will hold future tokens eventually, but they block other requests while they wait. **Internal fragmentation** is the reserved space that is never used, because the request stopped short of its maximum, and it only becomes visible once the request finishes. **External fragmentation** is the unusable space between blocks of different sizes left by the memory allocator (the paper assumes a buddy allocator).[^1] Their Figure 3 shows a request with a 2,048-token maximum that leaves 2,038 slots unused.[^1]',
+    },
+    {
+      type: 'image',
+      src: '/blog-images/vllm-continuous-batching/kv-cache-waste.webp',
+      alt: 'Stacked bar chart of KV cache usage. Orca (Max): 20.4% token states, 13.3% reservation, 57.3% internal fragmentation, 8.9% external fragmentation. Orca (Pow2): 26.8, 17.9, 13.6, 41.6. Orca (Oracle): 38.2, 25.2, 36.6. vLLM: 96.3% token states.',
+      width: 975,
+      height: 535,
+      caption: 'Figure 2 from Kwon et al., 2023,[^1] reproduced under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Average share of KV cache memory by use. The three Orca bars are the authors\' own reimplementations, since Orca itself was not public: Max reserves 2,048 tokens, Pow2 over-reserves by at most 2 times, and Oracle knows the true output length.',
+    },
+    {
+      type: 'p',
+      text: 'The Oracle bar is the telling one. Even when the system knows each output length in advance, which no real server does, only 38.2% of the cache holds token states. The reservation still covers the request\'s whole lifetime, and the variable-size blocks still fragment the free space around them.[^1] Knowing the length in advance does not fix the waste. Only a different allocation scheme does.',
+    },
+    {
+      type: 'h2',
+      text: 'Pages and block tables',
+    },
+    {
+      type: 'p',
+      text: 'PagedAttention borrows the operating system\'s virtual memory. It cuts each request\'s cache into **KV blocks** of a fixed number of tokens, and the blocks do not need to sit next to each other in GPU memory. The paper\'s analogy is that blocks are pages, tokens are bytes and requests are processes.[^1] Each request has a **block table** that maps its logical blocks, in order, to physical blocks anywhere in a shared pool, and records how many positions of each block are filled.[^1] The attention kernel reads the table and fetches the blocks one by one.[^1]',
+    },
+    {
+      type: 'p',
+      text: 'The paper\'s own example uses 4-token blocks. A prompt of 7 tokens gets logical blocks 0 and 1, which map to physical blocks 7 and 1, with one slot left over. The first generated token fills that slot. The second finds the last block full, so vLLM takes physical block 3 from the pool and writes a new row into the table.[^1] New memory is claimed only when the previous block is full, so each request wastes at most part of one block. Because every block is the same size, external fragmentation disappears.[^1] When a request finishes, its blocks go straight back to the pool.[^1]',
+    },
+    {
+      type: 'p',
+      text: 'Block size is a trade-off. Blocks that are too small do not use the GPU\'s parallelism well when reading the cache. Blocks that are too large bring internal fragmentation back and reduce the chance that requests can share blocks. vLLM defaults to 16 tokens.[^1] The table also makes sharing cheap. Several samples from one prompt can point at the same physical prompt blocks, with a reference count and copy-on-write for the last block. On the Alpaca trace, sharing saved 6.1% to 9.8% of blocks in parallel sampling and 37.6% to 55.2% in beam search.[^1]',
+    },
+    {
+      type: 'p',
+      text: 'Paging also changes what happens when memory runs out. Blocks are claimed on demand, so a burst of long outputs can fill the pool. vLLM then preempts requests in first-come-first-served order, latest arrivals first, and evicts all of a sequence\'s blocks or none of them. It either swaps them to CPU memory or throws them away and recomputes them later.[^1] That is the price of dropping the worst-case reservation Orca used.',
+    },
+    {
+      type: 'chart',
+      kind: 'bar',
+      title: 'Average requests batched at once, OPT-13B on one A100',
+      yLabel: 'Batched requests',
+      series: [
+        { label: 'ShareGPT (2 req/s)', key: 's' },
+        { label: 'Alpaca (30 req/s)', key: 'a' },
+      ],
+      data: [
+        { label: 'Orca (Max)', values: { s: 7.0, a: 7.0 } },
+        { label: 'Orca (Pow2)', values: { s: 9.81, a: 43.24 } },
+        { label: 'Orca (Oracle)', values: { s: 13.62, a: 72.75 } },
+        { label: 'vLLM', values: { s: 30.42, a: 132.44 } },
+      ],
+      caption: 'Redrawn from Figure 13 of Kwon et al., 2023.[^1] Alpaca requests are much shorter than ShareGPT ones, so more of them fit.',
+    },
+    {
+      type: 'p',
+      text: 'This chart shows the capacity from the hand example measured on a real model. On ShareGPT, vLLM kept 2.2 times as many requests in flight as Orca (Oracle) and 4.3 times as many as Orca (Max). At similar latencies, that became 1.7 to 2.7 times the sustainable request rate of Orca (Oracle), 2.7 to 8 times that of Orca (Max), and up to 22 times that of FasterTransformer, which has neither iteration-level scheduling nor efficient memory management.[^1] Both halves are needed. Iteration-level scheduling keeps the slots full, and paging gives it more slots to fill.',
+    },
+    {
+      type: 'h2',
+      text: 'Where paging stops paying',
+    },
+    {
+      type: 'p',
+      text: 'The block table has a cost. Looking up the table, running extra branches and handling variable sequence lengths made vLLM\'s attention kernel 20% to 26% slower than FasterTransformer\'s highly tuned version. The authors argue this is small because it affects only attention and not the linear layers.[^1] The gain also depends on memory being the bottleneck. With OPT-175B on eight 80 GB A100s and the short Alpaca requests, the Oracle and Pow2 baselines could already batch many requests, the workload became compute-bound, and vLLM\'s lead over them shrank.[^1] The paper\'s discussion section states the general limit. For workloads with static tensor shapes, like training, or for serving models that are compute-bound, better memory efficiency may not improve performance, and the extra indirection and non-contiguous blocks "may rather degrade the performance."[^1]',
+    },
     {
       type: 'sources',
+      numbered: true,
       items: [
-        { title: 'Kwon et al., Efficient Memory Management for Large Language Model Serving with PagedAttention (2023)', url: 'https://arxiv.org/abs/2309.06180' },
-        { title: 'Yu et al., Orca: A Distributed Serving System for Transformer-Based Generative Models (2022)', url: 'https://www.usenix.org/conference/osdi22/presentation/yu' },
-        { title: 'vLLM Documentation', url: 'https://docs.vllm.ai/en/latest/' }
-      ]
-    }
-  ]
+        { title: 'Kwon et al., Efficient Memory Management for Large Language Model Serving with PagedAttention (SOSP 2023)', url: 'https://arxiv.org/abs/2309.06180' },
+        { title: 'Yu et al., Orca: A Distributed Serving System for Transformer-Based Generative Models (OSDI 2022)', url: 'https://www.usenix.org/system/files/osdi22-yu.pdf' },
+        { title: 'Vaswani et al., Attention Is All You Need (2017)', url: 'https://arxiv.org/abs/1706.03762' },
+        { title: 'Ainslie et al., GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints (2023)', url: 'https://arxiv.org/abs/2305.13245' },
+        { title: 'Agrawal et al., Taming Throughput-Latency Tradeoff in LLM Inference with Sarathi-Serve (2024)', url: 'https://arxiv.org/abs/2403.02310' },
+      ],
+    },
+  ],
 };

@@ -68,10 +68,4 @@ export const SOURCES = {
   'agentic-rag': [S.selfrag, S.react, S.ragSurvey, S.ragBest, S.reflexion, S.rag],
   'hyde': [S.hydePaper, S.dpr, S.ragSurvey, S.sbert, S.rag, S.ragBest],
   'cag-vs-rag': [S.rag, S.ragSurvey, S.lostmiddle, S.pagedattn, S.longformer, S.scaleInfer],
-  'reranking': [S.rerankBert, S.dpr, S.sbert, S.ragSurvey, S.ragBest, S.wikiBM25],
-  'rag-evaluation': [S.ragas, S.rag, S.ragSurvey, S.factscore, S.evalSurvey, S.mtbench],
-  'why-llm-deployment-is-different': [S.scaleInfer, S.pagedattn, S.flashattn, S.mqa, S.vllmDocs, S.transformer],
-  'vllm-continuous-batching': [S.pagedattn, S.vllmDocs, S.scaleInfer, S.mqa, S.flashattn, S.transformer],
-  'serving-frameworks-compared': [S.pagedattn, S.vllmDocs, S.scaleInfer, S.flashattn, S.int8, S.mqa],
-  'autoscaling-cold-starts': [S.chiron, S.pagedattn, S.scaleInfer, S.vllmDocs, S.mqa, S.flashattn, S.llmSurvey2],
 };
