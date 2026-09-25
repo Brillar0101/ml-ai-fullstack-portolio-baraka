@@ -30,18 +30,12 @@ export const SOURCES = {
   'embeddings-meaning-vectors': [S.word2vec, S.sbert, S.e5, S.wikiEmbed, S.wikiCosine, S.dpr],
   'reading-benchmarks': [S.contamination, S.mmlu, S.helm, S.arena, S.leaderboards, S.ifeval],
   'chain-of-thought': [S.zeroshotCot, S.cot, S.gsm8k, S.selfconsist, S.testTime, S.r1],
+
+  // ---------- content/ai-series ----------
   'context-length': [S.lostmiddle, S.longformer, S.rope, S.distracted, S.flashattn, S.ragSurvey],
   'chunking-for-rag': [S.ragSurvey, S.raptor, S.graphrag, S.ragBest, S.rag, S.lostmiddle],
   'retrieval-algorithms': [S.wikiBM25, S.dpr, S.rerankBert, S.ragSurvey, S.hnsw, S.sbert],
   'kv-cache': [S.scaleInfer, S.pagedattn, S.mqa, S.flashattn, S.transformer, S.vllmDocs],
   'probabilistic-nature': [S.nucleus, S.gpt3, S.smcSteering, S.selfconsist, S.transformer, S.guided],
   'multilingual-quality': [S.tokenCost, S.mt5, S.bpe, S.llmSurvey2, S.llmSurvey, S.helm],
-
-  // ---------- content/ai-series ----------
-  'domain-specific-models': [S.biobert, S.bloomberggpt, S.codellama, S.ragfinetune, S.lora, S.lima],
-  'functional-correctness': [S.codex, S.mbpp, S.codellama, S.llmSE, S.gaia, S.checklist],
-  'ai-as-a-judge': [S.mtbench, S.evalSurvey, S.helm, S.factscore, S.ragas, S.leaderboards],
-  'jailbreaking': [S.gcg, S.dan, S.pair, S.owasp, S.hh, S.nist],
-  'build-vs-buy-model': [S.buyBuild, S.llama, S.lora, S.scaling, S.chinchilla, S.vllmDocs],
-  'detection-without-a-detector': [S.locateAnything, S.clip, S.coco, S.yolo, S.llmSurvey2, S.transformer],
 };
