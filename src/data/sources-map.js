@@ -10,8 +10,4 @@ export const SOURCES = {
   // ---------- src/data/seriesPosts.js ----------
 
   // ---------- content/ai-series ----------
-  'foundation-models-explained': [S.foundation, S.gpt3, S.llmSurvey, S.llama, S.instructgpt, S.wikiLLM],
-  'why-models-hallucinate': [S.hallSurvey, S.hallNLG, S.factscore, S.hallInev, S.truthfulqa, S.wikiHall],
-  'evaluation-is-the-hard-part': [S.helm, S.evalSurvey, S.mtbench, S.mmlu, S.contamination, S.checklist],
-  'prompt-engineering-that-helps': [S.gpt3, S.promptProg, S.principled, S.cot, S.helm, S.ifeval],
 };
