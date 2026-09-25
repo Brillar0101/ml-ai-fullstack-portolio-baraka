@@ -42,10 +42,14 @@ const PrivacyPage = () => {
       <section className="privacy-section">
         <h2>Analytics</h2>
         <p>
-          The site records anonymous usage events (such as which pages are viewed) to
-          understand what content is useful. These events are not tied to your identity
-          and are stored in a private database. No advertising or cross-site tracking
-          cookies are used.
+          The site records anonymous usage events to understand what content is useful:
+          which pages are viewed, how far down a blog post you scroll, how long you stay,
+          your browser&rsquo;s user agent, and, for the first page of a visit, the site
+          that linked here and any campaign tag in the link (for example
+          utm_source=chatgpt.com). To count visits rather than page loads, a random ID is
+          kept in your browser&rsquo;s session storage and deleted when you close the tab.
+          None of this is tied to your identity, and it is stored in a private database
+          only I can read. No cookies, advertising, or cross-site tracking are used.
         </p>
       </section>
 

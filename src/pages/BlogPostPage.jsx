@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useState, useEffect, useCallback, useRef } from 'react';
+import React, { lazy, Suspense, useState, useEffect, useCallback } from 'react';
 import { Link, useParams, Navigate } from 'react-router-dom';
 import { ChevronLeft, ArrowRight, Clock, Calendar, Send, User } from 'lucide-react';
 import { BLOG_POSTS } from '../data/blog';
@@ -8,53 +8,58 @@ import { AI_SERIES_POSTS } from '../data/aiSeriesPosts';
 import { isPublished, isPreviewing } from '../lib/publishing';
 import SeriesPost from './blog/SeriesPost';
 import { supabase } from '../lib/supabase';
+import { CONFIG } from '../config';
 import './BlogPostPage.css';
 
 // Analytics tracking hook
 const useAnalytics = (slug) => {
-  const startTime = useRef(Date.now());
-  const maxScroll = useRef(0);
-  const tracked = useRef(false);
-
   useEffect(() => {
-    if (!supabase || tracked.current) return;
-    tracked.current = true;
+    if (!supabase) return;
 
     // Page views are recorded globally by usePageTracking (one `page_view`
-    // event per /blog/<slug>). Here we only add per-post engagement below:
-    // how far the reader scrolled and how long they stayed.
+    // event per /blog/<slug>). Here we only add per-post engagement: how far
+    // the reader scrolled and how long they stayed. State is per slug, so
+    // moving to another post starts a fresh measurement.
+    const startTime = Date.now();
+    let maxScroll = 0;
+    let engagementSent = false;
 
-    // Track scroll depth
     const handleScroll = () => {
-      const scrollTop = window.scrollY;
       const docHeight = document.documentElement.scrollHeight - window.innerHeight;
       if (docHeight > 0) {
-        const depth = Math.round((scrollTop / docHeight) * 100);
-        if (depth > maxScroll.current) maxScroll.current = depth;
+        const depth = Math.round((window.scrollY / docHeight) * 100);
+        if (depth > maxScroll) maxScroll = depth;
       }
     };
-    window.addEventListener('scroll', handleScroll);
 
-    // Send scroll depth + time on page when leaving
-    let engagementSent = false;
+    // supabase-js only sends a request once it is awaited or .then()'d, so the
+    // insert must be consumed. `visibilitychange` to hidden fires reliably on
+    // tab close and on mobile app switches, where `beforeunload` often does not.
     const handleLeave = () => {
       if (engagementSent) return;
-      const timeOnPage = Math.round((Date.now() - startTime.current) / 1000);
-      if (timeOnPage < 2) return; // skip if less than 2 seconds (cleanup noise)
+      const timeOnPage = Math.round((Date.now() - startTime) / 1000);
+      if (timeOnPage < 2) return;
       engagementSent = true;
       supabase.from('analytics_events').insert([{
         post_slug: slug,
+        page_path: `/blog/${slug}`,
         event_type: 'engagement',
-        scroll_depth: maxScroll.current,
+        scroll_depth: Math.min(maxScroll, 100),
         time_on_page: timeOnPage,
-      }]);
+      }]).then(({ error }) => {
+        if (error && import.meta.env.DEV) console.warn('engagement insert failed:', error.message);
+      });
+    };
+    const handleVisibility = () => {
+      if (document.visibilityState === 'hidden') handleLeave();
     };
 
-    window.addEventListener('beforeunload', handleLeave);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    document.addEventListener('visibilitychange', handleVisibility);
     return () => {
       handleLeave();
       window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('beforeunload', handleLeave);
+      document.removeEventListener('visibilitychange', handleVisibility);
     };
   }, [slug]);
 };
@@ -183,6 +188,10 @@ const BlogPostPage = () => {
   const { slug } = useParams();
   const post = BLOG_POSTS.find(p => p.id === slug);
   useAnalytics(slug);
+
+  useEffect(() => {
+    if (post) document.title = `${post.title} | ${CONFIG.name}, Computer Engineer`;
+  }, [post]);
 
   // A post is either out or it is not. Hide anything not yet published or
   // explicitly marked coming soon.
