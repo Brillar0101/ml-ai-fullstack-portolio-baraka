@@ -139,11 +139,18 @@ function Block({ block, format }) {
       // pastel decision tree (option A); `edges` renders the icon-based
       // architecture diagram (option B); `nodes`/`rows` alone render the
       // simple boxed flow (default).
-      if (block.root) {
-        return <SketchTreeDiagram title={block.title} caption={block.caption} root={block.root} />;
-      }
-      if (block.edges) {
-        return <ArchDiagram title={block.title} caption={block.caption} nodes={block.nodes} edges={block.edges} groups={block.groups} />;
+      // Wide diagrams scroll sideways on a phone; their caption is rendered
+      // outside that scroll box so it wraps instead of being cut off.
+      if (block.root || block.edges) {
+        const diagram = block.root
+          ? <SketchTreeDiagram title={block.title} root={block.root} />
+          : <ArchDiagram title={block.title} nodes={block.nodes} edges={block.edges} groups={block.groups} />;
+        return block.caption ? (
+          <figure className="series-chart">
+            {diagram}
+            <figcaption className="series-chart-caption">{rich(block.caption)}</figcaption>
+          </figure>
+        ) : diagram;
       }
       return <FlowDiagram nodes={block.nodes} rows={block.rows} caption={block.caption} />;
     case 'chart': {
