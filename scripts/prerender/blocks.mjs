@@ -63,7 +63,7 @@ export function blockHtml(block) {
     case 'h2': return `<h2>${esc(block.text)}</h2>`;
     case 'ul': return `<ul>${block.items.map((it) => `<li>${inline(it)}</li>`).join('')}</ul>`;
     case 'terms':
-      return `<dl>${block.items.map((t) => `<dt>${esc(t.term)}</dt><dd>${inline(t.def)}</dd>`).join('')}</dl>`;
+      return `<dl>${block.items.map((t) => `<dt>${inline(t.term)}</dt><dd>${inline(t.def)}</dd>`).join('')}</dl>`;
     case 'eq': return `<figure>${tex(block.tex, true)}${caption(block.caption)}</figure>`;
     case 'image':
       return `<figure><img src="${esc(block.src)}" alt="${esc(block.alt)}"${block.width ? ` width="${block.width}" height="${block.height}"` : ''}>${caption(block.caption)}</figure>`;

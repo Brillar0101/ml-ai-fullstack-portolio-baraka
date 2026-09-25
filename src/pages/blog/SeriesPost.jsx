@@ -119,8 +119,8 @@ function Block({ block, format, showAll }) {
           {block.items.map((t, i) => (
             <li key={i}>
               {t.url
-                ? <a href={t.url} target="_blank" rel="noopener noreferrer"><strong>{t.term}</strong></a>
-                : <strong>{t.term}</strong>}: {rich(t.def)}
+                ? <a href={t.url} target="_blank" rel="noopener noreferrer"><strong>{rich(t.term)}</strong></a>
+                : <strong>{rich(t.term)}</strong>}: {rich(t.def)}
             </li>
           ))}
         </ul>
