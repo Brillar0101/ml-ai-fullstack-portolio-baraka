@@ -1,215 +1,196 @@
+// Every factual claim below is taken from the numbered sources at the end.
+// The Enhanced vs Agentic RAG diagram is reproduced under CC BY 4.0 (arXiv 2601.07711).
+// The two charts are redrawn from table values in Jin et al. 2025 (Search-R1)
+// and Ferrazzi et al. 2026, since the Search-R1 arXiv license does not allow reuse.
 export const POST = {
   id: 'manual-rag-vs-agentic-context',
-  title: 'Who Decides What Goes in the Window: Manual RAG vs Agentic Context',
-  excerpt: 'A docs bot that runs a full retrieval on every "thanks" is burning money. The fix is not a bigger pipeline. It is letting the model decide when to fetch.',
+  title: 'Same Retriever, Different Driver: Fixed RAG Pipelines vs Models That Search',
+  excerpt: 'Search-R1 kept the retriever, the corpus and the three passages per call fixed, and changed only who writes the queries. Exact match on seven QA sets went from 0.304 to 0.431. The papers that measured the bill, and the cases where the fixed pipeline still won, tell the rest.',
   category: 'AI',
   tags: ['Context Engineering', 'RAG', 'Agents'],
   body: [
     {
       type: 'p',
-      text: 'Picture a documentation assistant for a developer portal. It answers questions about the API well enough. Then someone looks at the token bill. The bot is running a full vector search and pulling ten document chunks into the prompt on **every single message**, including the ones that are just a user typing "thanks, that worked" or "ok". When a large share of the traffic needs no documents at all, the system is paying retrieval and prompt costs on all of it anyway.',
+      text: "In March 2025 a team from the University of Illinois, UMass Amherst and Google Cloud AI Research ran a comparison where almost everything was held still. Both systems used Qwen2.5-7B. Both searched the same 2018 Wikipedia dump with the same retriever, E5, and both got exactly 3 passages back per retrieval.[^1] E5 is a text embedding model: it turns a query and each passage into a single vector, so the nearest vectors can be looked up as the most relevant passages.[^2] The baseline was plain retrieval-augmented generation (RAG). It took the question, retrieved once, pasted the passages in front of the question, and let the model answer. The other system, Search-R1, let the model write its own search queries in the middle of its reasoning, as many as its budget allowed, after training it with reinforcement learning to do so.[^1]",
     },
     {
       type: 'p',
-      text: 'That waste was not a bug in the code. It was a consequence of the design. The pipeline was built to retrieve first and ask questions later. Nobody had given the system a way to say \'this turn does not need any documents.\' To understand why, and to see the alternative, we need to look at who is actually in charge of filling the context window.'
+      text: "Averaged over seven question answering datasets, the RAG baseline scored 0.304 exact match. Search-R1 trained from the base 7B model scored 0.431.[^1] Exact match (EM) is the share of answers that equal the gold answer string, so this is 30.4% of questions right against 43.1%. By my arithmetic that is a 42% relative gain over RAG. The abstract reports 24%, which matches the gap to the paper's strongest baseline, a rejection sampling method at 0.348, rather than to RAG.[^1] The number worth keeping is the raw pair. Same retriever, same corpus, same passage count. The one thing that changed was who decided what went into the context window.",
     },
     {
       type: 'h2',
-      text: 'The context window is a small desk, and someone has to decide what sits on it'
-    },
-    { type: 'p', text: 'Think of the model as a person working at a small desk. The desk is the context window: the text the model can see while it produces an answer. It is not huge, and even when it is large, cramming it full costs money and can bury the useful lines under noise.' },
-      { type: 'p', text: 'Every design that connects a model to a knowledge base is, underneath, a policy for what to put on that desk each turn. The interesting question is who writes that policy. In one design a fixed program decides. In the other the model decides for itself.' },
-    {
-      type: 'p',
-      text: 'Hold onto the desk image, because the whole contrast comes down to this. A manual pipeline is like an assistant who drops the same stack of ten folders on your desk before every conversation, no matter what you asked. An agentic setup is like giving you the key to the filing cabinet and letting you walk over and grab a folder only when you actually need one.'
-    },
-    {
-      type: 'h2',
-      text: 'How a manual RAG pipeline fills the window without asking'
-    },
-    { type: 'p', text: 'The classic retrieval-augmented generation pipeline is a straight line. A message comes in. The system turns it into a vector, searches a database for the closest chunks, takes the top handful, pastes them above the question, and sends the whole thing to the model.' },
-      { type: 'p', text: 'The model answers. Same steps, same order, every turn. Nothing in that flow ever checks whether the documents were needed.' },
-    {
-      type: 'diagram',
-      title: 'Manual RAG: a fixed line',
-      nodes: [
-        { id: 'u', label: 'User message', icon: 'user', at: [0, 0] },
-        { id: 'r', label: 'Retriever (top-k)', icon: 'service', at: [1, 0] },
-        { id: 'db', label: 'Vector store', icon: 'datastore', at: [1, 1] },
-        { id: 's', label: 'Stuff prompt', icon: 'service', at: [2, 0] },
-        { id: 'm', label: 'Model answers', icon: 'model', at: [3, 0] }
-      ],
-      edges: [
-        { from: 'u', to: 'r', label: 'always' },
-        { from: 'db', to: 'r', label: 'top-k chunks' },
-        { from: 'r', to: 's', label: '' },
-        { from: 's', to: 'm', label: '' }
-      ],
-      caption: 'Retrieval happens on every turn regardless of whether the turn needs it. The model never gets a vote.'
+      text: 'What exactly differs between the two designs',
     },
     {
       type: 'p',
-      text: 'This is exactly what the documentation bot was doing. When a user asked \'how do I paginate the results endpoint,\' the pipeline shone. It found the pagination page, dropped it in, and the model wrote a clean answer grounded in the real docs. When the user replied \'thanks,\' the same machinery fired. It searched, it found the ten chunks that were vaguely closest to the word thanks, and it stuffed them in front of a model that only needed to say \'you are welcome.\''
-    },
-    { type: 'p', text: 'The strength here is that the behavior is boring in the good sense. You can predict the cost of every turn to the token. You can cache. You can trace a bad answer back to the chunks that caused it.' },
-      { type: 'p', text: 'The weakness is that the pipeline has no judgment. It cannot tell a real question from a pleasantry, and it cannot decide to fetch a second, different document when the first batch turned out to be off topic.' },
-    {
-      type: 'h2',
-      text: 'Agentic context engineering: the model treats retrieval as an action'
-    },
-    {
-      type: 'p',
-      text: 'The other design flips the control. Instead of a program deciding to retrieve, you hand the model a set of tools and let it choose. Retrieval becomes one option among several, something the model can call the way it would call any function. The model reads the incoming message, thinks about whether it can answer from what it already knows, and only reaches for the docs when it decides they would help. This is the shape behind the ReAct pattern, where a model interleaves reasoning with actions, and behind what Anthropic describes as context engineering: treating the assembly of the window as something the agent manages on purpose.'
+      text: "The phrase \"agentic RAG\" gets used loosely, so it helps to pin both designs down by three questions: what goes in, who writes the query, and how many retrieval calls happen.",
     },
     {
       type: 'terms',
+      optional: false,
       items: [
-        { term: 'Manual RAG pipeline', def: 'A fixed program that retrieves top-k chunks and inserts them into the prompt on every turn. The retrieval policy lives in code, not in the model.' },
-        { term: 'Agentic context engineering', def: 'A design where the model itself decides when to retrieve, what to fetch, which tool to call, and what to keep in the window. Context assembly becomes an action the model controls.' },
-        { term: 'Top-k retrieval', def: 'Pulling the k most similar chunks to the query from a vector store. A larger k means more coverage and more tokens.' }
-      ]
-    },
-    {
-      type: 'p',
-      text: 'The flow stops being a line and becomes a loop. The model looks at the situation, picks an action, sees the result, and looks again. It might answer immediately. It might retrieve once, read what came back, decide it needs a different document, and retrieve again. It might call a tool that has nothing to do with documents at all.'
-    },
-    {
-      type: 'diagram',
-      title: 'Agentic: a decision loop',
-      nodes: [
-        { id: 'u', label: 'User message', icon: 'user', at: [0, 1] },
-        { id: 'm', label: 'Model decides', icon: 'model', at: [1, 1] },
-        { id: 'r', label: 'Retrieve docs', icon: 'service', at: [2, 0] },
-        { id: 't', label: 'Call a tool', icon: 'service', at: [2, 1] },
-        { id: 'a', label: 'Answer user', icon: 'user', at: [2, 2] }
+        { term: 'Fixed pipeline (naive RAG)', def: 'The engineer decides everything ahead of time. The user question is the query, one retrieval runs, a fixed number of passages is added to the prompt, and the model generates once. Lewis et al. introduced RAG as a model that pairs a pretrained generator with a dense vector index of Wikipedia reached through a neural retriever.[^3]' },
+        { term: 'Enhanced RAG', def: 'Still a fixed sequence, but with extra modules bolted on: a router that decides whether to retrieve at all, a rewriter that reformulates the query, and a reranker that re-sorts retrieved chunks before generation.[^5]' },
+        { term: 'Agentic search', def: 'The model decides, token by token, whether to search, what to search for, and when to stop. Retrieval results are appended to its running text and it keeps reasoning over them.[^1,4]' },
+        { term: 'Reinforcement learning (RL) here', def: 'Training where the model tries whole question-to-answer episodes, including its searches, and is updated toward the episodes that earned a higher reward. In Search-R1 the reward is only whether the final answer matches the gold answer.[^1]' },
       ],
-      edges: [
-        { from: 'u', to: 'm', label: '' },
-        { from: 'm', to: 'r', label: 'if docs help' },
-        { from: 'm', to: 't', label: 'if action needed' },
-        { from: 'm', to: 'a', label: 'if already known' },
-        { from: 'r', to: 'm', label: 'read result, loop' },
-        { from: 't', to: 'm', label: 'read result, loop' }
-      ],
-      caption: 'The model chooses each step. A trivial message goes straight to answer with no retrieval at all.'
     },
     {
       type: 'p',
-      text: 'Here is a small version of the decision the model makes before it commits to retrieving. In the manual design this branch does not exist. In the agentic design it is the whole point.'
+      text: "In Search-R1, the RAG baseline's input is the question plus the top 3 passages for that question: one call, with the query written by nobody but the user. Search-R1's input starts as a short template telling the model it can wrap a query in <search> and </search> tags. When the system sees a closing search tag it pauses generation, runs the query, and inserts the top 3 results between <information> tags. The loop ends when the model writes an <answer>, or when it hits the maximum action budget, which the authors set to 4.[^1] So the agent makes somewhere between zero and four calls, and it writes every query itself.",
     },
-    { type: 'lab', height: 460,
-        title: 'Retrieving every turn against deciding first',
-        caption: 'Half of a real conversation is pleasantries that need no documents. Deciding first is a cheap call that skips an expensive search and a large paste.',
-        code: `# Retrieve-every-turn against let-the-model-decide. The
-# "model" here is a stand-in that routes on the shape of the
-# message, which is enough to show what the two designs
-# cost.
-
-class StandInModel:
-    def decide(self, message):
-        m = message.lower().strip(" .!?")
-        if m in {"thanks", "thanks, that worked", "ok", "great", "perfect"}:
-            return "answer_directly"
-        return "retrieve_docs"
-
-    def answer(self, message, context):
-        if not context:
-            return "You're welcome."
-        return "Per the docs: " + context[0]
-
-class StandInRetriever:
-    CALLS = 0
-    DOCS = ["Rate limits are 100 requests per minute.",
-            "API keys are rotated from Settings.",
-            "Webhooks retry three times."]
-
-    def search(self, query, k=5):
-        StandInRetriever.CALLS += 1
-        return self.DOCS[:k]
-
-CONVERSATION = [
-    "what are the rate limits?",
-    "thanks, that worked",
-    "how do I rotate my API key?",
-    "ok",
-    "do webhooks retry?",
-    "perfect",
-]
-
-CHUNK_TOKENS = 120     # rough cost of pasting one retrieved chunk
-
-def run(strategy, model, retriever):
-    StandInRetriever.CALLS = 0
-    tokens = 0
-    for message in CONVERSATION:
-        if strategy == "always":
-            chunks = retriever.search(message, k=5)
-        else:
-            plan = model.decide(message)
-            chunks = retriever.search(message, k=5) if plan == "retrieve_docs" else []
-        tokens += len(chunks) * CHUNK_TOKENS
-        model.answer(message, chunks)
-    return StandInRetriever.CALLS, tokens
-
-model, retriever = StandInModel(), StandInRetriever()
-for label, strategy in [("retrieve every turn", "always"),
-                        ("let the model decide", "agentic")]:
-    calls, tokens = run(strategy, model, retriever)
-    print("%-22s %d searches over %d turns, ~%d context tokens"
-          % (label, calls, len(CONVERSATION), tokens))
-
-print()
-print("Half these messages are pleasantries that need no documents at all.")
-print("Deciding first is a cheap model call that skips an expensive search")
-print("and a large paste, on every turn that never needed them.")
-
-# Try it: add more "thanks" turns, which is what real
-# conversations look like, and watch the gap widen. Then
-# consider what happens if decide() gets it wrong: answering
-# "what are the rate limits?" with no documents at all.
-` },
     {
       type: 'p',
-      text: 'When the docs team switched their assistant to something like this, the \'thanks\' problem disappeared on its own. The model saw a message with no real question in it and chose to answer directly, skipping the vector store entirely. Retrieval fired on the turns that earned it. The token bill for the trivial traffic dropped close to zero because those turns stopped carrying ten unnecessary chunks.'
+      text: "There is a second difference that is easy to miss. The RAG baseline ran on the instruction-tuned model with no task training, while Search-R1 was trained with PPO on the merged NQ and HotpotQA training sets.[^1] PPO (proximal policy optimization) is a standard RL algorithm; the paper also tried GRPO. The authors did train other baselines on the same data, including supervised fine-tuning and rejection sampling, to separate the effect of training from the effect of search.[^1] My reading is that the fair comparison to RAG is really \"trained agent\" against \"untrained pipeline\", and the fair test of agency alone is the untrained agents, which come up below.",
     },
-    { type: 'p', text: 'The gain went beyond cost. Because the model now controlled retrieval, it could handle a follow-up that the fixed pipeline always fumbled. A user asks about pagination, gets an answer, then asks \'what about sorting.\' In the manual pipeline that second turn re-runs the same search against the word sorting and hopes the sort docs rank high enough to make the top ten.' },
-      { type: 'p', text: 'In the agentic version the model already knows it is mid-conversation about the results endpoint, so it phrases a sharper query, pulls the sorting section, and connects it to what it just told the user. The context window ended up holding fewer chunks and more of the right ones. That is the quiet win: control over retrieval is also control over relevance.' },
+    {
+      type: 'p',
+      text: "Search-o1, from Renmin University of China, is the untrained version of the idea. It gives a reasoning model, QwQ-32B-Preview, instructions to emit a query between special search tokens when it is unsure, retrieves the top 10 results from the Bing Web Search API, and runs a separate pass the authors call Reason-in-Documents that condenses the retrieved pages before they go back into the main reasoning chain.[^4] Its fixed baseline retrieves the top 10 documents for the original question once and puts them next to the question.[^4]",
+    },
+    {
+      type: 'p',
+      text: "The third paper frames the question for production systems. Pietro Ferrazzi and colleagues compared an Enhanced RAG pipeline against a single-tool agent built on the PocketFlow framework, where the agent's only choices are to call the RAG tool or to answer. They limited the agent to one tool on purpose, so it would have no abilities the pipeline lacked.[^5] Both used the same embedder, OpenAI's text-embedding-3-small with cosine similarity, and the same pgvector database, so retrieval time and cost were identical in both settings.[^5]",
+    },
+    {
+      type: 'image',
+      src: '/blog-images/manual-rag-vs-agentic-context/enhanced-vs-agentic-rag.webp',
+      alt: 'Two-panel diagram. Left, Enhanced RAG: a user question passes through a router, a rewriter, a retriever returning three ranked documents, a reranker that reorders them, and a generator, with a dotted path from the router straight to the generator for out-of-scope questions. Right, Agentic RAG: an agent box that at each of n steps chooses between calling a RAG node and going to an answer node, with a loop arrow back to the RAG node labeled n times.',
+      width: 1960,
+      height: 820,
+      caption: 'The two designs Ferrazzi et al. compared. In the pipeline the engineer fixed the order of the modules; in the agent the model chooses each step. Figure 1 from Ferrazzi et al., 2026,[^5] reproduced under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).',
+    },
     {
       type: 'h2',
-      text: 'The tradeoff you are actually choosing between'
+      text: 'Where search paid and where it did not',
     },
-    { type: 'p', text: 'Adaptivity is not free. The moment the model is deciding whether to retrieve, it can decide wrong. It can skip retrieval on a question that genuinely needed the docs and answer from memory, which is where confident, wrong answers come from.' },
-      { type: 'p', text: 'It can loop too many times and run up latency. Its choices are harder to predict, so your cost per turn now varies with the model\'s judgment instead of sitting at a fixed number. The manual pipeline never makes those mistakes because it never makes a choice.' },
     {
-      type: 'ul',
-      items: [
-        'Manual RAG wins when queries are uniform and always need grounding: a search box over a knowledge base, a compliance tool that must cite a source every time, anything where predictable cost and easy tracing matter more than flexibility.',
-        'Agentic context wins when traffic is mixed: a conversational assistant where some turns are questions and some are chatter, a coding agent that sometimes needs to read a file and sometimes already has what it needs, any workflow where retrieving on every turn is obvious waste.',
-        'Many real systems land in the middle. You can keep a cheap gate that decides retrieve-or-not, then run a fixed, predictable retrieval when the answer is yes. That buys most of the savings without a fully open-ended loop.'
-      ]
+      type: 'p',
+      text: "Search-R1 reports per-dataset scores. Three of the seven datasets (NQ, TriviaQA, PopQA) are general questions that usually need one fact. The other four (HotpotQA, 2WikiMultiHopQA, Musique, Bamboogle) are multi-hop, meaning the answer needs two or more facts found in sequence. NQ and HotpotQA were the training sets; the other five are out of domain.[^1]",
+    },
+    {
+      type: 'chart',
+      kind: 'bar',
+      title: 'Qwen2.5-7B, exact match by dataset (E5 retriever, 3 passages per call)',
+      yLabel: 'Exact match (%)',
+      valueLabels: false,
+      series: [
+        { label: 'RAG (one retrieval)', key: 'rag', baseline: true },
+        { label: 'Search-R1, base model', key: 'base' },
+        { label: 'Search-R1, instruct model', key: 'inst' },
+      ],
+      data: [
+        { label: 'NQ', values: { rag: 34.9, base: 48.0, inst: 39.3 } },
+        { label: 'TriviaQA', values: { rag: 58.5, base: 63.8, inst: 61.0 } },
+        { label: 'PopQA', values: { rag: 39.2, base: 45.7, inst: 39.7 } },
+        { label: 'HotpotQA', values: { rag: 29.9, base: 43.3, inst: 37.0 } },
+        { label: '2Wiki', values: { rag: 23.5, base: 38.2, inst: 41.4 } },
+        { label: 'Musique', values: { rag: 5.8, base: 19.6, inst: 14.6 } },
+        { label: 'Bamboogle', values: { rag: 20.8, base: 43.2, inst: 36.8 } },
+      ],
+      caption: 'Redrawn from Table 2 of Jin et al., 2025,[^1] with EM scores multiplied by 100. Both Search-R1 models were trained with PPO; the RAG baseline used the instruct model without task training.',
+    },
+    {
+      type: 'p',
+      text: "The gaps are largest on the multi-hop sets. On Musique, RAG got 5.8% and the base Search-R1 model 19.6%; on Bamboogle, 20.8% against 43.2%. On TriviaQA the gap is about five points, and the instruct model barely beat RAG on PopQA (39.7% against 39.2%).[^1] The paper's own case study shows why multiple calls help. Asked which city and state the singer behind the fragrance Curious was born in, the model first searched for the fragrance, learned it was Britney Spears's, then searched for her birthplace and answered McComb, Mississippi. A version trained without search guessed Beyoncé and answered Houston.[^1] A single retrieval on the original question cannot issue that second query, because the name it needs is not in the question.",
+    },
+    {
+      type: 'p',
+      text: "Search-o1 reached the same split without any training. With QwQ-32B, its agentic retrieval baseline (the model issues its own queries, no Reason-in-Documents) beat single-shot RAG by 23.2% in average EM on the four multi-hop sets. On the two single-hop sets there was no significant change: 47.8 against 47.6 average EM. The authors' explanation is that those questions need one piece of knowledge and no second retrieval.[^4] The full Search-o1 system beat single-shot RAG with QwQ-32B by 29.6% on multi-hop average EM.[^4]",
+    },
+    {
+      type: 'p',
+      text: "Ferrazzi et al. looked at the retrieval steps one at a time. For query rewriting, the agent, which rewrote queries when it chose to, averaged 55.6 NDCG@10 across four datasets against 52.8 for the pipeline that always applied HyDE rewriting.[^5] NDCG@10 scores how well the ten retrieved documents are ranked against the labeled relevant ones, from 0 to 100 here. For picking the final documents, the result flipped. The pipeline with a reranker reached 49.5 NDCG@10 averaged over FiQA and CQADupStack-English, and the agent reached 43.9, below the naive pipeline's 45.5.[^5] The agent chose to retrieve a second time in only 10% of cases, and when it did, 53% of the documents it got back were the same as the first time. The authors conclude that once the model has made a decision it is not likely to reconsider it.[^5]",
+    },
+    {
+      type: 'h2',
+      text: 'The bill: calls, tokens, latency and training',
+    },
+    {
+      type: 'p',
+      text: "A fixed pipeline makes one retrieval call per question, by design. The agent makes more. SearchAgent-X, an inference system paper that served Search-R1 models, reports an average of 2.717 retrieval calls per question across six datasets, ranging from 2.288 on NQ to 3.247 on Musique.[^6] Search-R1's own training curves show the count of valid searches rising as training goes on; the model learns to call search more.[^1]",
+    },
+    {
+      type: 'p',
+      text: "Those extra calls cost more than their retrieval time. In a fixed pipeline all retrieval happens before generation, and retrieval takes milliseconds against seconds for the whole request, so the SearchAgent-X authors found naive RAG insensitive to retrieval latency.[^6] In an agent, retrieval interrupts generation. The paused request can lose its cached attention state (its KV cache) to other requests and must then recompute its whole prefix. When average retrieval time rose from 0.6 to 4.4 seconds, the agents' prefix cache hit rate fell from over 30% to under 21%, while RAG's end-to-end latency stayed largely stable. Under a standard first-come-first-served scheduler, 55.9% of tokens in affected requests were recomputed without need, more than doubling computation time per request.[^6]",
+    },
+    {
+      type: 'p',
+      text: "Ferrazzi et al. measured the bill directly, with the retrieval side identical. Averaged over their datasets, the agent used 3.3 times the input tokens, 1.9 times the output tokens and 1.5 times the end-to-end time of the Enhanced pipeline, and up to 3.6 times the input tokens on CQADupStack-English.[^5] The latency gap depended heavily on the model:",
+    },
+    {
+      type: 'chart',
+      kind: 'bar',
+      title: 'End-to-end time per FiQA query, same retriever',
+      yLabel: 'Seconds',
+      series: [
+        { label: 'Enhanced RAG', key: 'en', baseline: true },
+        { label: 'Agentic RAG', key: 'ag' },
+      ],
+      data: [
+        { label: 'GPT-4.1-nano', values: { en: 9.0, ag: 10.2 } },
+        { label: 'Qwen3-0.6B', values: { en: 8.1, ag: 22.1 } },
+        { label: 'Qwen3-4B', values: { en: 35.5, ag: 38.6 } },
+        { label: 'Qwen3-8B', values: { en: 58.5, ag: 69.9 } },
+        { label: 'Qwen3-32B', values: { en: 62.6, ag: 93.8 } },
+      ],
+      caption: 'Redrawn from Table 9 of Ferrazzi et al., 2026.[^5] Qwen3-0.6B ran without thinking mode. The agent was capped at 3 turns. For the Enhanced pipeline the authors found about 45 to 50% of the time went to generating the answer and a similar share to query rewriting, with 0 to 5% on retrieval.',
+    },
+    {
+      type: 'p',
+      text: "Training is a separate bill that only the RL approach pays. Search-R1's PPO runs took 500 steps on a single node of 8 H100 GPUs with a batch size of 512, and every rollout during training calls the search engine live.[^1] The method also needed a fix that plain fine-tuning does not: the retrieved passages sit inside the model's own output sequence, so the authors masked them out of the loss. Without that mask the 7B base model averaged 0.343 EM instead of 0.431.[^1] GRPO, the other RL algorithm they tried, converged faster but showed reward collapse after many steps. When training diverged, they evaluated the most recent stable checkpoint instead of the final one.[^1]",
+    },
+    {
+      type: 'h2',
+      text: 'When the fixed pipeline still wins',
+    },
+    {
+      type: 'p',
+      text: "The papers report several conditions where the engineer's pipeline did as well or better. I list only what they measured.",
+    },
+    {
+      type: 'p',
+      text: "The clearest case is single-fact questions. Search-o1 found no significant gain from agentic retrieval on single-hop QA, and with QwQ-32B the fixed RAG setup scored higher on TriviaQA (65.6 EM against 62.0).[^4] In Search-R1 with Qwen2.5-3B, RAG beat the trained instruct model on NQ (0.348 against 0.341) and PopQA (0.387 against 0.378).[^1]",
+    },
+    {
+      type: 'p',
+      text: "Model size matters too. Search-R1's 7B model opened a much wider gap over RAG than its 3B model did, which the authors read as larger models being better at learning to search.[^1] On Bamboogle and Musique, the 3B base model's gains over RAG were under one point (0.088 against 0.080, and 0.049 against 0.047).[^1] Search-o1 found that a model not trained for long reasoning, Qwen2.5-32B-Instruct, did about as well with agentic retrieval as with standard RAG on the GPQA science questions, and worse on math and code. The authors conclude that ordinary LLMs cannot effectively use search as a tool for complex reasoning tasks.[^4]",
+    },
+    {
+      type: 'p',
+      text: "Deciding whether to retrieve at all went to the pipeline when the domain was broad. Ferrazzi et al. tested whether each system could tell in-scope questions from out-of-scope ones. On the finance and grammar-forum datasets the agent was slightly better. On FEVER, a fact-checking set with no clear domain boundary, the pipeline's semantic router scored 87.9 F1 and the agent 64.6, because the agent often retrieved when it should not have.[^5]",
+    },
+    {
+      type: 'p',
+      text: "For choosing the final documents, as noted above, a dedicated reranker in the pipeline beat the agent's own retrieval choices, 49.5 against 43.9 NDCG@10.[^5]",
+    },
+    {
+      type: 'p',
+      text: "Then there is the budget. Every measurement above puts the agent at more tokens and more time for the same retriever.[^5,6] Ferrazzi et al. write that a well-optimized Enhanced RAG can match or exceed Agentic performance while remaining more efficient, and they suggest adding an explicit reranking step to agentic pipelines.[^5]",
     },
     {
       type: 'callout',
-      title: 'The most common mistake',
-      text: 'Reaching for agentic control to fix a problem that was really about k being too large or chunks being too big. If your retrieval is bloated, a model deciding when to run bloated retrieval still runs bloated retrieval. Fix the pipeline\'s content first, then decide whether the turn-by-turn choice is worth the added unpredictability.'
-    },
-    {
-      type: 'p',
-      text: 'Two other traps show up often. The first is giving the model the choice but no way to loop, so it retrieves once, gets bad chunks, and answers from them anyway because it cannot ask for more. The second is the opposite: an open loop with no cap, so a stuck model retrieves five times chasing an answer that was never in the docs. A good agentic design gives the model both the freedom to fetch again and a hard limit on how many times.'
+      title: 'My reading, not a finding from the papers',
+      text: "Across these results, the gain from letting the model search tracks one property of the question: whether the second query depends on what the first one returned. Multi-hop questions have that property and single-fact lookups do not. If most of your traffic is single-fact lookups against a well-scoped corpus, the data here favors a tuned pipeline with a reranker. If questions chain facts, the Search-R1 and Search-o1 multi-hop numbers are the strongest evidence for handing the model the query.",
     },
     {
       type: 'h2',
-      text: 'What to carry away'
+      text: 'What the comparisons did not measure',
     },
-    { type: 'p', text: 'Manual RAG and agentic context are not competing products. They are two answers to one question: who decides what goes on the desk. In a manual pipeline the code decides, and it decides the same way every time, which gives you predictable cost and no judgment. In an agentic setup the model decides, which gives you judgment and the failure modes that come with it.' },
-      { type: 'p', text: 'The documentation bot did not need a smarter retriever to stop wasting money on \'thanks.\' It needed to move the decision from the pipeline to the model, so that a turn with no real question could take no real action. When you design your next system, ask which turns actually need documents before you wire retrieval to run on all of them. Start with the cheapest design that fits your traffic, measure where the tokens really go, and add model-driven control only where the fixed line is clearly wasting them. The goal is never agentic for its own sake. It is putting the right small stack of pages on the desk, and giving that decision to whichever party can make it best.' },
+    {
+      type: 'p',
+      text: "Search-R1's appendix includes a failure it labels as such. Asked for the title of Weezer's debut album, the model sometimes failed to break the question into parts and was misled by irrelevant retrieved passages.[^1] Ferrazzi et al. state the limit of their own cost numbers in a table note: their agent always performed a maximum of 3 turns, and in scenarios requiring more turns, the tokens it consumed would increase. They also note that giving the agent a single tool restricts what their study can say about agents that do more than retrieval.[^5]",
+    },
     {
       type: 'sources',
+      numbered: true,
       items: [
-        { title: 'Yao et al., ReAct: Synergizing Reasoning and Acting in Language Models (2022)', url: 'https://arxiv.org/abs/2210.03629' },
-        { title: 'Anthropic, Effective context engineering for AI agents', url: 'https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents' },
-        { title: 'Lewis et al., Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks (2020)', url: 'https://arxiv.org/abs/2005.11401' }
-      ]
-    }
-  ]
+        { title: 'Jin et al., Search-R1: Training LLMs to Reason and Leverage Search Engines with Reinforcement Learning, COLM 2025', url: 'https://arxiv.org/abs/2503.09516' },
+        { title: 'Wang et al., Text Embeddings by Weakly-Supervised Contrastive Pre-training (E5), 2022', url: 'https://arxiv.org/abs/2212.03533' },
+        { title: 'Lewis et al., Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks, NeurIPS 2020', url: 'https://arxiv.org/abs/2005.11401' },
+        { title: 'Li et al., Search-o1: Agentic Search-Enhanced Large Reasoning Models, 2025', url: 'https://arxiv.org/abs/2501.05366' },
+        { title: 'Ferrazzi, Cvjeticanin, Piraccini, and Giannuzzi, Is Agentic RAG worth it? An experimental comparison of RAG approaches, LREC 2026 Industry Day', url: 'https://arxiv.org/abs/2601.07711' },
+        { title: 'Yang et al., Demystifying and Enhancing the Efficiency of Large Language Model Based Search Agents (SearchAgent-X), 2025', url: 'https://arxiv.org/abs/2505.12065' },
+      ],
+    },
+  ],
 };

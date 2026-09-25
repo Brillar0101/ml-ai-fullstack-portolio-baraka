@@ -50,10 +50,4 @@ export const SOURCES = {
   'context-vs-prompt-engineering': [S.lostmiddle, S.ragSurvey, S.distracted, S.react, S.gpt3, S.promptProg],
   'six-types-of-agent-context': [S.react, S.agentSurvey, S.lostmiddle, S.mcpSpec, S.toolformer, S.reflexion],
   'context-budgeting': [S.lostmiddle, S.distracted, S.ragSurvey, S.scaleInfer, S.tokenCost, S.longformer],
-  'context-rot': [S.lostmiddle, S.distracted, S.longformer, S.rope, S.ragBest, S.helm],
-  'manual-rag-vs-agentic-context': [S.selfrag, S.react, S.ragSurvey, S.agentSurvey, S.rag, S.ragBest],
-  'what-mcp-solves': [S.mcpSpec, S.toolformer, S.react, S.agentSurvey, S.gaia, S.llmSurvey2],
-  'mcp-vs-function-calling': [S.mcpSpec, S.toolformer, S.react, S.guided, S.jsonSchema, S.agentSurvey],
-  'mcp-architecture': [S.mcpSpec, S.agentSurvey, S.toolformer, S.react, S.jsonSchema, S.gaia],
-  'mcp-primitives': [S.mcpSpec, S.toolformer, S.jsonSchema, S.react, S.agentSurvey, S.guided],
 };
