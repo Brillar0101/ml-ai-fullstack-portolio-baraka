@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useParams, Navigate } from 'react-router-dom';
 import { ChevronLeft, ArrowRight, Clock, Calendar, Send, User } from 'lucide-react';
 import { BLOG_POSTS } from '../data/blog';
@@ -179,11 +179,6 @@ const BlogComments = ({ slug }) => {
   );
 };
 
-const postComponents = {
-  'your-first-ai-agent': lazy(() => import('./blog/AIAgentPost')),
-  'next-word-sampling': lazy(() => import('./blog/SamplingPost')),
-};
-
 const BlogPostPage = () => {
   const { slug } = useParams();
   const post = BLOG_POSTS.find(p => p.id === slug);
@@ -199,7 +194,6 @@ const BlogPostPage = () => {
     return <Navigate to="/blog" replace />;
   }
 
-  const PostContent = postComponents[slug];
   const seriesPost = SERIES_POSTS.find(p => p.id === slug) || EMBEDDED_POSTS.find(p => p.id === slug) || AI_SERIES_POSTS.find(p => p.id === slug);
   // Keep the sidebar short so it never makes the page taller than the article.
   const relatedPosts = BLOG_POSTS
@@ -231,15 +225,7 @@ const BlogPostPage = () => {
       {/* Main layout: content + sidebar */}
       <div className="blog-post-layout">
         <article className="blog-post-content">
-          {PostContent ? (
-            <Suspense fallback={<div style={{ minHeight: '40vh' }} />}>
-              <PostContent />
-            </Suspense>
-          ) : seriesPost ? (
-            <Suspense fallback={<div style={{ minHeight: '40vh' }} />}>
-              <SeriesPost post={seriesPost} />
-            </Suspense>
-          ) : null}
+          {seriesPost ? <SeriesPost post={seriesPost} /> : null}
           {/* Comments */}
           <section className="blog-comments-section">
             <h2 className="blog-comments-heading">Comments</h2>

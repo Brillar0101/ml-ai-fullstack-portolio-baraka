@@ -70,41 +70,9 @@ const aiSeriesMeta = AI_SERIES_POSTS.map((p) => ({
   draft: p.draft,
 }));
 
-// These two are written as components rather than block arrays, so their read
-// time cannot be derived from a body. The values below were measured from the
-// rendered prose and code with the same rates as lib/readTime.js (220 wpm,
-// 3s per code line, 12s per figure). Re-measure if the posts change.
-const CORE_POSTS = [
-  {
-    id: 'your-first-ai-agent',
-    title: 'Your First AI Agent in 50 Lines of Python',
-    excerpt: 'Build a ReAct agent from scratch using Claude\'s tool use API. No frameworks. No LangChain. Just raw function calling.',
-    category: 'AI',
-    date: 'Mar 15, 2026',
-    readTime: '7 min read', // 669 words + 84 lines of code
-    tags: ['Claude API', 'Python', 'AI Agents'],
-    series: 'AI Engineering Series',
-    seriesNum: 1,
-    route: '/blog/your-first-ai-agent',
-    coverGradient: 'linear-gradient(120deg, #0066CC 0%, #004D99 48%, #003366 100%)',
-    publishAt: '2026-03-15T12:00:00Z',
-  },
-  {
-    id: 'next-word-sampling',
-    title: 'How a language model picks the next word',
-    excerpt:
-      'Temperature, top-k, and top-p, explained by doing. Includes an interactive lab and runnable NumPy you can edit in the browser.',
-    category: 'AI',
-    date: 'Jun 25, 2026',
-    readTime: '4 min read', // 643 words + a 17-line lab and the demo
-    tags: ['Sampling', 'Temperature', 'top-p', 'Foundation Models'],
-    series: 'AI Engineering Series',
-    seriesNum: 3,
-    route: '/blog/next-word-sampling',
-    coverGradient: 'linear-gradient(120deg, #0066CC 0%, #004D99 48%, #003366 100%)',
-    publishAt: '2026-06-25T12:00:00Z', // test post — live now for review
-  },
-];
+// Every post is now a data-driven block array (series, embedded, or AI
+// series). The hand-built component posts were converted to content/series/.
+const CORE_POSTS = [];
 
 // Public list = hand-built posts + the data-driven series posts, newest first.
 const sortKey = (p) => new Date(p.publishAt || 0).getTime();

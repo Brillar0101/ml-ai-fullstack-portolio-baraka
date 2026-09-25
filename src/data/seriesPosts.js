@@ -5,6 +5,8 @@
 // posts out over time; see src/lib/publishing.js for gating.
 
 import { attachSources } from './attachSources';
+import { POST as yourFirstAiAgent } from '../../content/series/your-first-ai-agent.js';
+import { POST as nextWordSampling } from '../../content/series/next-word-sampling.js';
 import { POST as foundationModelsExplained } from '../../content/series/foundation-models-explained.js';
 import { POST as whyModelsHallucinate } from '../../content/series/why-models-hallucinate.js';
 import { POST as evaluationIsTheHardPart } from '../../content/series/evaluation-is-the-hard-part.js';
@@ -44,6 +46,8 @@ import { POST as informationExtractionPrompts } from '../../content/series/infor
 import { POST as detectionWithoutADetector } from '../../content/series/detection-without-a-detector.js';
 
 const RAW_SERIES_POSTS = [
+  yourFirstAiAgent,
+  nextWordSampling,
   foundationModelsExplained,
   whyModelsHallucinate,
   evaluationIsTheHardPart,
