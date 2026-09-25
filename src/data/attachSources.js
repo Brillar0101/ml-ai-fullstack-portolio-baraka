@@ -65,13 +65,12 @@ export function attachSources(post) {
   if (!Array.isArray(post.body)) return post;
   const items = SOURCES[post.id];
 
-  const body = insertExplorer(
-    insertDiagram(
-      post.body.filter((b) => b.type !== 'sources').map(linkTerms),
-      post.id,
-    ),
-    post.id,
-  );
+  // Research rewrites (numbered, cited sources) are complete as written: the
+  // older per-post diagrams and explorers were made for the previous text and
+  // must not be spliced into the new one.
+  const rewritten = post.body.some((b) => b.type === 'sources' && b.numbered);
+  const base = post.body.filter((b) => b.type !== 'sources').map(linkTerms);
+  const body = rewritten ? base : insertExplorer(insertDiagram(base, post.id), post.id);
 
   if (items) body.push({ type: 'sources', items });
   else {
