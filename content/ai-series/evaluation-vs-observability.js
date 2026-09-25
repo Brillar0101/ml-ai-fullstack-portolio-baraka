@@ -1,193 +1,176 @@
+// Every factual claim below is taken from the numbered sources at the end.
+// Both charts are redrawn from table values: Zheng et al. 2023 (Table 5) and
+// Zhou et al. 2023 (Tables 1 and 3). Neither paper's arXiv license allows
+// figure reuse, so no figure is reproduced.
 export const POST = {
   id: 'evaluation-vs-observability',
-  title: 'Passing Evals Then Drowning in Complaints: Why Testing Before You Ship Is Only Half the Job',
-  excerpt: 'A team scored high on every offline test, shipped with confidence, and a week later could not explain a wave of angry tickets. Nothing about the live traffic had been recorded. This is the gap between checking a version and watching a running system.',
+  title: 'Why a Passing Eval Suite Still Needs Production Logs',
+  excerpt: 'In a 2024 Berkeley study, developers kept rewriting their own grading rules as they read more model outputs. That finding, plus research on LLM judges, benchmark leakage, and real user traffic, makes a case that offline evaluation can only be a draft of what production observability later corrects.',
   category: 'AI',
   tags: ['Observability', 'Evaluation', 'Production'],
   body: [
     {
       type: 'p',
-      text: 'Picture a support assistant built on a language model. Before launch the team does the responsible thing. They collect two hundred real customer questions, write out the ideal answer for each one, and run their candidate version against that set. The scores come back strong. Faithfulness looks good, the answers match the reference material, and a second model acting as a judge rates most responses highly. They ship on a Thursday feeling safe.',
-    },
-    { type: 'p', text: 'By the next Wednesday the support inbox had filled with complaints. Users said the assistant was confidently wrong about refund windows, that it stalled on some questions, and that it gave different answers to what looked like the same request. The team pulled up their evaluation report to see what had changed. Nothing had changed there.' },
-      { type: 'p', text: 'The two hundred test cases still passed. The problem was that the assistant was failing on questions the test set had never contained, and the team had no record of any of it. They had not logged the live calls. They could see the score from before launch, and they could see the angry tickets, but they had nothing in between. They could not tell which questions triggered the bad answers, how slow the slow ones really were, or whether the model or their own code was at fault.' },
-    {
-      type: 'p',
-      text: 'That missing middle is the subject of this post. The score before launch and the health of the running system are two different questions, answered by two different practices. One is **offline evaluation**. The other is **online observability**. You need both, and the team above had built only the first.'
-    },
-    {
-      type: 'h2',
-      text: 'The two questions: is this change safe to ship, and is the shipped thing working'
-    },
-    { type: 'p', text: 'Start with the plain intuition, because the two ideas are easy to blur together. Evaluation asks a question about a version of your system before real users touch it. You take a fixed set of inputs, you know what a good output looks like, and you measure how close your candidate gets.' },
-      { type: 'p', text: 'It happens in a controlled room with the doors closed. Observability asks a question about the system that is already running. It does not compare against a known answer, because in production you usually do not have one. Instead it records what actually happened on real traffic so you can look back and see where things went wrong.' },
-    { type: 'p', text: 'Put simply, evaluation is a rehearsal and observability is a security camera. A rehearsal tells you whether the play is ready for an audience. It cannot tell you that on opening night an actor tripped over a cable that was never on the rehearsal stage.' },
-      { type: 'p', text: 'For that you need the camera running during the real performance. The support team had rehearsed well. They had no camera.' },
-    { type: 'p', text: 'The reason both are needed comes down to what each one can and cannot see. Evaluation is precise but narrow. It gives you a clean number because it compares against answers you already trust, but it can only judge the inputs you put in front of it. Observability is broad but noisy.' },
-      { type: 'p', text: 'It sees everything that really happened, including the questions you never thought of, but it rarely comes with a tidy score, because on live traffic nobody wrote down the right answer in advance. One trades coverage for certainty and the other trades certainty for coverage. Lean on only the first and you are blind to the unexpected. Lean on only the second and you have no safe way to test a change before it reaches users.' },
-    {
-      type: 'h2',
-      text: 'Walking through the refund-window failure'
-    },
-    { type: 'p', text: 'Here is why a high evaluation score can sit right next to real production failures. The test set had two hundred questions. Every one of them was a question someone on the team had thought of. Real users asked things nobody had imagined.' },
-      { type: 'p', text: 'Somebody asked about refund windows for a product bought during a promotion, a case the reference set never included. The retrieval step pulled a policy page for a different product line, and the model answered fluently and wrongly. On the evaluation set this failure was invisible, because that question was not in the set. The score stayed high because the score only measures the cases you already wrote down.' },
-    { type: 'p', text: 'Now imagine the team had been recording live calls. For that bad answer there would be a record showing the exact user question, the passages the retriever fetched, the final answer, how long it took, how many tokens it used, and the fact that the user clicked thumbs down and then opened a human ticket. With that record in hand the diagnosis takes minutes instead of a week.' },
-      { type: 'p', text: 'You see the wrong policy page in the retrieved context and you know the failure is in retrieval, not in the prompt. Better still, that exact question becomes a new test case. You add it to the evaluation set so the next version is measured against the thing that actually broke.' },
-    {
-      type: 'terms',
-      items: [
-        { term: 'Offline evaluation', def: 'Running a fixed, known set of inputs against a candidate version and scoring the outputs against reference answers or rules, before any real users are involved. It answers whether a change is safe to ship.' },
-        { term: 'Online observability', def: 'Instrumenting the live system so that every real request and its result are recorded and searchable. It answers what the shipped system actually did and where it went wrong on real traffic.' },
-        { term: 'Trace', def: 'The full recorded story of one request as it moved through the system: the input, each intermediate step such as retrieval or a tool call, the timing of each step, and the final output. A trace lets you replay one interaction end to end.' },
-        { term: 'Feedback signal', def: 'Any observed reaction that suggests whether an output was good or bad without a hand-written reference answer. Examples are a thumbs down, a retry, an escalation to a human, or an abandoned session.' }
-      ]
-    },
-    {
-      type: 'h2',
-      text: 'The loop that connects the two'
+      text: "In 2024 a group at UC Berkeley asked nine industry practitioners to build automated checks for a language model pipeline. The pipeline pulled up to three well-known entities out of tweets. Two of the participants started with a rule that every extracted entity had to be a proper noun. As they graded more outputs, both decided the rule should say most entities, not all.[^1] Another participant noticed that some outputs kept hashtags like #justdoit while others turned #Nike into plain \"Nike,\" and had to rethink what the hashtag rule even meant. \"I think it's hard to know until you see it,\" that participant said.[^1]",
     },
     {
       type: 'p',
-      text: 'The two practices are strongest when you wire them into a loop rather than treating them as separate chores. You evaluate a candidate, ship the winner, watch the live traffic, mine the failures the camera caught, and turn those failures into fresh evaluation cases for the next round. Each trip around the loop makes the evaluation set look more like reality, because it grows from real production misses instead of only from what the team could imagine at the whiteboard.'
+      text: "The authors named this **criteria drift**: people need criteria to grade outputs, but grading outputs is how they find out what their criteria are. Their conclusion is blunt. It is \"impossible to completely determine evaluation criteria prior to human judging of LLM outputs.\"[^1]",
     },
     {
-      type: 'diagram',
-      nodes: [
-        { label: 'Evaluate candidate', detail: 'Run the fixed test set, score against references, pick the version to ship' },
-        { label: 'Ship winner', detail: 'Release the version that cleared the bar to real users' },
-        { label: 'Observe live traffic', detail: 'Record a trace for every real call: input, steps, output, latency, tokens, feedback' },
-        { label: 'Mine failures', detail: 'Search traces for thumbs down, escalations, retries, slow or costly calls' },
-        { label: 'New eval cases', detail: 'Turn each real miss into a test case, then loop back to evaluate' }
+      type: 'p',
+      text: "That result is a problem for anyone who treats a pre-launch test run as the final word. **Offline evaluation** means scoring a candidate version on a fixed set of inputs before real users see it, against reference answers, code checks, or a grading model. **Observability** means recording what the live system actually receives and returns (inputs, outputs, intermediate steps, scores, user reactions) so you can ask questions about it after the fact. The argument below is that the first cannot stand in for the second, and it is made one claim at a time, each with the paper evidence behind it and the limits of that evidence.",
+    },
+    {
+      type: 'h2',
+      text: 'Your test set stops describing your users',
+    },
+    {
+      type: 'p',
+      text: "A test set is a guess about what users will send. The WildChat project shows how wide the real distribution gets. Its authors offered free ChatGPT access in exchange for consent to log transcripts and collected about one million conversations from 204,736 unique IP addresses.[^6] They counted 68 languages that appeared in more than 100 prompts each; English was 53% of turns, Chinese 13%, Russian 12%.[^6] In a sample of English first turns, 61.9% were creative writing or assistance requests and only 6.7% were coding.[^6] By either of two toxicity classifiers, 10.46% of user turns were flagged as toxic.[^6] Users also pasted in jailbreak prompts copied from social media. One of them, called \"JailMommy,\" appeared 274 times from 45 users and got a flagged response 71.16% of the time.[^6]",
+    },
+    {
+      type: 'p',
+      text: "A team writing test cases at a whiteboard would be unlikely to write most of that. The interview study of machine learning engineers by Shankar and colleagues describes how production teams respond. Ten of the 18 engineers they interviewed described analyzing live failures and adding them to their validation sets so the same failure would not recur.[^2] One engineer contrasted this with academic practice, where researchers evaluate \"against fixed data sets,\" while \"most industry methods change their datasets.\"[^2] The authors add that the subgroups a model fails on are \"typically unforeseen\" and many are \"discovered post-deployment.\"[^2] Another engineer's team put every failed prediction into one queue and reviewed it weekly, then had analysts collect similar data for the next offline round.[^2]",
+    },
+    {
+      type: 'p',
+      text: "The limit on this evidence is sampling. WildChat's own authors say their users probably lean toward the IT community because the service ran on Hugging Face Spaces, and that anonymity may have pulled in more toxic content than a logged-in product would see.[^6] Your traffic will look different. That is the point, though: you only learn how different by recording it.",
+    },
+    {
+      type: 'h2',
+      text: "The grader's standards move too",
+    },
+    {
+      type: 'p',
+      text: "Drift in the inputs is familiar. The Berkeley study found drift in the people doing the judging. The paper describes two kinds. Participants added new criteria when they saw new types of bad output, and they reinterpreted existing criteria to fit what the model actually did.[^1] Participants who graded before writing any criteria still refined them as they kept grading, and some went back and changed earlier grades.[^1] One participant admitted to twice marking an output bad not because it was bad, but to stay consistent with previous grades.[^1]",
+    },
+    {
+      type: 'p',
+      text: "This cuts against a common assumption in evaluation tooling: that there is a settled set of labels to collect once and reuse. The authors point out that methods which calibrate an LLM grader against expert labels assume criteria fixed in advance, and that any change to the pipeline, such as swapping in a new model behind an API, can set off criteria drift again.[^1] Their suggestion for production is concrete. Evaluation assistants \"should ask users to grade new LLM outputs observed in production and automatically adapt assertion sets.\"[^1] Participants wanted to take their checks into production: some wanted to run them inline to block bad outputs, and one wanted a daily email report of the checks run on a sample of that day's outputs.[^1]",
+    },
+    {
+      type: 'p',
+      text: "The evidence is thin in the ways the authors admit. Nine participants, sessions capped at 40 minutes of tool use, one provided task, and no coverage of the deployment phase.[^1] They also consider the obvious objection, that criteria would settle with more grading time. They argue it would not, because the criteria were adapting to the outputs being judged, but they did not run a longer study to test that.[^1] Treat criteria drift as a well-described observation from a small sample, not a measured rate.",
+    },
+    {
+      type: 'h2',
+      text: "An LLM judge's agreement score depends on what you count",
+    },
+    {
+      type: 'p',
+      text: "Most teams scale up grading with **LLM-as-a-judge**: a strong model reads an answer, or a pair of answers, and returns a verdict. Zheng and colleagues tested this carefully on MT-bench, 80 multi-turn questions answered by six models and graded by GPT-4 and by 58 expert labelers, mostly graduate students.[^3] The headline is good for judges. On votes where neither side called a tie, GPT-4 agreed with humans 85% of the time, higher than humans agreed with each other (81%).[^3]",
+    },
+    {
+      type: 'p',
+      text: "Count the ties and the picture changes. In their first setup, ties and order-inconsistent votes stay in, and first-turn agreement falls to 66% for GPT-4 against humans and 63% for humans against humans, where a random judge would score 33%.[^3] Both setups are in the same table. Neither is wrong. They answer different questions, and a single \"agreement rate\" in a vendor dashboard does not tell you which one it is.",
+    },
+    {
+      type: 'chart',
+      kind: 'bar',
+      title: 'Judge agreement on MT-bench, first turn',
+      yLabel: 'Agreement (%)',
+      series: [
+        { label: 'Ties counted (S1)', key: 's1', baseline: true },
+        { label: 'Non-tie votes only (S2)', key: 's2' },
       ],
-      caption: 'Evaluation and observability form one loop. Live signals are not the end of the line, they are the source of the next generation of test cases.'
+      data: [
+        { label: 'GPT-4 pairwise vs human', values: { s1: 66, s2: 85 } },
+        { label: 'GPT-4 single vs human', values: { s1: 60, s2: 85 } },
+        { label: 'Human vs human', values: { s1: 63, s2: 81 } },
+        { label: 'Random judges', values: { s1: 33, s2: 50 } },
+      ],
+      caption: 'Redrawn from Table 5(a) of Zheng et al., 2023.[^3] S1 keeps tie and position-inconsistent votes (counted as ties); S2 keeps only non-tie votes. The random baseline is the paper\'s stated agreement between two random judges under each setup.',
     },
     {
       type: 'p',
-      text: 'The mechanism that makes the loop possible is structured logging. When a production call finishes, you write down one record that captures the inputs, the output, and the numbers around them: how long the call took, how many tokens it burned, and any feedback the user gave. Structured means the record is a set of named fields, not a line of free text, so you can later search for every call slower than three seconds or every call that got a thumbs down. Without that structure your logs are a haystack. With it, mining failures is a query.'
+      text: "The same paper documents why the judge needs watching. Asked to compare two similar answers and then the same pair in reversed order, GPT-4 gave a consistent verdict in 65% of cases; Claude-v1 managed 23.8%.[^3] In a \"repetitive list\" attack, where an answer was padded with a rephrased copy of its own list, GPT-3.5 and Claude-v1 preferred the padded answer 91.3% of the time, GPT-4 8.7%.[^3] On ten math questions graded in both orders, GPT-4 with the default prompt called a wrong answer correct in 14 of 20 cases. Giving it a reference answer cut that to 3 of 20.[^3] In one example the paper shows, GPT-4 misjudged an elementary problem it could solve when asked separately, because the answers it was grading misled it.[^3]",
     },
-    { type: 'lab', height: 460,
-        title: 'One structured record per call, then the questions it answers',
-        caption: 'The eval set scored 100 percent and was not wrong. It measured the questions someone thought to write down. Every unhappy request in production is a refund edge case, and not one of them appears in the eval set, which is the gap the two halves exist to close.',
-        code: `from collections import Counter
-
-# Offline evaluation says a change is safe to try.
-# Online observability says whether it helped the
-# people you built it for. Both run here, same
-# assistant.
-
-# ---- Offline: the eval set, run before shipping ---------
-# Curated questions with a known-good answer.
-EVAL_SET = [
-    ("how long do refunds take?", "5 business days", True),
-    ("how do I cancel?", "from the billing page", True),
-    ("do you support SSO?", "on the enterprise plan", True),
-    ("what are the rate limits?", "100 per minute", True),
-    ("where is my order?", "check the orders page", True),
-]
-
-# ---- Online: what real traffic actually did -------------
-# Same assistant, questions nobody thought to curate.
-TRAFFIC = [
-    ("how long do refunds take?", ["billing-2"], "up"),
-    ("how long do refunds take?", ["billing-2"], "up"),
-    ("refund after 60 days?",
-     ["billing-2", "policy-9"], "down"),
-    ("charged twice?",
-     ["billing-2", "billing-7"], "escalated"),
-    ("refund on a gift order?",
-     ["billing-2"], "down"),
-    ("where is my order?", ["ship-1"], "up"),
-]
-
-# ---- Report --------------------------------------------
-E = chr(27)
-DIM, OFF, BOLD = E + "[2m", E + "[0m", E + "[1m"
-OK, WARN, BAD = E + "[32m", E + "[33m", E + "[31m"
-note = lambda s: print(DIM + s + OFF)
-
-passed = sum(1 for _, _, ok in EVAL_SET if ok)
-score = passed / len(EVAL_SET)
-
-print(BOLD + "OFFLINE" + OFF + "  eval set, before ship")
-note("-" * 52)
-print("  cases          %d" % len(EVAL_SET))
-n = len(EVAL_SET)
-print("  passing        %s%d of %d  (%.0f%%)%s"
-      % (OK, passed, n, score * 100, OFF))
-print("  verdict        %sSAFE TO SHIP%s" % (OK, OFF))
-print()
-
-SAD = ("down", "escalated")
-unhappy = [t for t in TRAFFIC if t[2] in SAD]
-fb = Counter(t[2] for t in TRAFFIC)
-rate = len(unhappy) / len(TRAFFIC)
-
-print(BOLD + "ONLINE" + OFF + "   real traffic, after ship")
-note("-" * 52)
-print("  requests       %d" % len(TRAFFIC))
-m = len(TRAFFIC)
-print("  unhappy        %s%d of %d  (%.0f%%)%s"
-      % (BAD, len(unhappy), m, rate * 100, OFF))
-print("  feedback       %s" % dict(fb))
-print()
-
-note("the unhappy ones, and what they retrieved:")
-for q, chunks, signal in unhappy:
-    colour = BAD if signal == "escalated" else WARN
-    print("  %s%-10s%s %-23s %s"
-          % (colour, signal, OFF, q[:23],
-             ",".join(chunks)))
-
-print()
-note("-" * 52)
-gap = BOLD + "THE GAP" + OFF
-print(gap + "  every unhappy question is")
-print("         a refund edge case, and not one")
-print("         of them is in the eval set above.")
-
-print()
-note("Offline scored 100% and was not wrong. It measured")
-note("the questions someone thought to write down.")
-note("Production is where you meet the ones nobody")
-note("imagined, and each belongs in the eval set tomorrow.")
-
-# Try it: add the 60-day refund case to EVAL_SET with
-# ok=False. Offline drops and predicts the problem.
-` },
     {
       type: 'p',
-      text: 'Notice that the feedback field starts empty and gets filled in when the user reacts. The answer and the reaction arrive at different moments, so they are joined by the trace id. That single identifier is what lets you connect a slow, wrong answer to the thumbs down that followed it, and then to the human ticket after that.'
+      text: "The evidence the other way is real. When a human disagreed with GPT-4, humans still judged GPT-4's reasoning reasonable in 75% of cases and changed their own vote in 34%.[^3] Agreement also rose from 70% to nearly 100% as the quality gap between two models widened.[^3] Read together, my reading is that judges are dependable on clear differences and least dependable on close calls. Close calls are exactly what you face when comparing two versions of your own prompt. The paper also notes it folds accuracy, relevance and creativity into one helpfulness score and largely leaves safety out.[^3]",
     },
     {
       type: 'h2',
-      text: 'Common mistakes teams make with both'
+      text: 'A high benchmark score can come from the benchmark leaking into training',
     },
     {
       type: 'p',
-      text: 'The first mistake is the one from the story: shipping with a strong evaluation score and no live instrumentation, then flying blind when reality diverges from the test set. The second is the opposite, pouring effort into dashboards while never feeding the observed failures back into the evaluation set, so the same class of bug keeps shipping. A third mistake is logging only the final answer and dropping the intermediate steps. If you do not record the retrieved passages or the tool calls, you can see that an answer was wrong but not why, and the wrong policy page stays hidden.'
+      text: "Offline evaluation often starts before your own tests, when you pick a base model by its public benchmark scores. **Contamination** (also called leakage) is when a model has seen benchmark data during training. Sainz and colleagues give the worst case as training on a benchmark's test split and then evaluating on the same benchmark, and they say the extent of the problem \"is unknown, as it is not straightforward to measure.\"[^5] They list known cases: the C4 corpus contained test splits of several benchmarks crawled from GitHub, the GPT-3 authors acknowledged a filtering bug that contaminated several benchmarks, and OpenAI stated that parts of BIG-bench were mixed into GPT-4 training data.[^5]",
     },
     {
       type: 'p',
-      text: 'A quieter mistake is treating your evaluation set as finished. A test set written once at launch slowly drifts away from what users actually ask. The whole point of the loop is that production hands you real misses for free, and those misses are the most valuable test cases you will ever get because they are the ones your current system fails on. Ignoring them wastes the best source of coverage you have.'
+      text: "Zhou and colleagues measured what leakage does by continuing to train small open models on benchmark data. When LLaMA-2 7B was trained on the training sets of their collected benchmarks, not even the test sets, its MMLU score rose from 42.95 to 52.15.[^4] With training sets plus the test prompts, phi-1.5 at 1.3B parameters beat LLaMA-65B on RACE-M (55.80 vs. 53.00).[^4] With test data leaked as well, the 1.3B models beat 65B models on most tasks, which the authors call \"benchmark cheating.\"[^4] For LLaMA-2 7B, scores on tasks that were not in the leaked data went down.[^4]",
     },
     {
-      type: 'callout',
-      title: 'The one-line test',
-      text: 'For any live failure, ask: could I pull up the exact input, the intermediate steps, and the timing for that one request? If the answer is no, you have evaluation but not observability, and your next surprise will cost you a week.'
+      type: 'chart',
+      kind: 'bar',
+      title: 'LLaMA-2 7B before and after benchmark leakage',
+      yLabel: 'Score',
+      series: [
+        { label: 'Original model', key: 'base', baseline: true },
+        { label: 'After training on leaked benchmark training sets', key: 'leak' },
+      ],
+      data: [
+        { label: 'MMLU (leaked)', values: { base: 42.95, leak: 52.15 } },
+        { label: 'LAMBADA', values: { base: 68.2, leak: 61.0 } },
+        { label: 'HumanEval pass@10', values: { base: 26.83, leak: 8.54 } },
+        { label: 'XSum ROUGE-L', values: { base: 8.67, leak: 0.25 } },
+      ],
+      caption: 'Redrawn from Tables 1 and 3 of Zhou et al., 2023.[^4] MMLU is from the "+All Train S" setting in Table 1; the other three tasks were not in the leaked data and come from the "+Leak" setting in Table 3, which also uses the training sets of all the benchmarks. Units differ per task (accuracy, pass@10, ROUGE-L).',
+    },
+    {
+      type: 'p',
+      text: "The limit here is that these are deliberate, extreme simulations. The authors call the experiments preliminary and note that they continued training existing models on leaked data rather than pre-training with it mixed in, for lack of compute.[^4] So the chart shows the direction and rough size of the effect under heavy leakage, not what accidental contamination in a web crawl does. For an application team, the useful lesson is narrower: a public number describes the model on that benchmark, and only your own traffic describes it on your task.",
     },
     {
       type: 'h2',
-      text: 'What to take away'
+      text: 'Production shows what offline tests miss, but late and noisily',
     },
-    { type: 'p', text: 'Evaluation and observability are not competing ideas and you do not choose between them. Evaluation is a gate you pass before shipping, and it answers whether a specific change is safe to release. Observability is a window you keep open after shipping, and it answers whether the released thing is holding up on traffic you never anticipated.' },
-      { type: 'p', text: 'A great score behind the gate says nothing about the questions your users will invent tomorrow. Instrument the running system, record a structured trace for every call, watch the feedback signals, and route the real failures back into the test set. Do that and the two hundred cases you started with grow into a set that reflects the world, one caught failure at a time.' },
+    {
+      type: 'p',
+      text: "If offline evaluation is incomplete, the fix is to look at production. The interview study shows teams doing that in stages. Organizations usually ran between one and four deployment stages with names like canary, staging, shadow and A/B, so problems surface \"before they've met customers.\"[^2] In a shadow stage the new model makes live predictions that users never see, and the team compares its metrics with the current model.[^2] One engineer credited the success of a chatbot launch to slowly ramping it up to small slices of traffic and fixing failures early.[^2] A common symptom of the hardest bugs was a large gap between offline validation accuracy and production accuracy right after deployment.[^2]",
+    },
+    {
+      type: 'p',
+      text: "Logs over time also catch changes you did not make. WildChat's monthly toxicity rates show the share of toxic chatbot turns dropping sharply after June 2023, which the authors attribute mainly to OpenAI's June 27 model update.[^6] Nobody on the dataset team shipped that change. The model behind the API changed, and the logs recorded it.",
+    },
+    {
+      type: 'p',
+      text: "Observability has its own failure modes, and the same interviews describe them. Engineers who put alerts on every input and output column got buried in false positives; one said people were \"getting bombed with these alerts,\" and the authors report fatigue and silenced alerts that \"could miss actual performance drops.\"[^2] Labels arrive late. \"I have no idea how well [models] actually perform on live data,\" one engineer said, because feedback was \"always delayed by at least 2 weeks.\"[^2] Shadow mode cannot evaluate products with a feedback loop, since users never interact with shadow predictions.[^2] The interviews date from 2022 and cover ML pipelines in general (chatbots, autonomous vehicles, finance), not LLM applications specifically, so carrying these findings over to LLM apps is my reading. It fits the EvalGen participants, though: three were skeptical that LLM-based checks would carry over to monitoring a production pipeline, and one asked, \"How do I maintain my evals over time; do I have to rerun this entire process?\"[^1]",
+    },
+    {
+      type: 'h2',
+      text: 'What the papers leave unsolved',
+    },
+    {
+      type: 'p',
+      text: "Put side by side, these papers describe a loop: evaluate offline, deploy in stages, record production, turn failures into new test cases, and re-grade as criteria move. None of them claims the loop is solved. Here is what each one names as open.",
+    },
+    {
+      type: 'ul',
+      items: [
+        "How to sample outputs for human grading so the graded set reflects the whole distribution of successes and failures, including future outputs nobody has seen yet. Shankar and colleagues pose this as an open question and ask whether \"alignment\" with a grader is an achievable goal at all.[^1]",
+        "Label lag. The engineer quoted above called delayed feedback \"the number one problem\" and said \"nobody is solving\" it; the interview authors ask how engineers could find a \"Goldilocks\" alert setting and leave it as an open question.[^2]",
+        "Why LLM judges favor a position. Zheng and colleagues suspect training data or the left-to-right architecture and leave it to future work, and their agreement results cover helpfulness only.[^3]",
+        "How much contamination exists. Sainz and colleagues call for a shared registry of cases and for automatic detection methods, because it is not straightforward to measure; Zhou and colleagues ask model developers to publish contamination checks and pre-training data composition.[^5,4]",
+      ],
+    },
+    {
+      type: 'p',
+      text: "Each open problem sits at the boundary between the two practices. Grading samples, delayed labels, judge bias and contamination all come down to knowing what your system did on inputs you did not choose. Offline evaluation cannot answer that by construction, which is why the logs have to exist before the question comes up.",
+    },
     {
       type: 'sources',
+      numbered: true,
       items: [
-        { title: 'LangSmith documentation: tracing and observability for LLM applications', url: 'https://docs.smith.langchain.com/' },
-        { title: 'OpenTelemetry Generative AI semantic conventions', url: 'https://opentelemetry.io/docs/specs/semconv/gen-ai/' },
-        { title: 'Arize Phoenix: open-source LLM tracing and evaluation', url: 'https://docs.arize.com/phoenix' }
-      ]
-    }
-  ]
+        { title: 'Shankar, Zamfirescu-Pereira, Hartmann, Parameswaran, and Arawjo, Who Validates the Validators? Aligning LLM-Assisted Evaluation of LLM Outputs with Human Preferences, 2024', url: 'https://arxiv.org/abs/2404.12272' },
+        { title: 'Shankar, Garcia, Hellerstein, and Parameswaran, Operationalizing Machine Learning: An Interview Study, 2022', url: 'https://arxiv.org/abs/2209.09125' },
+        { title: 'Zheng et al., Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena, 2023', url: 'https://arxiv.org/abs/2306.05685' },
+        { title: 'Zhou et al., Don\'t Make Your LLM an Evaluation Benchmark Cheater, 2023', url: 'https://arxiv.org/abs/2311.01964' },
+        { title: 'Sainz et al., NLP Evaluation in trouble: On the Need to Measure LLM Data Contamination for each Benchmark, 2023', url: 'https://arxiv.org/abs/2310.18018' },
+        { title: 'Zhao et al., WildChat: 1M ChatGPT Interaction Logs in the Wild, 2024', url: 'https://arxiv.org/abs/2405.01470' },
+      ],
+    },
+  ],
 };

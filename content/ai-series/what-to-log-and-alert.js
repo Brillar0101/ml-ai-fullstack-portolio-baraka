@@ -1,296 +1,221 @@
+// Every factual claim below is taken from the numbered sources at the end.
+// Both charts are redrawn from reported numbers: Chen et al. 2023 and
+// Rabanser et al. 2019 are arXiv non-exclusive licenses, so no figures are
+// reproduced. Where the text reads a finding onto LLM features, it says so.
 export const POST = {
   id: 'what-to-log-and-alert',
-  title: 'The Dashboard Was Green While the Chatbot Quietly Broke: What to Log and Alert On for an LLM Feature',
-  excerpt: 'Uptime said everything was fine for four days while a support chatbot slowly turned useless. Standard app monitoring watches for crashes and slow responses, but an LLM feature can fail while every server stays healthy. Here is what to actually capture and what deserves to wake someone up.',
+  title: 'Postmortem of a Silent Regression: What to Log and Alert On for an LLM Feature',
+  excerpt: 'Between March and June 2023, GPT-4 went from 84% to 51% on a prime number task and from 52% to 10% on code that runs as written, while every request still came back as normal text. Read as an incident report, the drift studies and ML monitoring papers say which signals would have caught it.',
   category: 'AI',
   tags: ['Observability', 'Monitoring', 'Production'],
   body: [
-    { type: 'p', text: 'Picture a support chatbot shipped in front of a help center. It ran on a boring, well-monitored stack: load balancer, a couple of API servers, the usual alerts on CPU, memory, error rates, and uptime. For the first month it worked. Then someone changed the retrieval index the bot used to ground its answers, and a config typo quietly pointed it at a stale copy of the docs.' },
-      { type: 'p', text: 'The bot kept answering. It kept returning HTTP 200. Every server stayed healthy, latency looked normal, and the uptime alert stayed green the entire time. Four days later a manager noticed the support queue had swelled with angry follow-ups, all variations of the bot told me the wrong thing. The feature had been failing since Tuesday, and nothing in the monitoring stack had said a word.' },
-    {
-      type: 'p',
-      text: 'That gap is the whole point of this post. Standard application monitoring watches whether the software is running. It says almost nothing about whether the answers are any good. An LLM feature has a second, quieter way to fail: it stays up, stays fast, returns valid responses, and the content inside those responses is wrong, unsafe, or useless. If you only wire up the alerts you would use for a normal web service, you are blind to exactly the failures that make AI features different.'
-    },
     {
       type: 'h2',
-      text: 'Why a healthy server tells you nothing about answer quality'
+      text: 'The incident: same model name, different behavior',
     },
     {
       type: 'p',
-      text: 'Start with the intuition. In a normal web app, a broken feature usually announces itself. A bad deploy throws exceptions, a slow query spikes latency, a dead dependency returns 500s. Your alerts fire because failure and error are close to the same thing. The output of most endpoints is either right or it visibly breaks.'
-    },
-    { type: 'p', text: 'A language model does not offer you that courtesy. Feed it a stale document, a confusing prompt, or an input it has never seen, and it will still produce a fluent, confident, perfectly well-formed answer. The HTTP layer sees success.' },
-      { type: 'p', text: 'The model, meanwhile, is hallucinating a refund policy that does not exist. Nothing in the request or response shape reveals the problem, because the problem lives in the meaning of the text, and your web monitoring cannot read. So you have to capture different signals: numbers that stand in for quality, safety, cost, and change, measured on the content itself rather than on the plumbing around it.' },
-    {
-      type: 'h2',
-      text: 'Four families of signals worth capturing'
-    },
-    { type: 'p', text: 'It helps to sort the signals into four groups, because each group answers a different question and each earns a different response from you. The first group is **quality proxies**: numbers that correlate with whether users are getting good answers, even though you cannot measure good directly at scale.' },
-      { type: 'p', text: 'The clearest one is the thumbs-down rate, the fraction of responses users explicitly mark as unhelpful. Close behind are the regeneration or retry rate, how often a user asks the same thing again because the first answer missed, the escalation rate, how often a chat gets handed off to a human, and the refusal rate, how often the model declines to answer at all. When the stale index broke the support bot, the thumbs-down rate roughly tripled within hours. That signal existed. Nobody was watching it.' },
-    {
-      type: 'p',
-      text: 'The second group is **safety flags**. These catch the responses that are not merely unhelpful but harmful or risky: outputs a toxicity classifier scores as abusive, inputs that look like jailbreak attempts trying to override the system prompt, and cases where the model echoes back personal data, a PII leak. These are low-frequency and high-consequence, which shapes how you alert on them later.'
+      text: "In 2023 Lingjiao Chen, Matei Zaharia and James Zou ran the same prompts against two versions of GPT-4 and GPT-3.5 that OpenAI's API offered at the time, one snapshotted in March 2023 and one in June.[^1] They kept the default system prompt and set temperature to 0.1, a low setting that makes the output close to repeatable, so differences would come from the model and not from sampling luck.[^1]",
     },
     {
       type: 'p',
-      text: 'The third group is **operational metrics**, the LLM-flavored cousins of your normal ops dashboard. Time-to-first-token measures how long a user stares at a blank screen before words appear, which matters more than total latency for a streaming chat. Tokens per request and cost per request track spend, because a prompt that quietly grew from two thousand to twenty thousand tokens can multiply your bill without any error at all. Tool error rate matters when the model calls functions or APIs, because a failing tool can turn a capable agent into a confused one while the model itself looks fine.'
+      text: "On 1,000 questions of the form \"Is 17077 a prime number? Think step by step\", GPT-4's accuracy fell from 84.0% in March to 51.1% in June. Its average answer shrank from 638.3 characters to 3.9: the June model skipped the step-by-step reasoning it had been asked for and just wrote its answer.[^1] It also came to label almost every number as composite, 99.7% of the time.[^1] GPT-3.5 moved the other way on the same task, from 49.6% to 76.2%.[^1]",
     },
     {
       type: 'p',
-      text: 'The fourth group is **drift**: signals that the world has moved away from what your system was built for. A rising fallback rate, how often you drop to a default or canned response, is one sign. A changing input distribution, users suddenly asking about a product you launched last week that is not in your docs, is another. Drift is slow and easy to miss, which is exactly why the stale-index bug festered for days.'
+      text: "Code broke too, and not because the logic got worse. The authors gave both models 50 recent easy LeetCode problems with the instruction \"Generate the code only without any other text\" and sent each answer straight to LeetCode's online judge. GPT-4 answers that ran and passed went from 52.0% to 10.0%; GPT-3.5 went from 22.0% to 2.0%.[^1] The June versions wrapped their code in Markdown fences (```python at the top, ``` at the bottom), which is not valid Python. With that extra text stripped, June GPT-4 passed 70.0%, more than March.[^1] The authors warn that this kind of formatting shift \"can be particularly challenging to detect\" when the code feeds a larger software pipeline.[^1]",
     },
     {
-      type: 'diagram',
-      title: 'What to watch on an LLM feature',
-      rows: [
-        [
-          { label: 'Quality proxies', detail: 'thumbs-down rate, regeneration/retry rate, escalation to human, refusal rate' }
-        ],
-        [
-          { label: 'Safety flags', detail: 'toxicity score, jailbreak attempts, PII in output' }
-        ],
-        [
-          { label: 'Operational', detail: 'time-to-first-token, tokens/request, cost/request, tool error rate' }
-        ],
-        [
-          { label: 'Drift', detail: 'rising fallback rate, changing input distribution' }
-        ]
+      type: 'chart',
+      kind: 'bar',
+      title: 'GPT-4, March 2023 vs June 2023',
+      yLabel: 'Percent of prompts',
+      series: [
+        { label: 'March 2023', key: 'mar', baseline: true },
+        { label: 'June 2023', key: 'jun' },
       ],
-      caption: 'Standard app monitoring covers only part of the operational row. The quality, safety, and drift rows are where LLM features fail silently, and they need their own capture.'
+      data: [
+        { label: 'Prime task correct', values: { mar: 84.0, jun: 51.1 } },
+        { label: 'Code runs as-is', values: { mar: 52.0, jun: 10.0 } },
+        { label: 'Sensitive Q answered', values: { mar: 21.0, jun: 5.0 } },
+        { label: 'Answer-format rule followed', values: { mar: 99.5, jun: 0.5 } },
+      ],
+      caption: 'Redrawn from Figures 3, 7, 9 and 13 and Tables 1, 3 and 4 of Chen, Zaharia and Zou, 2023.[^1] Sample sizes: 1,000 prime questions, 50 LeetCode problems, 100 sensitive questions, 200 arXiv abstracts for the answer-format instruction.',
     },
     {
-      type: 'terms',
-      items: [
-        { term: 'Quality proxy', def: 'A measurable signal that stands in for answer quality, which you cannot grade directly at scale. Thumbs-down rate, regeneration rate, and escalation rate all move when answers get worse, so you watch them as a stand-in for a human reading every reply.' },
-        { term: 'Drift', def: 'A gradual shift between what your system was built for and what it now receives or produces. Inputs change (users ask new things), or outputs degrade (fallback and refusal rates creep up), so behavior that was fine at launch slowly stops fitting reality.' },
-        { term: 'Alert fatigue', def: 'What happens when a monitor pages people so often, or so noisily, that they start ignoring it. Once an alert is mostly false positives, a real one gets dismissed too, which makes the alert worse than none.' },
-        { term: 'SLO for an AI feature', def: 'A service level objective expressed in quality terms, not just uptime. For example: the thumbs-down rate stays under three percent over any rolling day, and time-to-first-token stays under two seconds for ninety-five percent of requests. It gives you a defined line that alerts can defend.' }
-      ]
+      type: 'p',
+      text: "Other behaviors shifted as well. On 100 questions that a model is not supposed to answer directly, GPT-4 answered 21.0% in March and 5.0% in June, and its replies shrank from over 600 characters to about 140, partly because it stopped explaining its refusals and just said it could not help.[^1] On a test of pure instruction following, GPT-4 honored \"answer yes or no within squared brackets\" 99.5% of the time in March and 0.5% in June. In June it still used the brackets but capitalized the answer, so a string match on \"[yes]\" would miss.[^1] The paper's summary: behavior of the \"same\" LLM service \"can change substantially in a relatively short amount of time.\"[^1]",
+    },
+    {
+      type: 'p',
+      text: "The rest of this post treats that study as an incident report on a feature you might own. The paper measured model behavior, not anyone's production system, so the incident framing is mine. The monitoring advice comes from papers written about exactly this class of failure.",
     },
     {
       type: 'h2',
-      text: 'Emit one structured event per request so every signal is queryable'
-    },
-    {
-      type: 'p',
-      text: 'None of these signals exist unless you capture them, and the cleanest way to capture them is to emit one structured event for every request. Not a free-text log line, but a machine-readable record with named fields, so you can later count, average, group, and alert without parsing prose. The event ties together the operational numbers, the safety scores, and a place to attach feedback when it arrives. Here is a compact version of what that emitter can look like.'
-    },
-    { type: 'lab', height: 460,
-        title: 'A structured event, and the four questions it answers',
-        caption: 'Every signal with the response it earns. Speed, quality and safety page someone; cost goes on a dashboard. Underneath is the single event all five rows were derived from, which is the point: none of these questions are answerable unless the field was logged in the first place.',
-        code: `import json
-from collections import Counter
-
-# One structured event per request, then the questions
-# you can only ask because the event was structured.
-
-def cost_of(usage, model):
-    rates = {"big-model": (0.003, 0.015),
-             "small-model": (0.0005, 0.0015)}
-    cin, cout = rates[model]
-    return (usage["in"] * cin
-            + usage["out"] * cout) / 1000
-
-def emit_llm_event(req, resp, timings, safety):
-    return {
-        "ts": req["ts"],
-        "request_id": req["id"],
-        "user_id": req["user_id"],
-        # operational
-        "model": resp["model"],
-        "ttft_ms": timings["ttft_ms"],
-        "total_ms": timings["total_ms"],
-        "input_tokens": resp["usage"]["in"],
-        "output_tokens": resp["usage"]["out"],
-        "cost_usd": round(
-            cost_of(resp["usage"], resp["model"]), 6),
-        "tool_errors": resp["tool_errors"],
-        # quality and behaviour
-        "refused": resp["refused"],
-        "used_fallback": resp["tool_errors"] > 0,
-        # safety scores from classifiers, 0..1
-        "jailbreak_score": safety["jailbreak"],
-        "pii_in_output": safety["pii"],
-        # feedback arrives later, keyed by request_id
-        "thumbs": None,
-    }
-
-def ev(i, model, ttft, tin, tout, errs,
-       refused, jb=0.02):
-    return emit_llm_event(
-        {"ts": 1750000000 + i, "id": "r%d" % i,
-         "user_id": "u%d" % (i % 3)},
-        {"model": model, "usage": {"in": tin, "out": tout},
-         "tool_errors": errs, "refused": refused},
-        {"ttft_ms": ttft, "total_ms": ttft * 4},
-        {"jailbreak": jb, "pii": False})
-
-EVENTS = [
-    ev(1, "small-model", 210, 800, 120, 0, False),
-    ev(2, "small-model", 240, 820, 140, 0, False),
-    ev(3, "big-model", 1900, 14000, 300, 1, False),
-    ev(4, "small-model", 260, 810, 130, 0, True, jb=0.81),
-    ev(5, "big-model", 2100, 15000, 280, 1, False),
-    ev(6, "small-model", 230, 790, 125, 0, False),
-]
-FEEDBACK = ["up", "up", "down", "down", None, "up"]
-for e, fb in zip(EVENTS, FEEDBACK):
-    e["thumbs"] = fb
-
-# ---- Report --------------------------------------------
-E = chr(27)
-DIM, OFF, BOLD = E + "[2m", E + "[0m", E + "[1m"
-OK, WARN, BAD, INFO = (E + "[32m", E + "[33m",
-                       E + "[31m", E + "[34m")
-note = lambda s: print(DIM + s + OFF)
-
-ttfts = sorted(e["ttft_ms"] for e in EVENTS)
-p95 = ttfts[int(0.95 * (len(ttfts) - 1))]
-spend = sum(e["cost_usd"] for e in EVENTS)
-big = sum(e["cost_usd"] for e in EVENTS
-          if e["model"] == "big-model")
-thumbs = Counter(e["thumbs"] for e in EVENTS)
-refusals = sum(e["refused"] for e in EVENTS)
-tool_errs = sum(e["tool_errors"] for e in EVENTS)
-def risky(e):
-    return e["jailbreak_score"] > 0.5 or e["pii_in_output"]
-
-flagged = [e for e in EVENTS if risky(e)]
-
-# group, signal, value, breached?, response
-ROWS = [
-    ("speed", "p95 time to first token",
-     "%d ms" % p95, p95 > 1500, "PAGE"),
-    ("cost", "spend, %.0f%% big" % (100 * big / spend),
-     "$%.4f" % spend, False, "DASH"),
-    ("quality", "thumbs down",
-     "%d of %d" % (thumbs["down"], len(EVENTS)),
-     thumbs["down"] >= 2, "PAGE"),
-    ("quality", "refusals and tool errors",
-     "%d / %d" % (refusals, tool_errs),
-     tool_errs > 0, "PAGE"),
-    ("safety", "requests flagged",
-     "%d" % len(flagged), len(flagged) > 0, "PAGE"),
-]
-
-hdr = BOLD + "SIGNALS" + OFF
-print(hdr + "  %d requests" % len(EVENTS))
-note("-" * 54)
-note("%-9s %-26s %-9s %s"
-     % ("GROUP", "SIGNAL", "VALUE", "ACTION"))
-
-for group, signal, value, breached, action in ROWS:
-    if action == "DASH":
-        colour, label = INFO, "dashboard"
-    elif breached:
-        colour, label = BAD, "PAGE ME"
-    else:
-        colour, label = OK, "ok"
-    print("%-9s %-26s %-9s %s%s%s"
-          % (group, signal, value, colour, label, OFF))
-
-note("-" * 54)
-print(BOLD + "ONE EVENT" + OFF + "  where that came from")
-note(json.dumps({k: EVENTS[3][k] for k in
-                 ("request_id", "model", "ttft_ms",
-                  "cost_usd", "refused",
-                  "jailbreak_score", "thumbs")}, indent=1))
-
-print()
-note("Speed, quality and safety page you. Cost goes on")
-note("a dashboard, because a bill creeping up is a")
-note("conversation, not a reason to wake someone at 3am.")
-
-# Try it: drop "model" from the event, then answer the
-# cost row again. Every row needs a field to exist.
-` },
-    {
-      type: 'p',
-      text: 'Two details make this work in practice. First, thumbs is left empty at request time and filled in later when the user clicks, joined back by request_id, so a single record can carry both what happened and how the user felt about it. Second, every value is a field with a name, which means your thumbs-down rate is a query over these events rather than a special pipeline you had to build. Capture once, ask many questions later.'
-    },
-    {
-      type: 'h2',
-      text: 'Decide what pages a human and what just sits on a dashboard'
-    },
-    { type: 'p', text: 'Capturing every signal does not mean alerting on every signal. The hard part is deciding which ones deserve to wake someone at two in the morning and which ones belong on a dashboard you review each morning with coffee.' },
-      { type: 'p', text: 'The rule of thumb: page a human only when the signal is both urgent and actionable right now. Safety events usually clear that bar. A spike in jailbreak attempts or a confirmed PII leak is happening now and someone must act, so it pages. A gradual rise in tokens per request costs money but can wait until morning, so it lives on a dashboard with a weekly review.' },
-    {
-      type: 'p',
-      text: 'Quality proxies sit in the interesting middle. A thumbs-down rate that jumps from three percent to nine percent and stays there is worth a page, because it is the exact signal that would have caught the stale-index bug on Tuesday afternoon instead of the following Saturday. But you do not page on a single thumbs-down, or even a handful. You page on a rate that crosses a threshold and holds. Here is the decision spine drawn out.'
-    },
-    {
-      type: 'diagram',
-      title: 'Alert or dashboard?',
-      root: {
-        label: 'A signal moved',
-        color: 'purple',
-        children: [
-          {
-            edge: 'unsafe or leaking now',
-            node: { label: 'Page immediately (safety)', color: 'yellow' }
-          },
-          {
-            edge: 'quality rate crossed SLO and held',
-            node: { label: 'Page on-call (quality)', color: 'yellow' }
-          },
-          {
-            edge: 'slow cost or drift trend',
-            node: { label: 'Dashboard + weekly review', color: 'yellow' }
-          },
-          {
-            edge: 'single bad response',
-            node: { label: 'Log only, no alert', color: 'yellow' }
-          }
-        ]
-      },
-      caption: 'Urgency and actionability decide the response. Immediate harm pages, a sustained quality breach pages, slow trends go on a dashboard, and one-off events are just logged.'
-    },
-    {
-      type: 'h2',
-      text: 'Alert on rates and trends, never on single events'
-    },
-    {
-      type: 'p',
-      text: 'The fastest way to ruin your own monitoring is alert fatigue, and LLM signals are especially good at causing it because they are noisy by nature. Any single response can be bad. A user thumbs-downs a perfect answer because they were in a bad mood, a toxicity classifier trips on a quoted swear word, one request refuses because the phrasing was odd. If each of those pages someone, your team learns within a week to swipe the alerts away without reading them, and then the real one gets swiped away too. The alert becomes noise, and noise is worse than silence because it costs attention and gives nothing back.'
-    },
-    { type: 'p', text: 'The fix is to alert on rates and trends rather than events. A single thumbs-down means nothing. A thumbs-down rate above six percent sustained over an hour, measured across enough requests to be real, means something specific and worth waking up for.' },
-      { type: 'p', text: 'This does three useful things at once. It smooths out individual noise, it forces you to state a threshold, which forces you to define what good looks like, and it ties the alert to your SLO, the quality line you promised to hold. Define the objective first, then let the alert defend it. An alert without an SLO behind it is just a guess about when to panic.' },
-    {
-      type: 'callout',
-      title: 'The one alert that would have caught it',
-      text: 'The support bot broke on Tuesday and was found on Saturday because the only alert was uptime, which never dropped. A single rate alert, thumbs-down above six percent sustained for one hour, would have paged within the first afternoon. The data to build it was already flowing. Nobody had turned it into a threshold.'
-    },
-    {
-      type: 'h2',
-      text: 'The mistakes that keep teams blind'
-    },
-    {
-      type: 'p',
-      text: 'A few patterns show up again and again, and each one maps back to a specific way the support bot stayed broken for four days.'
+      text: 'Timeline: why uptime and latency charts stay flat',
     },
     {
       type: 'ul',
       items: [
-        'Treating an LLM feature like a normal web service. Uptime and 500s tell you the server is alive, not that the answers are good. Add quality proxies or you are watching the wrong thing.',
-        'Capturing nothing about the content. If you never emit thumbs, refusals, or safety scores as fields, you cannot query them later, and the incident is invisible until users complain.',
-        'Alerting on single events. One bad response is not an incident. Page on sustained rates so noise does not train your team to ignore the pager.',
-        'Ignoring cost and token growth until the bill arrives. Tokens per request creeping up is a slow, silent budget leak. Put it on a dashboard even though it never deserves a page.',
-        'Having no quality SLO. Without a stated line for thumbs-down rate or time-to-first-token, every alert threshold is arbitrary and every argument about whether things are fine is unwinnable.'
-      ]
+        "**March 2023.** GPT-4 follows \"generate the code only\". Half its LeetCode answers run as written.[^1]",
+        "**March to June.** The model is updated. The authors note that when and how GPT-3.5 and GPT-4 are updated is opaque.[^1]",
+        "**June 2023.** The same prompt at the same temperature returns code inside Markdown fences. Only 10% of answers now run and pass as written.[^1]",
+        "**What the service metrics show.** A request went out and text came back. The paper does not report API errors or latency, and I am reading the absence here: the regression lives inside a normal-looking reply, where a status code or a response-time histogram cannot see it.",
+      ],
+    },
+    {
+      type: 'p',
+      text: "The ML reliability literature named this pattern years before LLM APIs. Rabanser, Günnemann and Lipton open their shift-detection paper by contrasting ordinary software, which throws warnings on bad input, with ML systems, which \"tend to fail silently.\"[^2] Google's ML Test Score rubric says changes in an upstream source can \"radically change\" what a feature means \"without necessarily producing values that are strange enough to trigger other monitoring.\"[^4] Sculley and colleagues call this an **unstable data dependency**: an input produced by another system that changes behavior over time, sometimes because it is itself a model being updated. Even an \"improvement\" to such an input can hurt the system that consumes it.[^3] A hosted LLM behind your feature is that kind of dependency.",
+    },
+    {
+      type: 'p',
+      text: "The rubric's authors also describe teams that assumed they needed no monitoring of their own, because their predictions were served inside a larger system whose reliability engineers would notice problems. The smaller system's errors, they reply, may be \"masked in the noise of the larger system.\"[^4] Watching whether the service is up answers a different question from whether it is right. What follows is one section per signal that would answer the second question.",
     },
     {
       type: 'h2',
-      text: 'What to carry away'
+      text: 'Signal 1: the model version that actually answered',
     },
-    { type: 'p', text: 'An LLM feature can fail while every server is healthy, so the monitoring you copied from your web tier will miss the failures that matter most. Capture four families of signal on the content itself: quality proxies like thumbs-down and regeneration and escalation and refusal rates, safety flags like toxicity and jailbreak attempts and PII leaks, operational numbers like time-to-first-token and tokens and cost and tool errors, and drift like rising fallback and shifting inputs. Emit them as one structured event per request so any of them is a query away.' },
-      { type: 'p', text: 'Then split the response by urgency: page immediately on live safety events, page on-call when a quality rate crosses your SLO and holds, and leave slow cost and drift trends on a dashboard you actually read. Above all, alert on rates and trends, never on single events, so you never train your team to ignore the pager. The support team from the story added exactly one rate alert on thumbs-down. The next time an index went stale, they knew within the hour, while the dashboard was still green.' },
+    {
+      type: 'p',
+      text: "Log which model version served every request, in a field of its own. The ML Test Score's first monitoring test is \"dependency changes result in notification\": subscribe to the announcement lists of every system you consume, and make sure its owners know you depend on it.[^4] Sculley's suggested fix for unstable inputs is a versioned copy, a frozen version you keep using until the new one has been vetted, at the price of possible staleness and of maintaining several versions.[^3] For an LLM API, my reading is that this means pinning a dated snapshot where the provider offers one, like the March and June versions Chen's team compared.[^1] With the version in every log line, any other signal in this post can be split by version, and a step change lines up with the day the version changed.",
+    },
+    {
+      type: 'h2',
+      text: 'Signal 2: format validity rate',
+    },
+    {
+      type: 'p',
+      text: "If your code parses the model's output (JSON, a bracketed label, a code block), count how often that parse succeeds and alert on the rate. This is the cheapest signal to compute and the one that would have caught both of Chen's formatting failures: the Markdown fences around code and the capitalized \"[Yes]\".[^1] It also tells you what kind of failure you have. Once the fences were stripped, June GPT-4's code passed more tests than March's.[^1] A parse-rate drop with steady answer quality points to post-processing you can fix the same day, not to a model you have to replace.",
+    },
+    {
+      type: 'p',
+      text: "The ML Test Score calls this checking **data invariants**: define a schema for the data a system expects, measure whether live data matches it, and alert when they diverge significantly.[^4] The rubric attaches a warning that applies to every alert in this post: thresholds need careful tuning to balance false positives against false negatives, or the alerts stop being useful.[^4]",
+    },
+    {
+      type: 'h2',
+      text: 'Signal 3: answer length and refusal rate',
+    },
+    {
+      type: 'p',
+      text: "Beyond each task's own score, Chen's team tracked two metrics for every task. **Verbosity** is the length of the reply in characters. **Mismatch** is how often the two versions give different extracted answers to the same prompt.[^1] Neither needs a correct answer to compute, and both moved sharply: GPT-4's prime-task replies went from 638.3 characters to 3.9, and its refusal replies from over 600 to about 140.[^1] Response rate, the share of prompts the model answers directly instead of declining, fell on opinion survey questions from 97.6% to about 22% for GPT-4 (the text says 22.1%, a figure 23.4%).[^1]",
+    },
+    {
+      type: 'p',
+      text: "Mismatch needs a noise floor, because models vary between runs even at low temperature. GPT-3.5 changed 27% of its opinion survey answers between March and June. Running the March model twice gave 2.8% disagreement, and running the June model twice gave 7.0%.[^1] That gap is what makes 27% a real shift and not noise. Before alerting on a change in answers, measure how much your setup disagrees with itself.",
+    },
+    {
+      type: 'p',
+      text: "Sculley's paper suggests a similar check for classifiers, called **prediction bias**: the distribution of predicted labels should usually match the distribution of observed labels. They admit a model that always predicts the average passes it, but call it \"a surprisingly useful diagnostic,\" and suggest slicing it by different dimensions to find problems fast and to drive automated alerts.[^3] The LLM analogue I would log is the mix of outcome types (answered, refused, fell back to a default) sliced by feature and by model version. That analogue is my reading of the paper, not something the paper tests.",
+    },
+    {
+      type: 'h2',
+      text: 'Signal 4: whether the inputs have shifted',
+    },
+    {
+      type: 'p',
+      text: "The first three signals watch the model. This one watches the users. **Dataset shift** means the data the system sees in production (the target distribution) differs from the data it was built and tested on (the source distribution). Rabanser, Günnemann and Lipton frame detecting it as a **two-sample test**: take a sample from each distribution and test the null hypothesis that both came from the same one.[^2] Standard tests lose power on high-dimensional data like raw images, so they first shrink each input to a short vector, then test that.[^2]",
+    },
+    {
+      type: 'p',
+      text: "They compared several ways to shrink the data. **BBSDs** (black box shift detection with soft predictions) uses the softmax output of a classifier already trained on the source data, meaning its list of class probabilities, as the representation.[^2] A **domain classifier** is instead trained to tell source samples from target samples, and if it beats a coin flip by more than chance allows (checked with a binomial test), the two sets differ.[^2] For the tests themselves, they ran either one multivariate test over all dimensions (the kernel test MMD) or one **Kolmogorov-Smirnov (KS) test** per dimension. The KS test compares two empirical cumulative distributions and uses their largest gap as the statistic.[^2] Running \\(K\\) tests at once inflates the chance that one fires by luck, so they applied a **Bonferroni correction**: flag a shift only when the smallest p-value falls below \\(\\alpha / K\\).[^2]",
+    },
+    {
+      type: 'eq',
+      tex: '\\begin{gathered} Z = \\sup_{z} \\, \\lvert F_p(z) - F_q(z) \\rvert \\\\[4pt] \\text{shift if } \\min_{k} \\, p_k < \\alpha / K \\end{gathered}',
+      caption: 'The KS statistic on one dimension, where \\(F_p\\) and \\(F_q\\) are the empirical CDFs of source and target samples, and the Bonferroni rule across \\(K\\) dimensions. Equation 4 and Section 3.2 of Rabanser et al., 2019.[^2]',
+    },
+    {
+      type: 'p',
+      text: "Across their simulated shifts on MNIST and CIFAR-10 images, BBSDs with per-dimension KS tests was the best method overall. Univariate tests with the Bonferroni correction worked about as well as the multivariate test, which surprised the authors given how conservative the correction is.[^2] The domain classifier did badly with 100 target samples or fewer and caught up as samples grew. The multivariate test run on raw, unreduced inputs, a widely used baseline, performed poorly.[^2]",
+    },
+    {
+      type: 'chart',
+      kind: 'bar',
+      title: 'Share of simulated shifts detected, by target sample size',
+      yLabel: 'Detection accuracy',
+      series: [
+        { label: 'Raw inputs, KS', key: 'nored', baseline: true },
+        { label: 'Domain classifier', key: 'classif' },
+        { label: 'BBSDs, KS', key: 'bbsds' },
+      ],
+      data: [
+        { label: '10 samples', values: { nored: 0.03, classif: 0.01, bbsds: 0.19 } },
+        { label: '50', values: { nored: 0.26, classif: 0.11, bbsds: 0.47 } },
+        { label: '100', values: { nored: 0.36, classif: 0.21, bbsds: 0.47 } },
+        { label: '1,000', values: { nored: 0.54, classif: 0.51, bbsds: 0.70 } },
+        { label: '10,000', values: { nored: 0.72, classif: 0.67, bbsds: 0.79 } },
+      ],
+      caption: 'Redrawn from Table 1a of Rabanser, Günnemann and Lipton, 2019,[^2] univariate rows plus the domain classifier. Averaged over all simulated shifts on MNIST and CIFAR-10 at significance level 0.05.',
+    },
+    {
+      type: 'p',
+      text: "Two more results matter for sizing an alert. Large shifts could be detected better than chance with only 20 samples using BBSDs, while small and medium shifts needed orders of magnitude more.[^2] And a shift that touched only 10% of the samples was hard to detect at all; the authors suggest such cases may suit outlier detection better.[^2] Not every detected shift is harmful, either. On the COIL-100 dataset they detected a real shift between object photos at different angles that left the classifier's accuracy intact.[^2]",
+    },
+    {
+      type: 'p',
+      text: "The authors see BBSDs winning as good news for practitioners, because any classifier you already run can double as a shift detector.[^2] Carrying this over to an LLM feature is my extrapolation, not their result: a small classifier you already run on incoming prompts (a topic or intent router, say) gives exactly the kind of soft output they tested, and a weekly KS test of this week's scores against a reference week is cheap. Their experiments were on images, and they list language data as untested.[^2]",
+    },
+    {
+      type: 'h2',
+      text: 'Signal 5: quality scored on a sample',
+    },
+    {
+      type: 'p',
+      text: "Format, length, refusals and input shift are all proxies. At some point someone has to judge whether answers are good. The ML Test Score's last monitoring test is that prediction quality on served data has not regressed. It admits the correct labels are often unknown even well after serving time, and it offers options, one of which is to have human raters label a sample of logged serving inputs.[^4] Its authors want thresholds set from quality bounds at launch, a responder notified right away when quality leaves them, and watch kept for both sudden drops and slow leaks.[^4]",
+    },
+    {
+      type: 'p',
+      text: "Labels are slow in practice. In an interview study of 18 ML engineers, Shankar and colleagues found feedback delay to be the most often reported data problem; one engineer said feedback on live predictions was \"always delayed by at least 2 weeks.\"[^5] Rabanser's paper offers a way to spend labels well. Label only the inputs the domain classifier rates as most typical of the new data, and check the model's accuracy on those. In their experiments, two to three orders of magnitude fewer labels than the full sample gave a good estimate of accuracy on the shifted data.[^2]",
+    },
+    {
+      type: 'p',
+      text: "Many teams now use another LLM as the grader. Zheng and colleagues found GPT-4 as a judge agreed with human experts 85% of the time on non-tied votes, higher than the 81% agreement between humans.[^6] They also measured its biases. With the order of two answers swapped, GPT-4 gave the same verdict only 65% of the time.[^6] When 23 answers were padded with a reworded copy of their own lists, Claude-v1 and GPT-3.5 preferred the padded version 91.3% of the time and GPT-4 8.7% of the time.[^6] Chen's study showed that verbosity itself drifts between versions,[^1] so a judge that favors long answers can give a better score to an update that only made replies longer. Swapping answer order and logging the judge's own model version are the least a sampled evaluator needs.",
+    },
+    {
+      type: 'terms',
+      optional: false,
+      items: [
+        { term: 'Source and target distribution', def: 'The data a system was built and tested on (source) versus the data it meets in production (target). Shift detection asks whether they differ.' },
+        { term: 'p-value', def: 'The probability of seeing a difference at least this large if the two samples really came from the same distribution. Small means the difference is unlikely to be luck.' },
+        { term: 'Slow leak', def: "The ML Test Score's term for a regression that builds up gradually instead of arriving as a step, The rubric suggests catching sudden drops by comparing against prior versions, and slow leaks with a preset threshold.[^4]" },
+      ],
+    },
+    {
+      type: 'h2',
+      text: 'Signal 6: how often each alert is ignored',
+    },
+    {
+      type: 'p',
+      text: "Every signal above can page someone, which is its own failure mode. False-positive alerts, meaning alerts that fire while the model is performing fine, were the pain point Shankar's interviewees raised most often.[^5] Many engineers alerted on every input column and every output column, and the authors point out that with enough tracked metrics, even over a handful of columns, the odds that at least one violates its bounds are high.[^5] That is the multiple-testing problem the Bonferroni correction exists for.[^2]",
+    },
+    {
+      type: 'p',
+      text: "The result was fatigue and alerts being silenced, which can hide real performance drops.[^5] One engineer said \"90% of them aren't immediate.\" Another described an internal tool that tracks which alerts on-call engineers actually acted on, and reports things like an alert that fired 1,000 times and was ignored 45% of the time.[^5] That ignore rate is a signal worth logging for your own alerts. An alert that is almost always dismissed should be retuned or deleted. Sculley's **action limits** set the bar from the other direction: limits \"broad enough not to trigger spuriously,\" which, when hit, should trigger manual investigation.[^3]",
+    },
+    {
+      type: 'callout',
+      title: 'One log record per request, from this postmortem',
+      text: "Model version string.[^4] Whether the output parsed.[^1] Reply length and outcome type: answered, refused or fallback.[^1,3] The scores of any classifier already run on the input, for later KS tests.[^2] Request ID so late feedback, human labels or judge scores can join back.[^4,5] Keeping these in one record is my suggestion; each field traces to the cited paper.",
+    },
+    {
+      type: 'h2',
+      text: 'Still open: shift detection on a live stream of text',
+    },
+    {
+      type: 'p',
+      text: "The detection method that did best in Failing Loudly was tested on batches of images, compared at fixed sample sizes. Its authors list two open questions. One is detection on online data, which would have to account for the strong correlation between neighboring time steps. The other is whether the framework carries over to other domains, and they name natural language processing.[^2] A production LLM feature sits squarely inside both. Its inputs arrive as a correlated stream, one user's session after another, and they are text. On the label side, one of Shankar's interviewees put it bluntly: \"nobody is solving the label lag problem.\"[^5]",
+    },
     {
       type: 'sources',
+      numbered: true,
       items: [
-        { title: 'Datadog: LLM Observability', url: 'https://docs.datadoghq.com/llm_observability/' },
-        { title: 'Arize: LLM Observability and monitoring', url: 'https://arize.com/llm-observability/' },
-        { title: 'OpenTelemetry: Semantic conventions for generative AI', url: 'https://opentelemetry.io/docs/specs/semconv/gen-ai/' }
-      ]
-    }
-  ]
+        { title: 'Chen, Zaharia, and Zou, How Is ChatGPT\'s Behavior Changing over Time?, 2023', url: 'https://arxiv.org/abs/2307.09009' },
+        { title: 'Rabanser, Günnemann, and Lipton, Failing Loudly: An Empirical Study of Methods for Detecting Dataset Shift, NeurIPS 2019', url: 'https://arxiv.org/abs/1810.11953' },
+        { title: 'Sculley et al., Hidden Technical Debt in Machine Learning Systems, NeurIPS 2015', url: 'https://papers.nips.cc/paper_files/paper/2015/file/86df7dcfd896fcaf2674f757a2463eba-Paper.pdf' },
+        { title: 'Breck, Cai, Nielsen, Salib, and Sculley, The ML Test Score: A Rubric for ML Production Readiness and Technical Debt Reduction, IEEE Big Data 2017', url: 'https://research.google.com/pubs/archive/46555.pdf' },
+        { title: 'Shankar, Garcia, Hellerstein, and Parameswaran, Operationalizing Machine Learning: An Interview Study, 2022', url: 'https://arxiv.org/abs/2209.09125' },
+        { title: 'Zheng et al., Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena, NeurIPS 2023', url: 'https://arxiv.org/abs/2306.05685' },
+      ],
+    },
+  ],
 };
