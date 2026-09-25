@@ -1,272 +1,252 @@
-// Original AI Engineering series post. Rendered by src/pages/blog/SeriesPost.jsx;
-// scheduled and given its sources in src/data/seriesPosts.js.
+// AI Engineering series post, rewritten against research papers.
+// Rendered by src/pages/blog/SeriesPost.jsx and scheduled in src/data/seriesPosts.js.
+// Every factual claim is cited to the numbered sources at the end. HELM Figure 26
+// is reproduced under CC BY 4.0 (arXiv 2211.09110); the bar chart is redrawn from
+// Table 2 of Gema et al. (arXiv 2406.04127, CC BY 4.0).
 export const POST = {
   "id": "capabilities-that-matter",
-  "title": "The leaderboard is not your job: which capabilities to measure",
-  "excerpt": "A team picked the top-ranked model and it flopped in production. The fix is to measure the handful of capabilities your specific task actually needs.",
+  "title": "Auditing a leaderboard number: what MMLU hides and what to measure instead",
+  "excerpt": "An audit of MMLU found errors in 57% of sampled Virology questions and an estimated 6.49% error rate overall. Add HELM's other metrics and Chatbot Arena's preference votes, and a single leaderboard score says little about which model fits your application.",
   "category": "AI",
   "tags": [
     "Evaluation",
     "Model selection",
-    "Strategy"
+    "Benchmarks"
   ],
   "seriesNum": 39,
   "publishAt": "2026-07-04T12:00:00Z",
   "body": [
     {
       "type": "p",
-      "text": "Picture a team choosing a model the obvious way: they look up a leaderboard, pick the model sitting at the top, and wire it in. It flops. The answers are slow, they ramble past the length their UI can show, and they ignore half the formatting instructions the team carefully wrote."
+      "text": "In 2024 a team at the University of Edinburgh and partner institutions sat down with 100 randomly chosen questions from the Virology section of MMLU, the widely used multiple-choice benchmark, and checked each one against its original source. They reported that 57% of those questions had some kind of error.[^1] One question asked for the best option for preventing future outbreaks of Ebola. The answer key picked sending American and European army teams into West Africa.[^1]"
     },
     {
       "type": "p",
-      "text": "The model that \"won\" lost at the only contest that mattered, which was their product. The mistake was treating a single overall ranking as if it measured fitness for their job. It did not. It measured a general average, and your job is never the general average."
-    },
-    {
-      "type": "p",
-      "text": "The better way to choose is to stop asking \"which model is best\" and start asking \"which capabilities does my task actually need, and how does each model do on those.\" A model is not good or bad as a single fact. It is a bundle of separate strengths, and a product only leans on a few of them. Once you name the few your task depends on, model selection turns from a popularity contest into a targeted measurement, and the leaderboard becomes one weak input rather than the verdict."
-    },
-    {
-      "type": "h2",
-      "text": "The capabilities most products actually lean on"
-    },
-    {
-      "type": "p",
-      "text": "A handful of capabilities cover most real needs, and they are worth separating because a model can be strong in one and weak in another. There is **domain knowledge**, how much the model knows about your particular subject. There is **generation quality**, whether what it writes is accurate, coherent, and useful."
-    },
-    {
-      "type": "p",
-      "text": "There is **instruction-following**, whether it actually does what you told it, including the boring constraints like length and format. And there is the practical bundle of **cost and latency**, how much each call costs and how long users wait. A leaderboard score smears all of these into one number, which is exactly why it could not warn the team that their winner was a slow rule-ignorer."
-    },
-    {
-      "type": "p",
-      "text": "This is not just an engineer's hunch; it is what large-scale measurement finds when someone bothers to measure more than one thing. The [HELM project](https://arxiv.org/abs/2211.09110) at Stanford evaluated dozens of models on seven dimensions at once, accuracy, calibration, robustness, fairness, bias, toxicity, and efficiency, and the dimensions refuse to move together. A model's accuracy and its calibration, how well its confidence matches how often it is right, can pull in opposite directions on the same task."
-    },
-    {
-      "type": "p",
-      "text": "They also found that before this standardization, prominent models had been compared on under a fifth of the same test scenarios, so even the \"overall\" rankings people quoted were built from tests that barely overlapped. A single capability score is not summarizing a coherent thing. It is averaging a committee that disagrees."
-    },
-    {
-      "type": "h2",
-      "text": "Walk the team's real requirements"
-    },
-    {
-      "type": "p",
-      "text": "Look at what their product needed and the right model almost picks itself. The feature shows short answers in a fixed box, so instruction-following on length and format is critical, and the top-ranked model was weak there. Users interact live, so latency matters more than a few points of some abstract quality score."
-    },
-    {
-      "type": "p",
-      "text": "The subject is ordinary, so deep domain knowledge is not the bottleneck. Written out like that, the team's priorities are nothing like the leaderboard's priorities, and a model that ranks lower overall but nails instructions and responds fast is plainly the better choice for them. The leaderboard was answering a question they never asked."
-    },
-    {
-      "type": "diagram",
-      "title": "Which capability gates your task?",
-      "root": {
-        "label": "Is a person waiting on the answer live?",
-        "color": "purple",
-        "children": [
-          {
-            "edge": "yes",
-            "node": {
-              "label": "Latency and cost lead",
-              "color": "yellow"
-            }
-          },
-          {
-            "edge": "no",
-            "node": {
-              "label": "Does the output feed code or a fixed UI?",
-              "color": "blue",
-              "children": [
-                {
-                  "edge": "yes",
-                  "node": {
-                    "label": "Instruction-following leads",
-                    "color": "yellow"
-                  }
-                },
-                {
-                  "edge": "no",
-                  "node": {
-                    "label": "Is the subject specialized?",
-                    "color": "blue",
-                    "children": [
-                      {
-                        "edge": "yes",
-                        "node": {
-                          "label": "Domain knowledge leads",
-                          "color": "yellow"
-                        }
-                      },
-                      {
-                        "edge": "no",
-                        "node": {
-                          "label": "Generation quality leads",
-                          "color": "yellow"
-                        }
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-          }
-        ]
-      },
-      "caption": "A first-pass triage. Most products end up with two leading capabilities, and that pair is what you measure candidates on."
-    },
-    {
-      "type": "h2",
-      "text": "Naming what you are measuring"
+      "text": "Across all 57 subjects, their re-annotated set of 5,700 questions, built by 14 human experts, led them to estimate that 6.49% of MMLU questions contain errors.[^1] In the subjects where errors cluster, that was enough to reorder the top models.[^1] So before trusting a leaderboard number to pick a model, it helps to audit what the number is made of. This post does that for MMLU, line by line, and then asks what a builder should measure instead."
     },
     {
       "type": "terms",
+      "optional": false,
       "items": [
         {
-          "term": "Domain knowledge",
-          "def": "how much the model knows about your specific subject area. Matters most for specialized fields."
-        },
-        {
-          "term": "Generation quality",
-          "def": "whether the output is accurate, coherent, and genuinely useful for the task."
-        },
-        {
-          "term": "Instruction-following",
-          "def": "whether the model obeys what you actually told it, including constraints like length, format, and tone."
-        },
-        {
-          "term": "Cost and latency",
-          "def": "the price per call and the time to respond. Often the deciding factor for live, high-volume features."
-        },
-        {
           "term": "Benchmark",
-          "def": "a standardized test producing a score. Useful as a rough signal, dangerous as a final verdict for your specific job."
+          "def": "A fixed set of test items with a scoring rule. MMLU is one: multiple-choice questions, scored by the fraction answered correctly."
         },
         {
-          "term": "Preference leaderboard",
-          "def": "a ranking built from people voting between anonymous model answers. It measures average helpfulness for its voters, not fitness for your task."
+          "term": "Ground truth",
+          "def": "The answer the benchmark counts as correct. If the key is wrong, a model that answers correctly gets marked down."
         },
         {
-          "term": "Verifiable constraint",
-          "def": "an instruction whose compliance plain code can check, like a word limit or valid JSON. The cheapest honest way to measure instruction-following."
+          "term": "Calibration",
+          "def": "Whether a model's stated confidence matches how often it is right. A calibrated model that says 80% is right about 80% of the time."
+        },
+        {
+          "term": "Robustness",
+          "def": "How much accuracy holds up when the input is perturbed in ways that should not change the answer, such as typos."
+        },
+        {
+          "term": "Pairwise preference",
+          "def": "A human sees two anonymous answers to the same prompt and picks the better one. Chatbot Arena ranks models from many such votes."
         }
       ]
     },
     {
       "type": "h2",
-      "text": "What a rank actually is"
+      "text": "Line item one: the answer key is wrong more often than you would guess"
     },
     {
       "type": "p",
-      "text": "It helps to open up the most-quoted leaderboard and look at the machinery. [Chatbot Arena](https://arxiv.org/abs/2403.04132), described in a 2024 paper from its builders, works like this: visitors type any prompt they like, two anonymous models both answer, the visitor votes for the better one, and hundreds of thousands of such votes are fed into a statistical model that turns win rates into a single rating per model. So a rank on that board means, precisely: the average preference of that site's visitors, on prompts those visitors happened to ask. The paper is admirably honest about the edges of that claim."
+      "text": "The Edinburgh study, published as \"Are We Done with MMLU?\" by Gema and colleagues, sorted each bad question into a small tree of error types. A question can be unclear, for example by referring to \"question 21\" that the model never sees. Its options can be garbled, often from a parsing mistake that split one option into two. Or the key itself can fail: no option is correct, several are, or the marked answer is simply the wrong one.[^1]"
     },
     {
       "type": "p",
-      "text": "The voters skew toward enthusiasts and researchers rather than everyday users, the prompt mix is whatever the crowd brings rather than anyone's production traffic, and the votes measure helpfulness, not safety or reliability. None of that is a scandal. It is a well-run answer to a question that is simply not \"which model should power your product.\""
+      "text": "The errors were not spread evenly. In Virology, the figure caption reports 33% of the sampled questions with a wrong ground truth, 14% with unclear questions, and 4% with more than one correct answer.[^1] More than 20% of sampled questions were wrong in Logical Fallacies and College Chemistry, and more than 10% in Professional Law, Business Ethics, Formal Logic, Human Aging, Global Facts, Machine Learning, Miscellaneous and Public Relations.[^1] The causes ranged from the plain to the strange. In College Chemistry, questions that spanned several lines in the source were parsed so that part of the question became option A and the real option D fell off.[^1] In Formal Logic, one question marks (F ∧ L) ∧ ¬C as correct and F ∧ L ∧ ¬C as incorrect, though the two formulas are equivalent.[^1]"
     },
     {
       "type": "p",
-      "text": "Economists got to the deeper problem years before the current model boom. A [2020 paper by Ethayarajh and Jurafsky](https://arxiv.org/abs/2009.13888) framed leaderboards in terms of utility, the benefit a consumer gets from a thing, and pointed out a structural mismatch. To a leaderboard, only rank matters: a jump from third to first is everything, and an improvement that does not change rank is worth nothing. To you, quality is smooth, every real improvement helps."
+      "text": "Does this change which model looks best? The authors re-scored ten leading models on the five subjects with the most errors, once on all questions and once on only the questions their annotators judged correct. In Virology, Llama 3.1 Instruct Turbo (405B) ranked 16th on all questions and first on the clean ones.[^1] In Human Sexuality, Gemini 1.5 Pro (001) went from 0.37 exact match and 55th place to 0.94 and 6th.[^1] The ranks here are positions on the larger HELM MMLU leaderboard the authors compared against, so the ten models below are a slice of a longer list."
+    },
+    {
+      "type": "chart",
+      "kind": "bar",
+      "title": "MMLU Virology, six models: all questions vs. only error-free questions",
+      "yLabel": "Exact match",
+      "series": [
+        {
+          "label": "All Virology questions",
+          "key": "all",
+          "baseline": true
+        },
+        {
+          "label": "Only questions judged correct",
+          "key": "clean"
+        }
+      ],
+      "data": [
+        {
+          "label": "Sonnet 3.5",
+          "values": {
+            "all": 0.6,
+            "clean": 0.91
+          }
+        },
+        {
+          "label": "GPT-4o",
+          "values": {
+            "all": 0.6,
+            "clean": 0.91
+          }
+        },
+        {
+          "label": "GPT-4 0613",
+          "values": {
+            "all": 0.6,
+            "clean": 0.86
+          }
+        },
+        {
+          "label": "Llama 405B",
+          "values": {
+            "all": 0.57,
+            "clean": 0.93
+          }
+        },
+        {
+          "label": "Qwen2 72B",
+          "values": {
+            "all": 0.56,
+            "clean": 0.88
+          }
+        },
+        {
+          "label": "Gemini 001",
+          "values": {
+            "all": 0.55,
+            "clean": 0.91
+          }
+        }
+      ],
+      "caption": "On the full Virology set, where roughly a third of the sampled keys were wrong, these six models sit within five points of each other. On the cleaned questions the order changes: Llama 3.1 405B moves from fourth of these six to first, and GPT-4 (0613) from tied first to last. Redrawn from Table 2 of Gema et al., 2024.[^1]"
     },
     {
       "type": "p",
-      "text": "Worse, a rank prices the costs of using a model at exactly zero: size, speed, and energy do not move it at all. Their sharpest example is a family of small models like DistilBERT, which kept about 97 percent of a much larger model's quality while being 40 percent smaller and 60 percent faster. On a pure-accuracy board that model is a loser. In a product, it is very often the winner. Their proposed fix, notably, was to let every user re-weight the leaderboard by their own priorities, which is this post's argument wearing formal clothes."
-    },
-    {
-      "type": "p",
-      "text": "The reason a single ranking misleads is that it has to pick a weighting of all these capabilities, and whatever weighting it picked is almost certainly not yours. A leaderboard might weigh hard reasoning heavily because that is impressive to measure, while your product would trade all of that reasoning for lower latency and tighter instruction-following. Neither weighting is wrong in the abstract. They are just answers to different questions. When you accept a general ranking as your answer, you are silently adopting a stranger's priorities for your product, and then acting surprised when the result does not fit your priorities."
-    },
-    {
-      "type": "p",
-      "text": "There is a second reason to be wary, and it is better documented than most people realize: benchmark data leaks into training data. Researchers who study this, notably a [2023 paper by Sainz and colleagues](https://arxiv.org/abs/2310.18018), catalogue real cases rather than hypotheticals. One widely used training corpus was found to contain the test sets of popular benchmarks. GPT-4's own technical report dropped a benchmark from its evaluation after discovering some of its data in the training mix."
-    },
-    {
-      "type": "p",
-      "text": "And popular chat models have been shown to regenerate well-known evaluation datasets nearly verbatim on request, which is hard to do without having trained on them. When a model has seen the test, its score reflects familiarity as much as ability, and since the biggest models keep their training data secret, you usually cannot check. Benchmarks remain a cheap first filter. They must never be the last word, because you cannot audit what they secretly rehearsed."
-    },
-    {
-      "type": "callout",
-      "title": "The one-line version",
-      "text": "A leaderboard rank is a stranger's weighted average of capabilities you may not need, measured on questions you will never be asked."
-    },
-    {
-      "type": "p",
-      "text": "It helps to picture two models side by side. One is a brilliant generalist that reasons through hard problems but takes its time and occasionally treats your formatting rules as suggestions."
-    },
-    {
-      "type": "p",
-      "text": "The other is plainer, knows less trivia, but answers in a heartbeat and follows instructions to the letter. On a leaderboard the first model wins and the second is forgotten. In a live product with a tight layout and impatient users, the second model is the one that keeps customers, and the first is a liability dressed as a champion. Same two models, opposite verdicts, and the only thing that changed was whose needs were doing the judging."
+      "text": "There is a second, odder signal in the same data. Scored against the original key, models should do worse on the questions flagged as erroneous, and in most subjects they did. In Professional Law and Formal Logic they did about as well, or better.[^1] A model should not be able to agree with a broken key by reasoning. The authors read this as possible evidence that those questions were memorised during pretraining.[^1]"
     },
     {
       "type": "h2",
-      "text": "How to choose for your task instead"
+      "text": "Line item two: which capability a question actually tests"
     },
     {
       "type": "p",
-      "text": "The procedure is the one this series keeps returning to, because it keeps being right: build a small evaluation set from your own real tasks, decide which two or three capabilities your product actually depends on, and score the candidate models on those specifically. Measure instruction-following by checking whether outputs obey your real constraints. Measure latency and cost by simply timing and pricing real calls. Measure domain knowledge and generation quality with the checkable or judge-based scoring from the evaluation posts. Now you are comparing models on the axes your users will feel, and the comparison produces a winner that is actually the winner for you, not for a leaderboard maintainer with different goals."
+      "text": "MMLU was built to measure breadth. Its original paper describes 57 tasks and 15,908 questions, collected by graduate and undergraduate students from freely available sources such as practice questions for the GRE and the US Medical Licensing Examination.[^2] The same paper found that models were \"lopsided\": strong in some subjects and near chance in others, including socially important ones such as morality and law.[^2] A single average hides that shape by design."
     },
     {
       "type": "p",
-      "text": "Two of the four capabilities need nothing more than plain code and a stopwatch. Here is a scorer for the team's actual constraints, short answers, valid structure, no chatty preamble, plus timing:"
-    },
-    {
-      "type": "lab",
-      "height": 460,
-      "title": "capability_check.py, scoring two models on real constraints",
-      "caption": "Instruction-following and latency need nothing but plain code and a stopwatch. The verbose model fails every constraint this product actually has.",
-      "code": "import json, time\n\n# ---- Two stand-in models\n# --------------------------------------------------\n# Scripted, not real. Each is written to have the habit the\n# post describes: the \"leaderboard winner\" is capable but\n# verbose and chatty, and the plainer model is terse and\n# obeys the format it was given.\ndef leaderboard_winner(prompt):\n    time.sleep(0.03)                      # stands in for a slower, larger model\n    return ('Sure! Here is a thorough answer to your question. '\n            '{\"answer\": \"Your plan renews on the 1st of each month, and you can '\n            'cancel any time from the billing page, which you will find under '\n            'account settings in the left-hand navigation menu.\"}')\n\ndef plainer_model(prompt):\n    time.sleep(0.01)\n    return '{\"answer\": \"Your plan renews monthly. Cancel any time in Billing.\"}'\n\ndef is_valid_json(out):\n    try:\n        json.loads(out)\n        return True\n    except Exception:\n        return False\n\n# ---- Your real constraints, written as code\n# -------------------------------\nLIMIT_WORDS = 30\n\ndef check_output(out):\n    return {\n        \"fits_the_box\":     len(out.split()) <= LIMIT_WORDS,\n        \"is_valid_json\":    is_valid_json(out),\n        \"has_answer_field\": '\"answer\"' in out,\n        \"no_preamble\":      not out.lstrip().startswith((\"Sure\", \"Here\")),\n    }\n\ndef score_model(model, cases):\n    start = time.perf_counter()\n    outputs = [model(c[\"input\"]) for c in cases]\n    avg_latency = (time.perf_counter() - start) / len(cases)\n    passed = [all(check_output(o).values()) for o in outputs]\n    return {\n        \"instruction_following\": sum(passed) / len(passed),\n        \"avg_latency_s\": round(avg_latency, 3),\n    }\n\nCASES = [{\"input\": \"when does my plan renew?\"},\n         {\"input\": \"how do I cancel?\"},\n         {\"input\": \"what is my billing date?\"}]\n\nfor name, model in [(\"leaderboard winner\", leaderboard_winner),\n                    (\"plainer model\", plainer_model)]:\n    s = score_model(model, CASES)\n    print(\"%-20s instruction-following %.2f   avg latency %.3fs\"\n          % (name, s[\"instruction_following\"], s[\"avg_latency_s\"]))\n\nprint()\nprint(\"Where the leaderboard winner fell down, check by check:\")\nfor k, v in check_output(leaderboard_winner(\"x\")).items():\n    print(\"   %-18s %s\" % (k, v))\n\n# Try it: raise LIMIT_WORDS to 120 and run again. The\n# verbose model still fails on no_preamble, which is the\n# constraint a length limit never catches.\n"
+      "text": "Reading the questions closely shows a second problem, which is that a subject label does not tell you what a question asks for. Gema and colleagues note that Professional Law and Accounting assume US jurisdiction and practice without saying so.[^1] Almost every Global Facts question needed an outside source to check, often a specific report from ourworldindata.org, and for several questions the sources disagreed with each other.[^1] Some Machine Learning quiz questions rely on older knowledge that may no longer apply.[^1] A high score on the Professional Law subset is partly a score for knowing that the unstated context is American. A high Global Facts score partly measures whether a model absorbed particular statistics tables."
     },
     {
       "type": "p",
-      "text": "Checks this simple are not a toy version of the real thing; they are the real thing. Google's IFEval benchmark is built entirely from such **verifiable constraints**, twenty-five types of them, word limits, forbidden words, exact formats, across roughly five hundred prompts, precisely because code-checkable rules are objective, reproducible, and free. And its headline result backs the whole argument of this post: under strict scoring, even the strongest model of its day failed to follow all the instructions in about one prompt out of five. Instruction-following is not a solved capability you can assume. It is a spread between models that you have to measure, and a few dozen lines of Python will measure it."
+      "text": "If a question can be answered by recall of a leaked answer key, it tests memory. If it depends on unstated national context, it tests an assumption. Neither is the capability named on the subject label, and neither shows up in the leaderboard cell."
     },
     {
-      "type": "diagram",
-      "nodes": [
-        {
-          "label": "Leaderboards",
-          "detail": "cheap first filter"
-        },
-        {
-          "label": "Shortlist",
-          "detail": "two or three candidates"
-        },
-        {
-          "label": "Your eval set",
-          "detail": "scored on your two or three capabilities"
-        },
-        {
-          "label": "Your winner",
-          "detail": "often not the public number one"
-        }
-      ],
-      "caption": "Where a leaderboard belongs in the decision: the start of the funnel, never the end."
+      "type": "h2",
+      "text": "Line item three: the metrics that accuracy leaves out"
     },
     {
       "type": "p",
-      "text": "Redo the choice this way and you may well land several rungs down the public ranking, on a model that answers fast and respects your formatting rules. Nothing about the leaderboard was dishonest. It simply measured a generic blend of abilities, and the team had mistaken that blend for their own needs. The durable habit is to translate \"pick a model\" into \"pick the capabilities that matter for this job, then measure those.\" Do that and you stop chasing the top of a list that was never ranking the thing you sell."
+      "text": "Accuracy is only one column. The Holistic Evaluation of Language Models project (HELM), led by Liang and colleagues at Stanford, measured seven metrics for each of 16 core scenarios: accuracy, calibration, robustness, fairness, bias, toxicity and efficiency.[^3] Before HELM, the 30 models it studied had on average been evaluated on just 17.9% of its core scenarios, and some prominent models did not share a single scenario. HELM raised that to 96.0% under the same prompting conditions.[^3] Many of the comparisons people quoted before HELM were between scores on different tests."
+    },
+    {
+      "type": "p",
+      "text": "Once every model sat the same tests, the metrics did not move together. Calibration was the clearest case. On HellaSwag, higher accuracy went with worse calibration; on OpenBookQA, a similar commonsense question set, higher accuracy went with better calibration.[^3] The authors called the finding that more robust and fairer models can be less well calibrated \"counter-intuitive and surprising.\"[^3] The MMLU paper had already found GPT-3 poorly calibrated on its own test, with the gap between confidence and accuracy reaching 24% on some subjects.[^2]"
+    },
+    {
+      "type": "p",
+      "text": "Robustness mostly tracked accuracy, but not always. On NarrativeQA, TNLG v2 (530B), the third most accurate model there, dropped from 72.6% accuracy to 38.9% when HELM applied robustness perturbations such as typos.[^3] In the overall head-to-head comparisons, BLOOM (176B) did better on robustness and fairness than its accuracy suggested, and OPT (175B) and GLM (130B) roughly swapped places between the accuracy and robustness rankings.[^3] The harm metrics diverged further. T0++ (11B) was the most toxic model compared with all others but among the three least gender-biased; davinci (175B) was among the four most biased but one of the less toxic.[^3]"
+    },
+    {
+      "type": "image",
+      "src": "/blog-images/capabilities-that-matter/helm-win-rates.webp",
+      "alt": "Six horizontal bar charts, one per metric: accuracy, calibration error, robustness, fairness, bias and toxicity. Each lists about 25 models ordered by head-to-head win rate. text-davinci-002 tops accuracy, robustness and fairness but sits ninth from the top of the calibration error panel, where the top is worst. The bias and toxicity orderings look very different from the accuracy ordering.",
+      "width": 1960,
+      "height": 1590,
+      "caption": "Head-to-head win rate for each model on each metric, across HELM's core scenarios. For calibration error, bias and toxicity, the top of the list is worst. The order that tops accuracy does not carry over to the right-hand panels. Figure 26 from Liang et al., 2022,[^3] reproduced under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)."
+    },
+    {
+      "type": "p",
+      "text": "The figure makes the point quickly. text-davinci-002 won more than 90% of its accuracy comparisons, the clearest leader in the study.[^3] In the calibration error panel, where a higher bar means the model more often had the larger error, it sits ninth from the worst end of 24 models.[^3] Efficiency behaved differently again. HELM saw only weak correlations between efficiency and the other metrics, no strong overall trade-off between accuracy and efficiency, and only a subset of models on the accuracy and efficiency frontier for any given scenario.[^3] The authors left efficiency out of the head-to-head rankings entirely, because they did not think it meant anything without accuracy beside it.[^3]"
+    },
+    {
+      "type": "p",
+      "text": "HELM's authors draw the consequence themselves. They write that they \"cannot simply rank models by accuracy to get a total order,\" and that they do not believe a universal aggregation exists that \"satisfies all preferences, reflects all values, or captures all circumstances appropriately.\"[^3] Their own example of a circumstance is an organization deploying on mobile, which should give the efficiency results more weight.[^3]"
+    },
+    {
+      "type": "h2",
+      "text": "Line item four: what people prefer is a different ranking"
+    },
+    {
+      "type": "p",
+      "text": "Chatbot Arena, described by Chiang and colleagues at Berkeley, ranks models a different way. A visitor types a prompt, two anonymous models answer, and the visitor votes for the better one; the names appear only after the vote. At the time of the paper it had collected over 240,000 votes from about 90,000 users.[^4] Because the prompts are open ended and fresh, there is no fixed answer key to go wrong or leak into training data.[^4] The authors checked vote quality by having graduate students label a sample blind, with fact-checking. Crowd votes agreed with those experts 72% to 83% of the time, and the two experts agreed with each other 79.4% and 89.8% of the time.[^4]"
+    },
+    {
+      "type": "p",
+      "text": "Two things in the Arena paper matter for model choice. First, strength depends on topic. The authors' topic clustering found 600 clusters, the largest covering only 1% of prompts.[^4] In one comparison on prompts sampled from several clusters, scored by a GPT-4 judge rather than by users, GPT-4 beat Llama-2-70b-chat in 96.7% of Python game programming prompts but only 53.3% of movie recommendation prompts.[^4] Second, the ranking has error bars. In the paper's ranking, gpt-4-0613 could sit anywhere from 3rd to 7th, and claude-2.1 from 6th to 18th.[^4] Much of a leaderboard's middle is a statistical tie."
+    },
+    {
+      "type": "p",
+      "text": "How far does a preference ranking differ from MMLU's ranking? A separate study, MixEval by Ni and colleagues, measured the Spearman rank correlation between many benchmarks and Arena Elo. MMLU came in at 0.83.[^5] That is well above chance, and still leaves room for models to trade places. The same study found that 10 of 13 general-domain benchmarks correlated above 0.5 with Arena, but only 1 of 8 domain-specific ones did.[^5] If your product lives in one domain, a general preference ranking and a domain test can point different ways."
+    },
+    {
+      "type": "h2",
+      "text": "Reading the audit for your own application (the author's reading)"
+    },
+    {
+      "type": "p",
+      "text": "What follows is my interpretation of these papers, not a finding in any of them. The audit shows that a leaderboard number bundles four things: the quality of the answer key, the capabilities the items happen to test, the single metric chosen, and the population of prompts or voters. When you pick a model, you get to choose all four for yourself, and you should."
+    },
+    {
+      "type": "p",
+      "text": "Start with the metric list, not the model list. HELM's seven metrics are a good menu. For a support bot that routes tickets, calibration may matter more than raw accuracy, since the system has to know when to hand off to a person. For something that reads messy user text, robustness to typos is the capability to test, and the NarrativeQA drop shows that accuracy on clean input can hide a large gap there.[^3] For a phone app or a high-volume pipeline, HELM's own advice is to weight efficiency.[^3]"
+    },
+    {
+      "type": "p",
+      "text": "Then write items that test the capability you named. The MMLU audit is a warning about what happens when you do not. If your legal assistant serves Kenya, a test that silently assumes US law measures the wrong thing.[^1] Keep the set small enough that someone can check every answer key by hand, because errors at MMLU's rate were enough to reorder close models in its worst subjects.[^1] Watch for items the models might have seen: questions lifted from public exams or documentation invite recall rather than reasoning.[^1]"
+    },
+    {
+      "type": "p",
+      "text": "Finally, treat public rankings as a filter, not a verdict. A model near the top of Arena or MMLU is a reasonable candidate. The difference between the third and seventh place models may not be real, and the topic breakdown suggests your task may sit in a cluster where the gap is narrow or reversed.[^4] A shortlist of three models run on a hundred of your own checked prompts, scored on the two or three metrics that fit the job, will usually tell you more than the leaderboard did."
+    },
+    {
+      "type": "h2",
+      "text": "What the Arena authors say their own ranking cannot see"
+    },
+    {
+      "type": "p",
+      "text": "The Chatbot Arena paper is candid about its reach. Its authors expect their users to be mostly LLM hobbyists and researchers keen to try the newest models, which may skew who is voting.[^4] The prompts come from their own chat interface, which, they write, \"might not accurately reflect the real-world usage of LLMs in production environments or specialized domains.\"[^4] And the study assesses helpfulness but overlooks safety, which they say calls for a parallel evaluation mechanism of its own.[^4]"
     },
     {
       "type": "sources",
+      "numbered": true,
       "items": [
         {
-          "title": "Ethayarajh & Jurafsky, \"Utility is in the Eye of the User: A Critique of NLP Leaderboards\" (EMNLP 2020)",
-          "url": "https://arxiv.org/abs/2009.13888"
+          "title": "Gema et al., \"Are We Done with MMLU?\" (2024; arXiv 2406.04127)",
+          "url": "https://arxiv.org/abs/2406.04127"
         },
         {
-          "title": "Liang et al., \"Holistic Evaluation of Language Models\" (HELM, 2022)",
+          "title": "Hendrycks et al., \"Measuring Massive Multitask Language Understanding\" (ICLR 2021; arXiv 2009.03300)",
+          "url": "https://arxiv.org/abs/2009.03300"
+        },
+        {
+          "title": "Liang et al., \"Holistic Evaluation of Language Models\" (TMLR 2023; arXiv 2211.09110)",
           "url": "https://arxiv.org/abs/2211.09110"
         },
         {
-          "title": "Zhou et al., \"Instruction-Following Evaluation for Large Language Models\" (IFEval, 2023)",
-          "url": "https://arxiv.org/abs/2311.07911"
-        },
-        {
-          "title": "Chiang et al., \"Chatbot Arena: An Open Platform for Evaluating LLMs by Human Preference\" (2024)",
+          "title": "Chiang et al., \"Chatbot Arena: An Open Platform for Evaluating LLMs by Human Preference\" (2024; arXiv 2403.04132)",
           "url": "https://arxiv.org/abs/2403.04132"
         },
         {
-          "title": "Sainz et al., \"NLP Evaluation in Trouble: On the Need to Measure LLM Data Contamination\" (EMNLP 2023 Findings)",
-          "url": "https://arxiv.org/abs/2310.18018"
+          "title": "Ni et al., \"MixEval: Deriving Wisdom of the Crowd from LLM Benchmark Mixtures\" (NeurIPS 2024; arXiv 2406.06565)",
+          "url": "https://arxiv.org/abs/2406.06565"
         }
       ]
     }

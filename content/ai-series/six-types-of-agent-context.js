@@ -1,76 +1,228 @@
-// AI Series. Block-array format matching seriesPosts.js.
-// Registered in src/data/aiPosts.js and rendered by SeriesPost.jsx.
-
+// Every factual claim below is taken from the numbered sources at the end.
+// The CoALA architecture figure is reproduced under CC BY 4.0 (arXiv 2309.02427).
+// The two charts are redrawn from reported numbers in Park et al. 2023 and
+// Packer et al. 2023; Park et al. is not under a license that allows figure reuse.
 export const POST = {
   id: 'six-types-of-agent-context',
-  title: 'The six types of context an AI agent needs on every request',
-  excerpt: 'Your coding assistant gets one shot at a request, and everything it knows has to fit in one window. Here is how that window splits into six jobs, where each one comes from, and how each one fails.',
+  title: 'What an agent reads on every request: four memories and a window',
+  excerpt: 'Generative Agents lost believability each time a memory component was switched off. CoALA gives the vocabulary for why: working, episodic, semantic and procedural memory, plus the tool results that flow back in. Here is each one as the papers define it, and how MemGPT and Generative Agents build and measure it.',
   category: 'AI',
   tags: ['Context Engineering', 'Agents', 'Memory'],
   publishAt: '2026-07-10T12:00:00Z',
   body: [
-    { type: 'p', text: 'You are pairing with a coding assistant inside your editor. You type: "Add rate limiting to the login endpoint, and follow the pattern we already use." At step three it is brilliant. It finds the right files, writes the middleware, and even remembers that your team uses Redis and not an in-memory counter, though you never said so in this chat.' },
-      { type: 'p', text: 'Around step eighteen, something changes. It rereads a file it already read, calls a tool that makes no sense for the task, and proposes a fix for a bug it introduced itself five steps earlier. Your first instinct is that the model got dumber mid-task. It did not.' },
-      { type: 'p', text: 'Nothing about the model changed between step three and step eighteen. What changed is what the model was looking at. Everything the agent "knows" on each step is handed to it as one assembled package of text, the **context**, and between those two steps that package quietly filled with junk. Getting it right is most of what separates an agent that helps from one that flails.' },
-    { type: 'p', text: 'Here is the intuition. A language model has no memory between calls and no eyes on your machine. On each request it sees exactly one thing: a block of text called the context window.' },
-      { type: 'p', text: 'Everything the agent "knows" in that moment has to be written into that block first. So the real work of building an agent is not the model. It is deciding what goes into the window, in what order, and what gets left out when space runs low. The window is small and the world is large, so you are always packing a suitcase.' },
-    { type: 'p', text: 'What surprises people is that the window is not one undifferentiated blob. It holds six different kinds of content, each doing a separate job, each arriving from a different source, and each failing in its own way. Confuse them and you get an agent that forgets your rules, hallucinates a function that does not exist, or executes an instruction hidden in a document it fetched. Name them clearly and you can debug your agent the way you debug code.' },
-    { type: 'h2', text: 'Tracing one login-endpoint request through all six' },
-    { type: 'p', text: 'Let me replay that rate-limiting request and freeze the frame right before the model runs. Six distinct chunks of text are sitting in the window. First, instructions: a persona line telling the agent it is a coding agent, the objective it must achieve, and hard requirements like run the tests before claiming success and answer as a unified diff.' },
-      { type: 'p', text: 'Second, examples: one worked demonstration of how a similar middleware change was reasoned through, and one of what a finished diff should look like. Third, knowledge: the contents of the two files it pulled in by searching your repository, plus a snippet of the rate-limiter library docs. Fourth, memory: the running transcript of this session, and one line recalled from dedicated storage outside it, "this team uses Redis for counters." Fifth, tools: a machine-readable menu of what it can call, read a file, edit a file, run a shell command, each with a description, typed parameters, and the results of the calls it has already made flowing back in. Sixth, guardrails: your input cleaned and tagged before the model saw it, an allowlist of commands the agent may actually run, and the schema its final answer has to fit.' },
-    { type: 'p', text: 'Those six are not my invention. The taxonomy comes from Avi Chawla\'s Daily Dose of Data Science, which defines context engineering as "delivering the right information, in the right format, at the right time." The categories match the natural seams in almost every agent you will build or use. Let me pin each one down before going further, because the rest of the post leans on the vocabulary.' },
-    { type: 'terms', items: [
-      { term: 'Instructions', url: 'https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents', def: 'The persona, the objective, and the requirements. Who the agent is (a coding agent, a PM), what needs to be achieved, and the constraints on how: steps, conventions, and the response format, whether JSON, XML, or plain text.' },
-      { term: 'Examples', url: 'https://arxiv.org/abs/2005.14165', def: 'Worked demonstrations of behaviour and of responses: how to think through a problem, and what a good answer should look like. A model imitates demonstrations more reliably than it obeys adjectives.' },
-      { term: 'Knowledge', url: 'https://arxiv.org/abs/2005.11401', def: 'What the model needs to know, in two flavors: external context (background and domain specifics) and task material (the docs, API specs, and workflow schemas this specific request needs), usually fetched by retrieval.' },
-      { term: 'Memory', url: 'https://langchain-ai.github.io/langgraph/concepts/memory/', def: 'Short-term memory is what happens inside this session: the transcript, the tool output so far, and the agent\'s own state, its plan, to-do list, and progress notes, which are often what keep a forty-step task on the rails. Long-term memory is dedicated storage that carries facts across sessions. Your Redis preference lived there.' },
-      { term: 'Tools', url: 'https://modelcontextprotocol.io/', def: 'The action menu. Each tool carries a description of what it does, parameters with types and required-or-not markings, and results that flow back into the window for the model to read.' },
-      { term: 'Guardrails', url: 'https://genai.owasp.org/', def: 'The safety layer on all three edges: inputs cleaned and tagged before the model sees them, actions restricted to an allowlist of safe tools, and outputs checked against schema and safety rules before anything ships.' },
-    ]},
-    { type: 'image', src: '/blog-images/context/six-context-types.png', alt: 'Tree diagram of the six types of context for AI agents: instructions (role, objective, requirements), examples (behaviour, responses), knowledge (external, task), memory (short-term, long-term), tools (description, parameters, results), and guardrails (inputs, actions, outputs).', caption: 'The six types and their parts. Taxonomy from Avi Chawla, Daily Dose of Data Science.' },
-    { type: 'p', text: 'Four of the six are authored by you before the agent ever runs: instructions, examples, tools, and guardrails. Knowledge is fetched from outside based on what you asked. Memory is accumulated, short-term as the session runs and long-term across sessions. That grouping is worth holding onto, because it tells you who is responsible when each one goes wrong.' },
-    { type: 'h2', text: 'How the six share one crowded window' },
-    { type: 'p', text: 'Picture the window as a fixed-height container. Everything below competes for the same vertical space, measured in tokens. When the job is small the container is roomy. When the agent has read ten files and made twenty tool calls, the memory layer swells with transcript and tool output and starts crowding out the rest.' },
-    { type: 'p', text: 'Because they all draw from one budget, assembling context is a packing problem with a hard ceiling. You cannot dump your entire codebase, every past chat, and a novel of reasoning into the window. You choose. A sane assembler reserves room for the authored layers first, gives knowledge a capped slice, and lets short-term memory use what remains, trimming the oldest tool output when it overflows.' },
-    { type: 'p', text: 'In your code, the six should be named fields, not one concatenated string. It lets you cache the authored layers, cap the fetched ones, and evict from the growing ones without touching the others. An agent that concatenates everything into one prompt loses the ability to reason about any of this.' },
-    { type: 'p', text: 'The ordering matters as much as the split. Models pay closest attention to text near the start and near the end of the window, and least to whatever sits in the deep middle. This is measured, not folklore: the [lost-in-the-middle](https://arxiv.org/abs/2307.03172) study found accuracy falling by more than 30 percentage points when the relevant fact moved from the start of the context to its center. So the instructions and guardrails go up top where they anchor everything, the live conversation and the freshest tool results sit near the bottom where they stay salient, and bulky retrieved documents go in between where a little inattention costs the least.' },
-      { type: 'p', text: 'There is a second, colder reason for that ordering. Inference providers cache the computation for a stable prefix, and cached input tokens can cost a tenth of uncached ones, so the layers that never change between calls earn their place at the top twice over. When you assemble context, you are not just choosing what to include. You are choosing where in the window each piece lands, and that placement quietly shapes how much the model actually uses it, and what every call costs you.' },
-    { type: 'h2', text: 'The failure that hides in each layer' },
-    { type: 'p', text: 'Each type breaks in a way that is specific to it, and knowing the pattern tells you which layer to inspect. Here are the six at a glance, then each one in turn.' },
-    { type: 'ul', items: [
-      'Instructions fail by being vague, contradictory, or buried.',
-      'Examples fail by teaching the wrong lesson.',
-      'Knowledge fails by fetching the wrong things, or too many things.',
-      'Memory fails at both ends: stale facts and overflowing sessions.',
-      'Tools fail through fuzzy descriptions, loose parameters, or sheer count.',
-      'Guardrails fail in both directions: too loose and too tight.',
-    ]},
-    { type: 'p', text: '**Instructions** fail by being vague, contradictory, or buried. If the requirements say "be concise" and also "explain your reasoning in full," the agent does not weigh the tension the way a person would. It picks one, more or less at random, and picks differently on the next run. Burial is subtler.' },
-      { type: 'p', text: 'A rule that sits at the very bottom of the block, underneath thousands of tokens of history, is technically present but practically invisible, because attention thins out in the middle and the rule never anchors anything. The symptom is an agent that ignores a rule you are certain you wrote. The fix is to keep the role, objective, and requirements short, non-conflicting, and near the top, and when two rules can collide, to say explicitly which one wins.' },
-    { type: 'p', text: '**Examples** fail by teaching the wrong lesson. A model imitates what it is shown more readily than it obeys what it is told, which is exactly why examples are powerful and exactly how they go stale. Change a requirement from "answer in prose" to "answer as a diff" but leave the old prose example in place, and the example wins surprisingly often. The symptom is output that keeps arriving in a format you thought you had retired. The fix is to treat examples as part of the spec: audit them every time a rule changes, keep them few, and keep them consistent with the instructions they sit beside.' },
-    { type: 'p', text: '**Knowledge** fails two ways, and both get blamed on the model. Retrieval fetches the wrong documents, so the agent answers confidently from irrelevant text. Or it fetches too many, and the one passage that mattered drowns in twenty that did not.' },
-      { type: 'p', text: 'From the outside both look identical: the model being dumb. Almost always the retriever is the culprit, not the model. The fix is to look at what retrieval actually returned before drawing any conclusion about intelligence, then cap the number of chunks and rerank so the best material lands, rather than the most material.' },
-    { type: 'p', text: '**Memory** fails at both ends. Long-term memory fails by remembering the wrong thing, or by holding the right thing that nothing ever loads. Save "the user prefers tabs" from one offhand comment and it haunts every future session; meanwhile the genuinely durable fact sits in the store and is never consulted when it matters. Short-term memory fails by overflowing.' },
-      { type: 'p', text: 'A long session eventually exceeds the window, the oldest turns get dropped, and those are usually the turns holding the original goal, so the agent drifts from what you actually asked. Tool output bloat is the same failure wearing work clothes: after twenty calls the reasoning is buried under raw logs and the agent starts repeating steps it already did. The fix is discipline at both ends. Only durable facts earn a permanent slot, old turns get summarized instead of hard-cut, and tool results get cleared once they have been used.' },
-    { type: 'p', text: '**Tools** fail when the description is fuzzy or the parameters are loose. A tool called "search" with one free-form string argument invites the model to pass garbage.' },
-      { type: 'p', text: 'The agent calls it wrong, gets an error back as a result, and often does not recover, because the error itself is now context it has to reason around. Sheer count is its own failure mode: in one benchmark a small Llama model failed a task when handed all 46 available tools but passed with 19. The definitions fit the window fine. The model could no longer reason over the menu. The fix is to name tools for what they do, constrain parameters tightly, and expose only the tools the current step needs.' },
-    { type: 'p', text: '**Guardrails** fail in both directions, and the loose direction is the dangerous one. Too loose, and an instruction hidden inside a fetched document walks straight into the model as if you had typed it, or a malformed answer ships to production because nothing checked it against the schema. Too tight, and the agent cannot do its job at all: it stalls asking permission for actions that were the entire point of building it. The symptom of one is an incident report; the symptom of the other is a useless agent. The fix is the three-edge discipline from the definition: clean and tag inputs before the model sees them, allowlist the actions the agent may take, and validate outputs before anything leaves the system.' },
-    { type: 'p', text: 'The through-line is that most "the model is being stupid" moments are really context moments. The model can only work with what it was handed. When it fails, the first question is which of the six layers was wrong, missing, or crowded out, not whether you need a smarter model.' },
-    { type: 'callout', title: 'The one habit that prevents most agent bugs', text: 'When your agent misbehaves, print the full context it received before blaming the model. Nine times out of ten you will see the answer: a rule that got buried, an example that contradicts it, a document that never got fetched, a memory that loaded when it should not have, or a tool-result log that ate the window.' },
-    { type: 'h2', text: 'Common mistakes when you build this yourself' },
-    { type: 'p', text: 'A few traps catch almost everyone the first time. The most common is treating memory as a dumping ground: saving every exchange into long-term storage until retrieval returns a wall of stale, half-relevant text. Long-term memory should hold durable facts and preferences, not a chat log.' },
-      { type: 'p', text: 'A second trap is letting tool results accumulate without bound, which is comfortable in a demo with three calls and fatal in a real task with forty. A third is mixing retrieved documents into the instructions block, which blurs the line between your standing rules and this-request data, makes both harder to debug, and hands prompt injection a free ride past your guardrails. Keep the layers physically separate, give each a budget, and decide up front what to drop when you run out of room.' },
-    { type: 'p', text: 'One more. People assume a bigger window makes all of this go away. It helps, but it changes the problem rather than removing it. A larger budget still fills up on a long task, models still attend less carefully to text buried in the middle of a huge window, and cost scales with every token you pack in. The discipline of choosing what belongs in each layer matters at every window size.' },
-    { type: 'h2', text: 'What to carry away' },
-    { type: 'p', text: 'An agent is a model plus the context you feed it, and that context is not one thing. It is six: the instructions you set, the examples you show, the knowledge you fetch, the memory you keep, the tools you expose, and the guardrails you enforce. Four are authored before the run, one is pulled in from outside, and one accumulates as the agent works.' },
-      { type: 'p', text: 'They share a single crowded budget, so building an agent is mostly deciding what goes in each slot and what gets evicted when space runs short. Learn to name the six, keep them separate in your code, give each one a budget, and read the assembled window whenever things break. Do that and the agent stops feeling like magic and starts feeling like a plain system you can actually reason about, inspect, and fix.' },
-    { type: 'sources', items: [
-      { title: 'Avi Chawla, Daily Dose of Data Science, "Context Engineering for AI Agents"', url: 'https://blog.dailydoseofds.com/p/context-engineering-for-agents' },
-      { title: 'Anthropic, "Effective context engineering for AI agents"', url: 'https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents' },
-      { title: 'LangGraph, Memory concepts and how-to docs', url: 'https://langchain-ai.github.io/langgraph/concepts/memory/' },
-      { title: 'Lewis et al., "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks" (2020), arXiv:2005.11401', url: 'https://arxiv.org/abs/2005.11401' },
-      { title: 'Liu et al., "Lost in the Middle: How Language Models Use Long Contexts" (2023), arXiv:2307.03172', url: 'https://arxiv.org/abs/2307.03172' },
-      { title: 'Marina Wyss, "Context Engineering in 29 Minutes: Complete Course" (video)', url: 'https://www.youtube.com/watch?v=-h9VVJIqtvA' },
-    ]},
+    {
+      type: 'p',
+      text: 'In 2023 a Stanford and Google team put 25 language model agents in a small simulated town called Smallville, let them live for two game days, and then interviewed them. Each agent answered five questions in each of five categories: knowing itself, recalling past events, making plans, reacting to surprises, and reflecting.[^1] The interesting part was the control group. The researchers ran the same interviews with versions of the agent that had parts of their memory switched off, and asked 100 human evaluators to rank all the answers for the same agent by how believable they were.[^1]',
+    },
+    {
+      type: 'p',
+      text: 'The full architecture ranked first, with a TrueSkill rating of \\(\\mu = 29.89\\). TrueSkill is a rating system in the family of chess Elo; higher means the condition won more of the rankings. Removing reflection dropped the rating to 26.88. Removing reflection and planning dropped it to 25.64. Removing everything, so the agent answered with no access to its memory stream at all, dropped it to 21.21, below even the answers human crowdworkers wrote while role-playing the agent (22.95).[^1] The gap between the full agent and the memoryless one was an effect size of \\(d = 8.16\\), eight standard deviations.[^1]',
+    },
+    {
+      type: 'chart',
+      kind: 'bar',
+      title: 'Believability of interview answers, by memory available',
+      yLabel: 'TrueSkill rating (mean)',
+      series: [{ label: 'Rating', key: 'mu' }],
+      data: [
+        { label: 'Full architecture', values: { mu: 29.89 } },
+        { label: 'No reflection', values: { mu: 26.88 } },
+        { label: 'No reflection, no planning', values: { mu: 25.64 } },
+        { label: 'Human crowdworker', values: { mu: 22.95 } },
+        { label: 'No memory at all', values: { mu: 21.21 } },
+      ],
+      caption: 'Redrawn from Section 6.5.1 and Figure 8 of Park et al., 2023.[^1] All agents ran on gpt-3.5-turbo. Standard deviations were 0.68 to 0.72. Every pairwise difference was significant at p < 0.001 except crowdworker versus no memory.',
+    },
+    {
+      type: 'p',
+      text: 'The same model produced every one of those machine answers. What changed between conditions was what got written into the prompt before the model ran. The authors even gave the ablated versions access to all the memories the full agent had built up, so the gaps are, in their words, likely a conservative estimate: a crippled agent would have lived a different two days.[^1]',
+    },
+    {
+      type: 'h2',
+      text: 'Where the categories come from',
+    },
+    {
+      type: 'p',
+      text: 'Earlier versions of this post split an agent\'s context into six practitioner categories. That list had no research source, so this version uses one that does. Sumers, Yao, Narasimhan and Griffiths proposed CoALA, short for Cognitive Architectures for Language Agents, in 2023. They borrowed the memory types from Soar and other cognitive architectures, which in turn took them from psychology.[^2]',
+    },
+    {
+      type: 'p',
+      text: 'CoALA starts from one plain fact: language models are stateless. They keep nothing between calls. An agent that needs to remember anything has to store it somewhere and copy it back into the prompt.[^2] CoALA names four places to store it. **Working memory** is short-term. The three long-term ones are **episodic**, **semantic** and **procedural** memory.[^2] Around those sit the actions: **retrieval** reads long-term memory into working memory, **reasoning** reads and writes working memory, **learning** writes to long-term memory, and **grounding** acts on the outside world and turns what comes back into text.[^2]',
+    },
+    {
+      type: 'image',
+      src: '/blog-images/six-types-of-agent-context/coala-figure4.webp',
+      alt: 'CoALA architecture diagram. Panel A shows procedural memory (LLM and agent code), semantic memory and episodic memory across the top, each connected by retrieval and learning arrows to a working memory box below. A decision procedure sits beside working memory, and actions and observations connect working memory to dialogue, physical and digital environments. Panel B shows a decision cycle: observation, then planning with proposal, evaluation and selection, then execution, looping back.',
+      width: 1830,
+      height: 905,
+      caption: 'Figure 4 from Sumers et al., 2023,[^2] reproduced under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Everything the LLM sees on a call is synthesized from working memory.',
+    },
+    {
+      type: 'p',
+      text: 'Held against that map, the practitioner\'s list folds into fewer boxes. Instructions are prompt templates, and CoALA files prompt templates under agent code, which is procedural memory.[^2] Tool definitions are procedural too: CoALA calls them grounding procedures, and it treats stateless APIs like search or a calculator as special "single-use" digital environments.[^2] Tool results are observations that grounding writes back into working memory as text.[^2] So the taxonomy below has four memory types plus one flow, not six types.',
+    },
+    {
+      type: 'terms',
+      optional: false,
+      items: [
+        { term: 'Working memory', url: 'https://arxiv.org/abs/2309.02427', def: 'Active information for the current decision cycle: perceptual inputs, knowledge retrieved or reasoned out, and goals carried over from the last cycle. Each LLM input is built from a subset of it.' },
+        { term: 'Episodic memory', url: 'https://arxiv.org/abs/2309.02427', def: 'Experience from earlier decision cycles, such as event logs, past trajectories, or earlier input and output pairs.' },
+        { term: 'Semantic memory', url: 'https://arxiv.org/abs/2309.02427', def: 'Knowledge about the world and about the agent itself. It can be a fixed document corpus or facts the agent inferred and wrote down.' },
+        { term: 'Procedural memory', url: 'https://arxiv.org/abs/2309.02427', def: 'How the agent does things. Implicitly, the LLM weights. Explicitly, the agent code: prompt templates, parsers, retrieval routines, tool procedures, and the decision loop.' },
+      ],
+    },
+    {
+      type: 'h2',
+      text: 'Working memory is the only part the model reads',
+    },
+    {
+      type: 'p',
+      text: 'CoALA separates working memory from the prompt on purpose. Earlier methods used the model\'s own context as working memory. In CoALA, working memory is a data structure that persists across LLM calls; each call\'s input is synthesized from a subset of it, and the output is parsed back into variables such as an action name and its arguments.[^2] The practical reading is that the prompt is a view onto working memory, rebuilt every call.',
+    },
+    {
+      type: 'p',
+      text: 'MemGPT, from Packer and colleagues at Berkeley, gives that view a concrete layout. It treats the context window like RAM in an operating system and everything else like disk. Its prompt, which it calls **main context**, has three contiguous sections: read-only system instructions, a fixed-size read/write block called working context, and a first-in, first-out queue of messages.[^3] Working context holds facts, preferences and details about the user and the agent\'s persona, and the model can change it only by calling functions. The queue holds the rolling conversation, system messages, and function call inputs and outputs. Its first slot is a recursive summary of messages that were evicted.[^3]',
+    },
+    {
+      type: 'p',
+      text: 'The eviction rule is what makes the layout work. When the prompt passes a warning threshold, 70% of the window in their example, a queue manager inserts a "memory pressure" warning so the model can save what matters into working context or long-term storage. At the flush threshold, 100% in the example, it evicts a chunk of messages (50% of the window in the example), folds them into a new recursive summary, and writes them to a database where they stay searchable.[^3] Nothing is thrown away. It just stops being in the prompt.',
+    },
+    {
+      type: 'h2',
+      text: 'Episodic memory: the record of what happened',
+    },
+    {
+      type: 'p',
+      text: 'CoALA defines episodic memory as experience from earlier decision cycles, and names history event flows, with Generative Agents as an example, as one form it can take.[^2] In Generative Agents that record is the **memory stream**: a list of memory objects, each with a natural language description, a creation timestamp and a most-recent-access timestamp. The basic entry is an observation, something the agent perceived, such as "Isabella Rodriguez is setting out the pastries" or "The refrigerator is empty."[^1]',
+    },
+    {
+      type: 'p',
+      text: 'The record grows faster than a context window can hold. The authors tried the obvious fix, summarizing all of an agent\'s experience into the prompt, and got an uninformative answer.[^1] Instead a retrieval function takes the agent\'s current situation as a query and scores every memory:',
+    },
+    {
+      type: 'eq',
+      tex: '\\begin{gathered} \\text{score}(m) = \\alpha_{\\text{rec}} \\cdot \\text{recency}(m) \\\\ +\\; \\alpha_{\\text{imp}} \\cdot \\text{importance}(m) \\\\ +\\; \\alpha_{\\text{rel}} \\cdot \\text{relevance}(m, q) \\\\[6pt] \\text{recency}(m) = 0.995^{\\,h_m} \\\\[4pt] \\text{relevance}(m, q) = \\cos(\\mathbf{e}_m, \\mathbf{e}_q) \\end{gathered}',
+      caption: 'Retrieval score from Section 4.1 of Park et al., 2023.[^1] Each term is min-max scaled to [0, 1] before weighting, and all three weights were set to 1. Writing recency as \\(0.995^{h_m}\\) is my reading of "exponential decay" with "decay factor 0.995".',
+    },
+    {
+      type: 'p',
+      text: 'Term by term. \\(m\\) is one memory object and \\(q\\) is the query memory describing the current situation. **Recency** decays exponentially with \\(h_m\\), the number of sandbox game hours since memory \\(m\\) was last retrieved, with a decay factor of 0.995, so things from this morning stay near the top.[^1] **Importance** is a number from 1 to 10 that the model assigns when the memory is created, using a prompt that anchors 1 at "brushing teeth, making bed" and 10 at "a break up, college acceptance." In the paper, that prompt scored "cleaning up the room" a 2 and "asking your crush out on a date" an 8.[^1] **Relevance** is the cosine similarity between the embedding \\(\\mathbf{e}_m\\) of the memory\'s text and the embedding \\(\\mathbf{e}_q\\) of the query. The \\(\\alpha\\) weights let you favor one signal; the authors set all three to 1.[^1] The top-ranked memories that fit in the context window go into the prompt.[^1]',
+    },
+    {
+      type: 'p',
+      text: 'CoALA\'s own label for this is useful: recency is rule-based, importance is reasoning-based, and relevance is embedding-based.[^2] Three different mechanisms vote on what the model sees.',
+    },
+    {
+      type: 'p',
+      text: 'MemGPT keeps its episodic record in **recall storage**. Every incoming message and every model output is written there, and evicted messages remain readable through a paginated search function.[^3] The authors tested it with a task they built on the Multi-Session Chat dataset, called deep memory retrieval: after five prior sessions, the user asks a question that can only be answered from an earlier conversation. Baselines saw a lossy summary of the past sessions; MemGPT had the full history but had to page through it with search calls.[^3]',
+    },
+    {
+      type: 'chart',
+      kind: 'bar',
+      title: 'Deep memory retrieval accuracy',
+      yLabel: 'Accuracy (%)',
+      series: [
+        { label: 'Model with summary', key: 'base', baseline: true },
+        { label: '+ MemGPT', key: 'mem' },
+      ],
+      data: [
+        { label: 'GPT-3.5 Turbo', values: { base: 38.7, mem: 66.9 } },
+        { label: 'GPT-4', values: { base: 32.1, mem: 92.5 } },
+        { label: 'GPT-4 Turbo', values: { base: 35.3, mem: 93.4 } },
+      ],
+      caption: 'Redrawn from Table 2 of Packer et al., 2023.[^3] Answers were judged against a gold answer by an LLM judge; ROUGE-L recall moved the same direction for every model.',
+    },
+    {
+      type: 'h2',
+      text: 'Semantic memory: facts, including ones the agent wrote',
+    },
+    {
+      type: 'p',
+      text: 'Semantic memory holds knowledge about the world and about the agent itself. CoALA points out that ordinary retrieval-augmented generation fits here: a Wikipedia index is a read-only semantic memory. Agents can also write to it, storing what they conclude from experience.[^2]',
+    },
+    {
+      type: 'p',
+      text: 'Generative Agents does the writing through **reflection**. The paper\'s example is Klaus Mueller, asked which acquaintance he would spend an hour with. With only raw observations, he picked Wolfgang, the neighbor he saw most often, though the two only ever saw each other in passing.[^1] Reflection fixes this. When the summed importance of recent events crosses a threshold (150 in their implementation, which worked out to two or three times a game day), the agent asks the model for the 3 most salient questions its 100 most recent memories raise, retrieves memories for each question, and writes insights such as "Klaus Mueller is dedicated to his research on gentrification," with pointers to the memories cited.[^1] With those reflections, Klaus picked Maria, who also does research.[^1] Reflections go back into the same stream and compete in the same retrieval score. CoALA reads them as writes to semantic memory, distinct from the episodic event list.[^2] The ablation above prices them: removing reflection alone cost three TrueSkill points.[^1]',
+    },
+    {
+      type: 'p',
+      text: 'MemGPT\'s semantic store is **archival storage**, a read/write database for text of any length.[^3] For document question answering, the authors loaded Wikipedia passages into it (PostgreSQL with the pgvector extension) and let the agent query it by function call.[^3] Fixed-context baselines were capped by the retriever: if the top \\(K\\) documents missed the gold article, the model never saw it. MemGPT could page further.[^3] A harder test, nested key-value lookup, hid chains of UUID pairs where a value could itself be a key. GPT-4 and GPT-4 Turbo fell to 0% accuracy by three nesting levels, while MemGPT on GPT-4 was unaffected by nesting depth, because it could keep issuing lookups.[^3]',
+    },
+    {
+      type: 'h2',
+      text: 'Procedural memory: instructions, code and skills',
+    },
+    {
+      type: 'p',
+      text: 'CoALA gives procedural memory two forms. One is implicit, stored in the LLM weights. The other is explicit, written as agent code, and that code splits again: procedures that carry out actions (reasoning, retrieval, grounding, learning) and the procedure that decides what to do next.[^2] Two rules follow. Unlike episodic or semantic memory, which can start empty, procedural memory has to be set up by the designer before the agent can run at all. And an agent writing to its own procedural memory is "significantly riskier" than writing to the other two, because it "can easily introduce bugs or allow an agent to subvert its designers\' intentions."[^2]',
+    },
+    {
+      type: 'p',
+      text: 'The system prompt is the most familiar piece of procedural memory. In MemGPT it is read-only and carries two things: a description of the memory hierarchy and what each tier is for, and a function schema with natural language descriptions of every function the model may call.[^3] MemGPT\'s self-editing works only because those instructions exist; the authors write that the model has to be aware of its context limits for self-editing to work, which is why MemGPT warns it about token usage.[^3]',
+    },
+    {
+      type: 'p',
+      text: 'Procedural memory can also grow. CoALA\'s example is Voyager, a Minecraft agent that stores working code as named skills, indexes each by an embedding of its description, and retrieves relevant ones into the prompt for new tasks.[^2,4] In its ablation, the full Voyager reached a diamond tool in 1 of 3 runs within 160 prompting iterations; without the skill library it reached it in none.[^4] On four unseen tasks in a fresh world, the version without a library needed 26 to 36 iterations on average and failed one task in one of three tries, while the full version took 18 to 21 and solved all of them.[^4]',
+    },
+    {
+      type: 'h2',
+      text: 'Tool definitions and tool results sit on opposite sides',
+    },
+    {
+      type: 'p',
+      text: 'This is where the old six-way split blurred two different things. A tool definition is a procedure the designer wrote, so it is procedural memory. A tool result is new information from outside, so it lands in working memory. CoALA\'s grounding procedures do both halves: they execute the external action and process the feedback into working memory as text.[^2] In MemGPT, the output of every function, including runtime errors, is fed back to the model, and retrieval results come back in pages so a single call cannot overflow the window.[^3]',
+    },
+    {
+      type: 'p',
+      text: 'Tool count is a cost in its own right. CoALA observes that agents with larger action spaces face a harder decision problem and lean on more hand-crafted decision procedures, and suggests taking "the minimal action space necessary to solve a given task."[^2]',
+    },
+    {
+      type: 'diagram',
+      caption: 'Where each type lives. The top row is external storage; retrieval copies pieces into the context window (middle row), which is all the model reads. Grounding sends actions out and writes results back into the window. Store names are MemGPT\'s and Generative Agents\' implementations of each CoALA memory.[^1,2,3]',
+      rows: [
+        [
+          { label: 'Episodic store', detail: 'Memory stream observations; MemGPT recall storage' },
+          { label: 'Semantic store', detail: 'Reflections; MemGPT archival storage; document indexes' },
+          { label: 'Procedural store', detail: 'Agent code, prompt templates, tool schemas, skill library; LLM weights' },
+        ],
+        [
+          { label: 'Context window = working memory view', detail: 'System instructions and tool schemas, working context facts, recent messages, retrieved memories' },
+        ],
+        [
+          { label: 'Grounding', detail: 'Tool call runs outside; result written back into working memory as text' },
+        ],
+      ],
+    },
+    {
+      type: 'p',
+      text: 'The diagram leaves out one caveat that CoALA itself raises. The LLM weights are procedural memory, and they never enter the window at all; they shape how everything in it is read.[^2] Everything else on the page reaches the model only by being copied into that middle row.',
+    },
+    {
+      type: 'p',
+      text: 'Placement inside the window also matters. MemGPT cites Liu et al.\'s finding that long-context models recall information at the start or end of the window better than information in the middle, as one reason not to just keep scaling context.[^3,5]',
+    },
+    {
+      type: 'h2',
+      text: 'Retrieval is the part the papers say is unsolved',
+    },
+    {
+      type: 'p',
+      text: 'Every type above depends on the same step: something outside the window has to be chosen and copied in. The papers are candid that this step fails. Generative Agents reports that full-memory agents "can fail to retrieve the correct instances from their memory." Rajiv Patel said he had not been following the election, though he had heard about Sam\'s candidacy. Tom retrieved his plan to talk politics with Isabella at her party but not the memory of being invited, so he was sure what to do there and unsure the party existed.[^1] The authors list tuning the relevance, recency and importance functions as future work.[^1]',
+    },
+    {
+      type: 'p',
+      text: 'MemGPT hits the same wall from the other side. It can in principle page through every retrieved document until it finds the gold one, but the authors observed that it "will often stop paging through retriever results before exhausting the retriever database."[^3] And CoALA, surveying the whole field, writes that "adaptive and context-specific recall remains understudied in language agents."[^2]',
+    },
+    {
+      type: 'sources',
+      numbered: true,
+      items: [
+        { title: 'Park, O\'Brien, Cai, Morris, Liang, Bernstein, "Generative Agents: Interactive Simulacra of Human Behavior" (UIST 2023), arXiv:2304.03442', url: 'https://arxiv.org/abs/2304.03442' },
+        { title: 'Sumers, Yao, Narasimhan, Griffiths, "Cognitive Architectures for Language Agents" (TMLR 2024), arXiv:2309.02427', url: 'https://arxiv.org/abs/2309.02427' },
+        { title: 'Packer, Wooders, Lin, Fang, Patil, Stoica, Gonzalez, "MemGPT: Towards LLMs as Operating Systems" (2023), arXiv:2310.08560', url: 'https://arxiv.org/abs/2310.08560' },
+        { title: 'Wang et al., "Voyager: An Open-Ended Embodied Agent with Large Language Models" (2023), arXiv:2305.16291', url: 'https://arxiv.org/abs/2305.16291' },
+        { title: 'Liu et al., "Lost in the Middle: How Language Models Use Long Contexts" (TACL 2024), arXiv:2307.03172', url: 'https://arxiv.org/abs/2307.03172' },
+      ],
+    },
   ],
 };

@@ -36,18 +36,12 @@ export const SOURCES = {
   'kv-cache': [S.scaleInfer, S.pagedattn, S.mqa, S.flashattn, S.transformer, S.vllmDocs],
   'probabilistic-nature': [S.nucleus, S.gpt3, S.smcSteering, S.selfconsist, S.transformer, S.guided],
   'multilingual-quality': [S.tokenCost, S.mt5, S.bpe, S.llmSurvey2, S.llmSurvey, S.helm],
+
+  // ---------- content/ai-series ----------
   'domain-specific-models': [S.biobert, S.bloomberggpt, S.codellama, S.ragfinetune, S.lora, S.lima],
   'functional-correctness': [S.codex, S.mbpp, S.codellama, S.llmSE, S.gaia, S.checklist],
   'ai-as-a-judge': [S.mtbench, S.evalSurvey, S.helm, S.factscore, S.ragas, S.leaderboards],
   'jailbreaking': [S.gcg, S.dan, S.pair, S.owasp, S.hh, S.nist],
   'build-vs-buy-model': [S.buyBuild, S.llama, S.lora, S.scaling, S.chinchilla, S.vllmDocs],
-  'evaluation-pipeline': [S.helm, S.mtbench, S.evalSurvey, S.ragas, S.checklist, S.ifeval],
-  'capabilities-that-matter': [S.leaderboards, S.helm, S.ifeval, S.arena, S.contamination, S.distilbert],
-  'information-extraction-prompts': [S.wikiIE, S.wikiOCR, S.jsonSchema, S.guided, S.ocrCot, S.hallSurvey],
   'detection-without-a-detector': [S.locateAnything, S.clip, S.coco, S.yolo, S.llmSurvey2, S.transformer],
-
-  // ---------- content/ai-series ----------
-  'context-vs-prompt-engineering': [S.lostmiddle, S.ragSurvey, S.distracted, S.react, S.gpt3, S.promptProg],
-  'six-types-of-agent-context': [S.react, S.agentSurvey, S.lostmiddle, S.mcpSpec, S.toolformer, S.reflexion],
-  'context-budgeting': [S.lostmiddle, S.distracted, S.ragSurvey, S.scaleInfer, S.tokenCost, S.longformer],
 };

@@ -1,214 +1,208 @@
 // Original AI Engineering series post. Rendered by src/pages/blog/SeriesPost.jsx;
-// scheduled and given its sources in src/data/seriesPosts.js.
+// scheduled in src/data/seriesPosts.js. Every factual claim is taken from the
+// numbered sources at the end. The error-example figure is reproduced from
+// LMDX (arXiv 2309.10952) under CC BY 4.0. Both charts are redrawn from table
+// values in LMDX (Table 2) and Anvari & Athitsos (Tables 15 and 17).
 export const POST = {
   "id": "information-extraction-prompts",
-  "title": "Clean JSON, wrong numbers: extracting data from real documents",
-  "excerpt": "A strict extraction prompt returned perfect JSON with the wrong prices, while a loose one got the numbers right. What that trade reveals about structured output, OCR, and where extraction accuracy actually comes from.",
+  "title": "Valid JSON, wrong values: a failure catalog for document extraction",
+  "excerpt": "On 20-page FDA device reviews, a single-prompt LLM extractor skipped about 27.5% of the fields a human would fill and added values the documents never state. The papers that measured this show four distinct ways extraction goes wrong, and none of them breaks the JSON.",
   "category": "AI",
   "chapter": "Prompt Engineering",
   "tags": [
     "Prompt engineering",
-    "Extraction",
+    "Information extraction",
     "OCR",
-    "Structured output"
+    "Evaluation"
   ],
   "seriesNum": 40,
   "publishAt": "2026-07-05T12:00:00Z",
   "body": [
     {
       "type": "p",
-      "text": "We asked a model to read a real invoice, and it taught us the opposite of the advice we expected. The strict, do-it-by-the-book prompt returned beautiful JSON with the prices all wrong. The loose, chatty prompt returned an unparseable paragraph with the prices all right. Same document, same model: **llama3.1:8b**, running locally through Ollama at temperature zero, so every result here reproduces exactly. This post is what that surprising flip taught us about **information extraction**, the job of pulling specific fields out of a document as clean data a program can use."
+      "text": "In 2023 a Stanford and Cornell team pointed text-davinci-003 at FDA 510(k) reviews, the roughly 20-page PDFs a device maker files before selling a medical device. They gave it one fixed prompt: list the attributes in this document and their values. On that set the model missed an average of 4.4 of the 16 attributes a human annotator had marked, 27.5% of them, in every document. It also produced an average of 9.7 attributes or values per document that the document did not explicitly mention. And it named things inconsistently: across a sample of 10 documents, the device classification came back as \"classification\", \"device classification\", \"regulatory information\", or not at all.[^1]"
     },
     {
       "type": "p",
-      "text": "Extraction is the job of turning a document into clean, structured data a program can use. You want the same shape every time: the invoice number as text, the total as a number, a list of line items you can loop over. What you do not want is a friendly paragraph. A model left to its own habits wants to explain itself and be helpful, and helpfulness is exactly what breaks the code waiting downstream, which expected a bare number and got a sentence instead. The whole craft of extraction is pinning the model to a strict shape and then checking that it obeyed."
-    },
-    {
-      "type": "h2",
-      "text": "The text is already broken before the model reads it"
-    },
-    {
-      "type": "p",
-      "text": "Here is the part most guides skip. A scanned or photographed document is not text, it is an image, and something has to turn those pixels into characters first."
-    },
-    {
-      "type": "p",
-      "text": "That step is **OCR**, optical character recognition, and it makes mistakes of its own before the model is ever involved. On our invoice, OCR read the numbers but tore them loose from the rows they belonged to. The item names came out in one block and the prices in another, with no reliable way to line them back up. No prompt can repair text that OCR has already scrambled, so the failure starts one step earlier than people expect."
-    },
-    {
-      "type": "image",
-      "src": "/blog-images/extraction/invoice-annotated.jpg",
-      "alt": "A sample invoice with the header marked read correctly and the price table marked scrambled by OCR",
-      "caption": "The real invoice we tested. Green is what the model read correctly. Red is the price table, where OCR scrambled the columns and the model guessed."
-    },
-    {
-      "type": "p",
-      "text": "To see why the model struggled, look at what it actually received. This is the OCR text of the item table, and the prices have floated away from the items they describe:"
-    },
-    {
-      "type": "code",
-      "lang": "text",
-      "title": "OCR text the model received (excerpt)",
-      "code": "ITEMS\nNo. Description Qty\n1. Liza Byrd Dress Sz L- Coral 2,00\n2. Bcbgeneration Black Sleeveless 1,00\n3. Tommy Bahama Women's V 2,00\n...\nNet price\n\n17,99\n\n2,99\n\n34,99"
-    },
-    {
-      "type": "p",
-      "text": "A person looking at the printed invoice has no trouble, because the eye follows each row across and pairs the dress with its price. The model never saw the printed invoice. It saw the block of text above, where a row's price can sit a dozen lines away from the row's description, separated from the other prices only by blank lines. Pairing them back up is guesswork, and the model guesses the way it always does under uncertainty, by producing something that looks plausible. That is the whole reason a clean-looking invoice can still produce a broken answer."
-    },
-    {
-      "type": "h2",
-      "text": "Two prompts, two different failures"
-    },
-    {
-      "type": "p",
-      "text": "We tried two prompts on that scrambled text. The first is the loose one everybody starts with: \"extract the important information from this invoice.\" It hands every decision to the model, and the model wrote back a friendly report. Here is the surprising part: in that chatty paragraph, it got all seven prices right and the totals right, pairing each price to the correct item, even though the text was a mess. It reasoned its way through. The catch is that the answer is prose, and no program can reliably pull structured data out of a paragraph:"
-    },
-    {
-      "type": "image",
-      "src": "/blog-images/extraction/weak-output.jpg",
-      "alt": "The loose prompt output, a chatty English summary that lists the correct prices",
-      "caption": "The loose prompt got all seven prices and the totals right, but as prose a program cannot parse."
-    },
-    {
-      "type": "p",
-      "text": "So we tightened it into a specification: name every field, return one JSON object and nothing else, write null instead of guessing, use only what the document shows. This is the advice you read everywhere, and it gave us exactly the clean, parseable shape we asked for. It also got the prices wrong. The same model that had just reasoned out every price in prose now returned 1234.56 for the first item and guessed the rest:"
-    },
-    {
-      "type": "image",
-      "src": "/blog-images/extraction/strong-output.jpg",
-      "alt": "The strict prompt output, clean JSON with the wrong prices",
-      "caption": "The strict prompt: clean, parseable JSON, and the prices are wrong. Structure is not accuracy."
-    },
-    {
-      "type": "h2",
-      "text": "Structure is not accuracy"
-    },
-    {
-      "type": "p",
-      "text": "That flip is the real lesson, and it runs against the usual advice. Forcing the model into a rigid shape did not make it more accurate, it made it less. Two things went wrong the moment we demanded strict JSON. First, we took away the room to reason."
-    },
-    {
-      "type": "p",
-      "text": "The loose prompt let the model think out loud and work the scrambled table into the right pairs; the strict prompt made it emit JSON immediately, with no space to reason, so on the hard rows it simply guessed. Second, a number leaked. We had written a formatting rule, \"convert a decimal comma to a dot, so 1.234,56 becomes 1234.56\", and the model lifted 1234.56 straight into the first item as if it were a real price. Under the strict format the whole price table came apart:"
-    },
-    {
-      "type": "ul",
-      "items": [
-        "It copied a number out of the prompt: 1234.56, from our own formatting rule. Never put a concrete number anywhere in a prompt, even inside a rule, because the model can echo it into the output as data.",
-        "It guessed the other prices, which came back as 1249, 1250, 2500 and similar, none of which are on the invoice.",
-        "It left every line's net worth null, because it could not match a price to a row.",
-        "It scrambled the totals: the real net total, 292.68, landed in the VAT slot, and the net total came back as 1799.00, a number that is nowhere on the page."
-      ]
-    },
-    {
-      "type": "p",
-      "text": "So structured output buys you one thing and not the other. It guarantees a shape your code can read. It does not guarantee the values are right, and it can make them worse by taking away the reasoning the model needs on a hard input. A schema is a promise about the container, not about the contents."
-    },
-    {
-      "type": "h2",
-      "text": "Where the accuracy actually comes from"
-    },
-    {
-      "type": "p",
-      "text": "If the strict prompt broke on the scrambled table, then the thing to fix is the table, not the wording of the prompt. The scramble was an OCR artifact: the default settings read the columns apart. One flag fixed it, telling the OCR to keep each row on a single line:"
-    },
-    {
-      "type": "code",
-      "lang": "bash",
-      "title": "layout-preserving OCR",
-      "code": "tesseract invoice.png out --psm 6 -c preserve_interword_spaces=1"
-    },
-    {
-      "type": "p",
-      "text": "With the rows kept intact, we ran the exact same strict prompt again, unchanged, and this time the model returned every price correctly and the totals to the cent. Same model, same prompt, one change to the input:"
-    },
-    {
-      "type": "code",
-      "lang": "text",
-      "title": "the strict prompt, before and after fixing the OCR",
-      "code": "default OCR  ->  unit prices: 1234.56, 1249.00, 1250.00, 2500.00, ...     (wrong)\nlayout OCR   ->  unit prices: 17.99, 2.99, 34.99, 21.23, 8.80, 4.99, 25.00   (correct)\n             ->  totals: net 292.68, vat 29.27, gross 321.95                (correct)"
-    },
-    {
-      "type": "p",
-      "text": "The model was never bad at reading numbers, it was starved of a readable table. When you cannot fix the OCR at the source, the next best move is to stop cramming reasoning and structure into one step: let the model extract in prose first, where it reasons well, then convert that prose to JSON in a second, simpler call. Either way the accuracy came from giving the model something it could actually read, not from the wording of the prompt."
-    },
-    {
-      "type": "h2",
-      "text": "The prompt makes good output likely, validation makes it safe"
-    },
-    {
-      "type": "p",
-      "text": "Even the strong prompt let wrong prices through, because the model is still guessing under uncertainty. So the second half of a reliable extractor lives outside the prompt entirely. After the model answers, you check the result against what you already know: are the required fields present, are the numbers actually numbers, do the line items add up to the stated total. When a check fails you reject the answer and retry, flag it for a human, or fall back, rather than writing a wrong price into your database. A short check catches every failure we just saw:"
-    },
-    {
-      "type": "lab",
-      "height": 460,
-      "title": "validate_invoice.py, run against both real outputs",
-      "caption": "Every number here is from the two runs above. A type check passes the bad record, because invented prices are still perfectly good floats. Checking them against the document is what catches it.",
-      "code": "# Every number below is from the two real runs described in\n# this post: llama3.1:8b at temperature 0, once on the\n# scrambled default OCR text and once on the\n# layout-preserving OCR text. Nothing here is made up.\n\n# The prices actually printed on the invoice, read off the\n# document itself.\nPRINTED_PRICES = [17.99, 2.99, 34.99, 21.23, 8.80, 4.99, 25.00]\n\nfrom_default_ocr = {\n    \"line_items\": [\n        {\"unit_price\": 1234.56, \"net_worth\": None},   # copied out of our own prompt\n        {\"unit_price\": 1249.00, \"net_worth\": None},\n        {\"unit_price\": 1250.00, \"net_worth\": None},\n        {\"unit_price\": 2500.00, \"net_worth\": None},\n    ],\n    \"summary\": {\"net_total\": 1799.00, \"vat\": 292.68, \"gross_total\": None},\n}\n\nfrom_layout_ocr = {\n    \"line_items\": [{\"unit_price\": p, \"net_worth\": None} for p in PRINTED_PRICES],\n    \"summary\": {\"net_total\": 292.68, \"vat\": 29.27, \"gross_total\": 321.95},\n}\n\ndef validate_invoice(data, printed_prices):\n    problems = []\n    for i, item in enumerate(data.get(\"line_items\", []), start=1):\n        price = item.get(\"unit_price\")\n        if not isinstance(price, (int, float)):\n            problems.append(\"item %d: unit_price is not a number\" % i)\n        elif not any(abs(price - p) < 0.005 for p in printed_prices):\n            problems.append(\"item %d: %.2f is not a price on this document\" % (i, price))\n\n    s = data.get(\"summary\") or {}\n    net, vat, gross = s.get(\"net_total\"), s.get(\"vat\"), s.get(\"gross_total\")\n    if gross is None:\n        problems.append(\"summary: gross_total missing, cannot check the arithmetic\")\n    elif abs((net + vat) - gross) > 0.01:\n        problems.append(\"summary: %.2f + %.2f does not equal %.2f\" % (net, vat, gross))\n    return problems   # an empty list means the record is safe to store\n\nfor label, record in [(\"default OCR\", from_default_ocr),\n                      (\"layout-preserving OCR\", from_layout_ocr)]:\n    problems = validate_invoice(record, PRINTED_PRICES)\n    print(\"--- %s ---\" % label)\n    for p in problems:\n        print(\"  reject:\", p)\n    if not problems:\n        print(\"  safe to store: every price is on the page and %.2f + %.2f = %.2f\"\n              % (record[\"summary\"][\"net_total\"], record[\"summary\"][\"vat\"],\n                 record[\"summary\"][\"gross_total\"]))\n    print()\n\n# Notice what a type check alone would have missed. Every\n# unit_price in the bad record is a perfectly good float. It\n# takes checking them against the document, and checking the\n# totals against each other, to catch invented numbers.\n"
-    },
-    {
-      "type": "p",
-      "text": "Run that against the real output above and it comes back with a list of problems: every line is missing its net worth, and the line items do not add up to the stated total. That is the point. The record gets caught and held for review instead of silently saved with invented prices. The prompt made a good answer likely; the validation made the bad answer safe. None of this is hypothetical: it is one real run on one real invoice, reproducible in a minute with the same model and the same prompt, which is the only kind of evidence worth trusting when you are about to ship a feature that reads documents for a living."
-    },
-    {
-      "type": "h2",
-      "text": "The vocabulary, linked to the source"
+      "text": "The paper's system, Evaporate, asks for a simple list of attribute and value pairs that it turns into a table, and none of the three failures it lists is about that format.[^1] They are about content. The authors' own summary of the failure is blunt: \"Since the error modes are quite varied, it is unclear how to improve quality.\"[^1] This post takes that sentence as a challenge. Later papers measured the variety more carefully, on forms, receipts and invoices, and the errors fall into four families. Each one has a paper that caught it and at least one mitigation someone measured."
     },
     {
       "type": "terms",
+      "optional": false,
       "items": [
-        {
-          "term": "Information extraction",
-          "def": "pulling specific structured fields out of unstructured text, like getting a total and a date out of an invoice.",
-          "url": "https://en.wikipedia.org/wiki/Information_extraction"
-        },
-        {
-          "term": "OCR",
-          "def": "optical character recognition: turning an image of a document into text. Its mistakes happen before the model reads anything.",
-          "url": "https://en.wikipedia.org/wiki/Optical_character_recognition"
-        },
-        {
-          "term": "Schema",
-          "def": "the exact shape the output must take: which fields exist and what type each one is.",
-          "url": "https://json-schema.org/"
-        },
-        {
-          "term": "Grounding",
-          "def": "restricting the model to facts actually present in the source text, so it does not invent fields from general knowledge.",
-          "url": "https://en.wikipedia.org/wiki/Hallucination_(artificial_intelligence)"
-        },
-        {
-          "term": "Validation",
-          "def": "checking the output against the schema and simple rules after the fact, and rejecting anything that does not conform.",
-          "url": "https://json-schema.org/learn/getting-started-step-by-step"
-        }
+        { "term": "Information extraction (IE)", "def": "Turning unstructured text into structured records, such as entities, relations and events. A recent survey defines it that way and frames the LLM version as generation: the model writes out the target structure token by token, given the text and a prompt.[^4]" },
+        { "term": "Schema and field", "def": "The schema is the list of slots to fill, each with a name and a data type, like file_date as a date or registration_num as digits. A field (papers also say attribute, key or entity type) is one slot.[^5]" },
+        { "term": "OCR", "def": "Optical character recognition, the step that turns a scanned page into text lines with bounding boxes. Text-only LLM pipelines see whatever OCR produced, errors included.[^2]" },
+        { "term": "Hierarchical entity", "def": "A field made of grouped sub-fields, like an invoice line item made of description, dates and price. Getting it right means getting the grouping right too.[^3]" },
+        { "term": "Grounding", "def": "Checking that an extracted value actually appears in the source document, at a place you can point to.[^2]" }
       ]
+    },
+    {
+      "type": "h2",
+      "text": "What the score counts as correct"
     },
     {
       "type": "p",
-      "text": "So the honest lesson is humbler than \"write a stricter prompt.\" A schema gives you a shape you can parse, which is worth having, but it does not give you correct values and it can quietly cost you accuracy on a hard input. The values come from what the model can actually read, which means the real fight is usually upstream at OCR, and from checking the result afterward. Name your fields and demand a shape, but fix the input first, let the model reason where it needs to, and validate every number before you trust it. That is what lets a document reader survive contact with the real, messy, badly-scanned world, where the invoice you never tested is always the next one through the door."
+      "text": "Before the catalog, it helps to see how these papers score an extraction, because the scoring rule decides which failures you can even see. Evaporate uses Pair F1. Every cell in the output table becomes a tuple of document, attribute and value, and a predicted tuple counts only if it exactly matches a tuple in the hand-built ground truth.[^1]"
+    },
+    {
+      "type": "eq",
+      "tex": "\\begin{gathered} T = \\{(d_i,\\, a_j,\\, r_{i,j})\\} \\\\[4pt] P = \\frac{|\\hat{T} \\cap T|}{|\\hat{T}|} \\qquad R = \\frac{|\\hat{T} \\cap T|}{|T|} \\\\[4pt] F_1 = \\frac{2PR}{P + R} \\end{gathered}",
+      "caption": "Pair F1 as Evaporate describes it in words: an F1 score over predicted and gold sets of (document, attribute, value) tuples, where a tuple must match exactly.[^1] The set notation is this post's."
+    },
+    {
+      "type": "p",
+      "text": "\\(T\\) is the gold set: one tuple per filled cell, where \\(d_i\\) is the document, \\(a_j\\) the attribute and \\(r_{i,j}\\) the value. \\(\\hat{T}\\) is what the system produced. Precision \\(P\\) is the share of predicted tuples that are right, so every invented value drags it down. Recall \\(R\\) is the share of gold tuples the system recovered, so every skipped field drags it down. \\(F_1\\) is their harmonic mean, which stays low if either one is low. On the FDA reports, direct prompting scored 45.5 Pair F1.[^1]"
+    },
+    {
+      "type": "p",
+      "text": "The quiet part is the \\(\\cap\\): what counts as a match. Under exact matching, \"$ 40,000\" and \"40,000\" are different values, and so are \"July 1, 2022\" and \"07/01/2022\". The VRDU benchmark, built from political ad-buy invoices filed with the FCC and foreign-agent registration forms, rejects that rule. Its evaluation tool matches by data type: price values are converted to numbers before comparison, dates are parsed and compared as dates, and addresses stay strict, since \"4, Main St.\" and \"40 Main St.\" are not the same place.[^3] Another receipt benchmark reports two scores side by side. Exact Match gives a key and value pair credit only if both match after lowercasing and whitespace cleanup, while token-level Value F1 gives partial credit.[^6] Keep that gap in mind. It comes back in the number section."
+    },
+    {
+      "type": "h2",
+      "text": "Failure 1: a field that is there comes back empty"
+    },
+    {
+      "type": "p",
+      "text": "The FDA result is the clearest case. Of the gold attributes the model missed in a given document, every one was extracted in at least one other document.[^1] The model could find them. It just did not do it every time, so this is a consistency failure, not a capability gap. Evaporate's comparison across model providers found another flavor: asked for one attribute value, Claude-V1 sometimes replied in chatbot style, \"I'm not sure, please give me more information,\" instead of giving a value.[^1] Either way, the field comes back empty."
+    },
+    {
+      "type": "p",
+      "text": "Empty is ambiguous, and that ambiguity is what the mitigations target. Evaporate's code-generation variant writes many small extraction functions and has to decide whether a function's empty output means \"this document has no such field\" or \"this function could not handle this document\". A function written for a lowercase \"k\" product code returns nothing on documents that use an uppercase \"K\", for instance.[^1] The system estimates how often the attribute is present by asking the LLM on up to 10 sample documents, then treats empty outputs accordingly. That abstention handling added 1.9 Pair F1 on average and 7.8 on the FDA setting, on top of filtering out bad functions.[^1]"
+    },
+    {
+      "type": "p",
+      "text": "Google's LMDX work measured a cheaper fix at the prompt level. Their completions list every schema field in order and write null for a missing single field or [] for a missing repeated one. When they trained the model to skip absent fields instead, micro-F1 on the ad-buy invoices fell from 54.35 to 47.58, a 6.77 point drop.[^2] Their explanation is a hypothesis, labeled as one: with explicit nulls the model copies the next key from the schema and makes a present-or-absent call, while skipping forces it to pick which of the remaining keys comes next.[^2]"
+    },
+    {
+      "type": "h2",
+      "text": "Failure 2: a value the document never states"
+    },
+    {
+      "type": "p",
+      "text": "The 9.7 unmentioned attributes or values per FDA document are the first half of the Evaporate result.[^1] The same pattern shows up on receipts. A 2026 benchmark of six open 7B to 8B models on the FUNSD, SROIE and CORD datasets used a prompt that explicitly discourages hallucinated fields. The models still sometimes invented fields such as \"subtotal\" or \"invoice number\" on receipts that did not contain them. On long receipts they also over-extracted, trying to label nearly every number on the page.[^6] Telling the model not to invent things did not make it stop."
+    },
+    {
+      "type": "p",
+      "text": "Some hallucinations are hard to spot because they sit one digit away from the truth. In a manual review of LLM extractions from VRDU registration forms, Colakoglu and colleagues give an example of a hallucinated date: the model wrote \"1992-04-24\" where the form says \"1992-04-21\".[^5] That output has the right key, a valid date format and a plausible value. Nothing in the JSON structure flags it."
+    },
+    {
+      "type": "p",
+      "text": "The measured mitigation is grounding. LMDX puts a coordinate token after every OCR line in the prompt, such as \"Apple Store 38|05\", and asks the model to copy that token next to each extracted value. Decoding then looks up the line by its coordinates and checks that the extracted text really appears on it. If it does not, the value is thrown away.[^2] On the ad-buy invoices with no target-domain training, 0.59% of completions contained such a mismatch, and the check discarded them. Invalid JSON, by comparison, showed up in only 0.18% of completions.[^2] (Zero-shot here means no ad-buy training documents. The model had been fine-tuned on other forms first, to learn the task and the output syntax.[^2]) LMDX also samples 16 completions per chunk and takes a majority vote. Dropping to a single completion cost 1.5 micro-F1, mostly because repeat samples let the system recover from a malformed or ungrounded answer.[^2]"
+    },
+    {
+      "type": "p",
+      "text": "Put those two numbers next to each other. Under one in five hundred completions failed to parse, yet the same zero-shot system scored 39.74 micro-F1 on those invoices.[^2] Almost all of the missing quality sat in values that parsed fine."
+    },
+    {
+      "type": "h2",
+      "text": "Failure 3: a number is misread or loses its unit"
+    },
+    {
+      "type": "p",
+      "text": "Numbers get corrupted before the model ever sees them. The receipt benchmark ran each model twice: once on clean text taken from the human annotations, and once on text from real OCR engines. It reports digit corruption such as \"193.00\" becoming \"19300\", along with broken decimal points.[^6] Its observation about what that does to scores is the most useful sentence in the paper for this topic. These errors often keep partial token overlap, so they earn moderate Value F1 while failing Exact Match completely.[^6] A lenient metric can make a wrong number look close to right."
+    },
+    {
+      "type": "chart",
+      "kind": "bar",
+      "title": "Same model, same receipts, different text quality",
+      "yLabel": "Score (0 to 1)",
+      "series": [
+        { "label": "Exact Match", "key": "em" },
+        { "label": "Value F1", "key": "vf1" }
+      ],
+      "data": [
+        { "label": "Clean text", "values": { "em": 0.7724, "vf1": 0.97 } },
+        { "label": "PaddleOCR", "values": { "em": 0.4545, "vf1": 0.8267 } },
+        { "label": "Tesseract", "values": { "em": 0.1187, "vf1": 0.2679 } }
+      ],
+      "caption": "Qwen2.5 7B, zero-shot, on CORD receipts. Redrawn from Tables 15 and 17 of Anvari and Athitsos, 2026.[^6] With the cleanest OCR engine, Value F1 still reads 0.83 while strict matches fall to 0.45."
+    },
+    {
+      "type": "p",
+      "text": "On CORD, the best zero-shot model kept a Value F1 of 0.83 on PaddleOCR text, but its Exact Match fell from 0.77 on clean text to 0.45.[^6] Under Tesseract, the noisiest engine in the study, Value F1 dropped to 0.27.[^6] The authors conclude that once OCR noise enters, the main source of error shifts from reasoning to input corruption, and that strong semantic modeling cannot compensate for degraded input.[^6] One caution on this source: it is a 2026 preprint that tests small open models on text alone, so its absolute numbers say less about large multimodal models than its pattern does."
+    },
+    {
+      "type": "p",
+      "text": "Units and formats fail in a quieter way. The model returns \"40,000\" for a total printed as \"$ 40,000\", or a date in a different format from the one in the ground truth. VRDU's type-aware matching exists precisely so those cases score as correct.[^3] Colakoglu and colleagues measured the same thing from the pipeline side. After GPT-3.5, GPT-4o and LLaMA3-70B extracted from VRDU registration forms, a data-cleaning step reformatted each value using a regular expression for its field type. That lifted average exact-match F1 from 0.650 to 0.734. A schema-mapping step that fixed misspelled keys changed nothing, because the models already returned the right keys.[^5] So the keys were right and the values needed repair."
+    },
+    {
+      "type": "p",
+      "text": "Tolerant scoring has its own risk. The same study scored with fuzzy string matching at a 0.8 similarity threshold, then had people check 91 pairs that failed exact match but passed fuzzy match. Fuzzy precision came out at 0.984, not 1.0.[^5] Their example of a \"wrong info\" error is a model that returned \"2016-10-31\" as the file date instead of \"2016-10-08\".[^5] A string metric sees two dates that share most of their characters. A person filing a form sees the wrong day. My reading of these results: normalization is safe for money and dates only when it compares parsed values, as VRDU does, and fuzzy matching should never be the check on a numeric field."
+    },
+    {
+      "type": "p",
+      "text": "Money fields are not always the weak spot, though. On the ad-buy invoices, LMDX scored 98.86 F1 on gross_amount, and removing all layout information barely moved it (98.47). The paper's explanation is that a total can be found from cues like \"$\" or \"USD\" without reading its label.[^2] The dates on the same invoices were much harder: 67.74 F1 for the flight start date.[^2]"
+    },
+    {
+      "type": "h2",
+      "text": "Failure 4: table rows come apart"
+    },
+    {
+      "type": "p",
+      "text": "Line items are where extraction scores collapse. VRDU's authors found that across training-set sizes, the FormNet model's micro-F1 on hierarchical entities trailed its score on other entities by 60 to 70 points. They call proper extraction of hierarchical entities \"an open question\".[^3] LLM extractors show the same gap. LMDX's zero-shot comparison on the ad-buy invoices reports line-item F1 separately from overall micro-F1, and the gap is large for every model."
+    },
+    {
+      "type": "chart",
+      "kind": "bar",
+      "title": "Zero-shot, ad-buy invoices: all fields vs line items",
+      "yLabel": "F1 (%)",
+      "series": [
+        { "label": "Micro-F1, all fields", "key": "all" },
+        { "label": "Line item F1", "key": "li" }
+      ],
+      "data": [
+        { "label": "GPT-3.5 + OCR", "values": { "all": 30.05, "li": 7.65 } },
+        { "label": "GPT-4V + image", "values": { "all": 31.95, "li": 4.45 } },
+        { "label": "Gemini Pro + OCR", "values": { "all": 34.46, "li": 19.25 } },
+        { "label": "LMDX (PaLM 2-S)", "values": { "all": 39.74, "li": 21.21 } },
+        { "label": "LMDX (Gemini Pro)", "values": { "all": 38.02, "li": 23.29 } }
+      ],
+      "caption": "VRDU Ad-buy Form, Mixed Template task, no ad-buy training documents. Redrawn from Table 2 of Perot et al., 2024.[^2] The LMDX rows add line coordinates to the prompt; the others get plain OCR text or the page image."
+    },
+    {
+      "type": "p",
+      "text": "The coordinates are what the LMDX rows add, and the paper tests how much they matter. In an ablation fine-tuned on 10 ad-buy documents, replacing the coordinate tokens with plain line numbers cut line-item F1 from 39.35 to 18.35. Eight of the nine single fields lost less than 10 points.[^2] The paper's explanation: line-item parts sit in tables, so the model needs horizontal and vertical alignment to group a description with its own dates and price.[^2]"
+    },
+    {
+      "type": "image",
+      "src": "/blog-images/information-extraction-prompts/lmdx-ocr-line-errors.webp",
+      "alt": "Two annotated invoice crops. Top: a table row where OCR drew one line box around the Channel value WJZ and the Description value Local News 6a-630a, so the model predicted program_desc as WJZ Local News 6a-630a instead of Local News 6a-630a. Bottom: a header table where Invoice Period 11/25/19 to 12/29/19 and Flight Dates 12/24/19 to 12/30/19 sit in one OCR line; the model returned the invoice period dates as the flight dates.",
+      "width": 940,
+      "height": 905,
+      "caption": "Figure 18 from Perot et al., 2024,[^2] reproduced under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Red boxes are OCR lines, blue are predictions, green is the ground truth. In both cases OCR merged two separate cells into one line."
+    },
+    {
+      "type": "p",
+      "text": "The figure shows the two error patterns the LMDX authors call common. In the first, OCR grouped the Channel and Description columns into one line, so the extracted description carried the channel code along with it. In the second, \"Invoice Period\" and \"Flight Dates\" landed on the same OCR line, and the model returned the invoice dates as the flight dates.[^2] Both answers passed the grounding check, because the text really is on that line. The receipt benchmark describes the same failure in CORD: models attach the right key, such as total, to an item-level amount, which costs Exact Match even when the model found every key.[^6] VRDU's own annotators made a milder version of this mistake, sometimes confusing the flight dates with other periods on the invoice, such as the invoice period.[^3]"
+    },
+    {
+      "type": "p",
+      "text": "Three mitigations have numbers behind them. Layout in the prompt is one: the 21 point line-item difference above.[^2] Examples from the same template are another. On CORD, LMDX with in-context examples retrieved by nearest-neighbor search matched its best random-example score using a single example, and matched its fine-tuned score at 10 examples, because the retrieval found receipts from the same merchant.[^2] The third is the image itself. In the Colakoglu study, GPT-4o-vision and Qwen2.5-vision, given the page image, were the best performers, at about 0.90 F1 against at most 0.80 for the tuned text-only pipelines. GPT-4o-vision used about twice the tokens and cost more than 10 times as much at November 2024 prices.[^5]"
+    },
+    {
+      "type": "h2",
+      "text": "Where the grounding check stops"
+    },
+    {
+      "type": "p",
+      "text": "The survey of generative IE lists the \"misalignment between natural language output and structured form\" as an open challenge next to hallucination.[^4] The papers above make that concrete. Parse errors are rare and cheap to catch. The hard errors are values that parse, match the schema, and even appear in the document, while belonging to a different field."
+    },
+    {
+      "type": "p",
+      "text": "LMDX, which built the strongest check in this catalog, says where that check ends. Its input is OCR text lines, so it inherits OCR's mistakes: wrong reading order, incorrect line grouping, undetected text and misrecognized characters.[^2] And its verification works at the level of a line. It confirms that the extracted text is present on the line the model pointed to. \"If the entity text appears multiple times on the line,\" the authors write, \"we don't have a definitive way to choose the correct text.\"[^2]"
     },
     {
       "type": "sources",
+      "numbered": true,
       "items": [
-        {
-          "title": "Invoice image: Voxel51 \"high-quality-invoice-images-for-ocr\" dataset (Hugging Face)",
-          "url": "https://huggingface.co/datasets/Voxel51/high-quality-invoice-images-for-ocr"
-        },
-        {
-          "title": "Optical character recognition (Wikipedia)",
-          "url": "https://en.wikipedia.org/wiki/Optical_character_recognition"
-        },
-        {
-          "title": "JSON Schema",
-          "url": "https://json-schema.org/"
-        },
-        {
-          "title": "Multilingual OCR-Aware Fine-Tuning and Prompt-Guided CoT Reasoning (arXiv:2605.16409)",
-          "url": "https://arxiv.org/abs/2605.16409"
-        }
+        { "title": "Arora, Yang, Eyuboglu, Narayan, Hojel, Trummer, Ré. Language Models Enable Simple Systems for Generating Structured Views of Heterogeneous Data Lakes (Evaporate). PVLDB 2023 / arXiv 2304.09433", "url": "https://arxiv.org/abs/2304.09433" },
+        { "title": "Perot et al. LMDX: Language Model-based Document Information Extraction and Localization. arXiv 2309.10952", "url": "https://arxiv.org/abs/2309.10952" },
+        { "title": "Wang, Zhou, Wei, Lee, Tata. VRDU: A Benchmark for Visually-rich Document Understanding. KDD 2023 / arXiv 2211.15421", "url": "https://arxiv.org/abs/2211.15421" },
+        { "title": "Xu et al. Large Language Models for Generative Information Extraction: A Survey. Frontiers of Computer Science 2024 / arXiv 2312.17617", "url": "https://arxiv.org/abs/2312.17617" },
+        { "title": "Colakoglu, Solmaz, Fürst. Problem Solved? Information Extraction Design Space for Layout-Rich Documents using LLMs. arXiv 2502.18179", "url": "https://arxiv.org/abs/2502.18179" },
+        { "title": "Anvari, Athitsos. From Pixels to Pairs: A Comprehensive Benchmark of LLM-Based Key-Value Extraction in Noisy Document Settings. arXiv 2609.17538 (preprint, 2026)", "url": "https://arxiv.org/abs/2609.17538" }
       ]
     }
   ]
-};
+}
