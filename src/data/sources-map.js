@@ -18,18 +18,12 @@ export const SOURCES = {
   'finetuning-or-rag': [S.ragfinetune, S.rag, S.lora, S.lima, S.ragSurvey, S.qlora],
   'quantization-plain-terms': [S.int8, S.gptq, S.awq, S.qlora, S.wikiQuant, S.scaleInfer],
   'data-quality': [S.dedup, S.lima, S.textbooks, S.pile, S.refinedweb, S.checklist],
+
+  // ---------- content/ai-series ----------
   'latency-throughput-cost': [S.scaleInfer, S.pagedattn, S.flashattn, S.mqa, S.vllmDocs, S.int8],
   'guardrails': [S.owasp, S.nist, S.indirectInj, S.hh, S.gcg, S.hallSurvey],
   'ai-eng-vs-ml-eng': [S.foundation, S.llmSurvey, S.llmSurvey2, S.helm, S.checklist, S.gpt3],
   'three-layers-ai-stack': [S.foundation, S.llmSurvey, S.llmSurvey2, S.pagedattn, S.scaleInfer, S.vllmDocs],
   'model-size': [S.scaling, S.chinchilla, S.llama, S.phi3, S.distilbert, S.palm],
   'sft-vs-preference': [S.instructgpt, S.dpo, S.hh, S.lima, S.ppo, S.orca],
-
-  // ---------- content/ai-series ----------
-  'structured-outputs': [S.guided, S.jsonSchema, S.smcSteering, S.toolformer, S.gpt3, S.ifeval],
-  'test-time-compute': [S.testTime, S.selfconsist, S.r1, S.cot, S.zeroshotCot, S.grpo],
-  'entropy-cross-entropy': [S.wikiEntropy, S.wikiCrossEnt, S.wikiPerplex, S.scaling, S.transformer, S.gpt3],
-  'embeddings-meaning-vectors': [S.word2vec, S.sbert, S.e5, S.wikiEmbed, S.wikiCosine, S.dpr],
-  'reading-benchmarks': [S.contamination, S.mmlu, S.helm, S.arena, S.leaderboards, S.ifeval],
-  'chain-of-thought': [S.zeroshotCot, S.cot, S.gsm8k, S.selfconsist, S.testTime, S.r1],
 };
