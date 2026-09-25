@@ -26,7 +26,9 @@ export function useProjects(category = 'all') {
 
           const { data, error } = await query;
 
-          if (!error && data) {
+          // An empty table means projects have not been moved into Supabase;
+          // keep showing the static list rather than an empty page.
+          if (!error && data && data.length > 0) {
             setProjects(data);
             setLoading(false);
             return;

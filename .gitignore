@@ -51,3 +51,4 @@ blog-cover-originals/
 
 # Downloaded research papers (local reference only; copyrighted)
 research/
+.vercel

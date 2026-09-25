@@ -21,7 +21,7 @@ export function usePublicPage(slug) {
             .select('craft_state')
             .eq('page_slug', slug)
             .eq('is_published', true)
-            .single();
+            .maybeSingle();
 
           if (!error && !cancelled && data?.craft_state) {
             setContent(data.craft_state);
