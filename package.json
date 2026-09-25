@@ -19,13 +19,14 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && ./scripts/run.sh scripts/prerender.mjs",
     "preview": "vite preview",
     "verify:labs": "./scripts/run.sh scripts/verify-labs.mjs",
     "verify:sources": "./scripts/run.sh scripts/verify-sources.mjs",
     "verify:links": "./scripts/run.sh scripts/verify-term-links.mjs",
     "verify:gate": "./scripts/run.sh scripts/test-publish-gate.mjs",
     "publish:report": "./scripts/run.sh scripts/publish-report.mjs",
-    "verify": "npm run verify:gate && npm run verify:labs && npm run verify:sources && npm run verify:links && npm run publish:report"
+    "verify": "npm run verify:gate && npm run verify:labs && npm run verify:sources && npm run verify:links && npm run verify:style && npm run publish:report",
+    "verify:style": "./scripts/run.sh scripts/verify-post-style.mjs"
   }
 }
