@@ -82,5 +82,4 @@ export const SOURCES = {
   'running-llms-locally': [S.int8, S.gptq, S.awq, S.qlora, S.llama, S.phi3],
   'build-finetuning-dataset': [S.lima, S.selfinstruct, S.dedup, S.orca, S.textbooks, S.lora],
   'grpo-rl-for-reasoning': [S.grpo, S.r1, S.ppo, S.instructgpt, S.gsm8k, S.testTime],
-  'training-llm-from-scratch': [S.scaling, S.chinchilla, S.palm, S.pile, S.refinedweb, S.transformer],
 };

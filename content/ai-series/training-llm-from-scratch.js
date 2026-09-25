@@ -1,210 +1,241 @@
+// Every factual claim below is taken from the numbered sources at the end.
+// Figures reproduced from the OPT and FineWeb papers are CC BY 4.0; the two
+// charts are redrawn from table values in the Chinchilla and Llama 3 papers.
 export const POST = {
   id: 'training-llm-from-scratch',
-  title: 'How an LLM Is Trained From Scratch: The Full Pipeline, End to End',
-  excerpt: 'You can rent a foundation model in an afternoon. Building one from raw text takes months and millions. Here is the map of every stage in between.',
+  title: 'How an LLM Is Trained From Scratch, According to the Teams Who Wrote It Down',
+  excerpt: 'Meta published a logbook of every crash while training OPT-175B. Read next to the Chinchilla, FineWeb, and Llama 3 papers, it gives a rare, honest map of what building a foundation model takes.',
   category: 'AI',
-  tags: ['LLMs', 'Training', 'Pretraining'],
+  tags: ['LLMs', 'Pretraining', 'Scaling Laws'],
   body: [
     {
       type: 'p',
-      text: 'Picture two engineers who both ship a working chatbot on the same Friday. The first one signs up for an API, sends a few requests, and has a helpful assistant answering customer questions by lunch. The second one is nine months into a project to build a comparable model from raw text, and is still watching a GPU cluster grind through a data pipeline. Same end product, wildly different journeys. Most people only ever meet the first engineer. This post is about the second one, because the hidden work behind a foundation model explains why the first path exists at all.',
+      text: 'In 2022 Meta trained OPT-175B, a 175 billion parameter language model, on 992 NVIDIA A100 GPUs over about two months. Most labs publish only the finished model. This team also published its [logbook](https://github.com/facebookresearch/metaseq/blob/main/projects/OPT/chronicles/OPT175B_Logbook.pdf), and the paper summarizes what it records: hardware failures caused at least 35 manual restarts, more than 100 machines had to be swapped out, and the team estimates another 70 or more restarts happened automatically.[^1,2] Several times the training loss suddenly shot upward. Each time, the fix was to roll back to an earlier checkpoint, lower the learning rate, and try again.[^1]',
+    },
+    {
+      type: 'image',
+      src: '/blog-images/training-llm-from-scratch/opt-lr-schedule.webp',
+      alt: 'Line chart of OPT-175B learning rate over 140,000 iterations. It rises to 1.2e-4, decays smoothly, then drops in several abrupt manual steps between 37k and 92k iterations.',
+      width: 910,
+      height: 640,
+      caption: 'OPT-175B\'s learning rate as it was actually run. A textbook schedule is one smooth curve. Every sudden step here is a person intervening after training became unstable. Figure 1 from Zhang et al., 2022,[^1] reproduced under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).',
     },
     {
       type: 'p',
-      text: 'Here is the intuition before any of the machinery. A large language model starts life knowing nothing, with billions of numbers set to noise. Training is the slow process of nudging those numbers until the model can guess what word comes next in almost any sentence humans have written. Everything downstream, following instructions, staying polite, refusing harmful requests, is a smaller adjustment layered on top of that one core skill. So the pipeline is really a story about teaching a blank system to predict text, and then reshaping that raw ability into something people can actually talk to.',
+      text: 'That jagged line is a more honest picture of pretraining than any clean pipeline diagram. This post uses it, along with papers from DeepMind, Hugging Face, and Meta\'s Llama 3 team, to walk through what "training from scratch" means: what goes in, which equation is being minimized, how big the model should be, and what turns a text predictor into an assistant.',
     },
     {
       type: 'h2',
-      text: 'The four stages, and what each one hands to the next',
-    },
-    {
-      type: 'p',
-      text: 'It helps to see the whole assembly line first, then zoom into each station. A model passes through four hands. First, a data team assembles and cleans an enormous pile of text. Second, the **pretraining** run turns that text into a **base model** that predicts words but does not yet chat. Third, **supervised fine-tuning** teaches the base model to answer questions instead of just continuing them. Fourth, **preference alignment** polishes the tone and safety so the model behaves the way people expect. Each stage takes the output of the last as its raw material, which is why skipping one leaves you with something half finished.',
-    },
-    {
-      type: 'diagram',
-      nodes: [
-        { label: 'Corpus', detail: 'Trillions of cleaned, deduplicated, tokenized words' },
-        { label: 'Pretraining', detail: 'Next-token prediction on a GPU cluster, weeks to months' },
-        { label: 'SFT', detail: 'Learn to follow instructions from example answers' },
-        { label: 'Alignment', detail: 'RLHF or DPO tunes for helpful, safe replies' },
-        { label: 'Deployed Model', detail: 'The instruct model users actually talk to' },
-      ],
-      caption: 'The full pipeline: raw text becomes a base model, then an instruction-following model, then a deployed assistant.',
-    },
-    {
-      type: 'h2',
-      text: 'Stage one: turning the internet into training fuel',
-    },
-    {
-      type: 'p',
-      text: 'The first stage is unglamorous and decides everything. A team gathers text from web crawls, books, code, and other sources, then spends most of its effort throwing text away. Duplicate pages get removed so the model does not memorize the same paragraph a thousand times. Low-quality junk, spam, and broken markup get filtered out. What survives gets **tokenized**, meaning it is chopped into the small units the model actually reads. The result is a **corpus**, a fixed body of text measured not in pages but in tokens, often trillions of them. If tokenization is new to you, the earlier post in this series on how text becomes tokens is the place to start, since every later stage counts its work in tokens.',
-    },
-    {
-      type: 'p',
-      text: 'The reason cleaning matters so much is that the model has no taste of its own. It will faithfully learn whatever patterns appear most often. Feed it duplicated boilerplate and it wastes capacity learning boilerplate. Feed it a balanced, deduplicated mix and it learns the shape of real language. This is why data work, not model architecture, is often where teams spend their scarce human hours. A concrete example makes the stakes clear. Suppose a single popular article got copied onto ten thousand sites. Without deduplication, the model sees that one article ten thousand times and learns its exact phrasing by heart, which crowds out ten thousand other pages it could have learned from instead. Good deduplication collapses those copies down to one, so the training budget buys variety rather than repetition.',
+      text: 'Five words you need first',
     },
     {
       type: 'terms',
+      optional: false,
       items: [
-        { term: 'Corpus', def: 'The full, fixed collection of text a model trains on, usually measured in tokens rather than documents.' },
-        { term: 'Tokenization', def: 'Splitting raw text into the small units, roughly word pieces, that the model reads and predicts.' },
+        { term: 'Token', def: 'A chunk of text the model reads as one unit, often a word or part of a word. Models count everything in tokens, not words or pages.' },
+        { term: 'Parameter', def: 'One adjustable number inside the network. "175B parameters" means 175 billion of them. Training is the process of choosing their values.' },
+        { term: 'Loss', def: 'A single number that measures how wrong the model\'s predictions are. Training lowers it a little at every step.' },
+        { term: 'Learning rate', def: 'How big a step the optimizer takes each time it updates the parameters. Too big and training blows up; too small and it crawls.' },
+        { term: 'Checkpoint', def: 'A saved copy of every parameter at one moment in training, so a crashed or diverging run can restart from there instead of from zero.' },
       ],
     },
     {
       type: 'h2',
-      text: 'Stage two: pretraining, where the money goes',
+      text: 'The data: most of the work is deciding what to delete',
     },
     {
       type: 'p',
-      text: '**Pretraining** is the expensive heart of the whole thing. The model reads the corpus and plays one game over and over: given the words so far, predict the next token. When it guesses wrong, its internal numbers get adjusted a tiny amount so the next guess is a little better. Repeat this across trillions of tokens on a cluster of hundreds or thousands of GPUs running for weeks, and the noise slowly organizes itself into a working language model. What comes out is a **base model**. It can complete text with startling fluency, but it does not know it is supposed to be an assistant. Ask it a question and it might just continue with more questions, because continuing text is the only thing it was ever trained to do.',
+      text: 'Pretraining data mostly comes from Common Crawl, a public archive of web pages captured in periodic "snapshots." Raw crawl text is full of navigation menus, cookie banners, spam, and the same page copied thousands of times. The job of a data pipeline is to throw most of it away without throwing away the good parts, and that turns out to be harder than it sounds.',
     },
     {
       type: 'p',
-      text: 'The learning signal itself is simpler than it sounds. You take a chunk of text, shift it by one position so each token becomes the target for the token before it, and measure how surprised the model was by the real next token. That surprise is the loss, and training just means reducing it. Walk through one tiny case. The model reads "the cat sat on the" and has to guess the next token. Early in training it might spread its bet evenly across thousands of possibilities, so it is very surprised when the real answer turns out to be "mat", and the loss is high. After enough passes over similar sentences, it learns to put most of its bet on words that fit, the surprise shrinks, and the loss drops. Multiply that single guess by trillions and you have the entire pretraining run. The snippet below shows the core objective in a few lines.',
+      text: 'Duplication is the clearest example. Lee and colleagues found a single 61-word English sentence repeated more than 60,000 times in C4, a popular training set. Models trained on such data copied over 1% of their unprompted output word for word from the training set. After deduplication, models emitted memorized text ten times less often and needed fewer training steps to reach the same accuracy.[^5]',
     },
-    { type: 'lab', packages: ['numpy'], height: 460,
-        title: 'The next-token objective, untrained against trained',
-        caption: 'Three stages of the same model on "the cat sat on mat". Perplexity reads as how many words it is choosing between at each step, so training is the act of walking that bar down to one.',
-        code: `import numpy as np
-
-# The next-token objective, small enough to read.
-# No framework: just the shift, and the cross-entropy
-# every language model is trained to push down.
-
-def softmax(z):
-    e = np.exp(z - z.max(axis=-1, keepdims=True))
-    return e / e.sum(axis=-1, keepdims=True)
-
-def next_token_loss(logits, tokens):
-    preds = logits[:, :-1, :]     # drop the last position
-    targets = tokens[:, 1:]       # shift left by one
-    probs = softmax(preds)
-    B, T, V = probs.shape
-    flat = probs.reshape(B * T, V)
-    picked = flat[np.arange(B * T), targets.reshape(-1)]
-    return float(-np.log(picked + 1e-12).mean())
-
-VOCAB = ["the", "cat", "sat", "on", "mat"]
-tokens = np.array([[0, 1, 2, 3, 4]])   # the cat sat on mat
-
-rng = np.random.default_rng(0)
-untrained = rng.normal(size=(1, 5, len(VOCAB)))
-
-# A model that learned this sentence puts its mass
-# on the token that actually comes next.
-trained = np.full((1, 5, len(VOCAB)), -2.0)
-for pos, nxt in enumerate(tokens[0][1:]):
-    trained[0, pos, nxt] = 6.0
-
-# Half-learned: leaning the right way, not yet certain.
-partly = np.full((1, 5, len(VOCAB)), -2.0)
-for pos, nxt in enumerate(tokens[0][1:]):
-    partly[0, pos, nxt] = 1.0
-
-# ---- Report ----------------------------------------
-# Colour marks direction of travel: red is where
-# training starts, gold is progress, green is a model
-# that has learned the sentence.
-E = chr(27)
-DIM, OFF, BOLD = E + "[2m", E + "[0m", E + "[1m"
-OK, WARN, BAD = E + "[32m", E + "[33m", E + "[31m"
-
-V = len(VOCAB)
-
-def bar(ppl, width=12):
-    # Full bar = as unsure as a uniform guess.
-    frac = min((ppl - 1) / (V - 1), 1.0)
-    filled = round(frac * width)
-    return "#" * filled + "." * (width - filled)
-
-note = lambda s: print(DIM + s + OFF)
-
-print(BOLD + "TRAINING" + OFF + "  vocab=%d" % V)
-note("-" * 50)
-note("%-13s %6s %7s  %s"
-     % ("STAGE", "LOSS", "PPL", "STILL UNSURE"))
-
-STAGES = [
-    ("untrained", untrained, BAD),
-    ("half-learned", partly, WARN),
-    ("trained", trained, OK),
-]
-
-for name, logits, colour in STAGES:
-    loss = next_token_loss(logits, tokens)
-    ppl = float(np.exp(loss))
-    print("%-13s %6.3f %7.2f  %s%s%s"
-          % (name, loss, ppl, colour, bar(ppl), OFF))
-
-note("-" * 50)
-print(BOLD + "PPL READS AS" + OFF
-      + "  words it is choosing between per step")
-
-print()
-note("Perplexity is just exp(loss). The untrained")
-note("model is still choosing between several options.")
-note("The trained one has nearly made up its mind.")
-note("Training moves the first number to the second,")
-note("over and over, on a great deal of text.")
-
-# Try it: lower 6.0 to 1.0 in \`trained\` and watch
-# perplexity climb back toward the vocabulary size.
-` },
     {
       type: 'p',
-      text: 'How big should the model be, and how much text does it need? That trade-off has a name in this series already, the scaling laws post, and the short version is that model size and data size have to grow together. A famous result from the Chinchilla work showed that many early models were oversized for the amount of text they saw, and that a smaller model trained on more tokens can beat a larger one trained on less. Your **compute budget**, the total amount of processing you can afford, is the real constraint, and it forces you to balance those two dials.',
+      text: 'The usual tool for finding near-duplicates is **MinHash**. Instead of comparing every pair of documents, which is impossible at web scale, each document is reduced to a short set of hash values computed from its overlapping word sequences. Documents that share enough hashes are treated as copies, and only one is kept. FineWeb, a 15 trillion token dataset built by Hugging Face from 96 Common Crawl snapshots, used 5-word sequences and 112 hash functions, tuned to catch documents that are at least 75% similar.[^4]',
+    },
+    {
+      type: 'p',
+      text: 'Then FineWeb\'s authors found something that contradicts the obvious strategy. Their first attempt deduplicated all 96 snapshots against each other. For the oldest snapshots, this removed as much as 90% of the data, and a model trained on what remained barely beat a model trained on data that was never deduplicated at all.[^4] So they ran a direct test on one old crawl from 2013: train one model on the 10% that survived, and another on the 90% that had been thrown out.',
+    },
+    {
+      type: 'image',
+      src: '/blog-images/training-llm-from-scratch/fineweb-kept-vs-removed.webp',
+      alt: 'Line chart of aggregate benchmark accuracy against training tokens up to 30 billion. The model trained on originally removed data (orange) ends near 43%, above the model trained on originally kept data (blue), which ends near 40.5%.',
+      width: 850,
+      height: 595,
+      caption: 'The data that global deduplication kept (blue) trained a worse model than the data it deleted (orange). Figure 4 from Penedo et al., 2024,[^4] reproduced under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).',
+    },
+    {
+      type: 'p',
+      text: 'The deleted data won. When the authors read samples, the surviving 10% had more ads, keyword lists, and badly formatted text.[^4] The authors\' hypothesis is that the benefit of deduplication comes from removing huge clusters of copies, some with hundreds of thousands of documents, while also removing small clusters (fewer than about 100 copies) can hurt. FineWeb instead deduplicated each snapshot on its own, which kept 20 trillion tokens and matched RefinedWeb, the strong baseline they had been failing to reach.[^4]',
+    },
+    {
+      type: 'p',
+      text: 'Llama 3\'s pipeline gives a sense of how many layers this takes in production. It deduplicates by URL, then by document with MinHash, then by individual line, removing any line that appears more than 6 times in a bucket of 30 million documents. The team notes that the line filter also deletes some good, frequently repeated text, and kept it anyway because evaluations improved.[^3] The final mix was roughly 50% general knowledge, 25% math and reasoning, 17% code, and 8% multilingual text.[^3]',
+    },
+    {
+      type: 'p',
+      text: 'The last step is **tokenization**. Most models use a variant of byte pair encoding (BPE), which Sennrich and colleagues adapted from a 1994 compression method: start with individual characters, find the most frequent adjacent pair, merge it into a new symbol, and repeat until the vocabulary reaches a target size.[^6] Frequent words end up as a single token, and rare words get split into pieces, so the model never meets a word it has no way to spell.',
+    },
+    {
+      type: 'h2',
+      text: 'The objective: one equation, trillions of times',
+    },
+    {
+      type: 'p',
+      text: 'Pretraining has exactly one goal: predict the next token. Given a sequence of tokens \\(x_1, \\dots, x_T\\), the model assigns a probability to each possible next token, and the loss is the average negative log probability it gave to the tokens that actually came next:',
+    },
+    {
+      type: 'eq',
+      tex: '\\mathcal{L}(\\theta) = -\\frac{1}{T} \\sum_{t=1}^{T} \\log p_\\theta\\left(x_t \\mid x_{<t}\\right)',
+      caption: 'Cross-entropy loss for next-token prediction. Kaplan et al. report their losses in exactly this form, in nats.[^7]',
+    },
+    {
+      type: 'p',
+      text: 'Read it piece by piece. \\(\\theta\\) is every parameter in the model. \\(p_\\theta(x_t \\mid x_{<t})\\) is the probability the model gave the real token \\(x_t\\) after seeing everything before it. If the model was confident and right, that probability is close to 1 and its log is close to 0, so the loss contribution is tiny. If the model gave the real token a probability of 0.001, the log is about \\(-6.9\\) and the loss jumps. Training computes this over a batch, works out how each parameter should change to lower it (backpropagation), and takes a step whose size is set by the learning rate.',
+    },
+    {
+      type: 'p',
+      text: 'The scale is hard to picture. Llama 3\'s flagship model has 405 billion parameters and was trained on 15.6 trillion tokens, using \\(3.8 \\times 10^{25}\\) floating point operations on up to 16,000 H100 GPUs.[^3] The recipe is also more careful than "run it." Llama 3 started with small batches of 4 million tokens for stability, doubled the batch size twice as training went on, and waited until the end to train on long documents, growing the context window from 8K to 128K tokens in six stages. It only did this late because attention cost grows with the square of sequence length.[^3]',
+    },
+    {
+      type: 'p',
+      text: 'The very end of the run is called **annealing**. Over the final 40 million tokens, the learning rate is lowered to zero while the data mix shifts toward the highest-quality sources. The Llama 3 team found that annealing on small amounts of high-quality code and math data boosted benchmark performance, and they also used short annealing runs as a cheap test of whether a new dataset was worth including.[^3]',
+    },
+    {
+      type: 'h2',
+      text: 'Choosing the size: the Chinchilla correction',
+    },
+    {
+      type: 'p',
+      text: 'Before any of this starts, a team has a fixed compute budget and has to split it between a bigger model and more data. In 2020 Kaplan and colleagues at OpenAI measured that loss falls as a smooth power law in both model size and data, and concluded that large models are so sample efficient that most extra compute should go into parameters: their optimal model size grows roughly as compute to the power 0.73.[^7] GPT-3, Jurassic, and Gopher, at 175, 178, and 280 billion parameters, were all trained on about 300 billion tokens.[^8]',
+    },
+    {
+      type: 'p',
+      text: 'In 2022 Hoffmann and colleagues at DeepMind trained over 400 models, from 70 million to more than 16 billion parameters, and fit the loss directly as a function of both parameter count \\(N\\) and training tokens \\(D\\):[^8]',
+    },
+    {
+      type: 'eq',
+      tex: '\\begin{gathered} L(N, D) = E + \\frac{A}{N^{\\alpha}} + \\frac{B}{D^{\\beta}} \\\\[4pt] E = 1.69,\\quad A = 406.4,\\quad B = 410.7 \\\\ \\alpha = 0.34,\\quad \\beta = 0.28 \\end{gathered}',
+      caption: 'The fitted Chinchilla loss (Hoffmann et al., 2022, equation 10).[^8]',
+    },
+    {
+      type: 'p',
+      text: 'Each term has a plain meaning. \\(E\\) is the loss no model can beat, the natural unpredictability of text. The second term is the penalty for having too few parameters, and it shrinks as \\(N\\) grows. The third is the penalty for having seen too little data, and it shrinks as \\(D\\) grows. Because the two exponents are close, the cheapest way to lower the total is to grow both together. The paper\'s headline result: for every doubling of model size, the number of training tokens should also double.[^8]',
+    },
+    {
+      type: 'p',
+      text: 'They tested it by training Chinchilla, a 70 billion parameter model given the same compute budget as their 280 billion parameter Gopher, but on 1.4 trillion tokens instead of 300 billion. Chinchilla beat Gopher, GPT-3, and the 530 billion parameter Megatron-Turing NLG across a wide range of tasks, reaching 67.5% on the MMLU benchmark, an improvement of more than 7% over Gopher.[^8] With a quarter of Gopher\'s parameters, it also needs much less compute to fine-tune and to serve.[^8]',
+    },
+    {
+      type: 'chart',
+      kind: 'bar',
+      title: 'Training tokens per parameter',
+      yLabel: 'Tokens per parameter',
+      series: [{ label: 'Tokens per parameter', key: 'r' }],
+      data: [
+        { label: 'MT-NLG 530B', values: { r: 0.51 } },
+        { label: 'Gopher 280B', values: { r: 1.07 } },
+        { label: 'GPT-3 175B', values: { r: 1.71 } },
+        { label: 'Chinchilla 70B', values: { r: 20 } },
+        { label: 'Llama 3 405B', values: { r: 38.5 } },
+      ],
+      caption: 'Computed from the parameter and token counts in Table 1 of Hoffmann et al.[^8] and, for Llama 3, from Grattafiori et al.[^3] Before Chinchilla, big models saw one or two tokens per parameter.',
+    },
+    {
+      type: 'p',
+      text: 'Llama 3 sits well past the Chinchilla ratio, and on purpose. The team ran its own version of this experiment, fit a scaling law on its own data, and got a compute-optimal answer of 402 billion parameters on 16.55 trillion tokens for its budget.[^3] It also noticed that the loss curve is very flat near the optimum at large budgets, so being a little off in either direction costs almost nothing.[^3] In other words, Chinchilla\'s specific ratio is less important than the method it introduced: measure small runs, fit the curve, then commit the big budget.',
+    },
+    {
+      type: 'h2',
+      text: 'What actually goes wrong',
+    },
+    {
+      type: 'p',
+      text: 'OPT\'s two problems, broken hardware and unstable loss, are still the two problems. They are handled very differently now.',
+    },
+    {
+      type: 'p',
+      text: 'Hardware first. During one 54-day stretch of Llama 3 pretraining, the job was interrupted 466 times. Only 47 of those were planned. Of the 419 unexpected ones, about 78% were confirmed or suspected hardware problems.[^3] Pretraining is synchronous: every GPU must finish its part of a step before any GPU can take the next one, so a single GPU failure can force a restart of the entire job. Even so, the team kept useful training time above 90%, and people had to step in manually only three times. Automation handled the rest.[^3]',
+    },
+    {
+      type: 'chart',
+      kind: 'bar',
+      title: 'Top causes of unexpected interruptions, Llama 3 405B, 54 days',
+      yLabel: 'Interruptions',
+      series: [{ label: 'Count', key: 'n' }],
+      data: [
+        { label: 'Faulty GPU', values: { n: 148 } },
+        { label: 'GPU HBM3 memory', values: { n: 72 } },
+        { label: 'Software bug', values: { n: 54 } },
+        { label: 'Network switch/cable', values: { n: 35 } },
+        { label: 'Host maintenance', values: { n: 32 } },
+        { label: 'GPU SRAM', values: { n: 19 } },
+      ],
+      caption: 'Redrawn from Table 5 of Grattafiori et al.[^3] Six of the categories that account for most of the 419 unexpected interruptions.',
+    },
+    {
+      type: 'p',
+      text: 'Instability is the quieter problem. A **loss divergence** is when the loss, instead of creeping down, suddenly spikes and does not recover. OPT\'s team noticed that divergences lined up with two warning signs: the dynamic loss scaler (which protects 16-bit arithmetic from rounding tiny numbers to zero) collapsing to zero, and the size of the final layer\'s activations growing without bound. They learned to pick restart checkpoints taken before those signals appeared. Cutting gradient clipping from 1.0 to 0.3 early in training also helped.[^1] Llama 3 reports the opposite experience: with a conservative recipe, it "observed few loss spikes and did not require interventions."[^3]',
     },
     {
       type: 'callout',
-      title: 'Why almost nobody pretrains',
-      text: 'A single frontier pretraining run can cost millions of dollars in compute and take months of cluster time, before a single user sees it. That is why the overwhelming majority of teams start from an open base model someone else already paid to pretrain, and only run the cheaper later stages themselves.',
+      title: 'Why the logbook matters',
+      text: 'OPT\'s authors point out that published cost estimates usually assume no failures and no restarts. Counting ablations, baselines, and downtime, they estimate their real cost was about twice what the final run alone suggests.[^1]',
     },
     {
       type: 'h2',
-      text: 'Stages three and four: from raw predictor to real assistant',
+      text: 'From text predictor to assistant',
     },
     {
       type: 'p',
-      text: 'The base model is powerful but blunt. To make it useful, you show it examples of the behavior you want. In **supervised fine-tuning**, you feed it thousands of prompt-and-answer pairs written or curated by people, and it learns that when text looks like a question, the right continuation is a direct answer. This is a short, cheap stage compared to pretraining, often days rather than months, and it reuses the exact same next-token machinery, just pointed at curated conversations instead of raw web text. It is where the model first starts to feel like it is talking to you rather than rambling. The output is often called an instruct model.',
+      text: 'The model that comes out of pretraining is a **base model**. It is very good at continuing text and has no idea it is meant to help anyone. Ask it a question and it may answer with three more questions, because that is a plausible continuation of a list of questions. Two more stages fix this.',
     },
     {
       type: 'p',
-      text: 'The last stage, **preference alignment**, handles the softer judgments that are hard to write as example answers. Given two replies to the same prompt, which one is more helpful, clearer, or safer? Writing a single perfect answer for every case is impossible, but people are quite good at comparing two options and picking the better one. So the process leans on comparison instead of dictation. People rank pairs of responses, and methods like RLHF or the simpler DPO use those rankings to nudge the model toward the answers humans prefer. The InstructGPT work showed that a smaller model tuned this way was rated more helpful than a much larger untuned one, which is a strong hint that alignment, not raw size, drives a lot of the quality people feel. The difference between supervised fine-tuning and preference methods, and newer approaches like GRPO, each get their own treatment elsewhere in this series.',
+      text: 'The first is **supervised fine-tuning** (SFT): keep training with the same next-token loss, but on examples of instructions paired with good responses. OpenAI\'s InstructGPT paper describes the standard version. Its SFT set had about 13,000 prompts, with demonstration answers written by a team of about 40 contractors.[^9]',
     },
     {
-      type: 'terms',
-      items: [
-        { term: 'Pretraining', def: 'The long, costly stage where a model learns next-token prediction over a huge corpus, producing a base model.' },
-        { term: 'Base model', def: 'The raw output of pretraining: fluent at completing text but not yet trained to follow instructions.' },
-        { term: 'SFT (supervised fine-tuning)', def: 'Teaching the base model to answer prompts by training it on curated question-and-answer examples.' },
-        { term: 'Preference alignment / RLHF', def: 'Tuning the model toward responses humans rank as more helpful and safe, using ranked pairs of answers.' },
-        { term: 'Compute budget', def: 'The total processing you can afford, which forces the trade-off between model size and training data size.' },
-      ],
+      type: 'p',
+      text: 'The second is **preference alignment**. People are shown two responses to the same prompt and pick the better one. InstructGPT used about 33,000 such comparisons to train a separate reward model, then used reinforcement learning (PPO) to push the language model toward higher reward.[^9] The result is one of the most quoted findings in the field: people preferred answers from the 1.3 billion parameter InstructGPT over the 175 billion parameter GPT-3, despite it having more than 100 times fewer parameters.[^9] Alignment did not add knowledge. It made the existing knowledge usable.',
+    },
+    {
+      type: 'p',
+      text: 'Reinforcement learning with a separate reward model is expensive and fiddly, because the model has to generate new samples during training. In 2023 Rafailov and colleagues showed the same objective can be optimized directly on the preference pairs with an ordinary classification-style loss, which they called Direct Preference Optimization (DPO):[^10]',
+    },
+    {
+      type: 'eq',
+      tex: '\\begin{aligned} \\mathcal{L}_{\\text{DPO}} = -\\,\\mathbb{E}_{(x, y_w, y_l)} \\Big[ \\log \\sigma \\Big( & \\beta \\log \\frac{\\pi_\\theta(y_w \\mid x)}{\\pi_{\\text{ref}}(y_w \\mid x)} \\\\ & - \\beta \\log \\frac{\\pi_\\theta(y_l \\mid x)}{\\pi_{\\text{ref}}(y_l \\mid x)} \\Big) \\Big] \\end{aligned}',
+      caption: 'The DPO loss (Rafailov et al., 2023, equation 7).[^10]',
+    },
+    {
+      type: 'p',
+      text: 'Here \\(x\\) is a prompt, \\(y_w\\) is the response people preferred, and \\(y_l\\) is the one they rejected. \\(\\pi_\\theta\\) is the model being trained, and \\(\\pi_{\\text{ref}}\\) is a frozen copy of where it started (usually the SFT model). The loss rewards the model for raising the probability of the preferred answer, relative to the reference, more than it raises the rejected one. \\(\\beta\\) controls how far the model may drift from the reference, and \\(\\sigma\\) is the sigmoid function. The paper\'s gradient analysis shows each example is weighted by how wrong the model currently is about it, and removing that weighting made models degenerate.[^10] Llama 3\'s team tried PPO as well and chose DPO for its post-training because it needed less compute at their scale.[^3]',
     },
     {
       type: 'h2',
-      text: 'Common mistakes when reading this map',
-    },
-    {
-      type: 'ul',
-      items: [
-        'Thinking the base model is broken because it will not chat. It is doing exactly its job, which is continuing text, and chatting is a later skill.',
-        'Assuming a bigger model is always better. Chinchilla showed data and size must scale together, so a well-fed smaller model can win.',
-        'Believing you need to pretrain to build a product. In practice you almost never do, since strong open base models already exist.',
-        'Treating data cleaning as a quick preprocessing step. It is the stage that quietly sets the ceiling on everything after it.',
-      ],
+      text: 'The pipeline, in one paragraph',
     },
     {
       type: 'p',
-      text: 'The takeaway is the contrast we started with. Renting a foundation model is an afternoon of work because someone else already spent the months and the millions on stages one and two. When you fine-tune an open base model for your own task, you are stepping onto the assembly line at stage three, skipping the part that only a handful of well-funded labs can afford. Knowing the full pipeline does not mean you should run all of it. It means you can see exactly which stage your problem actually lives in, and pay only for that. Most product needs are met at stage three or four, on top of a base someone else built, and recognizing that early saves both money and months.',
+      text: 'Collect web text and delete most of it, carefully, since FineWeb shows that deleting the wrong things makes the model worse. Tokenize what is left. Use small runs to fit a scaling law and pick a model size and token count for your budget. Minimize next-token cross-entropy for weeks on thousands of GPUs, with automation that expects hundreds of failures. Anneal on your best data. Then fine-tune on demonstrations and align with preference pairs. Each of these steps now has a paper you can read. The most useful one to start with may still be OPT\'s logbook, because it shows what the clean diagrams leave out.',
     },
     {
       type: 'sources',
+      numbered: true,
       items: [
-        { title: 'Brown et al., Language Models are Few-Shot Learners (GPT-3), 2020', url: 'https://arxiv.org/abs/2005.14165' },
-        { title: 'Ouyang et al., Training language models to follow instructions (InstructGPT), 2022', url: 'https://arxiv.org/abs/2203.02155' },
-        { title: 'Hoffmann et al., Training Compute-Optimal Large Language Models (Chinchilla), 2022', url: 'https://arxiv.org/abs/2203.15556' },
+        { title: 'Zhang et al., OPT: Open Pre-trained Transformer Language Models, 2022', url: 'https://arxiv.org/abs/2205.01068' },
+        { title: 'Meta AI, OPT-175B training logbook (chronicles)', url: 'https://github.com/facebookresearch/metaseq/blob/main/projects/OPT/chronicles/OPT175B_Logbook.pdf' },
+        { title: 'Grattafiori et al., The Llama 3 Herd of Models, 2024', url: 'https://arxiv.org/abs/2407.21783' },
+        { title: 'Penedo et al., The FineWeb Datasets: Decanting the Web for the Finest Text Data at Scale, 2024', url: 'https://arxiv.org/abs/2406.17557' },
+        { title: 'Lee et al., Deduplicating Training Data Makes Language Models Better, 2022', url: 'https://arxiv.org/abs/2107.06499' },
+        { title: 'Sennrich, Haddow, and Birch, Neural Machine Translation of Rare Words with Subword Units, 2016', url: 'https://arxiv.org/abs/1508.07909' },
+        { title: 'Kaplan et al., Scaling Laws for Neural Language Models, 2020', url: 'https://arxiv.org/abs/2001.08361' },
+        { title: 'Hoffmann et al., Training Compute-Optimal Large Language Models, 2022', url: 'https://arxiv.org/abs/2203.15556' },
+        { title: 'Ouyang et al., Training Language Models to Follow Instructions with Human Feedback, 2022', url: 'https://arxiv.org/abs/2203.02155' },
+        { title: 'Rafailov et al., Direct Preference Optimization: Your Language Model Is Secretly a Reward Model, 2023', url: 'https://arxiv.org/abs/2305.18290' },
       ],
     },
   ],
