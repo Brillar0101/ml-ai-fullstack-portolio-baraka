@@ -1,203 +1,240 @@
+// Every factual claim below is taken from the numbered sources at the end.
+// The LIMA figure is reproduced under CC BY 4.0; the AlpaGasus histogram is
+// redrawn from Figure 4 of that paper (arXiv non-exclusive license).
 export const POST = {
   id: 'build-finetuning-dataset',
-  title: 'Why 2,000 Hand-Picked Examples Beat 50,000 Scraped Ones',
-  excerpt: 'A team fine-tuned on fifty thousand scraped examples and shipped a model that was worse than the base. A rival team used two thousand they wrote by hand and won. The gap was never the model. It was the data.',
+  title: 'Four Fine-Tuning Datasets, Opened Up: What Was Kept, What Was Cut',
+  excerpt: 'LIMA beat a model trained on 52 times more data. AlpaGasus threw away 82% of Alpaca and got better. Read side by side with Self-Instruct and phi-1, these papers show exactly which filters did the work, and what their scores cannot measure.',
   category: 'AI',
   tags: ['Fine-tuning', 'Data', 'Instruction Tuning'],
   body: [
     {
       type: 'p',
-      text: 'Picture two teams setting out to fine-tune the same open base model for the same job: a support assistant that answers product questions in a calm, on-brand voice. The first team moved fast. They scraped fifty thousand question-and-answer pairs from old chat logs, forums, and a pile of internal docs, poured it all into the trainer, and waited. The result answered in three different tones depending on the question, repeated itself, and sometimes leaked half of a support macro into the reply. It scored worse on their own test set than the untouched base model did.'
-    },
-    { type: 'p', text: 'The second team was slower and, on paper, looked lazy. They wrote and curated two thousand examples by hand, checked each one, and threw away anything that felt off.' },
-      { type: 'p', text: 'Their model came out steady, consistent, and clearly better than the base. Same architecture, same trainer, same number of training epochs. The only thing that changed was the data going in. This post is about how the second team built their dataset, because that dataset is the real product, and the model is just what falls out of it.' },
-    {
-      type: 'h2',
-      text: 'The model copies your data, flaws and all'
-    },
-    { type: 'p', text: 'Here is the intuition that makes everything else click. Fine-tuning does not teach a model new facts so much as it teaches a **behavior**: given this kind of request, respond in this kind of way. The model learns that behavior by imitating the examples you show it.' },
-      { type: 'p', text: 'If half your examples are curt and half are chatty, the model learns to be randomly curt or chatty. If a tenth of your examples contain a formatting glitch, the model learns that the glitch is sometimes correct. It has no way to know which examples were good and which slipped through. Every row you include is a small vote for how the model should act.' },
-    { type: 'p', text: 'That is why volume alone can hurt you. Fifty thousand rows scraped without inspection carry fifty thousand votes, and a large share of them vote for the wrong thing. Two thousand clean rows carry two thousand votes that all point the same direction.' },
-      { type: 'p', text: 'The famous LIMA result put a number on this idea: a strong base model fine-tuned on roughly a thousand carefully written examples produced answers people preferred over models trained on far more. The lesson was that most of what a model needs to sound helpful is already inside the base model, and a small, clean dataset mostly wakes it up. Your job is to make sure every vote counts.' },
-    {
-      type: 'h2',
-      text: 'What one example actually looks like'
+      text: 'In May 2023 a team from Meta AI and several universities fine-tuned LLaMa 65B, a 65 billion parameter model, on exactly 1,000 prompt and response pairs. They called the result LIMA. As a baseline they fine-tuned the same base model on the 52,000 examples of the Alpaca dataset. Crowd workers then compared answers from the two models on 300 test prompts. LIMA\'s answer won 53% of the time, tied 21%, and lost 26%.[^1] In the authors\' words, "despite training on 52 times more data, Alpaca 65B tends to produce less preferable outputs than LIMA."[^1]',
     },
     {
       type: 'p',
-      text: 'An instruction-tuning example is a small script for a single turn. In the most common shape it has three fields: an instruction that states the task, an optional input that carries the specific data the task acts on, and an output that shows the answer you want the model to produce. If you ask the model to "summarize this email," the instruction is the summarize request, the input is the email text, and the output is the summary you would be happy to ship.'
+      text: 'Two months later a group from the University of Maryland and Samsung Research America came at the same Alpaca data from the other direction. Instead of writing a small set by hand, they asked ChatGPT to grade all 52,002 Alpaca examples on a 0 to 5 scale and kept only the ones scoring 4.5 or higher. That left 9,229. A model trained on them, which they named AlpaGasus, beat the original Alpaca on all four of their test sets, and training the 7B version took 14 minutes instead of 80.[^4]',
     },
     {
       type: 'p',
-      text: 'When you feed this to the trainer, those fields get stitched into one flat string using a fixed template. The instruction and input become the **prompt**, the output becomes the **completion**, and the model is trained to produce the completion when it sees the prompt. The template matters more than people expect. If you train with one wrapper and serve with a different one, the model sees a prompt it never learned from and its quality drops. Pick a template early, write it down, and use the exact same one everywhere.'
+      text: 'Both say a smaller, cleaner set can win, by different routes. This post opens four dataset-building efforts side by side (LIMA, Self-Instruct, AlpaGasus, and Microsoft\'s phi-1), then pulls out the filters they share, with the thresholds each paper actually used.',
     },
     {
-      type: 'terms',
-      items: [
-        { term: 'Instruction tuning (IFT)', def: 'Fine-tuning a base model on many instruction-and-response examples so it learns to follow requests in a consistent, helpful way.' },
-        { term: 'Prompt-completion format', def: 'The flat text shape the trainer sees: a prompt built from the instruction and input, and a completion the model learns to generate.' },
-        { term: 'Synthetic data', def: 'Examples written by a stronger model instead of a person, usually generated in bulk and then filtered down to the good ones.' },
-        { term: 'Deduplication', def: 'Removing rows that are identical or near-identical so the model does not over-weight a handful of repeated patterns.' },
-        { term: 'Validation split', def: 'A slice of examples held out of training and used only to measure how the model does on data it never learned from.' },
-        { term: 'Data diversity', def: 'How wide a range of tasks, phrasings, and topics your examples cover, which is what lets the model generalize past the exact rows you showed it.' }
-      ]
+      type: 'p',
+      text: '**Instruction tuning**, or supervised fine-tuning, means continuing to train a pretrained **base model** on pairs of an instruction and a good response, so that it answers requests instead of just continuing text. Everything below is about building those pairs.',
     },
     {
       type: 'h2',
-      text: 'Three ways to get examples, and how to trust them'
+      text: 'LIMA: 750 forum answers and 250 examples prepared by hand',
     },
     {
       type: 'p',
-      text: 'Examples come from three main places, and each has a catch. The first is curated real interactions: transcripts of actual users talking to your current system or your support staff. These are gold because they match how people really ask, but raw logs are messy, full of typos, dead ends, and answers you would not want to repeat, so they need heavy cleaning. The second is expert-written examples, where a person who knows the task writes both the request and the ideal answer. These are the most reliable and the most expensive, and they are worth it for the core behaviors you care about most.'
+      text: 'LIMA\'s 1,000 training examples came from six piles: 200 from Stack Exchange\'s STEM communities, 200 from its other communities, 200 wikiHow articles, 150 stories from Reddit\'s r/WritingPrompts, 50 tasks from Super-Natural Instructions, and 200 examples the authors wrote themselves. The whole set is roughly 750,000 tokens.[^1]',
     },
     {
       type: 'p',
-      text: 'The third is synthetic generation, where you prompt a stronger model to invent instructions and answers for you. This is the Self-Instruct idea that powered Alpaca: start with a small seed set of human examples, ask a capable model to produce many more in the same spirit, and use those to train a smaller model cheaply. It scales fast, but a strong model still makes mistakes and tends to repeat itself, so synthetic data without a filtering pass will quietly poison your set. The practical move is to blend all three: expert examples for the hard core, cleaned real logs for realism, and synthetic data to fill gaps in tasks you are short on.'
+      text: 'Most of the filtering was plain rules. For Stack Exchange, the team sampled across communities with a temperature of \\(\\tau = 3\\), which flattens the distribution so that one huge community such as programming does not crowd out the rest. Inside each community they took the highest-scoring questions whose title stood on its own, kept the top answer only if it had a score of at least 10, and then dropped answers shorter than 1,200 characters or longer than 4,096, answers written in the first person, and answers that referred to other answers ("as mentioned", "stack exchange"). Links and images were stripped.[^1] Reddit needed a human. Highly upvoted Reddit answers "tend to be humorous or trolling," so the authors picked those examples by hand.[^1]',
     },
     {
-      type: 'diagram',
-      nodes: [
-        { label: 'Collect', detail: 'Real logs, expert-written, synthetic' },
-        { label: 'Format', detail: 'Map to instruction / input / output' },
-        { label: 'Filter and dedup', detail: 'Drop bad rows and near-duplicates' },
-        { label: 'Balance', detail: 'Even out the task mix' },
-        { label: 'Split', detail: 'Hold out a validation slice' }
+      type: 'p',
+      text: 'The 200 hand-written answers follow one deliberate style: acknowledge the question, then answer it. The authors report that in preliminary experiments this consistent format generally improved the model.[^1] They also included 13 prompts with "some degree of toxicity or malevolence," answered with a partial or full refusal and an explanation.[^1]',
+    },
+    {
+      type: 'p',
+      text: 'The reason they expected 1,000 examples to be enough is what they call the **Superficial Alignment Hypothesis**: a model\'s knowledge and abilities are learned almost entirely during pretraining, and fine-tuning mostly teaches it which format to use when it talks to users.[^1] If that is true, you need outputs that share one style and inputs that cover a wide range. Against stronger systems LIMA was less impressive. Its answers were rated equal to or better than GPT-4\'s in 43% of comparisons, Claude\'s in 46%, and Bard\'s in 58%.[^1]',
+    },
+    {
+      type: 'h2',
+      text: 'Self-Instruct: GPT-3 writes its own examples, and about half pass an audit',
+    },
+    {
+      type: 'p',
+      text: 'Self-Instruct, from the University of Washington and collaborators, asked whether a model could produce its own instruction data. The pipeline starts from 175 seed tasks written by the authors and their labmates. At each step it samples 8 instructions from a growing pool, 6 human-written and 2 generated earlier, shows them to GPT-3 as examples, and asks for a new instruction. It then asks GPT-3 for inputs and outputs for that instruction.[^2]',
+    },
+    {
+      type: 'p',
+      text: 'A new instruction joins the pool only if its ROUGE-L similarity to every instruction already there is below 0.7.[^2] **ROUGE-L** is a score from 0 to 1 based on the longest run of words two texts share in the same order, so 0.7 means heavily overlapping wording. The pipeline also drops instructions that mention things a text model cannot handle, such as images or graphs, removes instances that are exact copies or that share an input but disagree on the output, and uses heuristics to catch instructions that are too long or too short and outputs that just repeat the input.[^2] What survived was 52,445 instructions and 82,439 instances.[^2]',
+    },
+    {
+      type: 'p',
+      text: 'Then the authors audited their own data. An expert (one of the authors) labeled 200 random instructions, one instance each. 92% of the instructions described a valid task, 79% of the inputs were appropriate, 58% of the outputs were correct and acceptable, and only 54% had every field valid.[^2] Even with that noise, fine-tuning GPT-3 on the data gave a 33% absolute improvement on the Super-NaturalInstructions benchmark, close to InstructGPT-001.[^2] When they regenerated the outputs with a stronger model, InstructGPT-003, the resulting model beat the one trained on the original outputs by 10% in their human evaluation.[^2]',
+    },
+    {
+      type: 'p',
+      text: 'Stanford\'s Alpaca reused this recipe: the same 175 seed tasks, with text-davinci-003 as the generator. It produced 52K instructions and outputs for less than $500 in API costs.[^3] That is the dataset LIMA compared against and AlpaGasus filtered.',
+    },
+    {
+      type: 'h2',
+      text: 'AlpaGasus: ChatGPT grades Alpaca, and 82% of it goes',
+    },
+    {
+      type: 'p',
+      text: 'The AlpaGasus authors started from an observation: Alpaca\'s 52k examples "contain many low-quality instances with incorrect or irrelevant responses."[^4] One example from their paper asks the model to classify a banana as animal or vegetable, and the training response reads "Animal: No, it\'s a vegetable."[^4]',
+    },
+    {
+      type: 'p',
+      text: 'Their fix is an **LLM judge**: a strong model prompted to rate other data. For every example they gave ChatGPT the instruction, the input, and the response, and asked it to rate the response\'s accuracy from 0 to 5, then explain the score. An example is kept if its score clears a threshold:[^4]',
+    },
+    {
+      type: 'eq',
+      tex: 'S = \\{\\, x \\in V : G(x, p_G) \\geq \\tau \\,\\}',
+      caption: 'The AlpaGasus selection rule (Chen et al., 2024, equation 1).[^4]',
+    },
+    {
+      type: 'p',
+      text: '\\(V\\) is the original dataset, \\(x\\) is one (instruction, input, response) triple, \\(G\\) is the grading model, \\(p_G\\) is the rating prompt, and \\(\\tau\\) is the cutoff. The authors chose \\(\\tau = 4.5\\) by looking at the histogram of scores.[^4]',
+    },
+    {
+      type: 'chart',
+      kind: 'bar',
+      title: 'ChatGPT accuracy scores for the 52,002 Alpaca examples',
+      yLabel: 'Examples',
+      series: [{ label: 'Examples', key: 'n' }],
+      data: [
+        { label: 'Below 3', values: { n: 172 } },
+        { label: '3.0', values: { n: 1550 } },
+        { label: '3.5', values: { n: 10811 } },
+        { label: '4.0', values: { n: 30240 } },
+        { label: '4.5', values: { n: 9218 } },
+        { label: '5.0', values: { n: 11 } },
       ],
-      caption: 'The dataset pipeline. Every stage throws examples away, and that is the point: what survives is what trains the model.'
-    },
-    {
-      type: 'h2',
-      text: 'The cleaning pass that saves the run'
+      caption: 'Only the last two bars (9,218 + 11 = 9,229 examples) were kept. Redrawn from Figure 4 of Chen et al., 2024.[^4]',
     },
     {
       type: 'p',
-      text: 'Once you have raw pairs, the middle of the pipeline is where a bad dataset becomes a good one. First you normalize every example into the same instruction shape so the trainer sees one consistent structure. Then you filter: drop rows with an empty answer, answers that are one word when the task needs a paragraph, or answers that are suspiciously long and rambling. Then you deduplicate, because scraped data is full of the same question asked ten times, and ten copies of one row teach the model that this one row is ten times as important as it should be. The code below shows the core of that pass on a small batch of raw pairs.'
-    },
-    { type: 'lab', height: 460,
-        title: 'Filtering raw pairs into a dataset worth training on',
-        caption: 'Five of eight rows thrown away. Three people asked the same password question with different spacing and capitals, and normalising before comparing is what collapses them into one row rather than three.',
-        code: `import re
-
-# Turning raw support transcripts into a finetuning set.
-# The filtering is the job: what you throw away shapes
-# the model more than what you keep.
-
-RAW_PAIRS = [
-    {"question": "  How do I reset my password?  ",
-     "answer": "Open Settings, Security, then Reset."},
-    {"question": "how do I reset my password",
-     "answer": "Open Settings, Security, then Reset."},
-    {"question": "HOW DO I RESET MY PASSWORD?!",
-     "answer": "Open Settings, Security, then Reset."},
-    {"question": "Where is my invoice?", "answer": "ok"},
-    {"question": "Do you support SSO?",
-     "answer": "Yes, on Enterprise. Upload SAML first."},
-    {"question": "", "answer": "Contact support."},
-    {"question": "Can I export my data?",
-     "answer": "Yes. " + "Go to Settings, Export. " * 99},
-    {"question": "What are the rate limits?",
-     "answer": "One hundred requests per minute."},
-]
-
-def to_example(pair):
-    return {"instruction": pair["question"].strip(),
-            "input": "",
-            "output": pair["answer"].strip()}
-
-def is_good(ex):
-    if not ex["instruction"] or not ex["output"]:
-        return False, "empty field"
-    n = len(ex["output"].split())
-    if n < 3:
-        return False, "too short to teach anything"
-    if n > 400:
-        return False, "a pasted macro or transcript dump"
-    return True, None
-
-def norm(text):
-    t = re.sub(r"\\s+", " ", text.lower()).strip()
-    return re.sub(r"[^a-z0-9 ]", "", t)
-
-# ---- Report --------------------------------------------
-E = chr(27)
-DIM, OFF, BOLD = E + "[2m", E + "[0m", E + "[1m"
-OK, WARN, BAD = E + "[32m", E + "[33m", E + "[31m"
-note = lambda s: print(DIM + s + OFF)
-
-clean, seen, dropped = [], set(), []
-for pair in RAW_PAIRS:
-    ex = to_example(pair)
-    ok, why = is_good(ex)
-    label = ex["instruction"][:26] or "(empty)"
-    if not ok:
-        dropped.append((label, why, BAD))
-        continue
-    key = norm(ex["instruction"]) + "|" + norm(ex["output"])
-    if key in seen:
-        dropped.append((label, "duplicate row", WARN))
-        continue
-    seen.add(key)
-    clean.append((label, ex))
-
-n_raw = len(RAW_PAIRS)
-print(BOLD + "DATASET" + OFF + "  %d raw pairs in" % n_raw)
-note("-" * 54)
-note("%-28s %s" % ("ROW", "VERDICT"))
-
-for label, _ in clean:
-    print("%-28s %sKEEP%s" % (label, OK, OFF))
-for label, why, colour in dropped:
-    print("%-28s %sDROP%s  %s%s%s"
-          % (label, colour, OFF, DIM, why, OFF))
-
-note("-" * 54)
-kept = len(clean)
-pct = 100.0 * kept / n_raw
-bar = "#" * kept + "." * len(dropped)
-print(BOLD + "KEPT" + OFF + "  %s%s%s  %d of %d (%.0f%%)"
-      % (OK, bar, OFF, kept, n_raw, pct))
-
-print()
-note("Three people asked one password question with")
-note("different spacing, capitals and punctuation.")
-note("Normalising before comparing makes them one row,")
-note("not three. Three copies of one answer is how a")
-note("model learns to give that answer too often.")
-
-# Try it: drop norm() from the key and watch the shouty
-# duplicate survive. Now picture that at real scale.
-` },
-    {
-      type: 'p',
-      text: 'This is deliberately simple, and simple is the right starting point. The exact-match dedup key catches obvious repeats. For near-duplicates that differ by a word or two, teams reach for fuzzy methods like comparing text embeddings and dropping pairs that sit above a similarity threshold, but do not add that until you have measured that plain dedup is not enough. Getting the boring filters right first removes most of the damage.'
+      text: 'The results were judged by GPT-4, which saw both models\' answers and scored each one. LLM judges tend to prefer answers in certain positions, so the authors ran every comparison in both orders.[^4] AlpaGasus beat Alpaca-52k on all four test sets at both 7B and 13B. It also beat a model trained on 9k examples picked at random from Alpaca, which shows the gain came from which examples were chosen and not just from having fewer of them.[^4] In a smaller human study of 160 prompts, the 13B AlpaGasus won 63, tied 64, and lost 33 against Alpaca-13B.[^4] Training cost for the 7B model fell from $27.31 to $4.78.[^4]',
     },
     {
       type: 'h2',
-      text: 'Balance the mix, then hold out a real test'
+      text: 'phi-1: GPT-4 labels 100,000 files, a cheap classifier does the rest',
     },
     {
       type: 'p',
-      text: 'After cleaning, look at what tasks are actually in your set. Scraped data is almost always lopsided: maybe seventy percent of your examples are one common question type and the tasks you care about most are barely present. If you train on that as-is, the model gets great at the common case and stays weak everywhere else. Balancing means capping the over-represented tasks and adding examples, often synthetic ones, for the under-represented ones, so the mix roughly matches how you want the model to spend its attention.'
+      text: 'Microsoft Research\'s phi-1 is a code model whose data work covers pretraining as well as fine-tuning. It belongs here because it shows how to run an LLM judge over more data than you could afford to send to the judge.',
     },
-    { type: 'p', text: 'The last step is the one people skip and later regret. Before training, pull out a **validation split**, say five to ten percent of your examples, and never train on them. This held-out slice is how you find out whether the model learned the behavior or just memorized rows.' },
-      { type: 'p', text: 'There is one rule that cannot bend: an example that appears in training must never also appear in validation. If it does, the model has effectively seen the answer key, your validation score looks great, and the real-world performance quietly disappoints. Deduplicate across the split boundary, not just within training, or the leak sneaks back in.' },
     {
-      type: 'callout',
-      title: 'The mistakes that quietly wreck a run',
-      text: 'Watch for these in order. Test data leaking into training, which inflates your scores and hides real problems. Duplicates that over-weight a few patterns. Inconsistent style, where the model learns to answer in a random voice. Format errors from a mismatched prompt template. And a lopsided task mix that makes the model sharp on one thing and dull on the rest. Every one of these is a data problem, not a model problem, so no bigger model or longer training run will fix them.'
+      type: 'p',
+      text: 'The starting pool was the Python part of the deduplicated Stack dataset plus StackOverflow: over 35 million files and over 35B tokens. GPT-4 labeled about 100k of them, prompted to "determine its educational value for a student whose goal is to learn basic coding concepts." Those labels trained a random forest classifier that uses embeddings from a pretrained code model as its input, and the classifier scored the rest.[^5] About 6B tokens survived. The team added under 1B tokens of textbooks written by GPT-3.5 and then fine-tuned on about 180M tokens of GPT-3.5 exercises, a set they call CodeExercises.[^5]',
+    },
+    {
+      type: 'p',
+      text: 'The 1.3B parameter result scored 50.6% pass@1 on HumanEval, meaning its first attempt passed the unit tests for about half the problems.[^5] The filter alone made a large difference. A 350M model trained on the unfiltered data stalled at 12.19% on HumanEval even after 96k steps, while the same size trained on the filtered subset reached 17.68% after 36k steps.[^5]',
     },
     {
       type: 'h2',
-      text: 'What to hold onto'
+      text: 'The four files next to each other',
     },
-    { type: 'p', text: 'The story of the two teams is not really about size. The scraped fifty thousand lost because most of those rows voted for behavior nobody wanted, and the two thousand won because every row was a clear vote for the same clean behavior.' },
-      { type: 'p', text: 'So treat your dataset as the thing you are actually building. Write down one prompt template and use it everywhere. Clean, deduplicate, and balance before you ever launch a training run. Hold out a validation split and guard it from leaks. If you get the data right, a modest model will surprise you, and if you get it wrong, no amount of compute will save you.' },
+    {
+      type: 'ul',
+      items: [
+        'LIMA kept 1,000 examples (about 750,000 tokens), mined from forums with rule-based filters and topped up with 200 answers the authors wrote. It was judged by crowd workers and GPT-4 against five other models.[^1]',
+        'Self-Instruct generated 52,445 instructions from 175 seeds, filtered by ROUGE-L below 0.7 plus heuristics. In the authors\' own audit, 54% of sampled examples were fully valid.[^2]',
+        'AlpaGasus kept 9,229 of Alpaca\'s 52,002 examples, those ChatGPT scored at least 4.5 for accuracy. It was judged by GPT-4 on four test sets, a 160-prompt human study, and benchmarks.[^4]',
+        'phi-1 filtered about 35B tokens of code down to about 6B with a classifier trained on GPT-4 labels, then fine-tuned on about 180M synthetic tokens. It was measured by HumanEval and MBPP pass rates.[^5]',
+      ],
+    },
+    {
+      type: 'p',
+      text: 'These outcomes do not share a scale, so I have not charted them together. LIMA reports human preference rates, AlpaGasus reports GPT-4 win and loss counts, Self-Instruct reports benchmark overlap scores and human ratings, and phi-1 reports code pass rates. The methods, though, compare directly.',
+    },
+    {
+      type: 'h2',
+      text: 'Near-duplicates: everyone removes them, with different thresholds',
+    },
+    {
+      type: 'p',
+      text: 'The clearest study of duplicates comes from Google\'s Lee and colleagues, who worked on pretraining corpora, but the tools carry over unchanged. They found a single 61-word English sentence repeated more than 60,000 times in C4, a popular training set. Models trained on that data copied over 1% of their unprompted output word for word from the training set, and deduplication cut that rate by a factor of 10.[^6]',
+    },
+    {
+      type: 'p',
+      text: 'They used two tools. The first removes exact repeats: any span of 50 or more tokens that appears more than once, found efficiently with a suffix array. The second, which they call NearDup, catches documents that are almost the same, such as one news story posted on several sites with different headers. It uses **MinHash**, which cuts each document into overlapping 5-word chunks and estimates how much two documents\' chunk sets overlap without comparing every pair directly. The overlap is the Jaccard index:[^6]',
+    },
+    {
+      type: 'eq',
+      tex: 'J(d_i, d_j) = \\frac{|d_i \\cap d_j|}{|d_i \\cup d_j|}',
+      caption: 'Jaccard index between the n-gram sets of two documents (Lee et al., 2022).[^6]',
+    },
+    {
+      type: 'p',
+      text: 'Pairs that MinHash flagged with an estimated Jaccard index above 0.8 were then checked with a slower edit-similarity measure and marked as duplicates if that was also above 0.8.[^6]',
+    },
+    {
+      type: 'p',
+      text: 'For a fine-tuning set the bigger risk is leakage into the test set. Lee and colleagues found that 4.6% of C4\'s validation examples and 14.4% of RealNews\' validation examples had a near-duplicate in the training data.[^6] If your evaluation prompts overlap your training pairs, your score partly measures memory. The phi-1 team treated this seriously. A 13-gram overlap check found 4 HumanEval problems that matched something in CodeExercises, all false positives. Because matching words misses code that does the same thing under different names, they also compared embeddings and syntax trees, and removed between 42.5K and 354K of the 879.5K exercises depending on the threshold.[^5] At the strictest setting the retrained model dropped from 50.6% to 45.1%, still above the 41.5% of the 15.5B parameter StarCoder-Prompted.[^5]',
+    },
+    {
+      type: 'h2',
+      text: 'LLM judges: where the cut line goes',
+    },
+    {
+      type: 'p',
+      text: 'AlpaGasus tested its threshold. Lowering it to \\(\\tau = 4.0\\) kept 39k examples. That model beat Alpaca-52k on two test sets (Koala and WizardLM), showed no advantage on the other two, and did worse than AlpaGasus with its 9k.[^4] The authors read this as the cost of letting low-quality data back in.',
+    },
+    {
+      type: 'p',
+      text: 'Going smaller did not keep improving things either. Random 3k and 6k slices of the 9k high-scoring set both did worse than the full 9k on all four test sets, though about 6k was already enough to match the original Alpaca.[^4] So there are two findings here. Low-scoring examples hurt. Among high-scoring examples, more still helped.',
+    },
+    {
+      type: 'p',
+      text: 'The same judge also works on data people wrote. Applied to Databricks\' Dolly, 15,000 human-written pairs, the 4.5 threshold kept 2,996.[^4] The paper also points out why human rating is hard here: strong generators produce "eloquent but incorrect responses that are more subtle to detect by humans."[^4] phi-1\'s version is the budget option. Pay for the expensive judge on 100k samples, then let a small classifier copy its judgment over tens of billions of tokens.[^5]',
+    },
+    {
+      type: 'h2',
+      text: 'Diversity is what a quality score quietly destroys',
+    },
+    {
+      type: 'p',
+      text: 'AlpaGasus has a warning buried in its skill-by-skill breakdown. On the WizardLM test set the 7B model was as good as or better than Alpaca on 22 of 29 skills, but had no advantage on the other 7, coding among them. The authors traced this to the filter. Of 718 coding examples, only 85 survived, a removal rate of 88.16% against 82.25% for the dataset as a whole.[^4] The selection rule said nothing about categories, so nothing stopped coding\'s share from shrinking. The paper\'s conclusion is that training data should be kept "diverse and balanced across different categories."[^4]',
+    },
+    {
+      type: 'p',
+      text: 'LIMA separated diversity, quality, and quantity in a set of ablations. The team trained 7B models on 2,000 examples from each source and had ChatGPT grade answers from 1 to 6. Filtered Stack Exchange, with varied questions and good answers, scored 3.83. wikiHow, with equally good answers but only "how to" questions, scored 3.49. Unfiltered Stack Exchange, varied but unfiltered, scored 3.33.[^1] The authors note that comparing two different sites may mix in other differences.[^1] Growing the filtered Stack Exchange set from 2K to 32K examples, a 16-fold increase, did not improve the score.[^1]',
+    },
+    {
+      type: 'image',
+      src: '/blog-images/build-finetuning-dataset/lima-diversity-quality-quantity.webp',
+      alt: 'Two charts. Left: bar chart of generation quality for 7B models trained on 2,000 examples: wikiHow 3.49, unfiltered Stack Exchange 3.33, filtered Stack Exchange 3.83. Right: line chart of generation quality versus training examples from 2K to 32K, flat at about 3.8 throughout.',
+      width: 1680,
+      height: 525,
+      caption: 'Left: same size, different sources. Right: the same filtered source at 2K to 32K examples, with no gain. Figures 5 and 6 from Zhou et al., 2023,[^1] reproduced under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).',
+    },
+    {
+      type: 'p',
+      text: 'Self-Instruct saw a similar curve. Human-rated quality rose with more generated data but almost plateaued after 16K instructions.[^2] The phi-1 authors say why generated data tends to lack variety: simply prompting a model for textbooks or exercises "will likely result in a very homogeneous and redundant dataset." Their fix was to put randomness in the prompts, varying the topic and target audience for textbooks and constraining the function names for exercises.[^5]',
+    },
+    {
+      type: 'p',
+      text: 'Filling a gap can be cheap. LIMA\'s original 1,000 examples had no multi-turn dialogue, and adding just 30 dialogue chains raised the share of excellent responses in live conversations from 45.2% to 76.1%.[^1]',
+    },
+    {
+      type: 'h2',
+      text: 'What the preference scores cannot see',
+    },
+    {
+      type: 'p',
+      text: 'A Berkeley group tested the shortcut behind Alpaca and Self-Instruct: fine-tune an open model on outputs from a stronger one. They trained models from 1.5B to 13B parameters on 0.3M to 150M tokens of ChatGPT outputs. Crowd workers rated about 70% of the imitation models\' outputs as equal to or better than ChatGPT\'s.[^7] Targeted benchmarks told a different story. On tasks that the imitation data did not cover heavily, the models closed "little to none" of the gap to ChatGPT, and training on 100k broad ChatGPT outputs gave no gain on Natural Questions, a factual question-answering benchmark. The authors\' explanation is that imitation models are good at copying ChatGPT\'s "style but not its factuality."[^7]',
+    },
+    {
+      type: 'p',
+      text: 'This matters for the case files above, because the headline numbers for LIMA and AlpaGasus are preference judgments by people or by GPT-4. AlpaGasus\'s own benchmark table contains a small counterpoint. On MMLU, a knowledge test, the 7B model trained on all 52k scored 40.86 against 38.78 for the filtered 9k, and at 13B it was 47.89 against 46.12.[^4] My reading, not the paper\'s: filtering bought answers that graders prefer, but it did not add knowledge, which is what LIMA\'s hypothesis would predict.',
+    },
+    {
+      type: 'p',
+      text: 'The authors of these papers name their own limits. LIMA\'s team says the effort of writing such examples "is significant and difficult to scale up," and that LIMA is less robust than product-grade models.[^1] The phi-1 team names a problem that sits under every filter in this post. Even after building a dataset, "we lack a good methodology to measure and evaluate the amount of diversity and redundancy in the data."[^5] Deduplication thresholds, judge scores, and ROUGE-L cutoffs can each be checked against a number. By the authors\' own account, the question of whether the surviving set is varied enough cannot yet.',
+    },
     {
       type: 'sources',
+      numbered: true,
       items: [
-        { title: 'Zhou et al., LIMA: Less Is More for Alignment (2023)', url: 'https://arxiv.org/abs/2305.11206' },
-        { title: 'Wang et al., Self-Instruct: Aligning Language Models with Self-Generated Instructions (2022)', url: 'https://arxiv.org/abs/2212.10560' }
-      ]
-    }
-  ]
+        { title: 'Zhou et al., LIMA: Less Is More for Alignment, 2023', url: 'https://arxiv.org/abs/2305.11206' },
+        { title: 'Wang et al., Self-Instruct: Aligning Language Models with Self-Generated Instructions, 2023', url: 'https://arxiv.org/abs/2212.10560' },
+        { title: 'Taori et al., Alpaca: A Strong, Replicable Instruction-Following Model (Stanford CRFM), 2023', url: 'https://crfm.stanford.edu/2023/03/13/alpaca.html' },
+        { title: 'Chen et al., AlpaGasus: Training a Better Alpaca with Fewer Data, ICLR 2024', url: 'https://arxiv.org/abs/2307.08701' },
+        { title: 'Gunasekar et al., Textbooks Are All You Need, 2023', url: 'https://arxiv.org/abs/2306.11644' },
+        { title: 'Lee et al., Deduplicating Training Data Makes Language Models Better, 2022', url: 'https://arxiv.org/abs/2107.06499' },
+        { title: 'Gudibande et al., The False Promise of Imitating Proprietary LLMs, 2023', url: 'https://arxiv.org/abs/2305.15717' },
+      ],
+    },
+  ],
 };

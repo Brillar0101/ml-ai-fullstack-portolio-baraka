@@ -78,8 +78,4 @@ export const SOURCES = {
   'tracing-llm-requests': [S.otelTraces, S.agentSurvey, S.evalSurvey, S.react, S.ragas, S.gaia],
   'what-to-log-and-alert': [S.otelTraces, S.owasp, S.evalSurvey, S.nist, S.helm, S.agentSurvey],
   'cost-token-observability': [S.tokenCost, S.scaleInfer, S.pagedattn, S.otelTraces, S.vllmDocs, S.chinchilla],
-  'mixture-of-experts': [S.moeShazeer, S.switch, S.mixtral, S.wikiMoE, S.transformer, S.scaling],
-  'running-llms-locally': [S.int8, S.gptq, S.awq, S.qlora, S.llama, S.phi3],
-  'build-finetuning-dataset': [S.lima, S.selfinstruct, S.dedup, S.orca, S.textbooks, S.lora],
-  'grpo-rl-for-reasoning': [S.grpo, S.r1, S.ppo, S.instructgpt, S.gsm8k, S.testTime],
 };

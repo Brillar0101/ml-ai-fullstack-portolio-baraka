@@ -1,183 +1,249 @@
+// Every factual claim below is taken from the numbered sources at the end.
+// The figure from Liu et al. (arXiv 2503.20783) is CC BY 4.0. The DeepSeek,
+// PPO, GAE, and DAPO papers are arXiv non-exclusive, so their numbers are
+// redrawn as charts rather than reproduced as figures.
 export const POST = {
   id: 'grpo-rl-for-reasoning',
-  title: 'GRPO: Teaching a Model to Reason by Grading Its Own Guesses',
-  excerpt: 'Give a model a math problem with a checkable answer, let it try several times, then push it toward the tries that beat its own average. That simple loop, called GRPO, is a big part of how reasoning models got good.',
+  title: 'Working GRPO by Hand: The Arithmetic Behind DeepSeek-R1\'s Aha Moment',
+  excerpt: 'DeepSeek-R1-Zero learned to stop and write "Wait" using nothing but a pass/fail grade. This post computes GRPO\'s group-relative advantage for eight sampled answers by hand, builds the full objective from it, and shows why DeepSeek dropped PPO\'s value network.',
   category: 'AI',
-  tags: ['Fine-tuning', 'Reinforcement Learning', 'Reasoning'],
+  tags: ['Reinforcement Learning', 'Reasoning', 'Fine-tuning'],
   body: [
-    { type: 'p', text: 'A model is staring at a grade-school word problem. A train leaves a station, another train leaves later, and the question wants to know when they meet. There is one correct number at the end, and a simple script can check it in a millisecond.' },
-      { type: 'p', text: 'The model writes out some steps and lands on an answer. It is wrong. Nobody hands it the right solution.' },
-      { type: 'p', text: 'Nobody labels which step went sideways. All the model gets back is a single bit: the final number did not match. The interesting question is how you turn that one bit of feedback into a model that, a few thousand attempts later, gets these problems right far more often.' },
-    { type: 'p', text: 'That is the puzzle reinforcement learning solves for reasoning, and **GRPO** is one of the cleaner ways to solve it. GRPO stands for Group Relative Policy Optimization. It came out of the DeepSeekMath work in 2024 and later powered the reasoning behavior in DeepSeek-R1.' },
-      { type: 'p', text: 'The short version: for a hard problem where the answer can be checked automatically, you let the model take several swings, score each swing by whether it worked, and then nudge the model toward the swings that beat the group average while pulling it away from the ones that fell below. There is no teacher writing perfect solutions. The model learns from the spread of its own attempts.' },
-    {
-      type: 'h2',
-      text: 'Grading on a curve inside a single question'
-    },
-    { type: 'p', text: 'Here is an intuition worth holding onto. Imagine a teacher who gives one student the same problem five times and gets five different attempts back. The teacher does not have an answer key with full worked solutions. What the teacher does have is a way to check the final answer, so they can mark each of the five attempts right or wrong.' },
-      { type: 'p', text: 'Now the teacher grades on a curve inside that little batch of five. Attempts that did better than the batch average get a thumbs up. Attempts that did worse get a thumbs down. The student is told to write more like the good ones and less like the bad ones.' },
     {
       type: 'p',
-      text: 'The clever part is that the batch supplies its own standard. The teacher never needs to know how hard the problem is in absolute terms. If all five attempts are strong, the average is high and only the best stand out. If all five are weak, the average is low and the least-bad ones still get encouraged, which keeps the student improving even on brutal problems. This idea of comparing each attempt to the average of its own group is the heart of GRPO, and it is what lets the whole thing run without a separate machine estimating how good a partial solution is.'
+      text: 'Partway through training DeepSeek-R1-Zero, its authors caught the model doing something nobody had asked for. It was working through an equation with nested square roots, squaring both sides, when it wrote: "Wait, wait. Wait. That\'s an aha moment I can flag here." Then it went back and re-checked the steps it had already taken. The team printed the transcript as Table 2 of the DeepSeek-R1 paper and called it "an aha moment for us" as well.[^1]',
     },
     {
-      type: 'h2',
-      text: 'One math problem, five attempts, step by step'
+      type: 'p',
+      text: 'What makes the moment strange is how little the model was told. R1-Zero started from DeepSeek-V3-Base with no supervised fine-tuning first. Its reward came from rules: one part checked whether the final answer was correct, the other whether the reasoning sat inside the right tags.[^1] Nobody graded individual steps, and no demonstrations showed what reflection looks like. Even so, its average pass@1 on the AIME 2024 math competition rose from 15.6% to 77.9% during training, and 86.7% with majority voting.[^1] Its responses grew longer as training went on. The word "wait" was nearly absent early, showed up now and then between steps 4,000 and 7,000, and spiked after step 8,000.[^1]',
     },
-    { type: 'p', text: 'Let us walk a concrete round. Take that train problem.' },
-      { type: 'p', text: 'The correct answer is 4 hours. We ask the model to produce five separate solutions, sampling with a bit of randomness so they come out different. Call them attempts A through E. A verifier, which here is just a small program, reads the final number in each and marks it. Say A, C, and D reach 4 hours and score 1, while B and E reach the wrong number and score 0.' },
-    { type: 'p', text: 'The average score across the five is 0.6. Now we compute how far each attempt sits from that average. A, C, and D are at 1, so they land 0.4 above the average, giving them a positive signal.' },
-      { type: 'p', text: 'B and E are at 0, so they sit 0.6 below, giving them a negative signal. During the update, the model is pushed to make the word choices and reasoning steps inside A, C, and D more likely next time, and the steps inside B and E less likely. Run this loop over thousands of different problems and the model slowly shifts its habits toward the kinds of reasoning that tend to check out.' },
-      { type: 'p', text: 'Notice what never happened: nobody wrote a model solution, and nobody scored any individual step. The only ground truth was the final answer.' },
     {
-      type: 'diagram',
-      nodes: [
-        { label: 'Problem', detail: 'A math question with one checkable answer' },
-        { label: 'Sample K answers', detail: 'Model writes K attempts with some randomness' },
-        { label: 'Score each', detail: 'Verifier marks right or wrong, plus format checks' },
-        { label: 'Group-relative advantage', detail: 'Each attempt minus the group average score' },
-        { label: 'Update policy', detail: 'Raise likelihood of above-average attempts, lower the rest' }
+      type: 'chart',
+      kind: 'bar',
+      title: 'DeepSeek-R1-Zero on AIME 2024, before and after RL',
+      yLabel: 'Accuracy (%)',
+      series: [{ label: 'Accuracy', key: 'acc' }],
+      data: [
+        { label: 'Start, pass@1', values: { acc: 15.6 } },
+        { label: 'End, pass@1', values: { acc: 77.9 } },
+        { label: 'End, cons@16', values: { acc: 86.7 } },
       ],
-      caption: 'One GRPO training step. The group of K samples for a single problem is both the material to learn from and the yardstick it is measured against.'
+      caption: 'Redrawn from the numbers reported with Figure 1(a) of DeepSeek-AI, 2025.[^1] Pass@1 averages the correctness of several sampled answers per question. Cons@16 takes a majority vote over 16 samples.',
+    },
+    {
+      type: 'p',
+      text: 'The algorithm doing the learning is **GRPO**, Group Relative Policy Optimization, which DeepSeek introduced a year earlier in the DeepSeekMath paper.[^2] Its central step is small enough to do on paper, so that is where this post starts. The full objective and the comparison with PPO follow from it.',
     },
     {
       type: 'h2',
-      text: 'The words behind the loop'
+      text: 'Eight attempts at one problem, graded by a script',
     },
     {
       type: 'p',
-      text: 'Before going further, it helps to pin down the vocabulary, because these terms get thrown around loosely. Each one names a specific piece of the loop you just watched.'
-    },
-    {
-      type: 'terms',
-      items: [
-        { term: 'Policy', def: 'The model being trained, viewed as a thing that takes a problem and produces text. Training changes the policy so it favors reasoning that scores well.' },
-        { term: 'Reward and verifier', def: 'The reward is a number saying how good one attempt was. The verifier is what produces it. For math it is often a script that checks the final answer and also checks the output follows the required format.' },
-        { term: 'RLVR', def: 'Reinforcement learning with verifiable rewards. The reward comes from an automatic check, like a math answer or a unit test passing, rather than a human rating or a learned scoring model.' },
-        { term: 'PPO', def: 'Proximal Policy Optimization, a widely used RL method from 2017. It trains the policy while a second model, the critic, estimates how good the current state is to serve as a baseline.' },
-        { term: 'GRPO', def: 'Group Relative Policy Optimization. A variant that removes the critic and instead uses a group of sampled answers to the same problem as the baseline.' },
-        { term: 'Group-relative advantage', def: 'For each sampled answer, its reward minus the average reward of its group. Positive means push toward it, negative means push away.' }
-      ]
-    },
-    {
-      type: 'h2',
-      text: 'What GRPO throws away that PPO kept'
+      text: 'Take one math question \\(q\\). GRPO asks the current model, called the **policy**, to answer it several times. The group size is \\(G\\). DeepSeekMath sampled 64 answers per question and R1-Zero sampled 16.[^2,1] To keep the arithmetic readable, use \\(G = 8\\).',
     },
     {
       type: 'p',
-      text: 'To see why GRPO is simpler, look at what PPO carries. PPO needs a baseline, a running sense of how much reward to expect, so it can tell whether an outcome was better or worse than normal. Without a baseline the training signal is noisy and pushes on everything. PPO builds that baseline with a second neural network called the critic, roughly the same size as the model itself. The critic has to be trained alongside the policy, which means more memory, more compute, and another moving part that can go wrong.'
-    },
-    { type: 'p', text: 'GRPO asks a blunt question: if we are already sampling several answers per problem, why train a whole extra network to guess the baseline when the group of answers can be the baseline? The average reward across the group is a perfectly good stand-in for what to expect on that problem. So GRPO drops the critic entirely.' },
-      { type: 'p', text: 'The advantage for each answer becomes its reward minus the group mean, sometimes divided by the group standard deviation to keep the scale steady. That single swap cuts the memory footprint, removes an entire training loop, and takes out a component that was often finicky to get right. You pay for it by needing several samples per problem, but for tasks with cheap automatic checking that trade is usually worth it.' },
-    { type: 'lab', packages: ['numpy'], height: 460,
-        title: 'Group-relative advantages, on an easy problem and a hard one',
-        caption: 'Three problems of different difficulty. Being right on the hard one, which a single sample solved, earns three times the push of being right on the easy one. When every sample agrees, the signal is exactly zero.',
-        code: `import numpy as np
-
-# GRPO's core move: instead of a separate value network
-# saying how good an answer "should" be, compare each
-# sample against the others for the SAME problem.
-# The group is the baseline.
-
-def group_advantages(rewards, group_size, eps=1e-4):
-    groups = rewards.reshape(-1, group_size)
-    mean = groups.mean(axis=1, keepdims=True)  # per-problem
-    std = groups.std(axis=1, keepdims=True)    # spread
-    return ((groups - mean) / (std + eps)).reshape(-1)
-
-# Four problems of different difficulty.
-# 1.0 = the answer checked out against a verifier.
-PROBLEMS = [
-    ("A  hard",   [1.0, 0.0, 0.0, 0.0]),
-    ("B  easy",   [1.0, 1.0, 1.0, 0.0]),
-    ("C  solved", [1.0, 1.0, 1.0, 1.0]),
-]
-
-rewards = np.array([r for _, rs in PROBLEMS for r in rs])
-adv = group_advantages(rewards, group_size=4)
-
-# ---- Report ---------------------------------------------
-# Colour is the direction of the update: green pushes the
-# model toward an answer, red away, grey means no signal.
-E = chr(27)
-DIM, OFF, BOLD = E + "[2m", E + "[0m", E + "[1m"
-OK, BAD, MUTE = E + "[32m", E + "[31m", E + "[90m"
-note = lambda s: print(DIM + s + OFF)
-
-def arrow(a):
-    if abs(a) < 1e-6:
-        return MUTE, "  no signal"
-    if a > 0:
-        return OK, "  push toward"
-    return BAD, "  push away"
-
-print(BOLD + "GRPO" + OFF + "  3 problems x 4 samples")
-note("-" * 54)
-note("%-11s %7s %5s %9s %s"
-     % ("PROBLEM", "SOLVED", "REWARD", "ADVANTAGE", "UPDATE"))
-
-for i, (name, rs) in enumerate(PROBLEMS):
-    block = adv[i * 4:(i + 1) * 4]
-    solved = "%d/4" % int(sum(rs))
-    for k, (r, a) in enumerate(zip(rs, block)):
-        colour, label = arrow(a)
-        head = name if k == 0 else ""
-        cell = solved if k == 0 else ""
-        print("%-11s %7s %5.0f %s%9.3f%s%s%s%s"
-              % (head, cell, r, colour, a, OFF,
-                 colour, label, OFF))
-    note("")
-
-note("-" * 54)
-print(BOLD + "READ IT" + OFF + "  a correct answer is worth more")
-print("         where fewer samples got it right")
-
-print()
-note("Being right on A, which one sample solved, earns")
-note("three times the push of being right on B, which")
-note("most already solved. C gives nothing at all: when")
-note("the whole group agrees there is nothing to learn.")
-note("That is why training data must mix difficulties.")
-
-# Try it: make problem A all zeros. It goes flat too,
-# for the same reason. Signal lives in disagreement.
-` },
-    {
-      type: 'p',
-      text: 'That function is the whole idea in a few lines. Reshape the flat list of rewards so each row is one problem\'s group of samples, subtract the row mean to center them, divide by the row spread to normalize, and flatten back out. The real training code multiplies these advantages against the change in each token\'s probability and adds a term that keeps the updated model from drifting too far from where it started, but the advantage computation you see here is the piece that replaces PPO\'s critic.'
-    },
-    {
-      type: 'h2',
-      text: 'Where people trip when they try this'
+      text: 'A script checks each final answer against the known solution and returns 1 for correct, 0 for wrong. (R1-Zero also added a format reward with the same weight.[^1] It is left out here to keep the numbers clean.) Suppose answers 1, 4, and 7 are right and the other five are wrong. The rewards are \\(r = (1, 0, 0, 1, 0, 0, 1, 0)\\).',
     },
     {
       type: 'p',
-      text: 'The first stumble is trusting a weak verifier. If your check only compares raw text, then a correct answer written as "4 hours" fails against an expected "4" and the model gets punished for being right. Bad reward signal poisons everything downstream, so the checker deserves real care. Many setups add a separate format reward that pays the model for putting its final answer where the verifier can find it, which makes checking reliable and teaches a tidy output habit at the same time.'
+      text: 'GRPO\'s rule for turning rewards into a learning signal is to subtract the group mean and divide by the group standard deviation.[^2] Written out for this group:',
+    },
+    {
+      type: 'eq',
+      tex: '\\begin{aligned} \\text{mean}(r) &= \\tfrac{3}{8} = 0.375 \\\\[2pt] \\text{std}(r) &= \\sqrt{\\tfrac{3(0.625)^2 + 5(0.375)^2}{8}} \\\\ &= \\sqrt{0.2344} \\approx 0.484 \\end{aligned}',
+      caption: 'Group statistics for three correct answers out of eight.',
+    },
+    {
+      type: 'eq',
+      tex: '\\begin{aligned} A_{\\text{right}} &= \\frac{1 - 0.375}{0.484} \\approx +1.29 \\\\[4pt] A_{\\text{wrong}} &= \\frac{0 - 0.375}{0.484} \\approx -0.77 \\end{aligned}',
+      caption: 'The advantage of each answer: its reward relative to its own group.',
     },
     {
       type: 'p',
-      text: 'A second trap is reward hacking. If the only thing scored is the final answer, a model can learn to guess the number and skip the reasoning, or to pad its output with tricks that happen to correlate with reward. You catch this by reading actual samples during training, not by watching the reward curve alone. A third issue is groups that are too small or too uniform. If every sample in a group gets the same score, the advantages are all zero and that problem teaches nothing that step, so you want problems at a difficulty where attempts actually disagree.'
+      text: 'The number \\(A\\) is called the **advantage**: how much better an answer did than what was expected. Here "expected" means the average of the model\'s own attempts at the same question. A quick check: three answers at +1.29 and five at −0.77 add up to about zero. That always happens, because subtracting the mean centers the group. Every update pushes some answers up and others down by matching amounts.',
+    },
+    {
+      type: 'p',
+      text: 'The advantage belongs to the whole answer, not to one step. With a reward only at the end, DeepSeekMath sets the advantage of every token in answer \\(i\\) to that answer\'s normalized reward.[^2] So each token of answer 1, including any lucky guesses along the way, gets +1.29. Each token of answer 2 gets −0.77. With outcome rewards like these, GRPO has no way to know which line of a wrong answer went bad.',
     },
     {
       type: 'callout',
-      title: 'Why this produced strong reasoners',
-      text: 'When the reward is honest and the problems sit at the edge of what the model can do, GRPO rewards longer, more careful reasoning simply because careful reasoning checks out more often. DeepSeek-R1 showed that with enough of this pressure a model starts to reflect, backtrack, and verify its own steps, behaviors nobody hand-coded. They emerged because they raised the odds of a correct, checkable answer.'
+      title: 'Which standard deviation?',
+      text: 'The papers write \\(\\text{std}(r)\\) without saying whether it divides by \\(G\\) or \\(G - 1\\).[^1,2] The example above divides by \\(G\\). Dividing by \\(G - 1\\) makes the magnitudes a little smaller but leaves every sign the same.',
     },
     {
       type: 'h2',
-      text: 'The one idea to keep'
+      text: 'An easy question and a hopeless one',
     },
     {
       type: 'p',
-      text: 'If you remember one thing, make it this: GRPO turns a single bit of feedback, right or wrong, into a useful training signal by comparing each attempt to the average of its sibling attempts on the same problem. That comparison is the baseline, which is why no separate critic model is needed, which is why the method is cheaper and easier to run than classic PPO. The catch that makes it all work is a trustworthy automatic verifier. When you have a way to check answers cheaply, whether that is math, code that must pass tests, or any task with a clear right result, this loop lets a model teach itself to reason better from nothing more than its own graded guesses. Start there, get the checker right, and the rest of the machinery is smaller than it looks.'
+      text: 'Now suppose a different question where seven of the eight answers are right. The mean is 0.875 and the standard deviation is about 0.331. Each correct answer gets a small advantage of about +0.38. The one wrong answer gets about −2.65, a hard push down. The general pattern for pass/fail rewards falls out of the same arithmetic. If a fraction \\(p\\) of the group is correct:',
+    },
+    {
+      type: 'eq',
+      tex: '\\begin{aligned} A_{\\text{right}} &= +\\sqrt{\\frac{1 - p}{p}} \\\\[4pt] A_{\\text{wrong}} &= -\\sqrt{\\frac{p}{1 - p}} \\end{aligned}',
+      caption: 'Advantages for 0/1 rewards, using the divide-by-G standard deviation.',
+    },
+    {
+      type: 'p',
+      text: 'A rare success on a hard question gets a large positive advantage, and a rare failure on an easy one gets a large negative one. It is grading on a curve, one question at a time.',
+    },
+    {
+      type: 'p',
+      text: 'The last case is the degenerate one. If all eight answers are right, or all eight are wrong, every reward equals the mean, the numerator is zero for everyone, and the question contributes no gradient at all. The DAPO paper points out that this gets worse as training goes on: the number of questions the model always solves keeps rising, so fewer questions in each batch carry any signal. DAPO\'s fix is to over-sample and drop questions whose group accuracy is exactly 1 or 0 until the batch is full.[^6]',
+    },
+    {
+      type: 'h2',
+      text: 'From one group to the loss the optimizer sees',
+    },
+    {
+      type: 'p',
+      text: 'Knowing that answer 1 should become more likely does not say how far to move. The full GRPO objective handles that, and it borrows most of its parts from PPO. Five terms first:',
+    },
+    {
+      type: 'terms',
+      optional: false,
+      items: [
+        { term: 'Old policy', def: 'A frozen snapshot of the model taken just before an update. It is the model that actually generated the group of answers.' },
+        { term: 'Probability ratio', def: 'How much more (or less) likely the updated model makes a token than the old policy did. A ratio of 1 means no change.' },
+        { term: 'Clipping', def: 'Cutting the ratio off at \\(1 - \\varepsilon\\) and \\(1 + \\varepsilon\\) so one update cannot move the model too far. PPO\'s paper uses \\(\\varepsilon = 0.2\\) as its example value.[^3]' },
+        { term: 'Reference policy', def: 'A separate frozen copy of the model that training is kept from drifting too far away from.' },
+        { term: 'KL divergence', def: 'A measure of how different two probability distributions are. Here it measures how far the policy has moved from the reference.' },
+      ],
+    },
+    {
+      type: 'p',
+      text: 'With those in hand, here is the objective as DeepSeekMath writes it, where \\(o_{i,t}\\) is token \\(t\\) of answer \\(i\\):[^2]',
+    },
+    {
+      type: 'eq',
+      tex: '\\begin{gathered} \\mathcal{J}(\\theta) = \\mathbb{E}\\Bigg[ \\frac{1}{G} \\sum_{i=1}^{G} \\frac{1}{|o_i|} \\sum_{t=1}^{|o_i|} \\Big( \\min\\big( \\rho_{i,t} \\hat{A}_{i,t},\\ \\\\ \\text{clip}(\\rho_{i,t}, 1 - \\varepsilon, 1 + \\varepsilon)\\, \\hat{A}_{i,t} \\big) \\\\ - \\beta\\, \\mathbb{D}_{KL}\\big[\\pi_\\theta \\,\\|\\, \\pi_{ref}\\big] \\Big) \\Bigg] \\\\[6pt] \\rho_{i,t} = \\frac{\\pi_\\theta(o_{i,t} \\mid q, o_{i,<t})}{\\pi_{\\theta_{old}}(o_{i,t} \\mid q, o_{i,<t})} \\end{gathered}',
+      caption: 'The GRPO objective (Shao et al., 2024, equation 3), with the probability ratio written as \\(\\rho\\) to save space.[^2]',
+    },
+    {
+      type: 'p',
+      text: 'Read it from the inside out. \\(\\hat{A}_{i,t}\\) is the number computed by hand above: +1.29 for every token of answer 1. Multiplying by the ratio \\(\\rho\\) means the objective goes up when the model makes those tokens more likely. The min and the clip stop the incentive at \\(1 + \\varepsilon\\): once answer 1\'s tokens are, say, 20% more likely than under the old policy, pushing further earns nothing. For answer 2, with a negative advantage, the same trick caps how hard its tokens get pushed down. PPO\'s authors describe this as a pessimistic bound: the objective ignores changes that would make it look better and keeps changes that make it look worse.[^3]',
+    },
+    {
+      type: 'p',
+      text: 'The two averages matter more than they look. The inner \\(1/|o_i|\\) averages over the tokens of one answer, and the outer \\(1/G\\) averages over the answers in the group. That inner average will come back later.',
+    },
+    {
+      type: 'p',
+      text: 'The last term keeps the model near the reference policy. DeepSeekMath estimates it per token with a form that is guaranteed to be positive:[^2]',
+    },
+    {
+      type: 'eq',
+      tex: '\\begin{gathered} \\mathbb{D}_{KL} = u - \\log u - 1 \\\\[4pt] u = \\frac{\\pi_{ref}(o_{i,t} \\mid q, o_{i,<t})}{\\pi_\\theta(o_{i,t} \\mid q, o_{i,<t})} \\end{gathered}',
+      caption: 'The KL estimator GRPO adds directly to the loss (Shao et al., 2024, equation 4), with the ratio written as \\(u\\).[^2]',
+    },
+    {
+      type: 'p',
+      text: 'The actual settings were modest. For DeepSeekMath-RL 7B the policy learning rate was 1e-6, the KL coefficient \\(\\beta\\) was 0.04, answers were capped at 1,024 tokens, and the policy got a single update after each round of sampling.[^2] R1-Zero used a learning rate of 3e-6, a much smaller KL coefficient of 0.001, and 32 questions per step with 16 answers each, a batch of 512. Its maximum answer length was 32,768 tokens until step 8,200 and 65,536 after. The paper says both accuracy and response length jumped at that step. Training ran for 10,400 steps, and every 400 steps the reference model was replaced with the latest policy.[^1] The R1 paper also writes the ratio over the whole answer, \\(\\pi_\\theta(o_i \\mid q)\\), rather than token by token.[^1]',
+    },
+    {
+      type: 'h2',
+      text: 'What PPO needs that GRPO throws away',
+    },
+    {
+      type: 'p',
+      text: 'The clipped ratio came from PPO. What GRPO changed is where the advantage comes from. In standard PPO for language models, the advantage of each token is estimated with Generalized Advantage Estimation (GAE), which depends on a learned **value function**: a second network that looks at a partial answer and predicts the reward the rest of it will earn.[^2,3] GAE combines one-step errors of that prediction,',
+    },
+    {
+      type: 'eq',
+      tex: '\\begin{gathered} \\delta_t = r_t + \\gamma V(s_{t+1}) - V(s_t) \\\\[4pt] \\hat{A}_t = \\sum_{l \\ge 0} (\\gamma \\lambda)^l\\, \\delta_{t+l} \\end{gathered}',
+      caption: 'Generalized Advantage Estimation (Schulman et al., 2016).[^4]',
+    },
+    {
+      type: 'p',
+      text: 'where \\(\\lambda\\) trades bias against variance. At \\(\\lambda = 1\\) the estimate stays unbiased however wrong \\(V\\) is, but it has high variance. At \\(\\lambda = 0\\) it has much lower variance but is biased unless \\(V\\) is accurate.[^4] The value network is trained alongside the policy with a squared-error loss.[^3]',
+    },
+    {
+      type: 'p',
+      text: 'DeepSeekMath gives two reasons for dropping it. The first is cost: the value function "is typically another model of comparable size as the policy model," which brings "a substantial memory and computational burden." The second is that the reward usually arrives only at the last token, which makes it hard to train a value function that is accurate at every token.[^2] GRPO replaces the learned prediction with the average reward of other answers to the same question, which is exactly the 0.375 computed above.[^2] The authors also note that comparing answers to the same question fits the way reward models are trained, since those are usually trained on comparisons between outputs for one question.[^2]',
+    },
+    {
+      type: 'p',
+      text: 'The R1 paper adds a reason specific to long reasoning. When a model reflects and revises, an early part of the answer may be contradicted later, so predicting the final reward from a partial answer gets even less feasible.[^1] It also points to a difference in the KL term. PPO usually adds a per-token KL penalty into the reward, and since RL maximizes cumulative reward, this penalizes cumulative KL. That may implicitly penalize longer responses and keep them from growing. GRPO puts the KL term in the loss instead.[^1]',
+    },
+    {
+      type: 'p',
+      text: 'The same appendix runs PPO and GRPO against each other on the MATH benchmark with DeepSeek-Coder-V2-Lite, a mixture-of-experts model with 16B parameters and 2.4B active. With GAE\'s \\(\\lambda\\) at 0.95, which the paper calls the default in most open-source PPO code, PPO did considerably worse than GRPO. Tuned to \\(\\lambda = 1.0\\), PPO came close to GRPO.[^1] The authors\' conclusion is measured: PPO can match GRPO when tuned, but tuning costs compute, and the value model adds memory and compute on top, so GRPO is the more practical choice for large models on limited resources.[^1]',
+    },
+    {
+      type: 'h2',
+      text: 'What a 7B model gained, and what it did not',
+    },
+    {
+      type: 'p',
+      text: 'GRPO\'s first test was DeepSeekMath-Instruct 7B, trained further on about 144K chain-of-thought questions related to GSM8K and MATH.[^2] It improved on every benchmark reported, including Chinese math sets that were not in the RL data.[^2]',
+    },
+    {
+      type: 'chart',
+      kind: 'bar',
+      title: 'DeepSeekMath 7B, chain-of-thought accuracy before and after GRPO',
+      yLabel: 'Accuracy (%)',
+      series: [
+        { label: 'Instruct (before RL)', key: 'sft', baseline: true },
+        { label: 'RL with GRPO', key: 'rl' },
+      ],
+      data: [
+        { label: 'GSM8K', values: { sft: 82.9, rl: 88.2 } },
+        { label: 'MATH', values: { sft: 46.8, rl: 51.7 } },
+        { label: 'MGSM-zh', values: { sft: 73.2, rl: 79.6 } },
+        { label: 'CMATH', values: { sft: 84.6, rl: 88.8 } },
+      ],
+      caption: 'Redrawn from Table 5 of Shao et al., 2024.[^2] GSM8K and MATH are in-domain for the RL data. The two Chinese benchmarks are out of domain.',
+    },
+    {
+      type: 'p',
+      text: 'The same paper then asked what RL had actually changed. It measured two things for different numbers of samples \\(K\\): **Pass@K**, whether any of \\(K\\) answers is right, and **Maj@K**, whether the majority vote of \\(K\\) answers is right. RL raised Maj@K but not Pass@K. The authors\' reading is that RL made the output distribution more robust, boosting correct answers that were already among the model\'s top candidates, "rather than the enhancement of fundamental capabilities."[^2] That fits the arithmetic: GRPO can only reinforce a correct answer the model has already sampled. A question the model never gets right gives an all-zero group and no signal.',
+    },
+    {
+      type: 'h2',
+      text: 'Later papers took both averages back out',
+    },
+    {
+      type: 'p',
+      text: 'In 2025, Liu and colleagues argued that the two normalizations in GRPO each add a bias.[^5] Their figure shows both at once.',
+    },
+    {
+      type: 'image',
+      src: '/blog-images/grpo-rl-for-reasoning/drgrpo-bias-illustration.webp',
+      alt: 'Two groups of four sampled answers drawn as rows of gray (correct) and red (incorrect) blocks, with row length showing response length. Question q1 has two correct and two incorrect answers and a small blue circle. Question q2 has three correct and one incorrect and a larger blue circle. Orange arrows show each answer\'s advantage divided by its length. A legend gives GRPO\'s effective advantage as 1 over std(R) times the centered advantage over the response length.',
+      width: 1690,
+      height: 240,
+      caption: 'Circle size is \\(1/\\text{std}\\), so a group with more agreement gets more weight. Arrow size is the advantage divided by answer length, so the long wrong answer to q1 gets a smaller push down than the short one. Figure 4 from Liu et al., 2025,[^5] reproduced under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).',
+    },
+    {
+      type: 'p',
+      text: 'The first is a **question-level difficulty bias**, caused by dividing by the standard deviation. Questions where rewards are almost all 1 or all 0 have a small standard deviation, so they get more weight in the update.[^5] The seven-out-of-eight example shows it: the lone wrong answer got −2.65, over three times the −0.77 from the three-out-of-eight group, only because the group agreed more. The authors note that advantage normalization is a common RL trick, but it is usually done across a whole batch, not per question.[^5]',
+    },
+    {
+      type: 'p',
+      text: 'The second is a **response-level length bias**, from the \\(1/|o_i|\\) average. A correct answer\'s advantage is spread over its tokens, so short correct answers get bigger per-token updates. A wrong answer\'s penalty is spread the same way, so long wrong answers get penalized less, and the policy drifts toward longer responses among the wrong ones.[^5] The authors say this bias may explain part of the length growth seen in R1-Zero-style training, and they found the same length normalization in several popular open-source PPO implementations.[^5] Their fix, Dr. GRPO, removes both the \\(1/|o_i|\\) and the standard deviation terms, leaving the plain difference \\(r_i - \\text{mean}(r)\\).[^5] Using it in a minimal recipe, they report 43.3% on AIME 2024 with a 7B base model.[^5]',
+    },
+    {
+      type: 'p',
+      text: 'The same paper also re-examined the aha moment. Running DeepSeek-V3-Base, the model R1-Zero started from, on 500 MATH questions with the R1 template, they found it already produced a fair amount of self-reflection, including words like "Aha" and "wait." In R1-Zero\'s own answers to those questions, self-reflection was more frequent, but it was not positively correlated with higher accuracy.[^5] The R1 paper itself reports a 5- to 7-fold rise in reflective words during training.[^1] Both findings can hold together: RL made a behavior the base model already had much more common. Whether that behavior is what raised the AIME score is a separate question, and Liu et al.\'s correlation result is a reason not to assume it.',
+    },
+    {
+      type: 'p',
+      text: 'Reproducing R1-Zero with plain GRPO also turned out to be hard. The DAPO team\'s first GRPO run on Qwen2.5-32B scored 30 points on AIME 2024, well short of the 47 points DeepSeek reported for DeepSeek-R1-Zero-Qwen-32B. They traced the gap to entropy collapse, reward noise, and training instability, and fixed it with four changes, one of them the zero-advantage filter from earlier. The result was 50 points in half the training steps.[^6] Much of that work, like Dr. GRPO\'s, comes down to the same few lines computed by hand at the top of this post: a mean, a standard deviation, and what to divide by.',
     },
     {
       type: 'sources',
+      numbered: true,
       items: [
-        { title: 'Shao et al., DeepSeekMath: Pushing the Limits of Mathematical Reasoning (GRPO), 2024', url: 'https://arxiv.org/abs/2402.03300' },
         { title: 'DeepSeek-AI, DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning, 2025', url: 'https://arxiv.org/abs/2501.12948' },
-        { title: 'Schulman et al., Proximal Policy Optimization Algorithms, 2017', url: 'https://arxiv.org/abs/1707.06347' }
-      ]
-    }
-  ]
+        { title: 'Shao et al., DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models, 2024', url: 'https://arxiv.org/abs/2402.03300' },
+        { title: 'Schulman et al., Proximal Policy Optimization Algorithms, 2017', url: 'https://arxiv.org/abs/1707.06347' },
+        { title: 'Schulman et al., High-Dimensional Continuous Control Using Generalized Advantage Estimation, 2016', url: 'https://arxiv.org/abs/1506.02438' },
+        { title: 'Liu et al., Understanding R1-Zero-Like Training: A Critical Perspective, 2025', url: 'https://arxiv.org/abs/2503.20783' },
+        { title: 'Yu et al., DAPO: An Open-Source LLM Reinforcement Learning System at Scale, 2025', url: 'https://arxiv.org/abs/2503.14476' },
+      ],
+    },
+  ],
 };
